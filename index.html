@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A calm, username-first place for public conversations.">
+  <title>kindred — messages, without the inbox</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --ink: #17201d;
+      --muted: #7c8882;
+      --line: #e5e9e3;
+      --paper: #f7f8f4;
+      --white: #fff;
+      --lime: #d6f36b;
+      --coral: #fa765f;
+      --mint: #dff5e9;
+      --shadow: 0 24px 70px rgba(30, 45, 34, .10);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Manrope', sans-serif;
+    }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar {
+      height: 76px;
+      padding: 0 5vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 248, 244, .85);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 800; letter-spacing: -.04em; }
+    .brand-mark { width: 28px; height: 28px; border-radius: 10px 10px 10px 3px; background: var(--ink); position: relative; }
+    .brand-mark::after { content: ''; position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--lime); top: 7px; left: 7px; box-shadow: 10px 0 0 var(--lime); }
+    .user-chip { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--coral); color: var(--white); font-size: 11px; font-weight: 800; }
+    .mono { font-family: 'DM Mono', monospace; }
+    .workspace { width: min(1280px, 90vw); margin: 42px auto 60px; display: grid; grid-template-columns: 310px 1fr; gap: 24px; flex: 1; }
+    .sidebar, .conversation { background: var(--white); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .sidebar { border-radius: 22px; padding: 24px 16px 16px; display: flex; flex-direction: column; min-height: 680px; }
+    .side-intro { padding: 0 10px 22px; }
+    .eyebrow { color: var(--coral); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, p { margin: 0; }
+    .side-intro h1 { margin-top: 7px; font-size: 25px; letter-spacing: -.055em; line-height: 1.08; }
+    .new-message { margin-top: 16px; width: 100%; border: 0; border-radius: 11px; background: var(--lime); color: var(--ink); padding: 11px 13px; text-align: left; font-size: 11px; font-weight: 800; }
+    .new-message:hover { background: #c9e85a; }
+    .side-intro p { margin-top: 9px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .search-wrap { position: relative; margin-bottom: 18px; }
+    .search-wrap span { position: absolute; left: 13px; top: 11px; color: var(--muted); font-size: 14px; }
+    input, textarea { border: 1px solid var(--line); outline: 0; color: var(--ink); background: #fbfcfa; transition: border-color .2s, box-shadow .2s; }
+    input:focus, textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(214, 243, 107, .45); }
+    .search { width: 100%; border-radius: 11px; padding: 10px 12px 10px 34px; font-size: 12px; }
+    .nav { display: flex; gap: 4px; padding: 4px; background: #f2f4ef; border-radius: 12px; margin-bottom: 18px; }
+    .nav button { flex: 1; border: 0; background: transparent; color: var(--muted); padding: 8px 4px; border-radius: 8px; font-size: 11px; }
+    .nav button.active { background: var(--white); color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.06); font-weight: 800; }
+    .thread-list { display: grid; gap: 5px; overflow: auto; }
+    .thread { border: 0; background: transparent; width: 100%; padding: 11px 9px; text-align: left; border-radius: 13px; display: flex; gap: 11px; align-items: center; }
+    .thread:hover, .thread.active { background: #f1f7e5; }
+    .avatar { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 13px; display: grid; place-items: center; color: var(--ink); font-weight: 800; font-size: 11px; }
+    .avatar.peach { background: #ffd8cc; } .avatar.blue { background: #cfe5f8; } .avatar.yellow { background: #f8e89e; } .avatar.lilac { background: #e4d9f8; }
+    .thread-copy { min-width: 0; flex: 1; }
+    .thread-line { display: flex; justify-content: space-between; gap: 5px; }
+    .thread-name { font-size: 12px; font-weight: 800; }
+    .thread-time { color: var(--muted); font: 10px 'DM Mono', monospace; }
+    .thread-preview { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; }
+    .unread { width: 6px; height: 6px; background: var(--coral); border-radius: 50%; align-self: flex-start; margin-top: 5px; }
+    .profile-link { margin-top: auto; border-top: 1px solid var(--line); padding: 17px 9px 0; display: flex; justify-content: space-between; align-items: center; }
+    .profile-link small { color: var(--muted); font-size: 10px; display: block; margin-bottom: 3px; }
+    .profile-link strong { font: 11px 'DM Mono', monospace; }
+    .copy-btn { border: 0; background: #f1f3ed; border-radius: 7px; font-size: 10px; padding: 7px 9px; }
+    .conversation { border-radius: 22px; display: flex; flex-direction: column; min-height: 680px; overflow: hidden; }
+    .conversation-head { padding: 22px 28px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+    .person { display: flex; align-items: center; gap: 12px; }
+    .person h2 { font-size: 15px; letter-spacing: -.03em; }
+    .person p { margin-top: 4px; font: 10px 'DM Mono', monospace; color: var(--muted); }
+    .status { color: #659844; font-size: 10px; margin-left: 8px; }
+    .more { border: 0; background: transparent; color: var(--muted); font-size: 22px; padding: 0 5px; }
+    .messages { padding: 28px 10%; display: flex; flex-direction: column; gap: 18px; flex: 1; overflow: auto; background: linear-gradient(145deg, #fff 0%, #fbfcf8 100%); }
+    .date-stamp { align-self: center; color: var(--muted); font: 10px 'DM Mono', monospace; background: #f0f3ed; padding: 6px 10px; border-radius: 20px; }
+    .message-row { display: flex; gap: 9px; align-items: flex-end; max-width: 72%; animation: arrive .35s ease both; }
+    .message-row.mine { margin-left: auto; flex-direction: row-reverse; }
+    .message-avatar { width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: var(--coral); color: white; font-size: 8px; font-weight: 800; flex: 0 0 24px; }
+    .mine .message-avatar { background: var(--ink); }
+    .bubble { padding: 12px 15px; border-radius: 16px 16px 16px 4px; background: #eef2eb; font-size: 12px; line-height: 1.55; }
+    .mine .bubble { background: var(--ink); color: white; border-radius: 16px 16px 4px 16px; }
+    .message-meta { color: var(--muted); font: 9px 'DM Mono', monospace; margin-top: 5px; }
+    .mine .message-meta { text-align: right; }
+    .composer { padding: 19px 28px 24px; border-top: 1px solid var(--line); }
+    .composer-form { display: flex; gap: 10px; align-items: flex-end; }
+    .composer textarea { flex: 1; min-height: 46px; max-height: 100px; resize: none; border-radius: 13px; padding: 13px 14px; font-size: 12px; }
+    .send, .primary { border: 0; background: var(--ink); color: white; font-weight: 800; border-radius: 12px; padding: 14px 18px; font-size: 11px; transition: transform .2s, background .2s; }
+    .send:hover, .primary:hover { transform: translateY(-2px); background: #30443a; }
+    .composer-hint { color: var(--muted); font: 9px 'DM Mono', monospace; margin: 9px 2px 0; }
+    .empty { display: none; text-align: center; color: var(--muted); padding: 35px 10px; font-size: 12px; }
+    .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 20; background: rgba(23,32,29,.38); align-items: center; justify-content: center; padding: 20px; }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(460px, 100%); background: white; border-radius: 22px; padding: 28px; box-shadow: 0 28px 90px rgba(0,0,0,.2); animation: rise .25s ease both; }
+    .modal h2 { font-size: 22px; letter-spacing: -.05em; }
+    .modal p { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 8px 0 20px; }
+    .modal input { width: 100%; border-radius: 11px; padding: 13px; font-size: 13px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+    .secondary { border: 1px solid var(--line); background: white; color: var(--ink); border-radius: 11px; padding: 12px 15px; font-size: 11px; font-weight: 700; }
+    @keyframes arrive { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+    @media (max-width: 760px) {
+      .topbar { height: 65px; padding: 0 5vw; } .workspace { width: 92vw; margin: 18px auto 28px; display: block; }
+      .sidebar { min-height: auto; margin-bottom: 14px; padding: 17px 12px 12px; } .side-intro { padding: 0 8px 14px; display: flex; align-items: center; gap: 12px; } .side-intro p { display: none; } .side-intro h1 { margin: 0; font-size: 20px; }
+      .search-wrap { margin-bottom: 11px; } .nav { margin-bottom: 8px; } .thread-list { display: flex; overflow-x: auto; } .thread { min-width: 190px; background: #f8faf6; } .profile-link { display: none; }
+      .conversation { min-height: 590px; } .conversation-head { padding: 17px 18px; } .messages { padding: 22px 16px; } .message-row { max-width: 88%; } .composer { padding: 14px 16px 18px; }
+      .user-chip span { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span>kindred</div>
+      <div class="user-chip"><span>your public handle</span><span class="user-avatar">AM</span><b class="mono">@maya</b></div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar">
+        <div class="side-intro"><span class="eyebrow">your messages</span><h1>Good conversations<br>start here.</h1><p>No email. No phone number. Just a username and a little curiosity.</p><button class="new-message" id="newMessage">+ Start a new conversation</button></div>
+        <div class="search-wrap"><span>⌕</span><input class="search" id="search" type="search" placeholder="Find a username..." aria-label="Find a username"></div>
+        <nav class="nav" aria-label="Message views"><button class="active" data-view="inbox">Inbox <b>3</b></button><button data-view="requests">Requests</button></nav>
+        <div class="thread-list" id="threadList">
+          <button class="thread active" data-name="jules" data-handle="@jules" data-initials="JR" data-color="peach"><span class="avatar peach">JR</span><span class="thread-copy"><span class="thread-line"><span class="thread-name">Jules Rivera</span><span class="thread-time">9:42</span></span><span class="thread-preview">The tiny bookstore on 5th...</span></span><span class="unread"></span></button>
+          <button class="thread" data-name="noah" data-handle="@noahmakes" data-initials="NM" data-color="blue"><span class="avatar blue">NM</span><span class="thread-copy"><span class="thread-line"><span class="thread-name">Noah Makes</span><span class="thread-time">Tue</span></span><span class="thread-preview">That sounds like a plan!</span></span></button>
+          <button class="thread" data-name="sol" data-handle="@solstice" data-initials="SL" data-color="yellow"><span class="avatar yellow">SL</span><span class="thread-copy"><span class="thread-line"><span class="thread-name">Sol Lee</span><span class="thread-time">Mon</span></span><span class="thread-preview">Sent you a photo</span></span></button>
+          <button class="thread" data-name="mara" data-handle="@marawrites" data-initials="MW" data-color="lilac"><span class="avatar lilac">MW</span><span class="thread-copy"><span class="thread-line"><span class="thread-name">Mara Williams</span><span class="thread-time">Sun</span></span><span class="thread-preview">Would love your thoughts...</span></span></button>
+        </div>
+        <div class="empty" id="empty">No usernames found.<br>Try a different search.</div>
+        <div class="profile-link"><div><small>your public link</small><strong>kindred.to/@maya</strong></div><button class="copy-btn" id="copyBtn">copy</button></div>
+      </aside>
+
+      <section class="conversation" aria-label="Conversation">
+        <header class="conversation-head"><div class="person"><span class="avatar peach" id="personAvatar">JR</span><div><h2 id="personName">Jules Rivera <span class="status">● online</span></h2><p id="personHandle">@jules</p></div></div><button class="more" aria-label="More options">•••</button></header>
+        <div class="messages" id="messages"><div class="date-stamp">today · saturday, sep 5</div><div class="message-row"><span class="message-avatar">JR</span><div><div class="bubble">You mentioned a tiny bookstore near the station. Is it the one with the green awning?</div><div class="message-meta">Jules · 9:36</div></div></div><div class="message-row mine"><span class="message-avatar">AM</span><div><div class="bubble">Yes! They have a cat who sleeps in the poetry section. Very important detail.</div><div class="message-meta">you · 9:39</div></div></div><div class="message-row"><span class="message-avatar">JR</span><div><div class="bubble">The most important detail. I’m going after work. Want to meet there?</div><div class="message-meta">Jules · 9:42</div></div></div></div>
+        <div class="composer"><form class="composer-form" id="messageForm"><textarea id="messageInput" placeholder="Write to @jules..." aria-label="Write a message" rows="1"></textarea><button class="send" type="submit">Send ↗</button></form><p class="composer-hint">Messages are public to your conversation · <span class="mono">enter</span> to send</p></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><span class="eyebrow">new conversation</span><h2 id="modalTitle">Who do you want to find?</h2><p>Start with a username. No email addresses, phone numbers, or awkward contact syncing.</p><input id="usernameInput" placeholder="@username" aria-label="Username"><div class="modal-actions"><button class="secondary" id="cancelModal">Cancel</button><button class="primary" id="startModal">Open conversation</button></div></div></div>
+
+  <script>
+    const threads = [...document.querySelectorAll('.thread')];
+    const messages = document.querySelector('#messages');
+    const input = document.querySelector('#messageInput');
+    const search = document.querySelector('#search');
+    const empty = document.querySelector('#empty');
+    const modal = document.querySelector('#modalBackdrop');
+
+    function selectThread(thread) {
+      threads.forEach(item => item.classList.remove('active'));
+      thread.classList.add('active');
+      document.querySelector('#personName').firstChild.textContent = thread.querySelector('.thread-name').textContent + ' ';
+      document.querySelector('#personHandle').textContent = thread.dataset.handle;
+      document.querySelector('#personAvatar').textContent = thread.dataset.initials;
+      document.querySelector('#personAvatar').className = 'avatar ' + thread.dataset.color;
+      input.placeholder = 'Write to ' + thread.dataset.handle + '...';
+      messages.innerHTML = '<div class="date-stamp">today · saturday, sep 5</div><div class="message-row"><span class="message-avatar">' + thread.dataset.initials + '</span><div><div class="bubble">Hey! I found you through your username. What are you working on lately?</div><div class="message-meta">' + thread.querySelector('.thread-name').textContent.split(' ')[0] + ' · 9:42</div></div></div>';
+    }
+    threads.forEach(thread => thread.addEventListener('click', () => selectThread(thread)));
+    search.addEventListener('input', () => {
+      const term = search.value.toLowerCase().replace('@', '');
+      let count = 0;
+      threads.forEach(thread => { const visible = thread.textContent.toLowerCase().includes(term) || thread.dataset.handle.includes(term); thread.style.display = visible ? 'flex' : 'none'; if (visible) count++; });
+      empty.style.display = count ? 'none' : 'block';
+    });
+    document.querySelector('#messageForm').addEventListener('submit', event => {
+      event.preventDefault(); const value = input.value.trim(); if (!value) return;
+      const row = document.createElement('div'); row.className = 'message-row mine'; row.innerHTML = '<span class="message-avatar">AM</span><div><div class="bubble"></div><div class="message-meta">you · now</div></div>'; row.querySelector('.bubble').textContent = value; messages.appendChild(row); input.value = ''; messages.scrollTop = messages.scrollHeight;
+    });
+    document.querySelector('#copyBtn').addEventListener('click', event => { navigator.clipboard?.writeText('https://kindred.to/@maya'); event.target.textContent = 'copied'; setTimeout(() => event.target.textContent = 'copy', 1300); });
+    document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => { document.querySelectorAll('[data-view]').forEach(item => item.classList.remove('active')); button.classList.add('active'); }));
+    document.querySelector('#cancelModal').addEventListener('click', () => modal.classList.remove('open'));
+    document.querySelector('#newMessage').addEventListener('click', () => { modal.classList.add('open'); document.querySelector('#usernameInput').focus(); });
+    document.querySelector('#startModal').addEventListener('click', () => { const username = document.querySelector('#usernameInput').value.trim(); if (!username) return; modal.classList.remove('open'); document.querySelector('#usernameInput').value = ''; input.focus(); });
+    document.querySelector('.brand').addEventListener('dblclick', () => modal.classList.add('open'));
+  </script>
+</body>
+</html>
