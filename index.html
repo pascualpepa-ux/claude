@@ -48,6 +48,8 @@
     .brand-mark { width: 28px; height: 28px; border-radius: 10px 10px 10px 3px; background: var(--ink); position: relative; }
     .brand-mark::after { content: ''; position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--lime); top: 7px; left: 7px; box-shadow: 10px 0 0 var(--lime); }
     .user-chip { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; }
+    .profile-trigger { border: 0; background: transparent; display: flex; align-items: center; gap: 10px; color: var(--muted); padding: 4px; border-radius: 10px; }
+    .profile-trigger:hover { background: #edf1e9; }
     .user-avatar { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--coral); color: var(--white); font-size: 11px; font-weight: 800; }
     .mono { font-family: 'DM Mono', monospace; }
     .workspace { width: min(1280px, 90vw); margin: 42px auto 60px; display: grid; grid-template-columns: 310px 1fr; gap: 24px; flex: 1; }
@@ -130,7 +132,7 @@
   <div class="app-shell">
     <header class="topbar">
       <div class="brand"><span class="brand-mark" aria-hidden="true"></span>kindred</div>
-      <div class="user-chip"><span>your public handle</span><span class="user-avatar">AM</span><b class="mono">@maya</b></div>
+      <button class="profile-trigger" id="profileTrigger" aria-label="Edit your username"><span>your public handle</span><span class="user-avatar">AM</span><b class="mono" id="headerHandle">@maya</b></button>
     </header>
 
     <main class="workspace">
@@ -145,7 +147,7 @@
           <button class="thread" data-name="mara" data-handle="@marawrites" data-initials="MW" data-color="lilac"><span class="avatar lilac">MW</span><span class="thread-copy"><span class="thread-line"><span class="thread-name">Mara Williams</span><span class="thread-time">Sun</span></span><span class="thread-preview">Would love your thoughts...</span></span></button>
         </div>
         <div class="empty" id="empty">No usernames found.<br>Try a different search.</div>
-        <div class="profile-link"><div><small>your public link</small><strong>kindred.to/@maya</strong></div><button class="copy-btn" id="copyBtn">copy</button></div>
+        <div class="profile-link"><div><small>your public link</small><strong id="publicLink">kindred.to/@maya</strong></div><button class="copy-btn" id="copyBtn">copy</button></div>
       </aside>
 
       <section class="conversation" aria-label="Conversation">
@@ -157,6 +159,7 @@
   </div>
 
   <div class="modal-backdrop" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><span class="eyebrow">new conversation</span><h2 id="modalTitle">Who do you want to find?</h2><p>Start with a username. No email addresses, phone numbers, or awkward contact syncing.</p><input id="usernameInput" placeholder="@username" aria-label="Username"><div class="modal-actions"><button class="secondary" id="cancelModal">Cancel</button><button class="primary" id="startModal">Open conversation</button></div></div></div>
+  <div class="modal-backdrop" id="profileModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle"><span class="eyebrow">your profile</span><h2 id="profileTitle">Choose your username</h2><p>This is how people find you on kindred. Use 3–20 letters, numbers, or underscores.</p><form id="profileForm"><input id="profileInput" placeholder="@yourname" aria-label="Your username" autocomplete="off"><p class="form-error" id="profileError" role="alert"></p><div class="modal-actions"><button class="secondary" type="button" id="cancelProfile">Cancel</button><button class="primary" type="submit">Save username</button></div></form></div></div>
 
   <script>
     const threads = [...document.querySelectorAll('.thread')];
@@ -165,6 +168,13 @@
     const search = document.querySelector('#search');
     const empty = document.querySelector('#empty');
     const modal = document.querySelector('#modalBackdrop');
+    const profileModal = document.querySelector('#profileModal');
+    const handleKey = 'kindred-username';
+    const savedHandle = localStorage.getItem(handleKey);
+    if (savedHandle) {
+      document.querySelector('#headerHandle').textContent = savedHandle;
+      document.querySelector('#publicLink').textContent = 'kindred.to/' + savedHandle;
+    }
 
     function selectThread(thread) {
       threads.forEach(item => item.classList.remove('active'));
@@ -187,11 +197,24 @@
       event.preventDefault(); const value = input.value.trim(); if (!value) return;
       const row = document.createElement('div'); row.className = 'message-row mine'; row.innerHTML = '<span class="message-avatar">AM</span><div><div class="bubble"></div><div class="message-meta">you · now</div></div>'; row.querySelector('.bubble').textContent = value; messages.appendChild(row); input.value = ''; messages.scrollTop = messages.scrollHeight;
     });
-    document.querySelector('#copyBtn').addEventListener('click', event => { navigator.clipboard?.writeText('https://kindred.to/@maya'); event.target.textContent = 'copied'; setTimeout(() => event.target.textContent = 'copy', 1300); });
+    document.querySelector('#copyBtn').addEventListener('click', event => { const handle = document.querySelector('#headerHandle').textContent; navigator.clipboard?.writeText('https://kindred.to/' + handle); event.target.textContent = 'copied'; setTimeout(() => event.target.textContent = 'copy', 1300); });
     document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => { document.querySelectorAll('[data-view]').forEach(item => item.classList.remove('active')); button.classList.add('active'); }));
     document.querySelector('#cancelModal').addEventListener('click', () => modal.classList.remove('open'));
     document.querySelector('#newMessage').addEventListener('click', () => { modal.classList.add('open'); document.querySelector('#usernameInput').focus(); });
     document.querySelector('#startModal').addEventListener('click', () => { const username = document.querySelector('#usernameInput').value.trim(); if (!username) return; modal.classList.remove('open'); document.querySelector('#usernameInput').value = ''; input.focus(); });
+    document.querySelector('#profileTrigger').addEventListener('click', () => { const current = document.querySelector('#headerHandle').textContent; document.querySelector('#profileInput').value = current; document.querySelector('#profileError').textContent = ''; profileModal.classList.add('open'); document.querySelector('#profileInput').focus(); });
+    document.querySelector('#cancelProfile').addEventListener('click', () => profileModal.classList.remove('open'));
+    document.querySelector('#profileForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const value = document.querySelector('#profileInput').value.trim().toLowerCase().replace(/^@/, '');
+      const error = document.querySelector('#profileError');
+      if (!/^[a-z0-9_]{3,20}$/.test(value)) { error.textContent = 'Use 3–20 letters, numbers, or underscores.'; return; }
+      const handle = '@' + value;
+      localStorage.setItem(handleKey, handle);
+      document.querySelector('#headerHandle').textContent = handle;
+      document.querySelector('#publicLink').textContent = 'kindred.to/' + handle;
+      profileModal.classList.remove('open');
+    });
     document.querySelector('.brand').addEventListener('dblclick', () => modal.classList.add('open'));
   </script>
 </body>
