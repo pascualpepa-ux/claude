@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Game Hub — Nhiều game, một chỗ</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <h1 onclick="GameHub.showHome()">🎮 Game Hub</h1>
+</header>
+
+<main id="home-view" class="view">
+  <p class="subtitle">Chọn một trò chơi để bắt đầu</p>
+  <div id="game-grid" class="game-grid"></div>
+</main>
+
+<main id="game-view" class="view" hidden>
+  <div class="game-toolbar">
+    <button id="back-btn" class="btn back-btn">⬅ Về trang chủ</button>
+    <h2 id="game-title"></h2>
+    <span id="game-score" class="score-badge"></span>
+  </div>
+  <div id="game-container" class="game-container"></div>
+</main>
+
+<footer class="app-footer">Game Hub — chạy 100% trên trình duyệt, không cần tài khoản.</footer>
+
+<script src="js/main.js"></script>
+<script src="js/games/tictactoe.js"></script>
+<script src="js/games/snake.js"></script>
+<script src="js/games/game2048.js"></script>
+<script src="js/games/memory.js"></script>
+<script src="js/games/breakout.js"></script>
+<script src="js/games/minesweeper.js"></script>
+<script src="js/games/rps.js"></script>
+<script src="js/games/simon.js"></script>
+<script>
+  GameHub.init();
+</script>
+</body>
+</html>
