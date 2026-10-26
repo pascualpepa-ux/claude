@@ -2,14 +2,14 @@
 task: app-viajes
 created: 2026-10-26
 updated: 2026-10-26
-status: planning
+status: in-progress
 workflow: WF-FEATURE
 priority: P2
 ---
 
 # PLAN MASTER: App de viajes — itinerario + gastos compartidos + agentes
 
-> Estado: **propuesta, esperando el OK del usuario**. No se escribe código hasta recibirlo.
+> Estado: **fase 1 lista, esperando revisión del usuario**. Código en `apps/viajes/`.
 > Los step files (`steps/STEP-*.md`) se crean al arrancar cada fase.
 
 ## Descripción
@@ -82,10 +82,10 @@ por viaje guardado, y abstracción por "proveedor" para cambiar de API sin tocar
 ### Fase 1: Interfaz + asistente + itinerario con datos de prueba
 | # | Paso | Status | Hecho |
 |---|------|--------|-------|
-| 1.1 | Scaffold Next.js + Tailwind + layout con firma en el pie | ⬜ | - |
-| 1.2 | Asistente paso a paso (origen/destino, fechas, personas, presupuesto mín/máx, aerolínea/clase, hotel, plan, equipaje) | ⬜ | - |
-| 1.3 | Itinerario día por día + precios + condiciones + total y por persona (mocks) | ⬜ | - |
-| 1.4 | Demo: cómo probarla | ⬜ | - |
+| 1.1 | Scaffold Next.js + Tailwind + layout con firma en el pie | ✅ | 2026-10-26 |
+| 1.2 | Asistente paso a paso (origen/destino, fechas, personas, presupuesto mín/máx, aerolínea/clase, hotel, plan, equipaje) | ✅ | 2026-10-26 |
+| 1.3 | Itinerario día por día + precios + condiciones + total y por persona (mocks) | ✅ | 2026-10-26 |
+| 1.4 | Demo: cómo probarla | ✅ | 2026-10-26 |
 
 ### Fase 2: Calculadora de gastos compartidos
 | # | Paso | Status | Hecho |
@@ -121,12 +121,16 @@ por viaje guardado, y abstracción por "proveedor" para cambiar de API sin tocar
 |---|------|--------|-------|
 | 6.1 | Deploy Vercel + Supabase, variables de entorno, prueba final | ⬜ | - |
 
-## Decisiones pendientes del usuario
-1. OK al stack y al plan.
-2. Dónde vive el código (repo nuevo recomendado vs. carpeta en este repo).
-3. Uso comercial o personal (afecta Open-Meteo y los cupos gratis).
+## Decisiones (2026-10-26)
+El usuario delegó las decisiones ("hacé lo mejor para que sea profesional y que la gente la use"):
+1. Stack y plan: aprobados.
+2. Código: carpeta `apps/viajes/` en este repo (se puede mover a un repo propio antes del deploy).
+3. Uso: público/comercial. Antes de publicar (fase 6) hay que pasar a planes que permitan uso comercial
+   (Open-Meteo comercial u OpenWeather como fuente principal; cupo pago de SerpApi).
+4. Nombre de la app: Rumbo. Diseño: neutros zinc + acento teal, Geist, modo claro y oscuro automático.
 
 ## Historial
 | Fecha | Cambio |
 |---|---|
 | 2026-10-26 | Propuesta inicial: investigación de APIs, stack y plan por fases |
+| 2026-10-26 | Fase 1 completa: portada, asistente de 7 pasos, itinerario con datos de ejemplo, 10 tests |

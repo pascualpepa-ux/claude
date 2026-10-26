@@ -1,0 +1,142 @@
+export type Clase = "economica" | "premium" | "business";
+export type TipoHotel = "hostel" | "3" | "4" | "5" | "depto";
+export type Plan = "economico" | "equilibrado" | "premium";
+export type Equipaje = "mano" | "valija";
+export type ModoPresupuesto = "total" | "persona";
+
+/** Respuestas del asistente. */
+export interface TripInput {
+  origen: string;
+  destino: string;
+  fechaIda: string; // YYYY-MM-DD
+  fechaVuelta: string; // YYYY-MM-DD
+  viajeros: string[];
+  presupuestoMin: number;
+  presupuestoMax: number;
+  modoPresupuesto: ModoPresupuesto;
+  aerolinea: string; // "" = cualquiera
+  clase: Clase;
+  tipoHotel: TipoHotel;
+  hotelPreferido: string;
+  plan: Plan;
+  equipaje: Equipaje;
+}
+
+/**
+ * Estado de verificación de un dato. Regla de los verificadores:
+ * si algo no se puede confirmar, no se inventa.
+ */
+export type Verificacion = "verificado" | "estimado" | "no_verificado";
+
+export interface Origen {
+  fuente: string;
+  consultadoEn: string; // ISO
+  estado: Verificacion;
+}
+
+export type Condicion = "soleado" | "parcial" | "nublado" | "lluvia" | "tormenta";
+
+export interface ClimaDia {
+  fecha: string;
+  condicion: Condicion;
+  maxima: number;
+  minima: number;
+  probLluvia: number; // 0-100
+  confianza: "alta" | "media" | "baja";
+  origen: Origen;
+}
+
+export interface Tramo {
+  desde: string;
+  hasta: string;
+  salida: string; // ISO
+  llegada: string; // ISO
+  escalas: string[];
+  duracionMin: number;
+}
+
+export interface OpcionVuelo {
+  id: string;
+  aerolinea: string;
+  clase: Clase;
+  ida: Tramo;
+  vuelta: Tramo;
+  precioPorPersona: number;
+  condiciones: {
+    equipajeMano: string;
+    valija: string;
+    cambios: string;
+    reembolso: string;
+  };
+  linkReserva: string;
+  origen: Origen;
+}
+
+export interface OpcionHotel {
+  id: string;
+  ciudad: string;
+  nombre: string;
+  tipo: TipoHotel;
+  zona: string;
+  precioNoche: number; // por habitación, sin impuestos
+  impuestosPct: number;
+  habitaciones: number;
+  condiciones: {
+    desayuno: string;
+    cancelacion: string;
+    checkIn: string;
+    checkOut: string;
+  };
+  linkReserva: string;
+  origen: Origen;
+}
+
+export type TipoActividad = "imperdible" | "comida" | "experiencia";
+
+export interface Actividad {
+  id: string;
+  ciudad: string;
+  nombre: string;
+  tipo: TipoActividad;
+  aireLibre: boolean;
+  precioPorPersona: number;
+  horas: number;
+}
+
+export interface TramoCiudad {
+  ciudad: string;
+  dias: number;
+}
+
+export interface Traslado {
+  fecha: string;
+  desde: string;
+  hasta: string;
+  medio: string;
+  precioPorPersona: number;
+  origen: Origen;
+}
+
+export interface DiaItinerario {
+  fecha: string;
+  ciudad: string;
+  clima: ClimaDia;
+  consejo: string;
+  actividades: string[]; // ids
+  nota?: string;
+}
+
+export interface TripPlan {
+  input: TripInput;
+  generadoEn: string;
+  ruta: TramoCiudad[];
+  rutaSugerida: boolean; // true si el usuario puso solo el país
+  vuelos: OpcionVuelo[];
+  vueloElegido: string;
+  hoteles: Record<string, OpcionHotel[]>; // por ciudad
+  hotelElegido: Record<string, string>;
+  actividades: Actividad[];
+  dias: DiaItinerario[];
+  traslados: Traslado[];
+  gastosDiarios: { comidaPorPersona: number; transportePorPersona: number };
+}

@@ -1,0 +1,107 @@
+import { AirplaneTakeoff, AirplaneLanding, ArrowSquareOut, Suitcase, Backpack, ArrowsClockwise, Receipt } from "@phosphor-icons/react/dist/ssr";
+import { usd } from "@/lib/dinero";
+import { formatoCorto, formatoDuracion, formatoHora } from "@/lib/fechas";
+import type { OpcionVuelo, Tramo } from "@/lib/types";
+import { EstadoDato } from "./EstadoDato";
+
+function textoEscalas(t: Tramo) {
+  if (t.escalas.length === 0) return "Directo";
+  return `${t.escalas.length} ${t.escalas.length === 1 ? "escala" : "escalas"} en ${t.escalas.join(" y ")}`;
+}
+
+function FilaTramo({ titulo, tramo, Icono }: { titulo: string; tramo: Tramo; Icono: React.ElementType }) {
+  return (
+    <div className="flex items-center gap-3">
+      <Icono size={20} className="shrink-0 text-zinc-500" aria-hidden />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm">
+          <span className="font-medium">{titulo}</span>{" "}
+          <span className="text-zinc-600 dark:text-zinc-400">{formatoCorto(tramo.salida.slice(0, 10))}</span>
+        </p>
+        <p className="text-sm tabular-nums">
+          {tramo.desde} {formatoHora(tramo.salida)} <span className="text-zinc-400">a</span> {tramo.hasta} {formatoHora(tramo.llegada)}
+        </p>
+      </div>
+      <p className="shrink-0 text-right text-xs text-zinc-600 dark:text-zinc-400">
+        {formatoDuracion(tramo.duracionMin)}
+        <span className="block">{textoEscalas(tramo)}</span>
+      </p>
+    </div>
+  );
+}
+
+export function TarjetaVuelo({
+  vuelo,
+  personas,
+  elegido,
+  onElegir,
+}: {
+  vuelo: OpcionVuelo;
+  personas: number;
+  elegido: boolean;
+  onElegir: () => void;
+}) {
+  const c = vuelo.condiciones;
+  return (
+    <article
+      className={`rounded-2xl border bg-white p-4 transition sm:p-5 dark:bg-zinc-900 ${
+        elegido ? "border-teal-700 ring-1 ring-teal-700 dark:border-teal-400 dark:ring-teal-400" : "border-zinc-200 dark:border-zinc-800"
+      }`}
+    >
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{vuelo.aerolinea}</h3>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">{textoEscalas(vuelo.ida)} a la ida</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xl font-semibold tabular-nums">{usd(vuelo.precioPorPersona)}</p>
+          <p className="text-xs text-zinc-600 dark:text-zinc-400">
+            por persona, {usd(vuelo.precioPorPersona * personas)} en total
+          </p>
+        </div>
+      </header>
+
+      <div className="mt-4 grid gap-3">
+        <FilaTramo titulo="Ida" tramo={vuelo.ida} Icono={AirplaneTakeoff} />
+        <FilaTramo titulo="Vuelta" tramo={vuelo.vuelta} Icono={AirplaneLanding} />
+      </div>
+
+      <details className="mt-4 rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-800/50">
+        <summary className="cursor-pointer text-sm font-medium">Condiciones</summary>
+        <ul className="mt-2 grid gap-1.5 pb-1 text-sm text-zinc-700 dark:text-zinc-300">
+          <li className="flex gap-2"><Backpack size={18} className="shrink-0 text-zinc-500" aria-hidden />{c.equipajeMano}</li>
+          <li className="flex gap-2"><Suitcase size={18} className="shrink-0 text-zinc-500" aria-hidden />{c.valija}</li>
+          <li className="flex gap-2"><ArrowsClockwise size={18} className="shrink-0 text-zinc-500" aria-hidden />{c.cambios}</li>
+          <li className="flex gap-2"><Receipt size={18} className="shrink-0 text-zinc-500" aria-hidden />{c.reembolso}</li>
+        </ul>
+      </details>
+
+      <footer className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <EstadoDato origen={vuelo.origen} />
+        <div className="flex gap-2">
+          <a
+            href={vuelo.linkReserva}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            Reservar
+            <ArrowSquareOut size={16} aria-hidden />
+          </a>
+          <button
+            type="button"
+            onClick={onElegir}
+            aria-pressed={elegido}
+            className={`rounded-xl px-3 py-2 text-sm font-medium transition active:scale-[0.98] ${
+              elegido
+                ? "bg-teal-700 text-white dark:bg-teal-500 dark:text-zinc-950"
+                : "border border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            }`}
+          >
+            {elegido ? "Elegido" : "Elegir"}
+          </button>
+        </div>
+      </footer>
+    </article>
+  );
+}
