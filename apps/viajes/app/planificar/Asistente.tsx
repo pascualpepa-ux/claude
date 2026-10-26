@@ -7,6 +7,8 @@ import { diferenciaDias, hoy, sumarDias } from "@/lib/fechas";
 import { resolverDestino } from "@/lib/destinos";
 import { CLAVE_BORRADOR, CLAVE_PEDIDO, CLAVE_VIAJE } from "@/lib/almacen";
 import type { Textos } from "@/lib/textos";
+import type { Lugar } from "@/lib/lugares-tipos";
+import { BuscadorCiudad } from "@/components/BuscadorCiudad";
 import { useIdioma } from "@/components/ProveedorIdioma";
 import type { Clase, Equipaje, ModoPresupuesto, Plan, TipoHotel, TripInput } from "@/lib/types";
 
@@ -16,12 +18,15 @@ interface Borrador extends Omit<TripInput, "presupuestoMin" | "presupuestoMax"> 
   cantidadDias: string;
   presupuestoMin: string;
   presupuestoMax: string;
+  lugarOrigen: Lugar | null; // ciudad elegida de la lista, con sus aeropuertos cercanos
 }
 
 function borradorInicial(): Borrador {
   const ida = sumarDias(hoy(), 30);
   return {
     origen: "",
+    aeropuertoOrigen: "",
+    lugarOrigen: null,
     destino: "",
     modoFechas: "fechas",
     fechaIda: ida,
@@ -47,7 +52,7 @@ type Errores = Partial<Record<string, string>>;
 function validar(paso: number, b: Borrador, E: Textos["asistente"]["errores"]): Errores {
   const e: Errores = {};
   if (paso === 0) {
-    if (!b.origen.trim()) e.origen = E.origen;
+    if (!b.lugarOrigen || !b.aeropuertoOrigen) e.origen = E.origen;
     if (!b.destino.trim()) e.destino = E.destino;
   }
   if (paso === 1) {
@@ -85,7 +90,8 @@ function aPedido(b: Borrador): TripInput {
   const fechaIda = b.modoFechas === "fechas" ? b.fechaIda : sumarDias(hoy(), 30);
   const fechaVuelta = b.modoFechas === "fechas" ? b.fechaVuelta : sumarDias(fechaIda, Number(b.cantidadDias) - 1);
   return {
-    origen: b.origen.trim(),
+    origen: b.lugarOrigen?.ciudad ?? b.origen.trim(),
+    aeropuertoOrigen: b.aeropuertoOrigen,
     destino: b.destino.trim(),
     fechaIda,
     fechaVuelta,
@@ -289,11 +295,21 @@ export function Asistente() {
         <div key={`c-${paso}`} className="aparecer mt-8 grid gap-6">
           {paso === 0 && (
             <>
-              <Campo etiqueta={A.origen} error={errores.origen}>
-                {(p) => (
-                  <input {...p} value={b.origen} onChange={(e) => cambiar("origen", e.target.value)} placeholder={A.origenEj} autoComplete="off" />
-                )}
-              </Campo>
+              <BuscadorCiudad
+                texto={b.origen}
+                lugar={b.lugarOrigen}
+                aeropuerto={b.aeropuertoOrigen}
+                error={errores.origen}
+                onTexto={(texto) => {
+                  setB((prev) => ({ ...prev, origen: texto, lugarOrigen: null, aeropuertoOrigen: "" }));
+                  setErrores((prev) => ({ ...prev, origen: undefined }));
+                }}
+                onLugar={(lugar) => {
+                  setB((prev) => ({ ...prev, origen: lugar.ciudad, lugarOrigen: lugar, aeropuertoOrigen: lugar.aeropuertos[0]?.iata ?? "" }));
+                  setErrores((prev) => ({ ...prev, origen: undefined }));
+                }}
+                onAeropuerto={(iata) => cambiar("aeropuertoOrigen", iata)}
+              />
               <Campo
                 etiqueta={A.destino}
                 error={errores.destino}

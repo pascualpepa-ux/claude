@@ -206,7 +206,7 @@ function armarVuelos(input: TripInput, destino: CiudadBase, regreso: CiudadBase,
     { escalas: 1, factor: 1.0, valijaIncluida: true, estado: "verificado" as const },
     { escalas: 2, factor: 0.82, valijaIncluida: false, estado: "estimado" as const },
   ];
-  const origenCodigo = input.origen.trim().slice(0, 3).toUpperCase() || "EZE";
+  const origenCodigo = input.aeropuertoOrigen || input.origen.trim().slice(0, 3).toUpperCase() || "EZE";
   return perfiles.map((p, i) => {
     const aerolinea = lista[i % lista.length];
     const duracionIda = Math.round(entre(r, 14, 18) * 60 + p.escalas * entre(r, 120, 240));
@@ -451,6 +451,7 @@ export function viajeDeMuestra(): TripInput {
   const ida = sumarDias(hoy(), 40);
   return {
     origen: "Buenos Aires",
+    aeropuertoOrigen: "EZE",
     destino: "China",
     fechaIda: ida,
     fechaVuelta: sumarDias(ida, 5),

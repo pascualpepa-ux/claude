@@ -14,6 +14,11 @@ export function Pie() {
         <div className="flex flex-col items-start gap-3">
           <LogoCompleto ancho={132} />
           <p className="max-w-[36ch] text-sm text-arena-600 dark:text-arena-400">{t.pie.lema}</p>
+          <p className="text-[11px] text-arena-500 dark:text-arena-400">
+            <a href="https://www.geonames.org" target="_blank" rel="noopener noreferrer" className="hover:underline">
+              {t.pie.creditos}
+            </a>
+          </p>
         </div>
         <nav aria-label={t.pie.navegacion}>
           <ul className="grid gap-2 text-sm">

@@ -36,3 +36,8 @@ Qué mirar:
 - `lib/mock.ts` generador de datos de ejemplo (lo reemplazan los agentes en la fase 3)
 - `lib/presupuesto.ts` cálculo de totales y control del rango de presupuesto
 - `.env.example` claves de API para la fase 3 (nunca van en el código)
+
+## Datos de ciudades y aeropuertos
+
+`data/lugares/` se genera con `scripts/datos-lugares.mjs` (ver el encabezado del script).
+Fuentes: GeoNames `cities15000` (CC BY 4.0, se cita en el pie de la web) y OurAirports (dominio público).

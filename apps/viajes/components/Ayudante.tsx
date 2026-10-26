@@ -17,7 +17,7 @@ function contexto(ruta: string) {
     if (guardado) {
       const { input } = JSON.parse(guardado) as TripPlan;
       partes.push(
-        `Armó un viaje de ${input.origen} a ${input.destino}, del ${input.fechaIda} al ${input.fechaVuelta}, ` +
+        `Armó un viaje de ${input.origen}${input.aeropuertoOrigen ? ` (aeropuerto ${input.aeropuertoOrigen})` : ""} a ${input.destino}, del ${input.fechaIda} al ${input.fechaVuelta}, ` +
           `${input.viajeros.length} viajeros, plan ${input.plan}, presupuesto máximo US$ ${input.presupuestoMax} ` +
           `${input.modoPresupuesto === "persona" ? "por persona" : "para el grupo"}.`,
       );

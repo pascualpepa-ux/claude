@@ -143,7 +143,10 @@ export function VistaViaje() {
               {t.viaje.fechasPlan(formatoCorto(input.fechaIda, idioma), formatoCorto(input.fechaVuelta, idioma), t.viaje.planes[input.plan])}
             </p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight text-balance md:text-4xl">
-              {t.viaje.titulo(input.origen, input.destino)}
+              {t.viaje.titulo(
+                input.aeropuertoOrigen ? t.viaje.conAeropuerto(input.origen, input.aeropuertoOrigen) : input.origen,
+                input.destino,
+              )}
             </h1>
             <ul className="mt-3 flex flex-wrap gap-2" aria-label={t.viaje.viajeros}>
               {input.viajeros.map((v) => (

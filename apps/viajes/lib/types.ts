@@ -8,7 +8,8 @@ export type ModoPresupuesto = "total" | "persona";
 
 /** Respuestas del asistente. */
 export interface TripInput {
-  origen: string;
+  origen: string; // ciudad de salida
+  aeropuertoOrigen: string; // código IATA del aeropuerto elegido ("" si no se conoce)
   destino: string;
   fechaIda: string; // YYYY-MM-DD
   fechaVuelta: string; // YYYY-MM-DD
