@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import { Encabezado } from "@/components/Encabezado";
 import { Pie } from "@/components/Pie";
 import { ContadorVisitas } from "@/components/ContadorVisitas";
+import { ProveedorIdioma } from "@/components/ProveedorIdioma";
+import { textosActuales } from "@/lib/idioma-servidor";
 import "./globals.css";
 
 // Google Sans Flex: la tipografía del logo (licencia SIL OFL, ver app/fuentes/OFL.txt).
@@ -13,18 +15,21 @@ const marca = localFont({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://rumbotraveling.com"),
-  title: "Rumbo Traveling · Planificá tu viaje",
-  description: "Itinerario, vuelos, hoteles, clima y gastos compartidos en un solo lugar.",
-  openGraph: {
-    title: "Rumbo Traveling",
-    description: "Planificá tu viaje: itinerario, vuelos, hoteles, clima y presupuesto en un solo lugar.",
-    images: ["/marca/icono-512.png"],
-    locale: "es_AR",
-    type: "website",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { idioma, t } = await textosActuales();
+  return {
+    metadataBase: new URL("https://rumbotraveling.com"),
+    title: t.meta.titulo,
+    description: t.meta.descripcion,
+    openGraph: {
+      title: "Rumbo Traveling",
+      description: t.meta.descripcion,
+      images: ["/marca/icono-512.png"],
+      locale: idioma === "en" ? "en_US" : "es_AR",
+      type: "website",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -33,13 +38,16 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { idioma } = await textosActuales();
   return (
-    <html lang="es" className={marca.variable}>
+    <html lang={idioma} className={marca.variable}>
       <body className="flex min-h-[100dvh] flex-col font-sans">
-        <Encabezado />
-        <div className="flex-1">{children}</div>
-        <Pie />
+        <ProveedorIdioma idioma={idioma}>
+          <Encabezado />
+          <div className="flex-1">{children}</div>
+          <Pie />
+        </ProveedorIdioma>
         {process.env.GOATCOUNTER_CODE && <ContadorVisitas codigo={process.env.GOATCOUNTER_CODE} />}
       </body>
     </html>

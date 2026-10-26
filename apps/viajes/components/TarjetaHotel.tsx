@@ -1,9 +1,10 @@
+"use client";
+
 import { ArrowSquareOut, Coffee, CalendarX, SignIn, SignOut, MapPin } from "@phosphor-icons/react/dist/ssr";
 import { usd } from "@/lib/dinero";
 import type { OpcionHotel } from "@/lib/types";
 import { EstadoDato } from "./EstadoDato";
-
-const NOMBRE_TIPO = { hostel: "Hostel", "3": "3 estrellas", "4": "4 estrellas", "5": "5 estrellas", depto: "Departamento" };
+import { useIdioma } from "./ProveedorIdioma";
 
 export function TarjetaHotel({
   hotel,
@@ -18,8 +19,9 @@ export function TarjetaHotel({
   elegido: boolean;
   onElegir: () => void;
 }) {
+  const { idioma, t } = useIdioma();
   const c = hotel.condiciones;
-  const unidad = hotel.tipo === "hostel" ? "cama" : hotel.tipo === "depto" ? "departamento" : "habitación";
+  const [uno, varios] = t.hotel.unidad[hotel.tipo === "hostel" ? "hostel" : hotel.tipo === "depto" ? "depto" : "hotel"];
   return (
     <article
       className={`rounded-2xl border bg-papel p-4 transition sm:p-5 dark:bg-arena-900 ${
@@ -31,28 +33,27 @@ export function TarjetaHotel({
           <h3 className="font-semibold">{hotel.nombre}</h3>
           <p className="flex items-center gap-1 text-sm text-arena-600 dark:text-arena-400">
             <MapPin size={14} aria-hidden />
-            {hotel.zona}, {NOMBRE_TIPO[hotel.tipo]}
+            {hotel.zona}, {t.hotel.tipos[hotel.tipo]}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-xl font-semibold tabular-nums">{usd(hotel.precioNoche)}</p>
-          <p className="text-xs text-arena-600 dark:text-arena-400">por noche y {unidad}, sin impuestos</p>
+          <p className="text-xl font-semibold tabular-nums">{usd(hotel.precioNoche, idioma)}</p>
+          <p className="text-xs text-arena-600 dark:text-arena-400">{t.hotel.porNoche(uno)}</p>
         </div>
       </header>
 
       <p className="mt-3 text-sm">
-        <span className="font-medium">{usd(total)}</span>{" "}
+        <span className="font-medium">{usd(total, idioma)}</span>{" "}
         <span className="text-arena-600 dark:text-arena-400">
-          por {noches} {noches === 1 ? "noche" : "noches"}, {hotel.habitaciones}{" "}
-          {hotel.habitaciones === 1 ? unidad : unidad === "habitación" ? "habitaciones" : `${unidad}s`}, con {hotel.impuestosPct}% de impuestos y tasas
+          {t.hotel.estadia(noches, hotel.habitaciones, hotel.habitaciones === 1 ? uno : varios, hotel.impuestosPct)}
         </span>
       </p>
 
       <ul className="mt-3 grid gap-1.5 text-sm text-arena-700 sm:grid-cols-2 dark:text-arena-300">
         <li className="flex gap-2"><Coffee size={18} className="shrink-0 text-arena-500" aria-hidden />{c.desayuno}</li>
         <li className="flex gap-2"><CalendarX size={18} className="shrink-0 text-arena-500" aria-hidden />{c.cancelacion}</li>
-        <li className="flex gap-2"><SignIn size={18} className="shrink-0 text-arena-500" aria-hidden />Check-in {c.checkIn.toLowerCase()}</li>
-        <li className="flex gap-2"><SignOut size={18} className="shrink-0 text-arena-500" aria-hidden />Check-out {c.checkOut.toLowerCase()}</li>
+        <li className="flex gap-2"><SignIn size={18} className="shrink-0 text-arena-500" aria-hidden />{c.checkIn}</li>
+        <li className="flex gap-2"><SignOut size={18} className="shrink-0 text-arena-500" aria-hidden />{c.checkOut}</li>
       </ul>
 
       <footer className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -64,7 +65,7 @@ export function TarjetaHotel({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-arena-700 transition hover:bg-arena-100 dark:text-arena-300 dark:hover:bg-arena-800"
           >
-            Reservar
+            {t.vuelo.reservar}
             <ArrowSquareOut size={16} aria-hidden />
           </a>
           <button
@@ -77,7 +78,7 @@ export function TarjetaHotel({
                 : "border border-arena-300 hover:bg-arena-100 dark:border-arena-700 dark:hover:bg-arena-800"
             }`}
           >
-            {elegido ? "Elegido" : "Elegir"}
+            {elegido ? t.vuelo.elegido : t.vuelo.elegir}
           </button>
         </div>
       </footer>

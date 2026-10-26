@@ -7,7 +7,7 @@ export interface VisitasDia {
 
 export type ResultadoVisitas =
   | { estado: "sin_configurar" }
-  | { estado: "error"; mensaje: string }
+  | { estado: "error"; motivo: "clave" | "conexion" | "servidor"; status?: number }
   | { estado: "ok"; dias: VisitasDia[]; total: number; panel: string };
 
 /** Visitas por día de los últimos `cantidad` días, leídas de la API de GoatCounter. */
@@ -26,9 +26,9 @@ export async function visitasPorDia(cantidad = 30): Promise<ResultadoVisitas> {
       cache: "no-store",
     });
     if (res.status === 401 || res.status === 403) {
-      return { estado: "error", mensaje: "GoatCounter rechazó la clave de API. Revisá que tenga permiso para leer estadísticas." };
+      return { estado: "error", motivo: "clave" };
     }
-    if (!res.ok) return { estado: "error", mensaje: `GoatCounter respondió con un error (${res.status}). Probá de nuevo en un rato.` };
+    if (!res.ok) return { estado: "error", motivo: "servidor", status: res.status };
     const datos = (await res.json()) as { total?: number; stats?: { day: string; daily: number }[] };
     const porDia = new Map((datos.stats ?? []).map((s) => [s.day, s.daily ?? 0]));
     const dias = Array.from({ length: cantidad }, (_, i) => {
@@ -37,6 +37,6 @@ export async function visitasPorDia(cantidad = 30): Promise<ResultadoVisitas> {
     });
     return { estado: "ok", dias, total: datos.total ?? dias.reduce((s, d) => s + d.visitas, 0), panel: base };
   } catch {
-    return { estado: "error", mensaje: "No se pudo conectar con GoatCounter. Probá de nuevo en un rato." };
+    return { estado: "error", motivo: "conexion" };
   }
 }

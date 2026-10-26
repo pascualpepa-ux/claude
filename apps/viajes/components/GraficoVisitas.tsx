@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { formatoCorto } from "@/lib/fechas";
 import type { VisitasDia } from "@/lib/goatcounter";
+import { useIdioma } from "./ProveedorIdioma";
 
 const ALTO = 240;
 const MARGEN = { arriba: 16, derecha: 8, abajo: 28, izquierda: 36 };
@@ -23,6 +24,7 @@ function barra(x: number, y: number, w: number, h: number) {
 
 export function GraficoVisitas({ dias }: { dias: VisitasDia[] }) {
   const [activo, setActivo] = useState<number | null>(null);
+  const { idioma, t } = useIdioma();
   // El dibujo usa el ancho real del contenedor para que el texto no se achique en el celular.
   const caja = useRef<HTMLDivElement>(null);
   const [ANCHO, setAncho] = useState(720);
@@ -50,7 +52,7 @@ export function GraficoVisitas({ dias }: { dias: VisitasDia[] }) {
           viewBox={`0 0 ${ANCHO} ${ALTO}`}
           className="h-auto w-full"
           role="img"
-          aria-label={`Visitantes por día en los últimos ${dias.length} días`}
+          aria-label={t.admin.grafico(dias.length)}
           onMouseLeave={() => setActivo(null)}
         >
           {marcas.map((m) => (
@@ -105,7 +107,7 @@ export function GraficoVisitas({ dias }: { dias: VisitasDia[] }) {
                     textAnchor="middle"
                     className="fill-arena-500 text-[11px] dark:fill-arena-400"
                   >
-                    {formatoCorto(d.dia)}
+                    {formatoCorto(d.dia, idioma)}
                   </text>
                 )}
               </g>
@@ -122,28 +124,28 @@ export function GraficoVisitas({ dias }: { dias: VisitasDia[] }) {
               transform: `translateX(${activo < dias.length * 0.2 ? "-15%" : activo > dias.length * 0.8 ? "-85%" : "-50%"})`,
             }}
           >
-            <p className="whitespace-nowrap text-arena-600 dark:text-arena-400">{formatoCorto(sel.dia)}</p>
+            <p className="whitespace-nowrap text-arena-600 dark:text-arena-400">{formatoCorto(sel.dia, idioma)}</p>
             <p className="whitespace-nowrap font-semibold tabular-nums">
-              {sel.visitas} {sel.visitas === 1 ? "visitante" : "visitantes"}
+              {t.admin.visitantes(sel.visitas)}
             </p>
           </div>
         )}
       </div>
 
       <details className="mt-3 text-sm">
-        <summary className="cursor-pointer text-arena-600 dark:text-arena-400">Ver como tabla</summary>
+        <summary className="cursor-pointer text-arena-600 dark:text-arena-400">{t.admin.verTabla}</summary>
         <div className="mt-2 max-h-64 overflow-y-auto">
           <table className="w-full tabular-nums">
             <thead>
               <tr className="text-left text-arena-500 dark:text-arena-400">
-                <th className="py-1 font-medium">Día</th>
-                <th className="py-1 text-right font-medium">Visitantes</th>
+                <th className="py-1 font-medium">{t.admin.dia}</th>
+                <th className="py-1 text-right font-medium">{t.admin.columnaVisitantes}</th>
               </tr>
             </thead>
             <tbody>
               {[...dias].reverse().map((d) => (
                 <tr key={d.dia} className="border-t border-arena-100 dark:border-arena-800">
-                  <td className="py-1">{formatoCorto(d.dia)}</td>
+                  <td className="py-1">{formatoCorto(d.dia, idioma)}</td>
                   <td className="py-1 text-right">{d.visitas}</td>
                 </tr>
               ))}

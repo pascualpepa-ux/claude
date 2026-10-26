@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LockSimple } from "@phosphor-icons/react/dist/ssr";
+import { useIdioma } from "@/components/ProveedorIdioma";
 
 export function FormularioAdmin() {
   const router = useRouter();
+  const { t } = useIdioma();
+  const A = t.admin;
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -13,8 +16,8 @@ export function FormularioAdmin() {
   return (
     <div className="mx-auto max-w-sm px-4 py-20">
       <LockSimple size={36} weight="duotone" className="text-oliva-700 dark:text-oliva-300" aria-hidden />
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">Administración</h1>
-      <p className="mt-1 text-arena-600 dark:text-arena-400">Ingresá la contraseña para ver las estadísticas.</p>
+      <h1 className="mt-4 text-2xl font-semibold tracking-tight">{A.titulo}</h1>
+      <p className="mt-1 text-arena-600 dark:text-arena-400">{A.ingresar}</p>
       <form
         className="mt-8 grid gap-4"
         onSubmit={async (e) => {
@@ -31,10 +34,9 @@ export function FormularioAdmin() {
               router.refresh();
               return;
             }
-            const datos = await res.json().catch(() => ({}));
-            setError(datos.error ?? "No se pudo entrar. Probá de nuevo.");
+            setError(res.status === 401 ? A.incorrecta : res.status === 503 ? A.sinConfigurar : A.noSePudo);
           } catch {
-            setError("No hay conexión. Revisá internet y probá de nuevo.");
+            setError(A.sinInternet);
           } finally {
             setEnviando(false);
           }
@@ -42,7 +44,7 @@ export function FormularioAdmin() {
       >
         <div className="grid gap-2">
           <label htmlFor="contrasena" className="text-sm font-medium">
-            Contraseña
+            {A.contrasena}
           </label>
           <input
             id="contrasena"
@@ -68,7 +70,7 @@ export function FormularioAdmin() {
           disabled={enviando || !contrasena}
           className="rounded-xl bg-oliva-700 px-5 py-3 font-medium text-white transition hover:bg-oliva-800 active:scale-[0.98] disabled:opacity-50 dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200"
         >
-          {enviando ? "Entrando..." : "Entrar"}
+          {enviando ? A.entrando : A.entrar}
         </button>
       </form>
     </div>

@@ -1,4 +1,5 @@
 import { diferenciaDias } from "./fechas";
+import { TEXTOS } from "./textos";
 import type { TripPlan, Verificacion } from "./types";
 
 export interface LineaPresupuesto {
@@ -26,14 +27,15 @@ function peor(estados: Verificacion[]): Verificacion {
 
 export function nochesPorCiudad(plan: TripPlan): Record<string, number> {
   const res: Record<string, number> = {};
-  for (const tramo of plan.ruta) res[tramo.ciudad] = (res[tramo.ciudad] ?? 0) + tramo.dias;
+  for (const tramo of plan.ruta) res[tramo.clave] = (res[tramo.clave] ?? 0) + tramo.dias;
   return res;
 }
 
-export function costoHotel(plan: TripPlan, ciudad: string, hotelId = plan.hotelElegido[ciudad]): number {
-  const hotel = plan.hoteles[ciudad]?.find((h) => h.id === hotelId);
+/** Costo total de un hotel en una ciudad (por clave de ciudad), con impuestos. */
+export function costoHotel(plan: TripPlan, clave: string, hotelId = plan.hotelElegido[clave]): number {
+  const hotel = plan.hoteles[clave]?.find((h) => h.id === hotelId);
   if (!hotel) return 0;
-  const noches = nochesPorCiudad(plan)[ciudad] ?? 0;
+  const noches = nochesPorCiudad(plan)[clave] ?? 0;
   return hotel.precioNoche * hotel.habitaciones * noches * (1 + hotel.impuestosPct / 100);
 }
 
@@ -41,26 +43,27 @@ export function calcularResumen(plan: TripPlan): Resumen {
   const personas = Math.max(1, plan.input.viajeros.length);
   const dias = diferenciaDias(plan.input.fechaIda, plan.input.fechaVuelta) + 1;
   const lineas: LineaPresupuesto[] = [];
+  const t = TEXTOS[plan.idioma ?? "es"].presupuesto.lineas;
 
   const vuelo = plan.vuelos.find((v) => v.id === plan.vueloElegido);
   if (vuelo) {
     lineas.push({
       id: "vuelos",
-      concepto: "Vuelos",
-      detalle: `${vuelo.aerolinea}, ${personas} ${personas === 1 ? "pasaje" : "pasajes"} ida y vuelta`,
+      concepto: t.vuelos,
+      detalle: t.vuelosDetalle(vuelo.aerolinea, personas),
       monto: vuelo.precioPorPersona * personas,
       estado: vuelo.origen.estado,
     });
   }
 
   for (const tramo of plan.ruta) {
-    const hotel = plan.hoteles[tramo.ciudad]?.find((h) => h.id === plan.hotelElegido[tramo.ciudad]);
+    const hotel = plan.hoteles[tramo.clave]?.find((h) => h.id === plan.hotelElegido[tramo.clave]);
     if (!hotel) continue;
     lineas.push({
-      id: `hotel-${tramo.ciudad}`,
-      concepto: `Alojamiento en ${tramo.ciudad}`,
-      detalle: `${hotel.nombre}, ${tramo.dias} ${tramo.dias === 1 ? "noche" : "noches"} con impuestos`,
-      monto: costoHotel(plan, tramo.ciudad),
+      id: `hotel-${tramo.clave}`,
+      concepto: t.alojamiento(tramo.ciudad),
+      detalle: t.alojamientoDetalle(hotel.nombre, tramo.dias),
+      monto: costoHotel(plan, tramo.clave),
       estado: hotel.origen.estado,
     });
   }
@@ -68,10 +71,10 @@ export function calcularResumen(plan: TripPlan): Resumen {
   if (plan.traslados.length) {
     lineas.push({
       id: "traslados",
-      concepto: "Traslados entre ciudades",
-      detalle: plan.traslados.map((t) => `${t.desde} a ${t.hasta}`).join(", "),
-      monto: plan.traslados.reduce((s, t) => s + t.precioPorPersona, 0) * personas,
-      estado: peor(plan.traslados.map((t) => t.origen.estado)),
+      concepto: t.traslados,
+      detalle: plan.traslados.map((tr) => t.trasladoTramo(tr.desde, tr.hasta)).join(", "),
+      monto: plan.traslados.reduce((s, tr) => s + tr.precioPorPersona, 0) * personas,
+      estado: peor(plan.traslados.map((tr) => tr.origen.estado)),
     });
   }
 
@@ -79,23 +82,23 @@ export function calcularResumen(plan: TripPlan): Resumen {
   const actividades = plan.actividades.filter((a) => elegidas.has(a.id));
   lineas.push({
     id: "actividades",
-    concepto: "Actividades",
-    detalle: `${actividades.length} ${actividades.length === 1 ? "actividad" : "actividades"} en el itinerario`,
+    concepto: t.actividades,
+    detalle: t.actividadesDetalle(actividades.length),
     monto: actividades.reduce((s, a) => s + a.precioPorPersona, 0) * personas,
     estado: "estimado",
   });
 
   lineas.push({
     id: "comida",
-    concepto: "Comida",
-    detalle: `${dias} días, aprox. US$ ${plan.gastosDiarios.comidaPorPersona} por persona por día`,
+    concepto: t.comida,
+    detalle: t.porDia(dias, plan.gastosDiarios.comidaPorPersona),
     monto: plan.gastosDiarios.comidaPorPersona * personas * dias,
     estado: "estimado",
   });
   lineas.push({
     id: "transporte",
-    concepto: "Transporte local",
-    detalle: `${dias} días, aprox. US$ ${plan.gastosDiarios.transportePorPersona} por persona por día`,
+    concepto: t.transporte,
+    detalle: t.porDia(dias, plan.gastosDiarios.transportePorPersona),
     monto: plan.gastosDiarios.transportePorPersona * personas * dias,
     estado: "estimado",
   });

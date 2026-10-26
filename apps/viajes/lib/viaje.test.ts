@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sumarDias } from "./fechas";
-import { generarViaje, repartirNoches, viajeDeMuestra } from "./mock";
+import { generarViaje, repartirNoches, traducirViaje, viajeDeMuestra } from "./mock";
 import { calcularResumen } from "./presupuesto";
 
 describe("repartirNoches", () => {
@@ -27,7 +27,7 @@ describe("generarViaje", () => {
   it("con una ciudad no sugiere ruta", () => {
     const plan = generarViaje({ ...viajeDeMuestra(), destino: "Lisboa" });
     expect(plan.rutaSugerida).toBe(false);
-    expect(plan.ruta).toEqual([{ ciudad: "Lisboa", dias: 5 }]);
+    expect(plan.ruta).toEqual([{ clave: "lisboa", ciudad: "Lisboa", dias: 5 }]);
   });
 
   it("no pone actividades al aire libre en días de lluvia", () => {
@@ -46,7 +46,7 @@ describe("generarViaje", () => {
 
   it("marca como no verificado el hotel preferido que no se pudo confirmar", () => {
     const plan = generarViaje({ ...viajeDeMuestra(), destino: "Roma", hotelPreferido: "Hotel Artemide" });
-    const elegido = plan.hoteles.Roma.find((h) => h.id === plan.hotelElegido.Roma);
+    const elegido = plan.hoteles.roma.find((h) => h.id === plan.hotelElegido.roma);
     expect(elegido?.nombre).toBe("Hotel Artemide");
     expect(elegido?.origen.estado).toBe("no_verificado");
   });
@@ -79,5 +79,37 @@ describe("calcularResumen", () => {
     const r = calcularResumen(plan);
     expect(r.rango.comparado).toBeCloseTo(r.total);
     expect(r.rango.estado).toBe("dentro");
+  });
+});
+
+describe("idiomas", () => {
+  it("genera el mismo viaje en inglés con nombres traducidos y los mismos precios", () => {
+    const es = generarViaje(viajeDeMuestra(), "es");
+    const en = generarViaje(viajeDeMuestra(), "en");
+    expect(en.ruta.map((r) => r.ciudad)).toEqual(["Beijing", "Shanghai"]);
+    expect(en.actividades[0].nombre).toBe("Great Wall at Mutianyu");
+    expect(en.dias[0].nota).toMatch(/^Arrival in Beijing/);
+    expect(calcularResumen(en).total).toBeCloseTo(calcularResumen(es).total);
+    expect(calcularResumen(en).lineas[0].concepto).toBe("Flights");
+  });
+
+  it("al cambiar de idioma conserva el vuelo, los hoteles y las actividades elegidas", () => {
+    const es = generarViaje(viajeDeMuestra(), "es");
+    const editado = {
+      ...es,
+      vueloElegido: "vuelo-2",
+      hotelElegido: { ...es.hotelElegido, beijing: "beijing-hotel-0" },
+      dias: es.dias.map((d, i) => (i === 1 ? { ...d, actividades: [] } : d)),
+    };
+    const en = traducirViaje(editado, "en");
+    expect(en.idioma).toBe("en");
+    expect(en.vueloElegido).toBe("vuelo-2");
+    expect(en.hotelElegido.beijing).toBe("beijing-hotel-0");
+    expect(en.dias[1].actividades).toEqual([]);
+    expect(calcularResumen(en).total).toBeCloseTo(calcularResumen(editado).total);
+  });
+
+  it("reconoce destinos escritos en inglés", () => {
+    expect(generarViaje({ ...viajeDeMuestra(), destino: "Japan" }, "en").ruta[0].ciudad).toBe("Tokyo");
   });
 });

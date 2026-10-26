@@ -1,3 +1,5 @@
+import { LOCALE, type Idioma } from "./idioma";
+
 // Las fechas se manejan como "YYYY-MM-DD" en UTC para evitar corrimientos por zona horaria.
 
 export function parseFecha(fecha: string): Date {
@@ -18,25 +20,23 @@ export function hoy(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-const fmtDia = new Intl.DateTimeFormat("es-AR", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  timeZone: "UTC",
-});
-const fmtCorto = new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "short", timeZone: "UTC" });
-const fmtHora = new Intl.DateTimeFormat("es-AR", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
-const fmtConsulta = new Intl.DateTimeFormat("es-AR", {
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+function formateador(opciones: Intl.DateTimeFormatOptions) {
+  const cache = new Map<Idioma, Intl.DateTimeFormat>();
+  return (idioma: Idioma) => {
+    if (!cache.has(idioma)) cache.set(idioma, new Intl.DateTimeFormat(LOCALE[idioma], opciones));
+    return cache.get(idioma)!;
+  };
+}
 
-export const formatoDia = (fecha: string) => fmtDia.format(parseFecha(fecha));
-export const formatoCorto = (fecha: string) => fmtCorto.format(parseFecha(fecha));
-export const formatoHora = (iso: string) => fmtHora.format(new Date(iso));
-export const formatoConsulta = (iso: string) => fmtConsulta.format(new Date(iso));
+const fmtDia = formateador({ weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+const fmtCorto = formateador({ day: "numeric", month: "short", timeZone: "UTC" });
+const fmtHora = formateador({ hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
+const fmtConsulta = formateador({ day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
+export const formatoDia = (fecha: string, idioma: Idioma = "es") => fmtDia(idioma).format(parseFecha(fecha));
+export const formatoCorto = (fecha: string, idioma: Idioma = "es") => fmtCorto(idioma).format(parseFecha(fecha));
+export const formatoHora = (iso: string, idioma: Idioma = "es") => fmtHora(idioma).format(new Date(iso));
+export const formatoConsulta = (iso: string, idioma: Idioma = "es") => fmtConsulta(idioma).format(new Date(iso));
 
 export function formatoDuracion(minutos: number): string {
   const h = Math.floor(minutos / 60);

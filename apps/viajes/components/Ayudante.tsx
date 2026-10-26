@@ -7,12 +7,7 @@ import { ChatCircleDots, PaperPlaneRight, X } from "@phosphor-icons/react/dist/s
 import { CLAVE_VIAJE } from "@/lib/almacen";
 import { LIMITES, type MensajeChat } from "@/lib/ayudante";
 import type { TripPlan } from "@/lib/types";
-
-const SUGERENCIAS = [
-  "¿Cómo armo mi viaje?",
-  "¿Qué significa precio estimado?",
-  "¿Qué llevo para un viaje en invierno?",
-];
+import { useIdioma } from "./ProveedorIdioma";
 
 /** Resumen de lo que la persona está mirando, para que las respuestas tengan contexto. */
 function contexto(ruta: string) {
@@ -33,6 +28,8 @@ function contexto(ruta: string) {
 
 export function Ayudante() {
   const ruta = usePathname() ?? "/";
+  const { idioma, t } = useIdioma();
+  const T = t.ayudante;
   const [abierto, setAbierto] = useState(false);
   const [mensajes, setMensajes] = useState<MensajeChat[]>([]);
   const [borrador, setBorrador] = useState("");
@@ -61,7 +58,7 @@ export function Ayudante() {
       const res = await fetch("/api/ayudante", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensajes: historial, contexto: contexto(ruta) }),
+        body: JSON.stringify({ mensajes: historial, contexto: contexto(ruta), idioma }),
       });
       if (!res.body) throw new Error("sin respuesta");
       const lector = res.body.getReader();
@@ -77,7 +74,7 @@ export function Ayudante() {
     } catch {
       setMensajes([
         ...historial,
-        { role: "assistant", content: "No pude responder. Revisá tu conexión y probá de nuevo." },
+        { role: "assistant", content: T.sinConexion },
       ]);
     } finally {
       setEsperando(false);
@@ -92,11 +89,11 @@ export function Ayudante() {
           type="button"
           onClick={() => setAbierto(true)}
           aria-expanded={abierto}
-          aria-label="¿Necesitás ayuda?"
+          aria-label={T.abrir}
           className="inline-flex size-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-arena-300 text-sm font-medium text-oliva-700 transition hover:bg-arena-100 active:scale-[0.98] sm:size-auto sm:px-3 sm:py-2 dark:border-arena-700 dark:text-oliva-300 dark:hover:bg-arena-800"
         >
           <ChatCircleDots size={20} weight="fill" aria-hidden />
-          <span className="hidden sm:inline">¿Necesitás ayuda?</span>
+          <span className="hidden lg:inline">{T.abrir}</span>
         </button>
 
       {abierto &&
@@ -104,19 +101,19 @@ export function Ayudante() {
         createPortal(
         <section
           role="dialog"
-          aria-label="Asistente de Rumbo"
+          aria-label={T.titulo}
           className="aparecer fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl border border-arena-200 bg-papel shadow-2xl sm:inset-x-auto sm:right-6 sm:bottom-6 sm:h-[min(600px,80dvh)] sm:w-96 sm:rounded-2xl dark:border-arena-800 dark:bg-arena-900"
         >
           <header className="flex items-center justify-between border-b border-arena-200 px-4 py-3 dark:border-arena-800">
             <div>
-              <h2 className="font-semibold">Asistente de Rumbo</h2>
-              <p className="text-xs text-arena-500 dark:text-arena-400">Respuestas generadas con IA. Pueden tener errores.</p>
+              <h2 className="font-semibold">{T.titulo}</h2>
+              <p className="text-xs text-arena-500 dark:text-arena-400">{T.aviso}</p>
             </div>
             <button
               type="button"
               onClick={() => setAbierto(false)}
               className="grid size-9 place-items-center rounded-xl text-arena-500 transition hover:bg-arena-100 hover:text-arena-900 dark:hover:bg-arena-800 dark:hover:text-arena-100"
-              aria-label="Cerrar asistente"
+              aria-label={T.cerrar}
             >
               <X size={18} />
             </button>
@@ -126,10 +123,10 @@ export function Ayudante() {
             {mensajes.length === 0 && (
               <div>
                 <p className="text-sm text-arena-700 dark:text-arena-300">
-                  Hola. Te ayudo a usar Rumbo o con dudas de tu viaje. ¿Qué necesitás?
+                  {T.saludo}
                 </p>
                 <ul className="mt-3 grid gap-2">
-                  {SUGERENCIAS.map((s) => (
+                  {T.sugerencias.map((s) => (
                     <li key={s}>
                       <button
                         type="button"
@@ -152,7 +149,7 @@ export function Ayudante() {
                       : "bg-arena-100 text-arena-900 dark:bg-arena-800 dark:text-arena-100"
                   }`}
                 >
-                  {m.content || <span className="inline-block animate-pulse text-arena-500">Escribiendo...</span>}
+                  {m.content || <span className="inline-block animate-pulse text-arena-500">{T.escribiendo}</span>}
                 </p>
               </div>
             ))}
@@ -166,7 +163,7 @@ export function Ayudante() {
             }}
           >
             <label htmlFor="pregunta-ayudante" className="sr-only">
-              Tu pregunta
+              {T.tuPregunta}
             </label>
             <textarea
               id="pregunta-ayudante"
@@ -181,14 +178,14 @@ export function Ayudante() {
                   enviar(borrador);
                 }
               }}
-              placeholder="Escribí tu pregunta"
+              placeholder={T.placeholder}
               className="max-h-32 min-h-11 flex-1 resize-none rounded-xl border border-arena-300 bg-papel px-3 py-2.5 text-base placeholder:text-arena-500 focus:border-oliva-600 focus:outline-none focus:ring-2 focus:ring-oliva-600/30 dark:border-arena-700 dark:bg-arena-950"
             />
             <button
               type="submit"
               disabled={esperando || !borrador.trim()}
               className="grid size-11 shrink-0 place-items-center rounded-xl bg-oliva-700 text-white transition hover:bg-oliva-800 active:scale-95 disabled:opacity-40 dark:bg-oliva-300 dark:text-arena-950"
-              aria-label="Enviar"
+              aria-label={T.enviar}
             >
               <PaperPlaneRight size={20} weight="fill" />
             </button>

@@ -1,3 +1,5 @@
+import type { Idioma } from "./idioma";
+
 export type Clase = "economica" | "premium" | "business";
 export type TipoHotel = "hostel" | "3" | "4" | "5" | "depto";
 export type Plan = "economico" | "equilibrado" | "premium";
@@ -104,6 +106,7 @@ export interface Actividad {
 }
 
 export interface TramoCiudad {
+  clave: string; // identificador estable de la ciudad (no cambia con el idioma)
   ciudad: string;
   dias: number;
 }
@@ -128,13 +131,14 @@ export interface DiaItinerario {
 
 export interface TripPlan {
   input: TripInput;
+  idioma: Idioma;
   generadoEn: string;
   ruta: TramoCiudad[];
   rutaSugerida: boolean; // true si el usuario puso solo el país
   vuelos: OpcionVuelo[];
   vueloElegido: string;
-  hoteles: Record<string, OpcionHotel[]>; // por ciudad
-  hotelElegido: Record<string, string>;
+  hoteles: Record<string, OpcionHotel[]>; // por clave de ciudad
+  hotelElegido: Record<string, string>; // por clave de ciudad
   actividades: Actividad[];
   dias: DiaItinerario[];
   traslados: Traslado[];

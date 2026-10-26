@@ -4,13 +4,14 @@ import { ForkKnife, Plus, Star, Sparkle, X, Umbrella, Info } from "@phosphor-ico
 import { usd } from "@/lib/dinero";
 import { formatoDia } from "@/lib/fechas";
 import type { Actividad, DiaItinerario } from "@/lib/types";
-import { IconoClima, NOMBRE_CONDICION } from "./IconoClima";
+import type { Idioma } from "@/lib/idioma";
+import { IconoClima } from "./IconoClima";
+import { useIdioma } from "./ProveedorIdioma";
 
 const ICONO_TIPO = { imperdible: Star, comida: ForkKnife, experiencia: Sparkle };
-const NOMBRE_TIPO = { imperdible: "Imperdible", comida: "Comida típica", experiencia: "Experiencia" };
 
-function formatoHoras(h: number) {
-  return h < 1 ? `${Math.round(h * 60)} min` : `${String(h).replace(".", ",")} h`;
+function formatoHoras(h: number, idioma: Idioma) {
+  return h < 1 ? `${Math.round(h * 60)} min` : `${idioma === "es" ? String(h).replace(".", ",") : h} h`;
 }
 
 interface Props {
@@ -23,14 +24,15 @@ interface Props {
 }
 
 export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuitar, onAgregar }: Props) {
+  const { idioma, t } = useIdioma();
   const { clima } = dia;
   const mojado = clima.condicion === "lluvia" || clima.condicion === "tormenta";
   return (
     <article className="rounded-2xl border border-arena-200 bg-papel p-4 shadow-sm shadow-arena-200/50 sm:p-5 dark:border-arena-800 dark:bg-arena-900 dark:shadow-none">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-oliva-700 dark:text-oliva-300">Día {numero}</p>
-          <h3 className="text-lg font-semibold tracking-tight first-letter:uppercase">{formatoDia(dia.fecha)}</h3>
+          <p className="text-sm font-medium text-oliva-700 dark:text-oliva-300">{t.dia.numero(numero)}</p>
+          <h3 className="text-lg font-semibold tracking-tight first-letter:uppercase">{formatoDia(dia.fecha, idioma)}</h3>
           <p className="text-sm text-arena-600 dark:text-arena-400">{dia.ciudad}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:text-right">
@@ -40,7 +42,7 @@ export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuita
               {clima.maxima}° <span className="text-arena-500 dark:text-arena-400">/ {clima.minima}°</span>
             </p>
             <p className="text-xs text-arena-500 dark:text-arena-400">
-              {NOMBRE_CONDICION[clima.condicion]}, lluvia {clima.probLluvia}%
+              {t.clima.resumen(t.clima[clima.condicion], clima.probLluvia)}
             </p>
           </div>
         </div>
@@ -56,7 +58,7 @@ export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuita
           {dia.consejo}
           {clima.confianza === "baja" && (
             <span className="block text-xs text-arena-500 dark:text-arena-400">
-              Pronóstico de baja confianza: falta más de 10 días. Se actualiza solo a medida que se acerca la fecha.
+              {t.clima.bajaConfianza}
             </span>
           )}
         </span>
@@ -70,18 +72,18 @@ export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuita
           return (
             <li key={a.id} className="flex items-center gap-3 py-2.5">
               <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-oliva-50 text-oliva-700 dark:bg-oliva-950/60 dark:text-oliva-300">
-                <Icono size={18} weight="duotone" aria-label={NOMBRE_TIPO[a.tipo]} />
+                <Icono size={18} weight="duotone" aria-label={t.dia.tipos[a.tipo]} />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium">{a.nombre}</p>
                 <p className="text-xs text-arena-500 dark:text-arena-400">
-                  {formatoHoras(a.horas)}, {a.aireLibre ? "al aire libre" : "bajo techo"}
+                  {formatoHoras(a.horas, idioma)}, {a.aireLibre ? t.dia.aireLibre : t.dia.bajoTecho}
                 </p>
               </div>
               <p className="shrink-0 text-right text-sm tabular-nums">
-                {a.precioPorPersona === 0 ? "Gratis" : usd(a.precioPorPersona)}
+                {a.precioPorPersona === 0 ? t.dia.gratis : usd(a.precioPorPersona, idioma)}
                 {a.precioPorPersona > 0 && (
-                  <span className="block text-xs text-arena-500 dark:text-arena-400">por persona</span>
+                  <span className="block text-xs text-arena-500 dark:text-arena-400">{t.dia.porPersona}</span>
                 )}
               </p>
               {onQuitar && (
@@ -89,7 +91,7 @@ export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuita
                   type="button"
                   onClick={() => onQuitar(a.id)}
                   className="grid size-8 shrink-0 place-items-center rounded-xl text-arena-500 transition hover:bg-arena-100 hover:text-arena-900 active:scale-95 dark:hover:bg-arena-800 dark:hover:text-arena-100"
-                  aria-label={`Sacar ${a.nombre}`}
+                  aria-label={t.dia.sacar(a.nombre)}
                 >
                   <X size={16} />
                 </button>
@@ -98,7 +100,7 @@ export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuita
           );
         })}
         {actividades.length === 0 && (
-          <li className="py-3 text-sm text-arena-500 dark:text-arena-400">Día libre. Podés sumar una actividad sugerida.</li>
+          <li className="py-3 text-sm text-arena-500 dark:text-arena-400">{t.dia.libre}</li>
         )}
       </ul>
 
@@ -106,7 +108,7 @@ export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuita
         <details className="group mt-2">
           <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-xl px-2 py-1.5 text-sm font-medium text-oliva-700 hover:bg-oliva-50 dark:text-oliva-300 dark:hover:bg-oliva-950/50">
             <Plus size={16} weight="bold" aria-hidden />
-            Sumar actividad
+            {t.dia.sumar}
           </summary>
           <ul className="mt-2 grid gap-2 sm:grid-cols-2">
             {sugerencias.map((a) => (
@@ -119,11 +121,11 @@ export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuita
                   <span className="min-w-0">
                     <span className="block font-medium">{a.nombre}</span>
                     <span className="text-xs text-arena-500 dark:text-arena-400">
-                      {formatoHoras(a.horas)}, {a.aireLibre ? "al aire libre" : "bajo techo"}
+                      {formatoHoras(a.horas, idioma)}, {a.aireLibre ? t.dia.aireLibre : t.dia.bajoTecho}
                     </span>
                   </span>
                   <span className="shrink-0 text-xs tabular-nums">
-                    {a.precioPorPersona === 0 ? "Gratis" : usd(a.precioPorPersona)}
+                    {a.precioPorPersona === 0 ? t.dia.gratis : usd(a.precioPorPersona, idioma)}
                   </span>
                 </button>
               </li>
