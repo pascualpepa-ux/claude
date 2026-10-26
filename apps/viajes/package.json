@@ -12,6 +12,7 @@
     "vista-previa": "node vista-previa/construir.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
     "@phosphor-icons/react": "^2.1.10",
     "geist": "^1.5.1",
     "next": "^15.5.28",

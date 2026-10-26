@@ -3,6 +3,8 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Encabezado } from "@/components/Encabezado";
 import { Pie } from "@/components/Pie";
+import { Ayudante } from "@/components/Ayudante";
+import { ContadorVisitas } from "@/components/ContadorVisitas";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,6 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Encabezado />
         <div className="flex-1">{children}</div>
         <Pie />
+        <Ayudante />
+        {process.env.GOATCOUNTER_CODE && <ContadorVisitas codigo={process.env.GOATCOUNTER_CODE} />}
       </body>
     </html>
   );
