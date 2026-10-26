@@ -1,0 +1,7 @@
+/*
+!/apps
+/apps/*
+!/apps/viajes
+/apps/viajes/node_modules
+/apps/viajes/.next
+/apps/viajes/vista-previa/dist

@@ -133,4 +133,5 @@ El usuario delegó las decisiones ("hacé lo mejor para que sea profesional y qu
 | Fecha | Cambio |
 |---|---|
 | 2026-10-26 | Propuesta inicial: investigación de APIs, stack y plan por fases |
+| 2026-10-26 | Publicada en https://rumbotraveling.com (Vercel, proyecto `rumbo`, carpeta `apps/viajes`). Dominio comprado por el usuario, vence 26-oct-2027 con renovación automática |
 | 2026-10-26 | Fase 1 completa: portada, asistente de 7 pasos, itinerario con datos de ejemplo, 10 tests |
