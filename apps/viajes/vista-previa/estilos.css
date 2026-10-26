@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@source "../app";
+@source "../components";
+
+/* Modo oscuro: sigue al sistema salvo que el visor fuerce un tema con data-theme. */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+}
+
+@theme {
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --fondo: var(--color-zinc-50);
+  --texto: var(--color-zinc-900);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fondo: var(--color-zinc-950);
+    --texto: var(--color-zinc-100);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fondo: var(--color-zinc-950);
+  --texto: var(--color-zinc-100);
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    scroll-padding-top: 5rem;
+  }
+  body {
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 40;
+    background: var(--fondo);
+  }
+  header.sticky {
+    top: env(safe-area-inset-top, 0px);
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-teal-600 dark:outline-teal-400;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+  .aparecer {
+    animation: aparecer 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

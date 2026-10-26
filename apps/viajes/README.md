@@ -19,6 +19,7 @@ npm run dev        # http://localhost:3000
 npm test           # pruebas de la lógica (ruta, clima, presupuesto)
 npm run typecheck
 npm run build
+npm run vista-previa  # arma vista-previa/dist/rumbo.html (una sola página para compartir)
 ```
 
 Qué mirar:
