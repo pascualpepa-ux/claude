@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Marca } from "./Logo";
+import { Ayudante } from "./Ayudante";
 
 export function Encabezado() {
   return (
@@ -11,12 +12,15 @@ export function Encabezado() {
             Rumbo <span className="hidden sm:inline">Traveling</span>
           </span>
         </Link>
+        <div className="flex items-center gap-2">
+        <Ayudante />
         <Link
           href="/planificar"
           className="shrink-0 rounded-xl bg-oliva-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-oliva-800 active:scale-[0.98] dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200"
         >
           Planificar viaje
         </Link>
+        </div>
       </nav>
     </header>
   );

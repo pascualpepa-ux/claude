@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { ChatCircleDots, PaperPlaneRight, X } from "@phosphor-icons/react/dist/ssr";
 import { CLAVE_VIAJE } from "@/lib/almacen";
@@ -83,24 +84,24 @@ export function Ayudante() {
     }
   };
 
-  // En la página del viaje, en celular, hay una barra fija abajo con el total.
-  const elevar = ruta === "/viaje" ? "bottom-24 lg:bottom-6" : "bottom-6";
 
   return (
     <>
-      {!abierto && (
-        <button
+      {/* El botón vive en el encabezado, al lado de "Planificar viaje", para no tapar contenido. */}
+      <button
           type="button"
           onClick={() => setAbierto(true)}
+          aria-expanded={abierto}
           aria-label="¿Necesitás ayuda?"
-          className={`fixed right-4 z-40 inline-flex size-14 items-center justify-center gap-2 rounded-full bg-oliva-700 font-medium sm:size-auto sm:px-4 sm:py-3 text-white shadow-lg shadow-oliva-900/25 transition hover:bg-oliva-800 active:scale-[0.97] sm:right-6 dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200 ${elevar}`}
+          className="inline-flex size-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-arena-300 text-sm font-medium text-oliva-700 transition hover:bg-arena-100 active:scale-[0.98] sm:size-auto sm:px-3 sm:py-2 dark:border-arena-700 dark:text-oliva-300 dark:hover:bg-arena-800"
         >
-          <ChatCircleDots size={24} weight="fill" aria-hidden />
+          <ChatCircleDots size={20} weight="fill" aria-hidden />
           <span className="hidden sm:inline">¿Necesitás ayuda?</span>
         </button>
-      )}
 
-      {abierto && (
+      {abierto &&
+        // Se monta en <body>: el encabezado tiene backdrop-blur y atraparía un elemento fixed.
+        createPortal(
         <section
           role="dialog"
           aria-label="Asistente de Rumbo"
@@ -192,8 +193,9 @@ export function Ayudante() {
               <PaperPlaneRight size={20} weight="fill" />
             </button>
           </form>
-        </section>
-      )}
+        </section>,
+          document.body,
+        )}
     </>
   );
 }
