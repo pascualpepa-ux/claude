@@ -7,7 +7,10 @@ Plan completo: `docs/plans/PLAN-app-viajes-2026-10-26/PLAN-MASTER.md` (en la ra�
 
 ## Estado
 
+Publicada en https://rumbotraveling.com (Vercel, proyecto `rumbo`).
+
 Fase 1 lista: interfaz, asistente de preguntas e itinerario con **datos de ejemplo**.
+También: página `/admin` con visitas de GoatCounter y asistente con IA (Claude).
 Las APIs reales se conectan en la fase 3.
 
 ## Cómo probarla
@@ -19,7 +22,6 @@ npm run dev        # http://localhost:3000
 npm test           # pruebas de la lógica (ruta, clima, presupuesto)
 npm run typecheck
 npm run build
-npm run vista-previa  # arma vista-previa/dist/rumbo.html (una sola página para compartir)
 ```
 
 Qué mirar:

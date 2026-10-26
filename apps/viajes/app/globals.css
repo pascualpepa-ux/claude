@@ -1,14 +1,42 @@
 @import "tailwindcss";
 
 /*
- * Sistema visual de Rumbo
- * - Neutros: zinc. Un solo acento: teal.
+ * Sistema visual de Rumbo Traveling, tomado del logo oficial
+ * - Acento: verde militar ("oliva"); oliva-700 es exactamente el verde del logo.
+ * - Neutros: crema cálidos ("arena"); arena-100 es exactamente el crema del logo.
+ * - "papel": superficie de tarjetas, un crema casi blanco.
+ * - Tipografía: Google Sans Flex, la misma familia del logo.
  * - Radios: botones y campos 12px (rounded-xl), tarjetas 16px (rounded-2xl), etiquetas pill.
  * - Tema: sigue la preferencia del sistema (claro u oscuro).
  */
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: var(--font-marca), ui-sans-serif, system-ui, sans-serif;
+
+  --color-oliva-50: #f5f6ee;
+  --color-oliva-100: #e9ebda;
+  --color-oliva-200: #d4d8b8;
+  --color-oliva-300: #b8be8e;
+  --color-oliva-400: #9ca36b;
+  --color-oliva-500: #7f8650;
+  --color-oliva-600: #676d43;
+  --color-oliva-700: #575b40;
+  --color-oliva-800: #464a34;
+  --color-oliva-900: #3a3d2c;
+  --color-oliva-950: #1f2117;
+
+  --color-arena-50: #faf7ef;
+  --color-arena-100: #f2ecdc;
+  --color-arena-200: #e6dec8;
+  --color-arena-300: #d3c8ac;
+  --color-arena-400: #ab9f84;
+  --color-arena-500: #736b58;
+  --color-arena-600: #5e5747;
+  --color-arena-700: #474236;
+  --color-arena-800: #2e2b23;
+  --color-arena-900: #211f19;
+  --color-arena-950: #16150f;
+
+  --color-papel: #fffdf7;
 }
 
 @layer base {
@@ -17,10 +45,10 @@
     scroll-padding-top: 5rem;
   }
   body {
-    @apply bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
+    @apply bg-arena-50 text-arena-900 antialiased dark:bg-arena-950 dark:text-arena-100;
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-teal-600 dark:outline-teal-400;
+    @apply outline-2 outline-offset-2 outline-oliva-600 dark:outline-oliva-300;
   }
 }
 

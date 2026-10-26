@@ -7,7 +7,7 @@ import { visitasPorDia } from "@/lib/goatcounter";
 import { FormularioAdmin } from "./FormularioAdmin";
 import { BotonSalir } from "./BotonSalir";
 
-export const metadata: Metadata = { title: "Administración · Rumbo", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Administración · Rumbo Traveling", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function Admin() {
@@ -15,7 +15,7 @@ export default async function Admin() {
     return (
       <div className="mx-auto max-w-md px-4 py-20">
         <h1 className="text-2xl font-semibold tracking-tight">Administración</h1>
-        <p className="mt-2 text-zinc-600 dark:text-zinc-400">El acceso de administrador todavía no está configurado.</p>
+        <p className="mt-2 text-arena-600 dark:text-arena-400">El acceso de administrador todavía no está configurado.</p>
       </div>
     );
   }
@@ -32,14 +32,14 @@ export default async function Admin() {
         <BotonSalir />
       </header>
 
-      <section aria-labelledby="titulo-visitas" className="mt-8 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+      <section aria-labelledby="titulo-visitas" className="mt-8 rounded-2xl border border-arena-200 bg-papel p-5 dark:border-arena-800 dark:bg-arena-900">
         <h2 id="titulo-visitas" className="text-lg font-semibold">
           Visitantes por día
         </h2>
 
         {visitas.estado === "sin_configurar" && (
-          <div className="mt-4 flex gap-3 rounded-xl bg-zinc-50 p-4 text-sm text-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300">
-            <ChartBar size={24} weight="duotone" className="shrink-0 text-teal-700 dark:text-teal-400" aria-hidden />
+          <div className="mt-4 flex gap-3 rounded-xl bg-arena-50 p-4 text-sm text-arena-700 dark:bg-arena-800/60 dark:text-arena-300">
+            <ChartBar size={24} weight="duotone" className="shrink-0 text-oliva-700 dark:text-oliva-300" aria-hidden />
             <p>
               Falta conectar GoatCounter. Cuando estén cargados el código del sitio y la clave de API, acá vas a ver cuánta
               gente entra a la web cada día.
@@ -62,7 +62,7 @@ export default async function Admin() {
                 ["Promedio por día", Math.round(visitas.total / visitas.dias.length)],
               ].map(([etiqueta, valor]) => (
                 <div key={etiqueta}>
-                  <dt className="text-xs text-zinc-600 sm:text-sm dark:text-zinc-400">{etiqueta}</dt>
+                  <dt className="text-xs text-arena-600 sm:text-sm dark:text-arena-400">{etiqueta}</dt>
                   <dd className="text-2xl font-semibold tabular-nums">{valor}</dd>
                 </div>
               ))}
@@ -74,7 +74,7 @@ export default async function Admin() {
               href={visitas.panel}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline dark:text-teal-400"
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-oliva-700 hover:underline dark:text-oliva-300"
             >
               Ver más detalles en GoatCounter
               <ArrowSquareOut size={16} aria-hidden />

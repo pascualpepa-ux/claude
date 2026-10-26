@@ -39,18 +39,18 @@ function AgentesTrabajando({ listos }: { listos: number }) {
   return (
     <div className="mx-auto max-w-md px-4 py-20" role="status" aria-live="polite">
       <h1 className="text-2xl font-semibold tracking-tight">Armando tu viaje</h1>
-      <p className="mt-2 text-zinc-600 dark:text-zinc-400">Los agentes buscan y verifican cada dato.</p>
+      <p className="mt-2 text-arena-600 dark:text-arena-400">Los agentes buscan y verifican cada dato.</p>
       <ul className="mt-8 grid gap-3">
         {AGENTES.map((nombre, i) => (
           <li key={nombre} className="flex items-center gap-3 text-sm">
             {i < listos ? (
-              <CheckCircle size={20} weight="fill" className="text-teal-700 dark:text-teal-400" aria-hidden />
+              <CheckCircle size={20} weight="fill" className="text-oliva-700 dark:text-oliva-300" aria-hidden />
             ) : i === listos ? (
-              <CircleNotch size={20} className="animate-spin text-zinc-500 motion-reduce:animate-none" aria-hidden />
+              <CircleNotch size={20} className="animate-spin text-arena-500 motion-reduce:animate-none" aria-hidden />
             ) : (
-              <span className="size-5 rounded-full border border-zinc-300 dark:border-zinc-700" aria-hidden />
+              <span className="size-5 rounded-full border border-arena-300 dark:border-arena-700" aria-hidden />
             )}
-            <span className={i <= listos ? "" : "text-zinc-500 dark:text-zinc-400"}>{nombre}</span>
+            <span className={i <= listos ? "" : "text-arena-500 dark:text-arena-400"}>{nombre}</span>
           </li>
         ))}
       </ul>
@@ -61,14 +61,14 @@ function AgentesTrabajando({ listos }: { listos: number }) {
 function SinViaje() {
   return (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
-      <MapTrifold size={48} weight="duotone" className="mx-auto text-teal-700 dark:text-teal-400" aria-hidden />
+      <MapTrifold size={48} weight="duotone" className="mx-auto text-oliva-700 dark:text-oliva-300" aria-hidden />
       <h1 className="mt-4 text-2xl font-semibold tracking-tight">Todavía no armaste un viaje</h1>
-      <p className="mt-2 text-zinc-600 dark:text-zinc-400">Contestá unas preguntas y te mostramos el itinerario con todos los precios.</p>
+      <p className="mt-2 text-arena-600 dark:text-arena-400">Contestá unas preguntas y te mostramos el itinerario con todos los precios.</p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <Link href="/planificar" className="rounded-xl bg-teal-700 px-5 py-3 font-medium text-white transition hover:bg-teal-800 active:scale-[0.98] dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400">
+        <Link href="/planificar" className="rounded-xl bg-oliva-700 px-5 py-3 font-medium text-white transition hover:bg-oliva-800 active:scale-[0.98] dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200">
           Planificar mi viaje
         </Link>
-        <Link href="/viaje?ejemplo=1" className="rounded-xl border border-zinc-300 bg-white px-5 py-3 font-medium transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800">
+        <Link href="/viaje?ejemplo=1" className="rounded-xl border border-arena-300 bg-papel px-5 py-3 font-medium transition hover:bg-arena-100 dark:border-arena-700 dark:bg-arena-900 dark:hover:bg-arena-800">
           Ver un ejemplo
         </Link>
       </div>
@@ -136,7 +136,7 @@ export function VistaViaje() {
       <main className="mx-auto grid max-w-6xl gap-8 px-4 pt-8 pb-28 lg:grid-cols-[minmax(0,1fr)_340px] lg:pb-16">
         <div className="min-w-0">
           <header className="aparecer">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-arena-600 dark:text-arena-400">
               {formatoCorto(input.fechaIda)} al {formatoCorto(input.fechaVuelta)}, plan {NOMBRE_PLAN[input.plan].toLowerCase()}
             </p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight text-balance md:text-4xl">
@@ -144,7 +144,7 @@ export function VistaViaje() {
             </h1>
             <ul className="mt-3 flex flex-wrap gap-2" aria-label="Viajeros">
               {input.viajeros.map((v) => (
-                <li key={v} className="rounded-full bg-zinc-200/70 px-3 py-1 text-sm dark:bg-zinc-800">
+                <li key={v} className="rounded-full bg-arena-200/70 px-3 py-1 text-sm dark:bg-arena-800">
                   {v}
                 </li>
               ))}
@@ -156,7 +156,7 @@ export function VistaViaje() {
             Estás viendo datos de ejemplo. Los precios, el clima y la disponibilidad reales se conectan en la próxima etapa.
           </p>
 
-          <nav aria-label="Secciones" className="sticky top-16 z-20 -mx-4 mt-6 overflow-x-auto bg-zinc-50/90 px-4 py-2 backdrop-blur dark:bg-zinc-950/90">
+          <nav aria-label="Secciones" className="sticky top-16 z-20 -mx-4 mt-6 overflow-x-auto bg-arena-50/90 px-4 py-2 backdrop-blur dark:bg-arena-950/90">
             <ul className="flex gap-1.5 text-sm font-medium whitespace-nowrap sm:gap-2">
               {[
                 ["#itinerario", "Itinerario"],
@@ -165,7 +165,7 @@ export function VistaViaje() {
                 ["#presupuesto", "Presupuesto"],
               ].map(([href, texto]) => (
                 <li key={href}>
-                  <a href={href} className="block rounded-full border border-zinc-300 px-2.5 py-1 sm:px-3 sm:py-1.5 transition hover:border-teal-700 hover:text-teal-800 dark:border-zinc-700 dark:hover:border-teal-400 dark:hover:text-teal-300">
+                  <a href={href} className="block rounded-full border border-arena-300 px-2.5 py-1 sm:px-3 sm:py-1.5 transition hover:border-oliva-700 hover:text-oliva-800 dark:border-arena-700 dark:hover:border-oliva-300 dark:hover:text-oliva-300">
                     {texto}
                   </a>
                 </li>
@@ -178,16 +178,16 @@ export function VistaViaje() {
               <h2 id="titulo-ruta" className="text-xl font-semibold tracking-tight">
                 Ruta sugerida
               </h2>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="mt-1 text-sm text-arena-600 dark:text-arena-400">
                 Como pusiste solo el país, te proponemos estas ciudades según los días que tenés.
               </p>
               <ol className="mt-4 flex flex-wrap items-center gap-2">
                 {plan.ruta.map((r, i) => (
                   <li key={r.ciudad} className="flex items-center gap-2">
-                    {i > 0 && <Train size={18} className="text-zinc-400" aria-label="en tren a" />}
-                    <span className="rounded-xl border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+                    {i > 0 && <Train size={18} className="text-arena-400" aria-label="en tren a" />}
+                    <span className="rounded-xl border border-arena-200 bg-papel px-3 py-2 dark:border-arena-800 dark:bg-arena-900">
                       <span className="font-medium">{r.ciudad}</span>{" "}
-                      <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                      <span className="text-sm text-arena-600 dark:text-arena-400">
                         {r.dias} {r.dias === 1 ? "noche" : "noches"}
                       </span>
                     </span>
@@ -195,7 +195,7 @@ export function VistaViaje() {
                 ))}
               </ol>
               {plan.traslados.map((t) => (
-                <p key={t.fecha} className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                <p key={t.fecha} className="mt-2 text-sm text-arena-600 dark:text-arena-400">
                   {t.medio} de {t.desde} a {t.hasta} el {formatoCorto(t.fecha)}: aprox. {usd(t.precioPorPersona)} por persona.
                 </p>
               ))}
@@ -206,7 +206,7 @@ export function VistaViaje() {
             <h2 id="titulo-itinerario" className="text-xl font-semibold tracking-tight">
               Itinerario día por día
             </h2>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1 text-sm text-arena-600 dark:text-arena-400">
               Las actividades se acomodan según el clima. Podés sacarlas o sumar otras.
             </p>
             <div className="mt-4 grid gap-4">
@@ -228,7 +228,7 @@ export function VistaViaje() {
             <h2 id="titulo-vuelos" className="text-xl font-semibold tracking-tight">
               Vuelos
             </h2>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1 text-sm text-arena-600 dark:text-arena-400">
               {plan.ruta.length > 1
                 ? `Llegás a ${plan.ruta[0].ciudad} y volvés desde ${plan.ruta.at(-1)!.ciudad}, así no repetís trayectos.`
                 : "Elegí la opción que más te convenga. El total se actualiza solo."}
@@ -252,7 +252,7 @@ export function VistaViaje() {
             </h2>
             {plan.ruta.map((r) => (
               <div key={r.ciudad} className="mt-4">
-                <h3 className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                <h3 className="text-sm font-medium text-arena-600 dark:text-arena-400">
                   {r.ciudad}, {r.dias} {r.dias === 1 ? "noche" : "noches"}
                 </h3>
                 <div className="mt-3 grid gap-4">
@@ -276,23 +276,23 @@ export function VistaViaje() {
           <ResumenPresupuesto resumen={resumen} />
           <Link
             href="/planificar"
-            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 px-4 py-2.5 text-sm font-medium transition hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-arena-300 px-4 py-2.5 text-sm font-medium transition hover:bg-arena-100 dark:border-arena-700 dark:hover:bg-arena-800"
           >
             Cambiar respuestas
           </Link>
         </aside>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur lg:hidden dark:border-zinc-800 dark:bg-zinc-900/95">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-arena-200 bg-papel/95 px-4 py-3 backdrop-blur lg:hidden dark:border-arena-800 dark:bg-arena-900/95">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
           <div>
             <p className="text-lg font-semibold tabular-nums">{usd(resumen.total)}</p>
-            <p className={`text-xs ${resumen.rango.estado === "excedido" ? "text-red-700 dark:text-red-400" : "text-zinc-600 dark:text-zinc-400"}`}>
+            <p className={`text-xs ${resumen.rango.estado === "excedido" ? "text-red-700 dark:text-red-400" : "text-arena-600 dark:text-arena-400"}`}>
               {usd(resumen.porPersona)} por persona
               {resumen.rango.estado === "excedido" && ", fuera de presupuesto"}
             </p>
           </div>
-          <a href="#presupuesto" className="inline-flex items-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-medium text-white active:scale-[0.98] dark:bg-teal-500 dark:text-zinc-950">
+          <a href="#presupuesto" className="inline-flex items-center gap-1.5 rounded-xl bg-oliva-700 px-4 py-2.5 text-sm font-medium text-white active:scale-[0.98] dark:bg-oliva-300 dark:text-arena-950">
             Ver detalle
             <ArrowRight size={16} weight="bold" aria-hidden />
           </a>

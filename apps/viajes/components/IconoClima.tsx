@@ -17,7 +17,7 @@ export function IconoClima({ condicion, size = 28 }: { condicion: Condicion; siz
     condicion === "soleado" || condicion === "parcial"
       ? "text-amber-500 dark:text-amber-400"
       : condicion === "tormenta"
-        ? "text-zinc-700 dark:text-zinc-300"
+        ? "text-arena-700 dark:text-arena-300"
         : "text-sky-600 dark:text-sky-400";
   return <Icono size={size} weight="duotone" className={color} aria-label={NOMBRE_CONDICION[condicion]} />;
 }

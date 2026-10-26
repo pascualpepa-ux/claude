@@ -60,7 +60,7 @@ export function GraficoVisitas({ dias }: { dias: VisitasDia[] }) {
                 x2={ANCHO - MARGEN.derecha}
                 y1={y(m)}
                 y2={y(m)}
-                className="stroke-zinc-200 dark:stroke-zinc-800"
+                className="stroke-arena-200 dark:stroke-arena-800"
                 strokeWidth={1}
               />
               <text
@@ -68,7 +68,7 @@ export function GraficoVisitas({ dias }: { dias: VisitasDia[] }) {
                 y={y(m)}
                 dy="0.32em"
                 textAnchor="end"
-                className="fill-zinc-500 text-[11px] tabular-nums dark:fill-zinc-400"
+                className="fill-arena-500 text-[11px] tabular-nums dark:fill-arena-400"
               >
                 {Number.isInteger(m) ? m : m.toFixed(1)}
               </text>
@@ -85,7 +85,7 @@ export function GraficoVisitas({ dias }: { dias: VisitasDia[] }) {
                     d={barra(x, y(d.visitas), anchoBarra, h)}
                     className={`transition-opacity ${
                       activo === null || activo === i ? "opacity-100" : "opacity-40"
-                    } fill-teal-600 dark:fill-teal-400`}
+                    } fill-oliva-600 dark:fill-oliva-300`}
                   />
                 )}
                 {/* Zona de toque más grande que la barra */}
@@ -103,7 +103,7 @@ export function GraficoVisitas({ dias }: { dias: VisitasDia[] }) {
                     x={MARGEN.izquierda + i * paso + paso / 2}
                     y={ALTO - 8}
                     textAnchor="middle"
-                    className="fill-zinc-500 text-[11px] dark:fill-zinc-400"
+                    className="fill-arena-500 text-[11px] dark:fill-arena-400"
                   >
                     {formatoCorto(d.dia)}
                   </text>
@@ -115,14 +115,14 @@ export function GraficoVisitas({ dias }: { dias: VisitasDia[] }) {
 
         {sel && activo !== null && (
           <div
-            className="pointer-events-none absolute top-0 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm shadow-md dark:border-zinc-700 dark:bg-zinc-900"
+            className="pointer-events-none absolute top-0 rounded-xl border border-arena-200 bg-papel px-3 py-2 text-sm shadow-md dark:border-arena-700 dark:bg-arena-900"
             style={{
               left: `${((MARGEN.izquierda + activo * paso + paso / 2) / ANCHO) * 100}%`,
               // Cerca de los bordes la etiqueta se corre hacia adentro para no cortarse.
               transform: `translateX(${activo < dias.length * 0.2 ? "-15%" : activo > dias.length * 0.8 ? "-85%" : "-50%"})`,
             }}
           >
-            <p className="whitespace-nowrap text-zinc-600 dark:text-zinc-400">{formatoCorto(sel.dia)}</p>
+            <p className="whitespace-nowrap text-arena-600 dark:text-arena-400">{formatoCorto(sel.dia)}</p>
             <p className="whitespace-nowrap font-semibold tabular-nums">
               {sel.visitas} {sel.visitas === 1 ? "visitante" : "visitantes"}
             </p>
@@ -131,18 +131,18 @@ export function GraficoVisitas({ dias }: { dias: VisitasDia[] }) {
       </div>
 
       <details className="mt-3 text-sm">
-        <summary className="cursor-pointer text-zinc-600 dark:text-zinc-400">Ver como tabla</summary>
+        <summary className="cursor-pointer text-arena-600 dark:text-arena-400">Ver como tabla</summary>
         <div className="mt-2 max-h-64 overflow-y-auto">
           <table className="w-full tabular-nums">
             <thead>
-              <tr className="text-left text-zinc-500 dark:text-zinc-400">
+              <tr className="text-left text-arena-500 dark:text-arena-400">
                 <th className="py-1 font-medium">Día</th>
                 <th className="py-1 text-right font-medium">Visitantes</th>
               </tr>
             </thead>
             <tbody>
               {[...dias].reverse().map((d) => (
-                <tr key={d.dia} className="border-t border-zinc-100 dark:border-zinc-800">
+                <tr key={d.dia} className="border-t border-arena-100 dark:border-arena-800">
                   <td className="py-1">{formatoCorto(d.dia)}</td>
                   <td className="py-1 text-right">{d.visitas}</td>
                 </tr>

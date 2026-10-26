@@ -12,9 +12,9 @@ export function FormularioAdmin() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-20">
-      <LockSimple size={36} weight="duotone" className="text-teal-700 dark:text-teal-400" aria-hidden />
+      <LockSimple size={36} weight="duotone" className="text-oliva-700 dark:text-oliva-300" aria-hidden />
       <h1 className="mt-4 text-2xl font-semibold tracking-tight">Administración</h1>
-      <p className="mt-1 text-zinc-600 dark:text-zinc-400">Ingresá la contraseña para ver las estadísticas.</p>
+      <p className="mt-1 text-arena-600 dark:text-arena-400">Ingresá la contraseña para ver las estadísticas.</p>
       <form
         className="mt-8 grid gap-4"
         onSubmit={async (e) => {
@@ -53,8 +53,8 @@ export function FormularioAdmin() {
             onChange={(e) => setContrasena(e.target.value)}
             aria-invalid={Boolean(error)}
             aria-describedby={error ? "error-contrasena" : undefined}
-            className={`w-full rounded-xl border bg-white px-3.5 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-teal-600/40 dark:bg-zinc-900 ${
-              error ? "border-red-500 dark:border-red-400" : "border-zinc-300 dark:border-zinc-700"
+            className={`w-full rounded-xl border bg-papel px-3.5 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-oliva-600/40 dark:bg-arena-900 ${
+              error ? "border-red-500 dark:border-red-400" : "border-arena-300 dark:border-arena-700"
             }`}
           />
           {error && (
@@ -66,7 +66,7 @@ export function FormularioAdmin() {
         <button
           type="submit"
           disabled={enviando || !contrasena}
-          className="rounded-xl bg-teal-700 px-5 py-3 font-medium text-white transition hover:bg-teal-800 active:scale-[0.98] disabled:opacity-50 dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400"
+          className="rounded-xl bg-oliva-700 px-5 py-3 font-medium text-white transition hover:bg-oliva-800 active:scale-[0.98] disabled:opacity-50 dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200"
         >
           {enviando ? "Entrando..." : "Entrar"}
         </button>

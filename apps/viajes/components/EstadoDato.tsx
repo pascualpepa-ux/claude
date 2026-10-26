@@ -5,7 +5,7 @@ import type { Origen } from "@/lib/types";
 const ESTILOS = {
   verificado: {
     texto: "Verificado",
-    clase: "bg-teal-50 text-teal-800 ring-teal-200 dark:bg-teal-950/60 dark:text-teal-300 dark:ring-teal-900",
+    clase: "bg-oliva-50 text-oliva-800 ring-oliva-200 dark:bg-oliva-950/60 dark:text-oliva-300 dark:ring-oliva-900",
     Icono: CheckCircle,
   },
   estimado: {
@@ -15,7 +15,7 @@ const ESTILOS = {
   },
   no_verificado: {
     texto: "No verificado",
-    clase: "bg-zinc-100 text-zinc-700 ring-zinc-300 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-700",
+    clase: "bg-arena-100 text-arena-700 ring-arena-300 dark:bg-arena-800 dark:text-arena-300 dark:ring-arena-700",
     Icono: Question,
   },
 } as const;
@@ -30,7 +30,7 @@ export function EstadoDato({ origen, textoEstimado }: { origen: Origen; textoEst
         <e.Icono size={14} weight="bold" aria-hidden />
         {texto}
       </span>
-      <span className="text-zinc-500 dark:text-zinc-400">
+      <span className="text-arena-500 dark:text-arena-400">
         {origen.fuente}, consultado el {formatoConsulta(origen.consultadoEn)}
       </span>
     </span>

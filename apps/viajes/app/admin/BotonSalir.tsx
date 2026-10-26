@@ -11,7 +11,7 @@ export function BotonSalir() {
         await fetch("/api/admin/salir", { method: "POST" }).catch(() => {});
         router.refresh();
       }}
-      className="rounded-xl border border-zinc-300 px-4 py-2 text-sm font-medium transition hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+      className="rounded-xl border border-arena-300 px-4 py-2 text-sm font-medium transition hover:bg-arena-100 dark:border-arena-700 dark:hover:bg-arena-800"
     >
       Cerrar sesión
     </button>

@@ -103,7 +103,7 @@ function aPedido(b: Borrador): TripInput {
 /* ---------- Piezas de formulario ---------- */
 
 const claseCampo =
-  "w-full rounded-xl border bg-white px-3.5 py-2.5 text-base text-zinc-900 placeholder:text-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-teal-600/40 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:ring-teal-400/40";
+  "w-full rounded-xl border bg-papel px-3.5 py-2.5 text-base text-arena-900 placeholder:text-arena-500 transition focus:outline-none focus:ring-2 focus:ring-oliva-600/40 dark:bg-arena-900 dark:text-arena-100 dark:placeholder:text-arena-500 dark:focus:ring-oliva-300/40";
 
 function Campo({
   etiqueta,
@@ -127,7 +127,7 @@ function Campo({
         id,
         "aria-invalid": Boolean(error),
         "aria-describedby": descripcion,
-        className: `${claseCampo} ${error ? "border-red-500 dark:border-red-400" : "border-zinc-300 focus:border-teal-600 dark:border-zinc-700 dark:focus:border-teal-400"}`,
+        className: `${claseCampo} ${error ? "border-red-500 dark:border-red-400" : "border-arena-300 focus:border-oliva-600 dark:border-arena-700 dark:focus:border-oliva-300"}`,
       })}
       {error ? (
         <p id={`${id}-error`} className="text-sm text-red-700 dark:text-red-400">
@@ -135,7 +135,7 @@ function Campo({
         </p>
       ) : (
         ayuda && (
-          <p id={`${id}-ayuda`} className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p id={`${id}-ayuda`} className="text-sm text-arena-600 dark:text-arena-400">
             {ayuda}
           </p>
         )
@@ -166,10 +166,10 @@ function Opciones<T extends string>({
           return (
             <label
               key={o.valor}
-              className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-600/40 ${
+              className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-oliva-600/40 ${
                 activo
-                  ? "border-teal-700 bg-teal-50 dark:border-teal-400 dark:bg-teal-950/40"
-                  : "border-zinc-300 bg-white hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-500"
+                  ? "border-oliva-700 bg-oliva-50 dark:border-oliva-300 dark:bg-oliva-950/40"
+                  : "border-arena-300 bg-papel hover:border-arena-400 dark:border-arena-700 dark:bg-arena-900 dark:hover:border-arena-500"
               }`}
             >
               <input
@@ -184,13 +184,13 @@ function Opciones<T extends string>({
                 <o.Icono
                   size={22}
                   weight="duotone"
-                  className={activo ? "text-teal-700 dark:text-teal-400" : "text-zinc-500"}
+                  className={activo ? "text-oliva-700 dark:text-oliva-300" : "text-arena-500"}
                   aria-hidden
                 />
               )}
               <span>
                 <span className="block font-medium">{o.titulo}</span>
-                {o.detalle && <span className="block text-sm text-zinc-600 dark:text-zinc-400">{o.detalle}</span>}
+                {o.detalle && <span className="block text-sm text-arena-600 dark:text-arena-400">{o.detalle}</span>}
               </span>
             </label>
           );
@@ -252,14 +252,14 @@ export function Asistente() {
   return (
     <div className="mx-auto max-w-2xl px-4 pt-8 pb-16 md:pt-14">
       <div className="mb-8">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="text-sm text-arena-600 dark:text-arena-400">
           Paso {paso + 1} de {PASOS.length}
         </p>
         <ol className="mt-3 grid grid-cols-7 gap-1.5" aria-label="Progreso">
           {PASOS.map((nombre, i) => (
             <li
               key={nombre}
-              className={`h-1.5 rounded-full transition-colors ${i <= paso ? "bg-teal-700 dark:bg-teal-400" : "bg-zinc-200 dark:bg-zinc-800"}`}
+              className={`h-1.5 rounded-full transition-colors ${i <= paso ? "bg-oliva-700 dark:bg-oliva-400" : "bg-arena-200 dark:bg-arena-800"}`}
               aria-current={i === paso ? "step" : undefined}
             >
               <span className="sr-only">{nombre}</span>
@@ -347,7 +347,7 @@ export function Asistente() {
                 </Campo>
               )}
               {noches >= 1 && !errores.fechaVuelta && !errores.cantidadDias && (
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm text-arena-600 dark:text-arena-400">
                   Son {noches + 1} días y {noches} {noches === 1 ? "noche" : "noches"}.
                 </p>
               )}
@@ -356,7 +356,7 @@ export function Asistente() {
 
           {paso === 2 && (
             <>
-              <p className="-mt-2 text-zinc-600 dark:text-zinc-400">Usamos los nombres para dividir los gastos entre todos.</p>
+              <p className="-mt-2 text-arena-600 dark:text-arena-400">Usamos los nombres para dividir los gastos entre todos.</p>
               {b.viajeros.map((v, i) => (
                 <div key={i} className="flex items-end gap-2">
                   <div className="flex-1">
@@ -381,7 +381,7 @@ export function Asistente() {
                     <button
                       type="button"
                       onClick={() => setB({ ...b, viajeros: b.viajeros.filter((_, j) => j !== i) })}
-                      className={`grid size-11 shrink-0 place-items-center rounded-xl border border-zinc-300 text-zinc-600 transition hover:bg-zinc-100 active:scale-95 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 ${errores[`viajero-${i}`] ? "mb-7" : ""}`}
+                      className={`grid size-11 shrink-0 place-items-center rounded-xl border border-arena-300 text-arena-600 transition hover:bg-arena-100 active:scale-95 dark:border-arena-700 dark:text-arena-400 dark:hover:bg-arena-800 ${errores[`viajero-${i}`] ? "mb-7" : ""}`}
                       aria-label={`Quitar viajero ${i + 1}`}
                     >
                       <Trash size={18} />
@@ -394,7 +394,7 @@ export function Asistente() {
                 <button
                   type="button"
                   onClick={() => setB({ ...b, viajeros: [...b.viajeros, ""] })}
-                  className="inline-flex w-fit items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-teal-700 transition hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-950/50"
+                  className="inline-flex w-fit items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-oliva-700 transition hover:bg-oliva-50 dark:text-oliva-300 dark:hover:bg-oliva-950/50"
                 >
                   <Plus size={16} weight="bold" aria-hidden />
                   Sumar viajero
@@ -426,7 +426,7 @@ export function Asistente() {
                   )}
                 </Campo>
               </div>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="text-sm text-arena-600 dark:text-arena-400">
                 Te mostramos opciones dentro de ese rango y te avisamos si el viaje se pasa.
               </p>
             </>
@@ -496,7 +496,7 @@ export function Asistente() {
           )}
         </div>
 
-        <div className="mt-10 flex items-center justify-between gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        <div className="mt-10 flex items-center justify-between gap-3 border-t border-arena-200 pt-6 dark:border-arena-800">
           {paso > 0 ? (
             <button
               type="button"
@@ -504,7 +504,7 @@ export function Asistente() {
                 setErrores({});
                 setPaso(paso - 1);
               }}
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-3 font-medium text-zinc-700 transition hover:bg-zinc-100 active:scale-[0.98] dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-3 font-medium text-arena-700 transition hover:bg-arena-100 active:scale-[0.98] dark:text-arena-300 dark:hover:bg-arena-800"
             >
               <ArrowLeft size={18} aria-hidden />
               Atrás
@@ -514,7 +514,7 @@ export function Asistente() {
           )}
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-5 py-3 font-medium text-white transition hover:bg-teal-800 active:scale-[0.98] dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400"
+            className="inline-flex items-center gap-2 rounded-xl bg-oliva-700 px-5 py-3 font-medium text-white transition hover:bg-oliva-800 active:scale-[0.98] dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200"
           >
             {paso === PASOS.length - 1 ? "Armar mi viaje" : "Siguiente"}
             <ArrowRight size={18} weight="bold" aria-hidden />

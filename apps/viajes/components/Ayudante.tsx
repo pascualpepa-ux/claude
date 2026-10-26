@@ -92,10 +92,11 @@ export function Ayudante() {
         <button
           type="button"
           onClick={() => setAbierto(true)}
-          className={`fixed right-4 z-40 inline-flex items-center gap-2 rounded-full bg-teal-700 px-4 py-3 font-medium text-white shadow-lg shadow-teal-900/25 transition hover:bg-teal-800 active:scale-[0.97] sm:right-6 dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400 ${elevar}`}
+          aria-label="¿Necesitás ayuda?"
+          className={`fixed right-4 z-40 inline-flex size-14 items-center justify-center gap-2 rounded-full bg-oliva-700 font-medium sm:size-auto sm:px-4 sm:py-3 text-white shadow-lg shadow-oliva-900/25 transition hover:bg-oliva-800 active:scale-[0.97] sm:right-6 dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200 ${elevar}`}
         >
-          <ChatCircleDots size={22} weight="fill" aria-hidden />
-          ¿Necesitás ayuda?
+          <ChatCircleDots size={24} weight="fill" aria-hidden />
+          <span className="hidden sm:inline">¿Necesitás ayuda?</span>
         </button>
       )}
 
@@ -103,17 +104,17 @@ export function Ayudante() {
         <section
           role="dialog"
           aria-label="Asistente de Rumbo"
-          className="aparecer fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl border border-zinc-200 bg-white shadow-2xl sm:inset-x-auto sm:right-6 sm:bottom-6 sm:h-[min(600px,80dvh)] sm:w-96 sm:rounded-2xl dark:border-zinc-800 dark:bg-zinc-900"
+          className="aparecer fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl border border-arena-200 bg-papel shadow-2xl sm:inset-x-auto sm:right-6 sm:bottom-6 sm:h-[min(600px,80dvh)] sm:w-96 sm:rounded-2xl dark:border-arena-800 dark:bg-arena-900"
         >
-          <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+          <header className="flex items-center justify-between border-b border-arena-200 px-4 py-3 dark:border-arena-800">
             <div>
               <h2 className="font-semibold">Asistente de Rumbo</h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">Respuestas generadas con IA. Pueden tener errores.</p>
+              <p className="text-xs text-arena-500 dark:text-arena-400">Respuestas generadas con IA. Pueden tener errores.</p>
             </div>
             <button
               type="button"
               onClick={() => setAbierto(false)}
-              className="grid size-9 place-items-center rounded-xl text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+              className="grid size-9 place-items-center rounded-xl text-arena-500 transition hover:bg-arena-100 hover:text-arena-900 dark:hover:bg-arena-800 dark:hover:text-arena-100"
               aria-label="Cerrar asistente"
             >
               <X size={18} />
@@ -123,7 +124,7 @@ export function Ayudante() {
           <div ref={lista} className="flex-1 space-y-3 overflow-y-auto px-4 py-4" aria-live="polite">
             {mensajes.length === 0 && (
               <div>
-                <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                <p className="text-sm text-arena-700 dark:text-arena-300">
                   Hola. Te ayudo a usar Rumbo o con dudas de tu viaje. ¿Qué necesitás?
                 </p>
                 <ul className="mt-3 grid gap-2">
@@ -132,7 +133,7 @@ export function Ayudante() {
                       <button
                         type="button"
                         onClick={() => enviar(s)}
-                        className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-left text-sm transition hover:border-teal-600 hover:bg-teal-50/60 dark:border-zinc-700 dark:hover:border-teal-500 dark:hover:bg-teal-950/30"
+                        className="w-full rounded-xl border border-arena-300 px-3 py-2 text-left text-sm transition hover:border-oliva-600 hover:bg-oliva-50/60 dark:border-arena-700 dark:hover:border-oliva-300 dark:hover:bg-oliva-950/30"
                       >
                         {s}
                       </button>
@@ -146,18 +147,18 @@ export function Ayudante() {
                 <p
                   className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed whitespace-pre-wrap ${
                     m.role === "user"
-                      ? "bg-teal-700 text-white dark:bg-teal-500 dark:text-zinc-950"
-                      : "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
+                      ? "bg-oliva-700 text-white dark:bg-oliva-300 dark:text-arena-950"
+                      : "bg-arena-100 text-arena-900 dark:bg-arena-800 dark:text-arena-100"
                   }`}
                 >
-                  {m.content || <span className="inline-block animate-pulse text-zinc-500">Escribiendo...</span>}
+                  {m.content || <span className="inline-block animate-pulse text-arena-500">Escribiendo...</span>}
                 </p>
               </div>
             ))}
           </div>
 
           <form
-            className="flex items-end gap-2 border-t border-zinc-200 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] dark:border-zinc-800"
+            className="flex items-end gap-2 border-t border-arena-200 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] dark:border-arena-800"
             onSubmit={(e) => {
               e.preventDefault();
               enviar(borrador);
@@ -180,12 +181,12 @@ export function Ayudante() {
                 }
               }}
               placeholder="Escribí tu pregunta"
-              className="max-h-32 min-h-11 flex-1 resize-none rounded-xl border border-zinc-300 bg-white px-3 py-2.5 text-base placeholder:text-zinc-500 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/30 dark:border-zinc-700 dark:bg-zinc-950"
+              className="max-h-32 min-h-11 flex-1 resize-none rounded-xl border border-arena-300 bg-papel px-3 py-2.5 text-base placeholder:text-arena-500 focus:border-oliva-600 focus:outline-none focus:ring-2 focus:ring-oliva-600/30 dark:border-arena-700 dark:bg-arena-950"
             />
             <button
               type="submit"
               disabled={esperando || !borrador.trim()}
-              className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal-700 text-white transition hover:bg-teal-800 active:scale-95 disabled:opacity-40 dark:bg-teal-500 dark:text-zinc-950"
+              className="grid size-11 shrink-0 place-items-center rounded-xl bg-oliva-700 text-white transition hover:bg-oliva-800 active:scale-95 disabled:opacity-40 dark:bg-oliva-300 dark:text-arena-950"
               aria-label="Enviar"
             >
               <PaperPlaneRight size={20} weight="fill" />
