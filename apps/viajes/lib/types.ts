@@ -61,6 +61,20 @@ export interface Tramo {
   escalas: string[];
   duracionMin: number;
   numeros?: string[]; // números de vuelo reales ("UX 42"); sin valor en los datos de ejemplo
+  segmentos?: SegmentoVuelo[]; // cada vuelo del tramo (solo con vuelos reales)
+}
+
+/** Un vuelo concreto dentro de un tramo: número, horarios locales, duración, avión y la escala que sigue. */
+export interface SegmentoVuelo {
+  numero: string;
+  aerolinea: string;
+  desde: string;
+  hasta: string;
+  salida: string; // hora local del aeropuerto de salida, guardada como ISO
+  llegada: string; // hora local del aeropuerto de llegada
+  duracionMin: number;
+  avion?: string;
+  escalaMin?: number; // espera hasta el próximo vuelo (si hay)
 }
 
 export interface OpcionVuelo {

@@ -3,7 +3,8 @@
 import { AirplaneTakeoff, AirplaneLanding, ArrowSquareOut, Suitcase, Backpack, ArrowsClockwise, Receipt } from "@phosphor-icons/react/dist/ssr";
 import { usd } from "@/lib/dinero";
 import { formatoCorto, formatoDuracion, formatoHora } from "@/lib/fechas";
-import type { OpcionVuelo, Tramo } from "@/lib/types";
+import { diasDespues, horaEmbarque } from "@/lib/embarque";
+import type { OpcionVuelo, SegmentoVuelo, Tramo } from "@/lib/types";
 import type { Textos } from "@/lib/textos";
 import { EstadoDato } from "./EstadoDato";
 import { useIdioma } from "./ProveedorIdioma";
@@ -59,6 +60,64 @@ function FilaTramo({ titulo, tramo, Icono, estimado }: { titulo: string; tramo: 
   );
 }
 
+/** Cada vuelo del tramo: número, aerolínea, avión, salida, embarque, llegada, duración y la escala que sigue. */
+function DetalleSegmentos({ titulo, segmentos }: { titulo: string; segmentos: SegmentoVuelo[] }) {
+  const { idioma, t } = useIdioma();
+  const hora = (iso: string) => formatoHora(iso, idioma);
+  return (
+    <div>
+      <p className="text-xs font-semibold tracking-wide text-arena-500 uppercase dark:text-arena-400">{titulo}</p>
+      <ol className="mt-2 grid gap-2">
+        {segmentos.map((s, i) => {
+          const dias = diasDespues(s.salida, s.llegada);
+          return (
+            <li key={i}>
+              <div className="rounded-lg border border-arena-200 bg-papel p-3 dark:border-arena-700 dark:bg-arena-900">
+                <p className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
+                  <span className="font-semibold text-oliva-700 tabular-nums dark:text-oliva-300">{s.numero}</span>
+                  <span className="text-arena-600 dark:text-arena-400">
+                    {s.aerolinea}
+                    {s.avion && ` · ${s.avion}`}
+                  </span>
+                </p>
+                <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm sm:grid-cols-4">
+                  <div>
+                    <dt className="text-xs text-arena-500 dark:text-arena-400">{t.vuelo.sale}</dt>
+                    <dd className="tabular-nums">
+                      {s.desde} {hora(s.salida)}
+                      <span className="block text-xs text-arena-500 dark:text-arena-400">{formatoCorto(s.salida.slice(0, 10), idioma)}</span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-arena-500 dark:text-arena-400">{t.vuelo.embarque}</dt>
+                    <dd className="tabular-nums">{hora(horaEmbarque(s.salida, s.duracionMin))}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-arena-500 dark:text-arena-400">{t.vuelo.llega}</dt>
+                    <dd className="tabular-nums">
+                      {s.hasta} {hora(s.llegada)}
+                      {dias > 0 && <span className="ml-1 text-xs font-medium whitespace-nowrap text-amber-700 dark:text-amber-400">{t.vuelo.masDias(dias)}</span>}
+                    </dd>
+                  </div>
+                  {s.duracionMin > 0 && (
+                    <div>
+                      <dt className="text-xs text-arena-500 dark:text-arena-400">{t.vuelo.duracion}</dt>
+                      <dd className="tabular-nums">{formatoDuracion(s.duracionMin)}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+              {s.escalaMin ? (
+                <p className="mt-2 pl-3 text-xs text-arena-600 dark:text-arena-400">{t.vuelo.escala(s.hasta, formatoDuracion(s.escalaMin))}</p>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
 export function TarjetaVuelo({
   vuelo,
   personas,
@@ -98,6 +157,17 @@ export function TarjetaVuelo({
         <FilaTramo titulo={t.vuelo.vuelta} tramo={vuelo.vuelta} Icono={AirplaneLanding} estimado={vuelo.estimado} />
         {vuelo.estimado && <p className="text-xs text-arena-600 dark:text-arena-400">{t.vuelo.horariosAConfirmar}</p>}
       </div>
+
+      {!vuelo.estimado && (vuelo.ida.segmentos?.length || vuelo.vuelta.segmentos?.length) ? (
+        <details open className="mt-4 rounded-xl bg-arena-50 px-3 py-2 dark:bg-arena-800/50">
+          <summary className="cursor-pointer text-sm font-medium">{t.vuelo.detalle}</summary>
+          <div className="mt-2 grid gap-4 pb-2">
+            {vuelo.ida.segmentos?.length ? <DetalleSegmentos titulo={t.vuelo.ida} segmentos={vuelo.ida.segmentos} /> : null}
+            {vuelo.vuelta.segmentos?.length ? <DetalleSegmentos titulo={t.vuelo.vuelta} segmentos={vuelo.vuelta.segmentos} /> : null}
+            <p className="text-xs text-arena-600 dark:text-arena-400">{t.vuelo.notaEmbarque}</p>
+          </div>
+        </details>
+      ) : null}
 
       <details className="mt-4 rounded-xl bg-arena-50 px-3 py-2 dark:bg-arena-800/50">
         <summary className="cursor-pointer text-sm font-medium">{t.vuelo.condiciones}</summary>

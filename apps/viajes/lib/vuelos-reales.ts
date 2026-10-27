@@ -1,7 +1,7 @@
 import { codigoAerolinea } from "./aerolineas";
 import type { Idioma } from "./idioma";
 import { aeropuertosDeLaCiudad, coordenadasAeropuerto, distanciaAeropuertos } from "./lugares";
-import type { Clase, Equipaje, OpcionVuelo, Tramo, Verificacion } from "./types";
+import type { Clase, Equipaje, OpcionVuelo, SegmentoVuelo, Tramo, Verificacion } from "./types";
 
 // Agentes de vuelos (solo servidor), con Google Flights a través de SerpApi (https://serpapi.com/google-flights-api).
 // Google Flights recibe las tarifas de las mismas aerolíneas: son los precios y números de vuelo reales.
@@ -28,6 +28,8 @@ export type ResultadoVuelos =
 const CLASE: Record<Clase, number> = { economica: 1, premium: 2, business: 3 };
 const MIN_CUPO = 8; // búsquedas que deja libres el plan de SerpApi antes de cortar
 const CACHE_SEG = 6 * 3600;
+// Dirección de SerpApi; SERPAPI_BASE solo se usa en pruebas locales con un simulador.
+const BASE = () => process.env.SERPAPI_BASE || "https://serpapi.com";
 
 const TX = {
   es: {
@@ -57,10 +59,12 @@ interface Segmento {
   arrival_airport: { id: string; time: string };
   airline: string;
   flight_number: string;
+  duration?: number;
+  airplane?: string;
 }
-interface Grupo {
+export interface Grupo {
   flights: Segmento[];
-  layovers?: { id: string }[];
+  layovers?: { id: string; duration?: number }[];
   total_duration: number;
   price?: number;
   extensions?: string[];
@@ -76,7 +80,7 @@ interface Respuesta {
 }
 
 async function serpapi(params: Record<string, string>, clave: string): Promise<Respuesta | null> {
-  const url = `https://serpapi.com/search.json?${new URLSearchParams({ engine: "google_flights", ...params, api_key: clave })}`;
+  const url = `${BASE()}/search.json?${new URLSearchParams({ engine: "google_flights", ...params, api_key: clave })}`;
   try {
     const res = await fetch(url, { next: { revalidate: CACHE_SEG } });
     if (!res.ok) return null;
@@ -89,7 +93,7 @@ async function serpapi(params: Record<string, string>, clave: string): Promise<R
 
 async function cupoLibre(clave: string): Promise<number> {
   try {
-    const res = await fetch(`https://serpapi.com/account.json?api_key=${clave}`, { cache: "no-store" });
+    const res = await fetch(`${BASE()}/account.json?api_key=${clave}`, { cache: "no-store" });
     const j = await res.json();
     return Number(j.total_searches_left ?? j.plan_searches_left ?? 0);
   } catch {
@@ -97,11 +101,23 @@ async function cupoLibre(clave: string): Promise<number> {
   }
 }
 
+const iso = (t: string) => `${t.replace(" ", "T")}:00Z`; // hora local mostrada tal cual (la web formatea en UTC)
+
 /** Tramo de la web a partir de los segmentos de Google Flights. Las horas son locales de cada aeropuerto. */
-function tramo(g: Grupo): Tramo {
+export function tramo(g: Grupo): Tramo {
   const primero = g.flights[0];
   const ultimo = g.flights[g.flights.length - 1];
-  const iso = (t: string) => `${t.replace(" ", "T")}:00Z`; // hora local mostrada tal cual (la web formatea en UTC)
+  const segmentos: SegmentoVuelo[] = g.flights.map((s, i) => ({
+    numero: s.flight_number,
+    aerolinea: s.airline,
+    desde: s.departure_airport.id,
+    hasta: s.arrival_airport.id,
+    salida: iso(s.departure_airport.time),
+    llegada: iso(s.arrival_airport.time),
+    duracionMin: s.duration ?? 0,
+    ...(s.airplane && { avion: s.airplane }),
+    ...(g.layovers?.[i]?.duration && { escalaMin: g.layovers[i].duration }),
+  }));
   return {
     desde: primero.departure_airport.id,
     hasta: ultimo.arrival_airport.id,
@@ -110,6 +126,7 @@ function tramo(g: Grupo): Tramo {
     escalas: (g.layovers ?? []).map((l) => l.id),
     duracionMin: g.total_duration,
     numeros: g.flights.map((s) => s.flight_number),
+    segmentos,
   };
 }
 
