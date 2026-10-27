@@ -1,10 +1,10 @@
 "use client";
 
-import { Cloud, CloudLightning, CloudRain, CloudSun, Sun } from "@phosphor-icons/react/dist/ssr";
+import { Cloud, CloudLightning, CloudRain, CloudSun, Snowflake, Sun } from "@phosphor-icons/react/dist/ssr";
 import type { Condicion } from "@/lib/types";
 import { useIdioma } from "./ProveedorIdioma";
 
-const ICONOS = { soleado: Sun, parcial: CloudSun, nublado: Cloud, lluvia: CloudRain, tormenta: CloudLightning };
+const ICONOS = { soleado: Sun, parcial: CloudSun, nublado: Cloud, lluvia: CloudRain, tormenta: CloudLightning, nieve: Snowflake };
 
 export function IconoClima({ condicion, size = 28 }: { condicion: Condicion; size?: number }) {
   const { t } = useIdioma();

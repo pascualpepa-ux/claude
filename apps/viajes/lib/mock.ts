@@ -1,6 +1,7 @@
 import { ciudadGenerica, resolverDestino, type CiudadBase } from "./destinos";
 import { diferenciaDias, hoy, sumarDias } from "./fechas";
 import type { Idioma } from "./idioma";
+import type { DatoClima } from "./clima-real";
 import type {
   Actividad,
   ClimaDia,
@@ -33,6 +34,8 @@ const TX = {
     frio: "Frío: abrigo, guantes y planes cortos al aire libre.",
     sol: "Buen día para caminar y hacer planes al aire libre.",
     templado: "Clima templado: sirve tanto para paseos como para museos.",
+    nieve: "Puede nevar: abrigo, calzado que no resbale y planes bajo techo de reserva.",
+    sinPronostico: "Todavía no conseguimos el clima para este día. Volvé a mirar más cerca de la fecha.",
     llegada: (c: string) => `Llegada a ${c}. Check-in y primera recorrida tranquila.`,
     ultimo: "Último día: check-out y traslado al aeropuerto.",
     trasladoNota: (c: string) => `Traslado en tren a ${c} por la mañana.`,
@@ -65,6 +68,8 @@ const TX = {
     frio: "Cold: coat, gloves and short outdoor plans.",
     sol: "A good day for walking and outdoor plans.",
     templado: "Mild weather: works for both walks and museums.",
+    nieve: "Snow is possible: warm layers, non-slip shoes and indoor plans as backup.",
+    sinPronostico: "We couldn't get the weather for this day yet. Check again closer to the date.",
     llegada: (c: string) => `Arrival in ${c}. Check in and take an easy first walk.`,
     ultimo: "Last day: check out and head to the airport.",
     trasladoNota: (c: string) => `Morning train to ${c}.`,
@@ -183,8 +188,10 @@ function clima(ciudad: string, fecha: string, idioma: Idioma): ClimaDia {
   };
 }
 
-function consejoClima(c: ClimaDia, idioma: Idioma): string {
+export function consejoClima(c: ClimaDia, idioma: Idioma): string {
   const t = TX[idioma];
+  if (c.tipo === "sin_datos") return t.sinPronostico;
+  if (c.condicion === "nieve") return t.nieve;
   if (c.condicion === "tormenta") return t.tormenta;
   if (c.condicion === "lluvia") return t.lluvia;
   if (c.maxima >= 29) return t.calor;
@@ -303,13 +310,13 @@ function elegirPorPlan<T>(opciones: T[], precio: (o: T) => number, plan: Plan): 
   return orden[Math.floor(orden.length / 2)];
 }
 
-function ubicarActividades(dias: DiaItinerario[], actividades: Actividad[], plan: Plan) {
+export function ubicarActividades(dias: DiaItinerario[], actividades: Actividad[], plan: Plan) {
   const usadas = new Set<string>();
   const porDia = plan === "premium" ? 3 : 2;
   dias.forEach((dia, i) => {
     const esExtremo = i === 0 || i === dias.length - 1;
     const cupo = esExtremo ? 1 : porDia;
-    const mojado = dia.clima.condicion === "lluvia" || dia.clima.condicion === "tormenta";
+    const mojado = dia.clima.condicion === "lluvia" || dia.clima.condicion === "tormenta" || dia.clima.condicion === "nieve";
     const seco = dia.clima.condicion === "soleado" || dia.clima.condicion === "parcial";
     const candidatas = actividades
       .filter((a) => a.ciudad === dia.ciudad && !usadas.has(a.id))
@@ -353,7 +360,7 @@ export function generarViaje(input: TripInput, idioma: Idioma = "es"): TripPlan 
   const nochesPorCiudad = repartirNoches(ciudades.map((c) => c.peso), noches);
   ciudades = ciudades.slice(0, nochesPorCiudad.length);
   const nombre = (c: CiudadBase) => c.nombre[idioma];
-  const ruta: TramoCiudad[] = ciudades.map((c, i) => ({ clave: c.clave, ciudad: nombre(c), dias: nochesPorCiudad[i] }));
+  const ruta: TramoCiudad[] = ciudades.map((c, i) => ({ clave: c.clave, ciudad: nombre(c), dias: nochesPorCiudad[i], aeropuerto: c.aeropuerto }));
 
   // Los ids usan la clave de la ciudad: no cambian al cambiar de idioma, así se conservan las elecciones.
   const actividades: Actividad[] = ciudades.flatMap((c) =>
@@ -397,7 +404,7 @@ export function generarViaje(input: TripInput, idioma: Idioma = "es"): TripPlan 
           : traslados.at(-1)?.fecha === fecha
             ? t.trasladoNota(ciudad)
             : undefined;
-    dias.push({ fecha, ciudad, clima: c, consejo: consejoClima(c, idioma), actividades: [], nota });
+    dias.push({ fecha, ciudad, clave: ciudades[ciudadIdx].clave, clima: c, consejo: consejoClima(c, idioma), actividades: [], nota });
     nochesEnCiudad++;
   }
 
@@ -441,16 +448,49 @@ export function generarViaje(input: TripInput, idioma: Idioma = "es"): TripPlan 
   };
 }
 
-/** Rearma el mismo viaje en otro idioma conservando lo que la persona eligió y editó. */
+/** Rearma el mismo viaje en otro idioma conservando lo que la persona eligió y editó (y el clima real). */
 export function traducirViaje(plan: TripPlan, idioma: Idioma): TripPlan {
   if (plan.idioma === idioma) return plan;
   const nuevo = generarViaje(plan.input, idioma);
   return {
     ...nuevo,
+    climaReal: plan.climaReal,
     vueloElegido: plan.vueloElegido,
     hotelElegido: { ...nuevo.hotelElegido, ...plan.hotelElegido },
-    dias: nuevo.dias.map((d, i) => ({ ...d, actividades: plan.dias[i]?.actividades ?? d.actividades })),
+    dias: nuevo.dias.map((d, i) => {
+      const previo = plan.dias[i];
+      if (!previo) return d;
+      const clima = plan.climaReal ? previo.clima : d.clima;
+      return { ...d, clima, consejo: consejoClima(clima, idioma), actividades: previo.actividades };
+    }),
   };
+}
+
+/**
+ * Pone el clima que trajeron los agentes en cada día. La primera vez también reacomoda las actividades
+ * según ese clima; después respeta lo que la persona sacó o sumó.
+ */
+export function aplicarClima(plan: TripPlan, datos: Record<string, Record<string, DatoClima>>, idioma: Idioma): TripPlan {
+  const reacomodar = !plan.climaReal;
+  const dias = plan.dias.map((d) => {
+    const iata = plan.ruta.find((r) => r.clave === d.clave)?.aeropuerto ?? "";
+    const dato = datos[iata]?.[d.fecha];
+    if (!dato) return d;
+    const anticipacion = diferenciaDias(hoy(), d.fecha);
+    const clima: ClimaDia = {
+      fecha: d.fecha,
+      condicion: dato.condicion,
+      maxima: dato.maxima,
+      minima: dato.minima,
+      probLluvia: dato.probLluvia,
+      tipo: dato.tipo,
+      confianza: dato.tipo !== "pronostico" ? "baja" : anticipacion <= 5 ? "alta" : anticipacion <= 10 ? "media" : "baja",
+      origen: { fuente: dato.fuente, consultadoEn: dato.consultadoEn, estado: dato.estado },
+    };
+    return { ...d, clima, consejo: consejoClima(clima, idioma), actividades: reacomodar ? [] : d.actividades };
+  });
+  if (reacomodar) ubicarActividades(dias, plan.actividades, plan.input.plan);
+  return { ...plan, dias, climaReal: true };
 }
 
 /** Viaje de muestra para la portada: 5 días en China, como en el pedido original. */

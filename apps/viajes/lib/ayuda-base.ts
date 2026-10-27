@@ -63,17 +63,17 @@ const es: EntradaAyuda[] = [
     respuesta:
       "Cada precio muestra de dónde sale, cuándo se consultó y una etiqueta:\n" +
       "• Verificado: un segundo agente lo confirmó.\n" +
-      "• Precio estimado: es un cálculo aproximado, no una tarifa confirmada.\n" +
+      "• Estimado: es un cálculo aproximado, no un dato confirmado.\n" +
       "• No verificado: no se pudo confirmar.\n" +
-      "Hoy la web todavía muestra datos de ejemplo, así que tomá los precios como referencia.",
+      "El clima ya es real; los precios de vuelos y hoteles todavía son de ejemplo, así que tomalos como referencia.",
   },
   {
     id: "ejemplo",
     pregunta: "¿Los precios son reales?",
     claves: ["real", "reales", "ejemplo", "exacto", "actualizado", "precio", "precios", "cuanto sale", "cuanto cuesta", "disponibilidad"],
     respuesta:
-      "Todavía no son reales: por ahora los precios, el clima y la disponibilidad son datos de ejemplo, para que veas cómo queda tu viaje armado. " +
-      "La conexión con precios y clima reales llega en la próxima etapa. Antes de pagar, confirmá siempre el precio en el sitio donde reserves.",
+      "Los precios todavía no: los vuelos y hoteles son datos de ejemplo, para que veas cómo queda tu viaje armado; los reales llegan en la próxima etapa. " +
+      "El clima sí es real. Antes de pagar, confirmá siempre el precio en el sitio donde reserves.",
   },
   {
     id: "reservar",
@@ -119,8 +119,9 @@ const es: EntradaAyuda[] = [
     pregunta: "¿Cómo funciona el clima?",
     claves: ["clima", "lluvia", "llueve", "pronostico", "temperatura", "tiempo", "frio", "calor"],
     respuesta:
-      "Cada día del itinerario muestra el pronóstico de esa ciudad. Si falta más de 10 días, queda marcado como de baja confianza " +
-      "y se actualiza a medida que se acerca la fecha. Recordá que por ahora son datos de ejemplo.",
+      "El clima es real. Un agente lo busca en Open-Meteo y otro lo controla con MET Norway (el servicio meteorológico de Noruega): " +
+      "si coinciden, queda \"Verificado\". El pronóstico llega hasta 16 días antes; para fechas más lejanas ves el promedio de los últimos 5 años " +
+      "para esos días. Se actualiza cada vez que abrís el viaje, y las actividades al aire libre van a los días sin lluvia.",
   },
   {
     id: "cambiar",
@@ -258,17 +259,17 @@ const en: EntradaAyuda[] = [
     respuesta:
       "Every price shows where it comes from, when it was checked and a label:\n" +
       "• Verified: a second agent confirmed it.\n" +
-      "• Estimated price: an approximate calculation, not a confirmed fare.\n" +
+      "• Estimated: an approximate calculation, not confirmed data.\n" +
       "• Not verified: it couldn't be confirmed.\n" +
-      "The site still shows sample data today, so treat prices as a reference.",
+      "The weather is already real; flight and hotel prices are still sample data, so treat them as a reference.",
   },
   {
     id: "ejemplo",
     pregunta: "Are the prices real?",
     claves: ["real", "sample", "exact", "up to date", "price", "prices", "how much", "cost", "availability"],
     respuesta:
-      "They aren't real yet: for now prices, weather and availability are sample data, so you can see how your trip comes together. " +
-      "Real prices and weather come in the next stage. Before paying, always confirm the price on the site where you book.",
+      "Prices aren't yet: flights and hotels are sample data so you can see how your trip comes together; real ones come in the next stage. The weather is real. " +
+      "Before paying, always confirm the price on the site where you book.",
   },
   {
     id: "reservar",
@@ -314,8 +315,9 @@ const en: EntradaAyuda[] = [
     pregunta: "How does the weather work?",
     claves: ["weather", "rain", "forecast", "temperature", "cold", "hot"],
     respuesta:
-      "Each day of the itinerary shows the forecast for that city. If it's more than 10 days away, it's marked as low confidence " +
-      "and updates as the date gets closer. Remember that for now it's sample data.",
+      "The weather is real. One agent gets it from Open-Meteo and another checks it with MET Norway (Norway's weather service): " +
+      "if they agree, it's marked \"Verified\". Forecasts go up to 16 days ahead; for later dates you see the average of the last 5 years " +
+      "for those days. It updates every time you open the trip, and outdoor activities go on dry days.",
   },
   {
     id: "cambiar",

@@ -5,6 +5,7 @@ import { usd } from "@/lib/dinero";
 import { formatoDia } from "@/lib/fechas";
 import type { Actividad, DiaItinerario } from "@/lib/types";
 import type { Idioma } from "@/lib/idioma";
+import { EstadoDato } from "./EstadoDato";
 import { IconoClima } from "./IconoClima";
 import { useIdioma } from "./ProveedorIdioma";
 
@@ -26,7 +27,8 @@ interface Props {
 export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuitar, onAgregar }: Props) {
   const { idioma, t } = useIdioma();
   const { clima } = dia;
-  const mojado = clima.condicion === "lluvia" || clima.condicion === "tormenta";
+  const sinDatos = clima.tipo === "sin_datos";
+  const mojado = !sinDatos && (clima.condicion === "lluvia" || clima.condicion === "tormenta" || clima.condicion === "nieve");
   return (
     <article className="rounded-2xl border border-arena-200 bg-papel p-4 shadow-sm shadow-arena-200/50 sm:p-5 dark:border-arena-800 dark:bg-arena-900 dark:shadow-none">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
@@ -35,6 +37,9 @@ export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuita
           <h3 className="text-lg font-semibold tracking-tight first-letter:uppercase">{formatoDia(dia.fecha, idioma)}</h3>
           <p className="text-sm text-arena-600 dark:text-arena-400">{dia.ciudad}</p>
         </div>
+        {sinDatos ? (
+          <p className="shrink-0 text-sm text-arena-500 dark:text-arena-400">{t.clima.sinDatos}</p>
+        ) : (
         <div className="flex shrink-0 items-center gap-2 sm:text-right">
           <IconoClima condicion={clima.condicion} />
           <div>
@@ -46,6 +51,7 @@ export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuita
             </p>
           </div>
         </div>
+        )}
       </header>
 
       <p className="mt-3 flex items-start gap-2 rounded-xl bg-arena-50 px-3 py-2 text-sm text-arena-700 dark:bg-arena-800/60 dark:text-arena-300">
@@ -56,9 +62,20 @@ export function TarjetaDia({ numero, dia, actividades, sugerencias = [], onQuita
         )}
         <span>
           {dia.consejo}
-          {clima.confianza === "baja" && (
-            <span className="block text-xs text-arena-500 dark:text-arena-400">
-              {t.clima.bajaConfianza}
+          {clima.tipo === "historico" ? (
+            <span className="block text-xs text-arena-500 dark:text-arena-400">{t.clima.historico}</span>
+          ) : (
+            clima.confianza === "baja" &&
+            !sinDatos && (
+              <span className="block text-xs text-arena-500 dark:text-arena-400">
+                {t.clima.bajaConfianza}
+              </span>
+            )
+          )}
+          {/* Fuente y verificación del clima real (los datos de ejemplo no la muestran) */}
+          {clima.tipo && !sinDatos && (
+            <span className="mt-1.5 block">
+              <EstadoDato origen={clima.origen} />
             </span>
           )}
         </span>

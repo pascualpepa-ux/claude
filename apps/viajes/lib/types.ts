@@ -39,7 +39,7 @@ export interface Origen {
   estado: Verificacion;
 }
 
-export type Condicion = "soleado" | "parcial" | "nublado" | "lluvia" | "tormenta";
+export type Condicion = "soleado" | "parcial" | "nublado" | "lluvia" | "tormenta" | "nieve";
 
 export interface ClimaDia {
   fecha: string;
@@ -48,6 +48,8 @@ export interface ClimaDia {
   minima: number;
   probLluvia: number; // 0-100
   confianza: "alta" | "media" | "baja";
+  /** pronostico: de los agentes; historico: promedio de años anteriores; sin_datos: no se consiguió. Sin valor: datos de ejemplo. */
+  tipo?: "pronostico" | "historico" | "sin_datos";
   origen: Origen;
 }
 
@@ -112,6 +114,7 @@ export interface TramoCiudad {
   clave: string; // identificador estable de la ciudad (no cambia con el idioma)
   ciudad: string;
   dias: number;
+  aeropuerto: string; // IATA, para pedir el clima de la ciudad
 }
 
 export interface Traslado {
@@ -126,6 +129,7 @@ export interface Traslado {
 export interface DiaItinerario {
   fecha: string;
   ciudad: string;
+  clave: string; // clave de la ciudad (ver TramoCiudad)
   clima: ClimaDia;
   consejo: string;
   actividades: string[]; // ids
@@ -146,4 +150,6 @@ export interface TripPlan {
   dias: DiaItinerario[];
   traslados: Traslado[];
   gastosDiarios: { comidaPorPersona: number; transportePorPersona: number };
+  /** true cuando el clima ya vino de los agentes (y las actividades se acomodaron según ese clima). */
+  climaReal?: boolean;
 }

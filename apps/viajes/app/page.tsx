@@ -4,7 +4,8 @@ import { TarjetaDia } from "@/components/TarjetaDia";
 import { Marca } from "@/components/Logo";
 import { EstadoDato } from "@/components/EstadoDato";
 import { ViajesGuardados } from "@/components/ViajesGuardados";
-import { generarViaje, viajeDeMuestra } from "@/lib/mock";
+import { aplicarClima, generarViaje, viajeDeMuestra } from "@/lib/mock";
+import { climaReal } from "@/lib/clima-real";
 import { calcularResumen } from "@/lib/presupuesto";
 import { usd } from "@/lib/dinero";
 import { textosActuales } from "@/lib/idioma-servidor";
@@ -17,7 +18,12 @@ const ICONOS = { clima: CloudSun, vuelos: AirplaneTilt, hoteles: Bed };
 export default async function Inicio() {
   const { idioma, t } = await textosActuales();
   const ti = t.inicio;
-  const plan = generarViaje(viajeDeMuestra(), idioma);
+  // La vista previa también muestra el clima real (se guarda una hora en caché).
+  const base = generarViaje(viajeDeMuestra(), idioma);
+  const clima = await climaReal(
+    base.ruta.map((r) => ({ iata: r.aeropuerto, fechas: base.dias.filter((d) => d.clave === r.clave).map((d) => d.fecha) })),
+  );
+  const plan = aplicarClima(base, clima, idioma);
   const resumen = calcularResumen(plan);
   const dia = plan.dias[1];
   const actividades = plan.actividades.filter((a) => dia.actividades.includes(a.id));

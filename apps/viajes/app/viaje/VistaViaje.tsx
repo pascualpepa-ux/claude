@@ -11,12 +11,56 @@ import { ResumenPresupuesto } from "@/components/ResumenPresupuesto";
 import { CLAVE_ABIERTO, CLAVE_PEDIDO, CLAVE_VIAJE, borrarGuardado, guardarViaje, leerGuardados } from "@/lib/almacen";
 import { usd } from "@/lib/dinero";
 import { formatoCorto } from "@/lib/fechas";
-import { generarViaje, traducirViaje, viajeDeMuestra } from "@/lib/mock";
+import { aplicarClima, generarViaje, traducirViaje, viajeDeMuestra } from "@/lib/mock";
+import type { DatoClima } from "@/lib/clima-real";
 import { useIdioma } from "@/components/ProveedorIdioma";
 import { calcularResumen, costoHotel, nochesPorCiudad } from "@/lib/presupuesto";
 import type { TripInput, TripPlan } from "@/lib/types";
 
 const PASOS_AGENTES = 6;
+
+type DatosClima = Record<string, Record<string, DatoClima>>;
+
+/** Pide el clima real de cada ciudad del viaje. Devuelve null si los agentes no responden. */
+async function pedirClima(plan: TripPlan): Promise<DatosClima | null> {
+  const lugares = plan.ruta
+    .filter((r) => r.aeropuerto)
+    .map((r) => ({ iata: r.aeropuerto, fechas: plan.dias.filter((d) => d.clave === r.clave).map((d) => d.fecha) }))
+    .filter((l) => l.fechas.length);
+  if (!lugares.length) return null;
+  try {
+    const res = await fetch("/api/clima", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lugares }),
+      signal: AbortSignal.timeout(15000),
+    });
+    return res.ok ? ((await res.json()) as DatosClima) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Si los agentes del clima no respondieron, cada día queda "sin datos": no se muestra clima inventado. */
+function sinClima(plan: TripPlan): DatosClima {
+  const datos: DatosClima = {};
+  const ahora = new Date().toISOString();
+  for (const d of plan.dias) {
+    const iata = plan.ruta.find((r) => r.clave === d.clave)?.aeropuerto ?? "";
+    (datos[iata] ??= {})[d.fecha] = {
+      fecha: d.fecha,
+      tipo: "sin_datos",
+      condicion: "parcial",
+      maxima: 0,
+      minima: 0,
+      probLluvia: 0,
+      estado: "no_verificado",
+      fuente: "Open-Meteo",
+      consultadoEn: ahora,
+    };
+  }
+  return datos;
+}
 
 function leer<T>(clave: string): T | null {
   try {
@@ -141,17 +185,30 @@ export function VistaViaje() {
       } catch {}
       setPlan(traducirViaje(guardado, idioma));
       setEstado("listo");
+      // El clima se vuelve a pedir cada vez que se abre: así el pronóstico está siempre al día.
+      pedirClima(guardado).then((datos) =>
+        setPlan((p) => {
+          if (!p) return p;
+          if (datos) return aplicarClima(p, datos, p.idioma);
+          // Sin respuesta: se queda con el último clima real; si nunca tuvo, no muestra el de ejemplo.
+          return p.climaReal ? p : aplicarClima(p, sinClima(p), p.idioma);
+        }),
+      );
       return;
     }
-    // Fase 1: simula a los agentes trabajando. En la fase 3 esto refleja el progreso real.
     const nuevo = generarViaje(pedido, idioma);
+    // Los dos primeros pasos son los agentes del clima (buscador y verificador): esperan su respuesta real.
+    // Vuelos y hoteles todavía son de ejemplo.
+    let clima: DatosClima | null | undefined;
+    pedirClima(nuevo).then((datos) => (clima = datos));
     let i = 0;
     const timer = setInterval(() => {
+      if (i >= 1 && clima === undefined) return;
       i++;
       setListos(i);
       if (i >= PASOS_AGENTES) {
         clearInterval(timer);
-        setPlan(nuevo);
+        setPlan(aplicarClima(nuevo, clima ?? sinClima(nuevo), idioma));
         setEstado("listo");
       }
     }, 280);

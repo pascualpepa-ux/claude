@@ -29,6 +29,12 @@ export function distanciaKm(lat1: number, lon1: number, lat2: number, lon2: numb
   return 2 * 6371 * Math.asin(Math.sqrt(a));
 }
 
+/** Ubicación de un aeropuerto por su código IATA (para pedir el clima de la ciudad). */
+export function coordenadasAeropuerto(iata: string): { lat: number; lon: number } | null {
+  const a = AEROPUERTOS.find((x) => x[0] === iata.toUpperCase());
+  return a ? { lat: a[4], lon: a[5] } : null;
+}
+
 /** Aeropuertos con vuelos regulares más cercanos a un punto (hasta `max`, dentro de `radioKm`). */
 export function aeropuertosCercanos(lat: number, lon: number, max = 3, radioKm = 250): AeropuertoCercano[] {
   return AEROPUERTOS.map((a) => ({ a, d: distanciaKm(lat, lon, a[4], a[5]) }))

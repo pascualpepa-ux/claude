@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sumarDias } from "./fechas";
-import { generarViaje, repartirNoches, traducirViaje, viajeDeMuestra } from "./mock";
+import { aplicarClima, generarViaje, repartirNoches, traducirViaje, viajeDeMuestra } from "./mock";
 import { calcularResumen } from "./presupuesto";
 
 describe("repartirNoches", () => {
@@ -27,7 +27,7 @@ describe("generarViaje", () => {
   it("con una ciudad no sugiere ruta", () => {
     const plan = generarViaje({ ...viajeDeMuestra(), destino: "Lisboa" });
     expect(plan.rutaSugerida).toBe(false);
-    expect(plan.ruta).toEqual([{ clave: "lisboa", ciudad: "Lisboa", dias: 5 }]);
+    expect(plan.ruta).toEqual([{ clave: "lisboa", ciudad: "Lisboa", dias: 5, aeropuerto: "LIS" }]);
   });
 
   it("no pone actividades al aire libre en días de lluvia", () => {
@@ -131,5 +131,40 @@ describe("idiomas", () => {
   it("usa el aeropuerto de llegada elegido", () => {
     const plan = generarViaje({ ...viajeDeMuestra(), destino: "Roma", aeropuertoDestino: "CIA" });
     expect(plan.vuelos[0].ida.hasta).toBe("CIA");
+  });
+});
+
+describe("clima real", () => {
+  it("usa el clima de los agentes, reacomoda actividades y no inventa cuando falta", () => {
+    const base = generarViaje({ ...viajeDeMuestra(), destino: "Lisboa" });
+    const iata = base.ruta[0].aeropuerto;
+    const datos = {
+      [iata]: Object.fromEntries(
+        base.dias.map((d, i) => [
+          d.fecha,
+          {
+            fecha: d.fecha,
+            tipo: i === 0 ? ("sin_datos" as const) : ("pronostico" as const),
+            condicion: "lluvia" as const,
+            maxima: 18,
+            minima: 11,
+            probLluvia: 90,
+            estado: "verificado" as const,
+            fuente: "Open-Meteo + MET Norway",
+            consultadoEn: new Date().toISOString(),
+          },
+        ]),
+      ),
+    };
+    const plan = aplicarClima(base, datos, "es");
+    expect(plan.climaReal).toBe(true);
+    expect(plan.dias[0].clima.tipo).toBe("sin_datos");
+    expect(plan.dias[1].clima).toMatchObject({ maxima: 18, condicion: "lluvia", tipo: "pronostico" });
+    expect(plan.dias[1].clima.origen.fuente).toBe("Open-Meteo + MET Norway");
+    // Con lluvia todos los días, ninguna actividad al aire libre.
+    const aireLibre = new Set(plan.actividades.filter((a) => a.aireLibre).map((a) => a.id));
+    expect(plan.dias.flatMap((d) => d.actividades).some((id) => aireLibre.has(id))).toBe(false);
+    // Al traducir, se conserva el clima real.
+    expect(traducirViaje(plan, "en").dias[1].clima.maxima).toBe(18);
   });
 });

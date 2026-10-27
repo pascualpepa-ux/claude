@@ -69,7 +69,7 @@ const es = {
   },
   estado: {
     verificado: "Verificado",
-    estimado: "Precio estimado",
+    estimado: "Estimado",
     no_verificado: "No verificado",
     consultado: (fuente: string, cuando: string) => `${fuente}, consultado el ${cuando}`,
   },
@@ -79,9 +79,13 @@ const es = {
     nublado: "Nublado",
     lluvia: "Lluvia",
     tormenta: "Tormenta",
+    nieve: "Nieve",
     resumen: (condicion: string, prob: number) => `${condicion}, lluvia ${prob}%`,
     bajaConfianza:
       "Pronóstico de baja confianza: falta más de 10 días. Se actualiza solo a medida que se acerca la fecha.",
+    historico: "Todavía no hay pronóstico para esta fecha: es el promedio de los últimos 5 años. El pronóstico real aparece 16 días antes.",
+    sinDatos: "Sin datos",
+    buscando: "Buscando el clima real...",
   },
   dia: {
     numero: (n: number) => `Día ${n}`,
@@ -165,7 +169,7 @@ const es = {
     titulo: (origen: string, destino: string) => `${origen} a ${destino}`,
     conAeropuerto: (ciudad: string, iata: string) => `${ciudad} (${iata})`,
     viajeros: "Viajeros",
-    aviso: "Estás viendo datos de ejemplo. Los precios, el clima y la disponibilidad reales se conectan en la próxima etapa.",
+    aviso: "El clima es real: lo busca Open-Meteo y lo verifica MET Norway. Los vuelos y hoteles todavía son de ejemplo: los reales se conectan en la próxima etapa.",
     secciones: "Secciones",
     nav: { itinerario: "Itinerario", vuelos: "Vuelos", alojamiento: "Alojamiento", presupuesto: "Presupuesto" },
     rutaTitulo: "Ruta sugerida",
@@ -426,7 +430,7 @@ const en: Textos = {
   },
   estado: {
     verificado: "Verified",
-    estimado: "Estimated price",
+    estimado: "Estimated",
     no_verificado: "Not verified",
     consultado: (fuente, cuando) => `${fuente}, checked ${cuando}`,
   },
@@ -436,9 +440,13 @@ const en: Textos = {
     nublado: "Cloudy",
     lluvia: "Rain",
     tormenta: "Storm",
+    nieve: "Snow",
     resumen: (condicion, prob) => `${condicion}, ${prob}% chance of rain`,
     bajaConfianza:
       "Low-confidence forecast: the date is more than 10 days away. It updates automatically as the date gets closer.",
+    historico: "There's no forecast for this date yet: this is the average of the last 5 years. The real forecast appears 16 days before.",
+    sinDatos: "No data",
+    buscando: "Getting the real weather...",
   },
   dia: {
     numero: (n) => `Day ${n}`,
@@ -522,7 +530,7 @@ const en: Textos = {
     titulo: (origen, destino) => `${origen} to ${destino}`,
     conAeropuerto: (ciudad, iata) => `${ciudad} (${iata})`,
     viajeros: "Travelers",
-    aviso: "You're looking at sample data. Real prices, weather and availability will be connected in the next stage.",
+    aviso: "The weather is real: Open-Meteo finds it and MET Norway checks it. Flights and hotels are still sample data: real ones come in the next stage.",
     secciones: "Sections",
     nav: { itinerario: "Itinerary", vuelos: "Flights", alojamiento: "Stays", presupuesto: "Budget" },
     rutaTitulo: "Suggested route",
