@@ -6,9 +6,15 @@ import { plural, type Idioma } from "./idioma";
  */
 const es = {
   meta: {
-    titulo: "Rumbo Traveling · Planificá tu viaje",
-    descripcion: "Itinerario, vuelos, hoteles, clima y gastos compartidos en un solo lugar.",
-    planificar: "Planificar viaje · Rumbo Traveling",
+    titulo: "Rumbo Traveling – Planificá tu viaje y dividí los gastos",
+    descripcion:
+      "Armá tu viaje en minutos: itinerario día por día, vuelos, hoteles y clima, presupuesto por persona y gastos divididos entre todos. Gratis.",
+    planificar: "Planificá tu viaje en 7 pasos · Rumbo Traveling",
+    planificarDescripcion:
+      "Contestá 7 preguntas (destino, fechas, viajeros, presupuesto, vuelo, alojamiento y estilo) y Rumbo arma tu viaje con todos los precios.",
+    ejemplo: "Ejemplo: 5 días en China · Rumbo Traveling",
+    ejemploDescripcion:
+      "Mirá un viaje armado con Rumbo: 5 días en Beijing y Shanghái, con vuelos, hoteles, clima, actividades y el costo por persona.",
     viaje: "Tu viaje · Rumbo Traveling",
     admin: "Administración · Rumbo Traveling",
     pausa: "Pausa · Rumbo Traveling",
@@ -415,9 +421,15 @@ export type Textos = typeof es;
 
 const en: Textos = {
   meta: {
-    titulo: "Rumbo Traveling · Plan your trip",
-    descripcion: "Itinerary, flights, hotels, weather and shared costs in one place.",
-    planificar: "Plan a trip · Rumbo Traveling",
+    titulo: "Rumbo Traveling – Plan your trip and split the costs",
+    descripcion:
+      "Plan your trip in minutes: a day-by-day itinerary, flights, hotels and weather, a per-person budget and costs split among everyone. Free.",
+    planificar: "Plan your trip in 7 steps · Rumbo Traveling",
+    planificarDescripcion:
+      "Answer 7 questions (destination, dates, travelers, budget, flight, stay and style) and Rumbo builds your trip with every price.",
+    ejemplo: "Example: 5 days in China · Rumbo Traveling",
+    ejemploDescripcion:
+      "See a trip planned with Rumbo: 5 days in Beijing and Shanghai, with flights, hotels, weather, activities and the cost per person.",
     viaje: "Your trip · Rumbo Traveling",
     admin: "Admin · Rumbo Traveling",
     pausa: "Pause · Rumbo Traveling",

@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { metadatosPagina } from "@/lib/seo";
+import { EnlacesIdioma } from "@/components/EnlacesIdioma";
 import { ArrowRight, CloudSun, AirplaneTilt, Bed, Receipt } from "@phosphor-icons/react/dist/ssr";
 import { TarjetaDia } from "@/components/TarjetaDia";
 import { Marca } from "@/components/Logo";
@@ -15,6 +18,11 @@ import { textosActuales } from "@/lib/idioma-servidor";
 
 // Las fechas de la muestra dependen del día de hoy.
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { idioma, t } = await textosActuales();
+  return metadatosPagina({ ruta: "/", idioma, titulo: t.meta.titulo, descripcion: t.meta.descripcion, tituloAbsoluto: true });
+}
 
 const ICONOS = { clima: CloudSun, vuelos: AirplaneTilt, hoteles: Bed };
 
@@ -34,6 +42,7 @@ export default async function Inicio() {
 
   return (
     <main>
+      <EnlacesIdioma ruta="/" idioma={idioma} />
       <ViajesGuardados />
       <section className="relative overflow-hidden border-b border-arena-200 bg-arena-100 dark:border-arena-800 dark:bg-arena-900">
         {/* Isotipo de la marca como marca de agua detrás de la vista previa */}

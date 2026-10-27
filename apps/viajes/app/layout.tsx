@@ -5,6 +5,8 @@ import { Pie } from "@/components/Pie";
 import { ContadorVisitas } from "@/components/ContadorVisitas";
 import { ProveedorIdioma } from "@/components/ProveedorIdioma";
 import { textosActuales } from "@/lib/idioma-servidor";
+import { SITIO_URL, metadatosPagina } from "@/lib/seo";
+import { DatosEstructurados } from "@/components/DatosEstructurados";
 import "./globals.css";
 
 // Google Sans Flex: la tipografía del logo (licencia SIL OFL, ver app/fuentes/OFL.txt).
@@ -17,17 +19,16 @@ const marca = localFont({
 
 export async function generateMetadata(): Promise<Metadata> {
   const { idioma, t } = await textosActuales();
+  // Valores por defecto para todas las páginas; cada página pública define su título, descripción y hreflang.
   return {
-    metadataBase: new URL("https://rumbotraveling.com"),
-    title: t.meta.titulo,
-    description: t.meta.descripcion,
-    openGraph: {
-      title: "Rumbo Traveling",
-      description: t.meta.descripcion,
-      images: ["/marca/icono-512.png"],
-      locale: idioma === "en" ? "en_US" : "es_AR",
-      type: "website",
-    },
+    metadataBase: new URL(SITIO_URL),
+    applicationName: "Rumbo Traveling",
+    ...metadatosPagina({ ruta: "/", idioma, titulo: t.meta.titulo, descripcion: t.meta.descripcion, tituloAbsoluto: true }),
+    alternates: undefined, // el canonical y el hreflang los pone cada página
+    authors: [{ name: "Pascual Pepa" }],
+    creator: "Pascual Pepa",
+    appleWebApp: { capable: true, title: "Rumbo", statusBarStyle: "default" },
+    formatDetection: { telephone: false },
   };
 }
 
@@ -48,6 +49,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="flex-1">{children}</div>
           <Pie />
         </ProveedorIdioma>
+        <DatosEstructurados idioma={idioma} />
         {process.env.GOATCOUNTER_CODE && <ContadorVisitas codigo={process.env.GOATCOUNTER_CODE} />}
       </body>
     </html>
