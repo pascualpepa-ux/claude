@@ -3,6 +3,7 @@ import { BASE_AYUDA, buscarAyuda, fichaComoTexto } from "@/lib/ayuda-base";
 import { LIMITES, SISTEMA, type MensajeChat } from "@/lib/ayudante";
 import { COOKIE_PAUSA, SEGUNDOS_PAUSA, tieneGroserias } from "@/lib/groserias";
 import { responderCuenta } from "@/lib/calculadora";
+import { responderConGateway } from "@/lib/ia-gateway";
 import { esIdioma, type Idioma } from "@/lib/idioma";
 
 export const runtime = "nodejs";
@@ -88,26 +89,51 @@ export async function POST(req: Request) {
   const cuenta = responderCuenta(datos.mensajes.at(-1)!.content, idioma);
   if (cuenta) return texto(cuenta, 200);
 
-  // Sin clave de Claude, responde directo desde la ficha: siempre exacto, aunque menos flexible.
-  if (!process.env.ANTHROPIC_API_KEY) {
-    const entrada = buscarAyuda(datos.mensajes.at(-1)!.content, idioma);
-    if (entrada) return texto(entrada.respuesta, 200);
+  const ultima = datos.mensajes.at(-1)!.content;
+  // Respuesta de la ficha: exacta y sin costo. Se usa si no hay IA disponible o si la IA falla.
+  const respuestaFicha = () => {
+    const entrada = buscarAyuda(ultima, idioma);
+    if (entrada) return entrada.respuesta;
     const temas = BASE_AYUDA[idioma].slice(0, 6).map((e) => `• ${e.pregunta}`).join("\n");
-    return texto(`${aviso.sinCoincidencia}\n${temas}`, 200);
-  }
+    return `${aviso.sinCoincidencia}\n${temas}`;
+  };
 
-  // El límite solo cuida el costo de la IA: la ficha no cuesta nada.
+  // El límite cuida el uso de la IA (20 preguntas cada 10 minutos por persona).
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "desconocida";
   if (!permitido(ip)) {
     return texto(aviso.limite, 429);
   }
 
-  const client = new Anthropic();
   const idiomaWeb =
     idioma === "en"
       ? "La persona usa la web en inglés: respondé en inglés, salvo que escriba en otro idioma."
       : "La persona usa la web en español.";
   const sistema = `${SISTEMA}\n\nFicha de Rumbo Traveling (única fuente sobre la web):\n${fichaComoTexto(idioma)}\n\n${idiomaWeb}${datos.contexto ? `\nContexto de la persona en la web: ${datos.contexto}` : ""}`;
+
+  // Sin clave de Anthropic: modelos de IA del AI Gateway de Vercel. Si fallan antes de responder, contesta la ficha.
+  if (!process.env.ANTHROPIC_API_KEY) {
+    const salidaGateway = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const enc = new TextEncoder();
+        let algo = false;
+        try {
+          for await (const trozo of responderConGateway(sistema, datos.mensajes)) {
+            algo = true;
+            controller.enqueue(enc.encode(trozo));
+          }
+          if (!algo) controller.enqueue(enc.encode(respuestaFicha()));
+        } catch (error) {
+          console.error("guía (gateway):", error instanceof Error ? error.message : error);
+          controller.enqueue(enc.encode(algo ? `\n\n${aviso.error}` : respuestaFicha()));
+        } finally {
+          controller.close();
+        }
+      },
+    });
+    return new Response(salidaGateway, { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
+  }
+
+  const client = new Anthropic();
 
   const salida = new ReadableStream<Uint8Array>({
     async start(controller) {
