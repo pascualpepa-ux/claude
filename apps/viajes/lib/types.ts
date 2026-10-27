@@ -97,6 +97,7 @@ export interface OpcionHotel {
   };
   linkReserva: string;
   origen: Origen;
+  propiedad?: string; // ficha real de Google Hotels, para vigilar precio y disponibilidad
 }
 
 export type TipoActividad = "imperdible" | "comida" | "experiencia";
@@ -155,4 +156,6 @@ export interface TripPlan {
   climaReal?: boolean;
   /** true cuando los vuelos son reales (Google Flights) y no de ejemplo. */
   vuelosReales?: boolean;
+  /** true cuando los hoteles son reales (Google Hotels) y no de ejemplo. */
+  hotelesReales?: boolean;
 }

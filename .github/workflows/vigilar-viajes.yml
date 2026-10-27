@@ -1,0 +1,18 @@
+# Cada 30 minutos le pide a Rumbo Traveling que revise los viajes suscriptos
+# (vuelos, clima y hoteles) y mande los avisos que correspondan.
+name: Vigilar viajes
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  vigilar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ronda de vigilancia
+        run: curl -fsS --max-time 90 -X POST https://rumbotraveling.com/api/vigilar

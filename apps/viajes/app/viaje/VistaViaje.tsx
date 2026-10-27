@@ -12,11 +12,11 @@ import { ResumenPresupuesto } from "@/components/ResumenPresupuesto";
 import { CLAVE_ABIERTO, CLAVE_PEDIDO, CLAVE_VIAJE, borrarGuardado, guardarViaje, leerGuardados } from "@/lib/almacen";
 import { usd } from "@/lib/dinero";
 import { formatoCorto } from "@/lib/fechas";
-import { ajustarDuraciones, aplicarClima, aplicarVuelos, generarViaje, traducirViaje, viajeDeMuestra } from "@/lib/mock";
+import { ajustarDuraciones, aplicarClima, aplicarHoteles, aplicarVuelos, estadiasPorCiudad, generarViaje, traducirViaje, viajeDeMuestra } from "@/lib/mock";
 import type { DatoClima } from "@/lib/clima-real";
 import { useIdioma } from "@/components/ProveedorIdioma";
 import { calcularResumen, costoHotel, nochesPorCiudad } from "@/lib/presupuesto";
-import type { OpcionVuelo, TripInput, TripPlan } from "@/lib/types";
+import type { OpcionHotel, OpcionVuelo, TripInput, TripPlan } from "@/lib/types";
 
 const PASOS_AGENTES = 6;
 
@@ -90,6 +90,31 @@ async function pedirVuelos(plan: TripPlan): Promise<RespuestaVuelos | null> {
       signal: AbortSignal.timeout(70000),
     });
     return res.ok ? ((await res.json()) as RespuestaVuelos) : null;
+  } catch {
+    return null;
+  }
+}
+
+type RespuestaHoteles = { estado: "ok"; hoteles: Record<string, OpcionHotel[]> } | { estado: "sin_clave" | "sin_cupo" | "sin_resultados" | "error" };
+
+/** Pide hoteles reales para cada ciudad del viaje. */
+async function pedirHoteles(plan: TripPlan): Promise<RespuestaHoteles | null> {
+  const ciudades = estadiasPorCiudad(plan).filter((c) => c.iata && c.salida > c.entrada);
+  if (!ciudades.length) return null;
+  try {
+    const res = await fetch("/api/hoteles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ciudades,
+        viajeros: plan.input.viajeros.length,
+        tipo: plan.input.tipoHotel,
+        preferido: plan.input.hotelPreferido,
+        idioma: plan.idioma,
+      }),
+      signal: AbortSignal.timeout(70000),
+    });
+    return res.ok ? ((await res.json()) as RespuestaHoteles) : null;
   } catch {
     return null;
   }
@@ -231,14 +256,16 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
     }
     const nuevo = generarViaje(pedido, idioma);
     // Cada par de pasos es un agente buscador y su verificador: la lista avanza cuando responden de verdad.
-    // Pasos 1-2: clima. Pasos 3-4: vuelos. Los hoteles todavía son de ejemplo.
+    // Pasos 1-2: clima. Pasos 3-4: vuelos. Pasos 5-6: hoteles.
     let clima: DatosClima | null | undefined;
     let vuelos: RespuestaVuelos | null | undefined;
+    let hoteles: RespuestaHoteles | null | undefined;
     pedirClima(nuevo).then((datos) => (clima = datos));
     pedirVuelos(nuevo).then((datos) => (vuelos = datos));
+    pedirHoteles(nuevo).then((datos) => (hoteles = datos));
     let i = 0;
     const timer = setInterval(() => {
-      if ((i >= 1 && clima === undefined) || (i >= 3 && vuelos === undefined)) return;
+      if ((i >= 1 && clima === undefined) || (i >= 3 && vuelos === undefined) || (i >= 5 && hoteles === undefined)) return;
       i++;
       setListos(i);
       if (i >= PASOS_AGENTES) {
@@ -246,6 +273,7 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
         let armado = aplicarClima(nuevo, clima ?? sinClima(nuevo), idioma);
         if (vuelos?.estado === "ok") armado = aplicarVuelos(armado, vuelos.vuelos);
         else if (vuelos) armado = ajustarDuraciones(armado, vuelos.distanciaIda, vuelos.distanciaVuelta);
+        if (hoteles?.estado === "ok") armado = aplicarHoteles(armado, hoteles.hoteles);
         setPlan(armado);
         setEstado("listo");
       }
@@ -338,7 +366,7 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
 
           <p className="mt-6 flex gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
             <Info size={20} className="shrink-0" aria-hidden />
-            {plan.vuelosReales ? t.viaje.avisoVuelos : t.viaje.aviso}
+            {plan.vuelosReales && plan.hotelesReales ? t.viaje.avisoTodo : plan.vuelosReales ? t.viaje.avisoVuelos : plan.hotelesReales ? t.viaje.avisoHoteles : t.viaje.aviso}
           </p>
 
           <nav aria-label={t.viaje.secciones} className="sticky top-16 z-20 -mx-4 mt-6 overflow-x-auto bg-arena-50/90 px-4 py-2 backdrop-blur dark:bg-arena-950/90">

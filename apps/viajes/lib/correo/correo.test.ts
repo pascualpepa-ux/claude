@@ -38,8 +38,11 @@ describe("redactor + verificador", () => {
   it("el aviso dice qué cambió, cómo estaba y cómo está", () => {
     const aviso = correoAviso(
       "es",
-      { titulo: "Tu vuelo UX 41 está demorado", detalle: "Madrid a Buenos Aires, 10 de diciembre", antes: "Sale 23:55", ahora: "Sale 01:40 (1 h 45 min de demora)" },
-      "https://rumbotraveling.com/",
+      {
+        titulo: "Tu vuelo UX 41 está demorado",
+        detalle: "Madrid a Buenos Aires, 10 de diciembre",
+        cambios: [{ que: "Salida de Madrid", antes: "Sale 23:55", ahora: "Sale 01:40 (1 h 45 min de demora)" }],
+      },
       "baja1",
     );
     expect(aviso.html).toContain("Antes");
@@ -49,7 +52,7 @@ describe("redactor + verificador", () => {
   });
 
   it("escapa lo que viene de afuera (no se puede meter HTML en un email)", () => {
-    const aviso = correoAviso("es", { titulo: "<script>x</script>", detalle: "a & b", antes: "1", ahora: "2" }, "https://rumbotraveling.com/", "b");
+    const aviso = correoAviso("es", { titulo: "<script>x</script>", detalle: "a & b", cambios: [{ que: "x", antes: "1", ahora: "2" }] }, "b");
     expect(aviso.html).not.toContain("<script>");
     expect(aviso.html).toContain("&lt;script&gt;");
   });

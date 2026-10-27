@@ -457,6 +457,8 @@ export function traducirViaje(plan: TripPlan, idioma: Idioma): TripPlan {
     ...nuevo,
     climaReal: plan.climaReal,
     vuelosReales: plan.vuelosReales,
+    hotelesReales: plan.hotelesReales,
+    hoteles: plan.hotelesReales ? plan.hoteles : nuevo.hoteles,
     // Los vuelos reales se conservan; en los de ejemplo se conservan las duraciones ya corregidas.
     vuelos: plan.vuelosReales
       ? plan.vuelos
@@ -525,6 +527,31 @@ export function aplicarVuelos(plan: TripPlan, vuelos: OpcionVuelo[]): TripPlan {
   if (!vuelos.length) return plan;
   const elegido = plan.input.aerolinea.trim() ? vuelos[0] : elegirPorPlan(vuelos, (v) => v.precioPorPersona, plan.input.plan);
   return { ...plan, vuelos, vueloElegido: elegido.id, vuelosReales: true };
+}
+
+/** Pone los hoteles reales de cada ciudad (las ciudades sin resultados se quedan con los de ejemplo). */
+export function aplicarHoteles(plan: TripPlan, hoteles: Record<string, OpcionHotel[]>): TripPlan {
+  const nuevos = { ...plan.hoteles };
+  const elegidos = { ...plan.hotelElegido };
+  let alguno = false;
+  for (const [clave, lista] of Object.entries(hoteles)) {
+    if (!lista.length || !nuevos[clave]) continue;
+    nuevos[clave] = lista;
+    // Con un hotel preferido, la primera opción es ese; si no, se elige según el plan.
+    elegidos[clave] = plan.input.hotelPreferido.trim() ? lista[0].id : elegirPorPlan(lista, (h) => h.precioNoche, plan.input.plan).id;
+    alguno = true;
+  }
+  return alguno ? { ...plan, hoteles: nuevos, hotelElegido: elegidos, hotelesReales: true } : plan;
+}
+
+/** Fechas de entrada y salida del hotel de cada ciudad del viaje. */
+export function estadiasPorCiudad(plan: TripPlan) {
+  return plan.ruta.map((r, i) => {
+    const entrada = plan.dias.find((d) => d.clave === r.clave)?.fecha ?? plan.input.fechaIda;
+    const siguiente = plan.ruta[i + 1];
+    const salida = siguiente ? (plan.dias.find((d) => d.clave === siguiente.clave)?.fecha ?? plan.input.fechaVuelta) : plan.input.fechaVuelta;
+    return { clave: r.clave, ciudad: r.ciudad, iata: r.aeropuerto, entrada, salida };
+  });
 }
 
 /** Viaje de muestra para la portada: 5 días en China, como en el pedido original. */

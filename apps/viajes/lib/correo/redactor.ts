@@ -26,7 +26,7 @@ export const TEXTOS = {
     aviso: {
       antes: "Antes",
       ahora: "Ahora",
-      verViaje: "Ver mi viaje",
+      verViaje: "Abrir Rumbo Traveling",
     },
     pie: "Un proyecto de Pascual Pepa",
     baja: "Darme de baja",
@@ -43,7 +43,7 @@ export const TEXTOS = {
     aviso: {
       antes: "Before",
       ahora: "Now",
-      verViaje: "See my trip",
+      verViaje: "Open Rumbo Traveling",
     },
     pie: "A project by Pascual Pepa",
     baja: "Unsubscribe",
@@ -115,36 +115,47 @@ ${escapar(c.vence)}<br><br>${escapar(t.sinBoton)}<br>
 }
 
 export interface CambioAviso {
-  titulo: string; // "Tu vuelo UX 41 está demorado"
-  detalle: string; // una línea de contexto
-  antes: string; // "Sale 23:55"
-  ahora: string; // "Sale 01:40 (1 h 45 min de demora)"
+  que: string; // qué cambió: "Jueves, 26 de noviembre" o "Vuelo UX 41, salida"
+  antes: string;
+  ahora: string;
 }
 
-/** Aviso de un cambio real en el viaje: qué cambió, cómo estaba antes y cómo está ahora. */
-export function correoAviso(idioma: Idioma, cambio: CambioAviso, enlaceViaje: string, tokenBaja: string): Correo {
+export interface Aviso {
+  titulo: string; // "Cambió el pronóstico en Roma"
+  detalle: string; // una línea de contexto: el viaje
+  cambios: CambioAviso[];
+}
+
+/** Aviso de cambios reales en el viaje: qué cambió, cómo estaba antes y cómo está ahora. */
+export function correoAviso(idioma: Idioma, aviso: Aviso, tokenBaja: string): Correo {
   const t = TEXTOS[idioma];
   const a = t.aviso;
   const baja = enlaceBaja(tokenBaja);
-  const fila = (etiqueta: string, valor: string, fuerte: boolean) =>
-    `<tr><td style="padding:10px 14px;font-size:13px;color:${COLOR.gris};width:80px;vertical-align:top;">${escapar(etiqueta)}</td>` +
-    `<td style="padding:10px 14px;font-size:16px;${fuerte ? `font-weight:700;color:${COLOR.olivaOscuro};` : "text-decoration:line-through;color:" + COLOR.gris + ";"}">${escapar(valor)}</td></tr>`;
-  const cuerpo = `<tr><td style="padding:16px 32px 0;">
-<h1 style="margin:0;font-size:22px;line-height:30px;font-weight:700;color:${COLOR.olivaOscuro};">${escapar(cambio.titulo)}</h1>
-<p style="margin:8px 0 20px;font-size:15px;line-height:22px;">${escapar(cambio.detalle)}</p>
+  const enlace = `${SITIO()}/`;
+  const bloque = (c: CambioAviso) => `<tr><td style="padding:0 32px 12px;">
+<p style="margin:0 0 6px;font-size:14px;font-weight:600;">${escapar(c.que)}</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${COLOR.arena};border-radius:12px;">
-${fila(a.antes, cambio.antes, false)}
-${fila(a.ahora, cambio.ahora, true)}
+<tr><td style="padding:10px 14px;font-size:13px;color:${COLOR.gris};width:70px;vertical-align:top;">${escapar(a.antes)}</td><td style="padding:10px 14px;font-size:15px;color:${COLOR.gris};">${escapar(c.antes)}</td></tr>
+<tr><td style="padding:10px 14px;font-size:13px;color:${COLOR.gris};width:70px;vertical-align:top;">${escapar(a.ahora)}</td><td style="padding:10px 14px;font-size:15px;font-weight:700;color:${COLOR.olivaOscuro};">${escapar(c.ahora)}</td></tr>
 </table>
+</td></tr>`;
+  const cuerpo = `<tr><td style="padding:16px 32px 16px;">
+<h1 style="margin:0;font-size:22px;line-height:30px;font-weight:700;color:${COLOR.olivaOscuro};">${escapar(aviso.titulo)}</h1>
+<p style="margin:8px 0 0;font-size:15px;line-height:22px;">${escapar(aviso.detalle)}</p>
 </td></tr>
-<tr><td style="height:24px;"></td></tr>
-${boton(a.verViaje, enlaceViaje)}
+${aviso.cambios.map(bloque).join("\n")}
+<tr><td style="height:16px;"></td></tr>
+${boton(a.verViaje, enlace)}
 <tr><td style="height:24px;"></td></tr>`;
+  const textoCambios = aviso.cambios.map((c) => `${c.que}\n  ${a.antes}: ${c.antes}\n  ${a.ahora}: ${c.ahora}`).join("\n\n");
   return {
     idioma,
-    asunto: cambio.titulo,
-    html: plantilla(idioma, cambio.titulo, cuerpo, baja),
-    texto: `${cambio.titulo}\n\n${cambio.detalle}\n\n${a.antes}: ${cambio.antes}\n${a.ahora}: ${cambio.ahora}\n\n${a.verViaje}: ${enlaceViaje}\n\n--\n${t.pie}\n${t.baja}: ${baja}`,
-    esperado: { frases: [cambio.titulo, cambio.antes, cambio.ahora, a.antes, a.ahora, t.pie, t.baja], enlaces: [enlaceViaje, baja] },
+    asunto: aviso.titulo,
+    html: plantilla(idioma, aviso.titulo, cuerpo, baja),
+    texto: `${aviso.titulo}\n\n${aviso.detalle}\n\n${textoCambios}\n\n${a.verViaje}: ${enlace}\n\n--\n${t.pie}\n${t.baja}: ${baja}`,
+    esperado: {
+      frases: [aviso.titulo, aviso.detalle, a.antes, a.ahora, t.pie, t.baja, ...aviso.cambios.flatMap((c) => [c.que, c.antes, c.ahora])],
+      enlaces: [enlace, baja],
+    },
   };
 }
