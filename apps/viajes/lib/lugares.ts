@@ -30,9 +30,27 @@ export function distanciaKm(lat1: number, lon1: number, lat2: number, lon2: numb
 }
 
 /** Ubicación de un aeropuerto por su código IATA (para pedir el clima de la ciudad). */
-export function coordenadasAeropuerto(iata: string): { lat: number; lon: number } | null {
+export function coordenadasAeropuerto(iata: string): { lat: number; lon: number; pais: string } | null {
   const a = AEROPUERTOS.find((x) => x[0] === iata.toUpperCase());
-  return a ? { lat: a[4], lon: a[5] } : null;
+  return a ? { lat: a[4], lon: a[5], pais: a[3] } : null;
+}
+
+/**
+ * El aeropuerto elegido y los demás de la misma ciudad (a menos de 60 km), separados por coma:
+ * "AEP" -> "AEP,EZE". Así la búsqueda de vuelos no se pierde los que llegan al otro aeropuerto.
+ */
+export function aeropuertosDeLaCiudad(iata: string): string {
+  const a = coordenadasAeropuerto(iata);
+  if (!a) return iata;
+  const otros = aeropuertosCercanos(a.lat, a.lon, 4, 60).map((x) => x.iata).filter((x) => x !== iata.toUpperCase());
+  return [iata.toUpperCase(), ...otros.slice(0, 2)].join(",");
+}
+
+/** Distancia en km entre dos aeropuertos, o null si alguno no está en los datos. */
+export function distanciaAeropuertos(a: string, b: string): number | null {
+  const x = coordenadasAeropuerto(a);
+  const y = coordenadasAeropuerto(b);
+  return x && y ? Math.round(distanciaKm(x.lat, x.lon, y.lat, y.lon)) : null;
 }
 
 /** Aeropuertos con vuelos regulares más cercanos a un punto (hasta `max`, dentro de `radioKm`). */

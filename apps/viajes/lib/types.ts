@@ -60,6 +60,7 @@ export interface Tramo {
   llegada: string; // ISO
   escalas: string[];
   duracionMin: number;
+  numeros?: string[]; // números de vuelo reales ("UX 42"); sin valor en los datos de ejemplo
 }
 
 export interface OpcionVuelo {
@@ -152,4 +153,6 @@ export interface TripPlan {
   gastosDiarios: { comidaPorPersona: number; transportePorPersona: number };
   /** true cuando el clima ya vino de los agentes (y las actividades se acomodaron según ese clima). */
   climaReal?: boolean;
+  /** true cuando los vuelos son reales (Google Flights) y no de ejemplo. */
+  vuelosReales?: boolean;
 }

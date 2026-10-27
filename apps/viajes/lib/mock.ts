@@ -12,6 +12,7 @@ import type {
   Origen,
   Plan,
   TipoHotel,
+  Tramo,
   TramoCiudad,
   Traslado,
   TripInput,
@@ -303,7 +304,7 @@ function armarHoteles(input: TripInput, ciudad: CiudadBase, ahora: string, idiom
   });
 }
 
-function elegirPorPlan<T>(opciones: T[], precio: (o: T) => number, plan: Plan): T {
+export function elegirPorPlan<T>(opciones: T[], precio: (o: T) => number, plan: Plan): T {
   const orden = [...opciones].sort((x, y) => precio(x) - precio(y));
   if (plan === "economico") return orden[0];
   if (plan === "premium") return orden[orden.length - 1];
@@ -455,6 +456,14 @@ export function traducirViaje(plan: TripPlan, idioma: Idioma): TripPlan {
   return {
     ...nuevo,
     climaReal: plan.climaReal,
+    vuelosReales: plan.vuelosReales,
+    // Los vuelos reales se conservan; en los de ejemplo se conservan las duraciones ya corregidas.
+    vuelos: plan.vuelosReales
+      ? plan.vuelos
+      : nuevo.vuelos.map((v, i) => {
+          const previo = plan.vuelos[i];
+          return previo ? { ...v, ida: { ...v.ida, ...previo.ida }, vuelta: { ...v.vuelta, ...previo.vuelta } } : v;
+        }),
     vueloElegido: plan.vueloElegido,
     hotelElegido: { ...nuevo.hotelElegido, ...plan.hotelElegido },
     dias: nuevo.dias.map((d, i) => {
@@ -491,6 +500,31 @@ export function aplicarClima(plan: TripPlan, datos: Record<string, Record<string
   });
   if (reacomodar) ubicarActividades(dias, plan.actividades, plan.input.plan);
   return { ...plan, dias, climaReal: true };
+}
+
+/** Duración creíble de un vuelo según la distancia: ~830 km/h, 35 min de despegue y aterrizaje, y por escala 2 h 30 y un 8% más de recorrido. */
+export function duracionEstimada(km: number, escalas: number) {
+  return Math.round(((km * (1 + 0.08 * escalas)) / 830) * 60 + 35 + escalas * 150);
+}
+
+/**
+ * Sin vuelos reales disponibles, corrige las duraciones de los vuelos de ejemplo con la distancia real
+ * entre aeropuertos (así Madrid–Buenos Aires da unas 12 h 40 directo, no 17 h).
+ */
+export function ajustarDuraciones(plan: TripPlan, kmIda: number | null, kmVuelta: number | null): TripPlan {
+  const ajustar = (t: Tramo, km: number | null): Tramo => {
+    if (!km) return t;
+    const duracionMin = duracionEstimada(km, t.escalas.length);
+    return { ...t, duracionMin, llegada: new Date(new Date(t.salida).getTime() + duracionMin * 60_000).toISOString() };
+  };
+  return { ...plan, vuelos: plan.vuelos.map((v) => ({ ...v, ida: ajustar(v.ida, kmIda), vuelta: ajustar(v.vuelta, kmVuelta) })) };
+}
+
+/** Pone los vuelos reales que trajeron los agentes. La primera opción es la de la aerolínea preferida, si la hay. */
+export function aplicarVuelos(plan: TripPlan, vuelos: OpcionVuelo[]): TripPlan {
+  if (!vuelos.length) return plan;
+  const elegido = plan.input.aerolinea.trim() ? vuelos[0] : elegirPorPlan(vuelos, (v) => v.precioPorPersona, plan.input.plan);
+  return { ...plan, vuelos, vueloElegido: elegido.id, vuelosReales: true };
 }
 
 /** Viaje de muestra para la portada: 5 días en China, como en el pedido original. */

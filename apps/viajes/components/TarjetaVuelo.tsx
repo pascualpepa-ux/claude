@@ -27,6 +27,9 @@ function FilaTramo({ titulo, tramo, Icono }: { titulo: string; tramo: Tramo; Ico
           {tramo.desde} {formatoHora(tramo.salida, idioma)} <span className="text-arena-400">{t.vuelo.a}</span> {tramo.hasta}{" "}
           {formatoHora(tramo.llegada, idioma)}
         </p>
+        {tramo.numeros?.length ? (
+          <p className="text-xs font-medium text-oliva-700 tabular-nums dark:text-oliva-300">{t.vuelo.numeros(tramo.numeros)}</p>
+        ) : null}
       </div>
       <p className="shrink-0 text-right text-xs text-arena-600 dark:text-arena-400">
         {formatoDuracion(tramo.duracionMin)}

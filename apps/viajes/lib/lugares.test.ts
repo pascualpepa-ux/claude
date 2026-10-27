@@ -36,3 +36,12 @@ describe("buscarLugares", () => {
     expect(buscarLugares("Peru").every((l) => l.tipo === "ciudad")).toBe(true);
   });
 });
+
+describe("aeropuertos de la ciudad", () => {
+  it("suma los otros aeropuertos cercanos de la misma ciudad", async () => {
+    const { aeropuertosDeLaCiudad } = await import("./lugares");
+    expect(aeropuertosDeLaCiudad("AEP").split(",")).toContain("EZE");
+    expect(aeropuertosDeLaCiudad("AEP").startsWith("AEP")).toBe(true);
+    expect(aeropuertosDeLaCiudad("MAD")).toBe("MAD");
+  });
+});

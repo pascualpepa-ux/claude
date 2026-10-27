@@ -11,11 +11,11 @@ import { ResumenPresupuesto } from "@/components/ResumenPresupuesto";
 import { CLAVE_ABIERTO, CLAVE_PEDIDO, CLAVE_VIAJE, borrarGuardado, guardarViaje, leerGuardados } from "@/lib/almacen";
 import { usd } from "@/lib/dinero";
 import { formatoCorto } from "@/lib/fechas";
-import { aplicarClima, generarViaje, traducirViaje, viajeDeMuestra } from "@/lib/mock";
+import { ajustarDuraciones, aplicarClima, aplicarVuelos, generarViaje, traducirViaje, viajeDeMuestra } from "@/lib/mock";
 import type { DatoClima } from "@/lib/clima-real";
 import { useIdioma } from "@/components/ProveedorIdioma";
 import { calcularResumen, costoHotel, nochesPorCiudad } from "@/lib/presupuesto";
-import type { TripInput, TripPlan } from "@/lib/types";
+import type { OpcionVuelo, TripInput, TripPlan } from "@/lib/types";
 
 const PASOS_AGENTES = 6;
 
@@ -60,6 +60,38 @@ function sinClima(plan: TripPlan): DatosClima {
     };
   }
   return datos;
+}
+
+type RespuestaVuelos =
+  | { estado: "ok"; vuelos: OpcionVuelo[] }
+  | { estado: "sin_clave" | "sin_cupo" | "sin_resultados" | "error"; distanciaIda: number | null; distanciaVuelta: number | null };
+
+/** Pide vuelos reales. Sin ellos, la respuesta trae las distancias para corregir las duraciones de ejemplo. */
+async function pedirVuelos(plan: TripPlan): Promise<RespuestaVuelos | null> {
+  const { input, ruta } = plan;
+  const origen = input.aeropuertoOrigen;
+  if (!origen || !ruta.length) return null;
+  try {
+    const res = await fetch("/api/vuelos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        origen,
+        destino: ruta[0].aeropuerto,
+        regreso: ruta[ruta.length - 1].aeropuerto,
+        ida: input.fechaIda,
+        vuelta: input.fechaVuelta,
+        clase: input.clase,
+        aerolinea: input.aerolinea,
+        equipaje: input.equipaje,
+        idioma: plan.idioma,
+      }),
+      signal: AbortSignal.timeout(70000),
+    });
+    return res.ok ? ((await res.json()) as RespuestaVuelos) : null;
+  } catch {
+    return null;
+  }
 }
 
 function leer<T>(clave: string): T | null {
@@ -197,18 +229,23 @@ export function VistaViaje() {
       return;
     }
     const nuevo = generarViaje(pedido, idioma);
-    // Los dos primeros pasos son los agentes del clima (buscador y verificador): esperan su respuesta real.
-    // Vuelos y hoteles todavía son de ejemplo.
+    // Cada par de pasos es un agente buscador y su verificador: la lista avanza cuando responden de verdad.
+    // Pasos 1-2: clima. Pasos 3-4: vuelos. Los hoteles todavía son de ejemplo.
     let clima: DatosClima | null | undefined;
+    let vuelos: RespuestaVuelos | null | undefined;
     pedirClima(nuevo).then((datos) => (clima = datos));
+    pedirVuelos(nuevo).then((datos) => (vuelos = datos));
     let i = 0;
     const timer = setInterval(() => {
-      if (i >= 1 && clima === undefined) return;
+      if ((i >= 1 && clima === undefined) || (i >= 3 && vuelos === undefined)) return;
       i++;
       setListos(i);
       if (i >= PASOS_AGENTES) {
         clearInterval(timer);
-        setPlan(aplicarClima(nuevo, clima ?? sinClima(nuevo), idioma));
+        let armado = aplicarClima(nuevo, clima ?? sinClima(nuevo), idioma);
+        if (vuelos?.estado === "ok") armado = aplicarVuelos(armado, vuelos.vuelos);
+        else if (vuelos) armado = ajustarDuraciones(armado, vuelos.distanciaIda, vuelos.distanciaVuelta);
+        setPlan(armado);
         setEstado("listo");
       }
     }, 280);
@@ -300,7 +337,7 @@ export function VistaViaje() {
 
           <p className="mt-6 flex gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
             <Info size={20} className="shrink-0" aria-hidden />
-            {t.viaje.aviso}
+            {plan.vuelosReales ? t.viaje.avisoVuelos : t.viaje.aviso}
           </p>
 
           <nav aria-label={t.viaje.secciones} className="sticky top-16 z-20 -mx-4 mt-6 overflow-x-auto bg-arena-50/90 px-4 py-2 backdrop-blur dark:bg-arena-950/90">

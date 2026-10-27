@@ -111,6 +111,7 @@ const es = {
     reservar: "Reservar",
     elegir: "Elegir",
     elegido: "Elegido",
+    numeros: (n: string[]) => `${n.length > 1 ? "Vuelos" : "Vuelo"} ${n.join(" + ")}`,
   },
   hotel: {
     tipos: { hostel: "Hostel", "3": "3 estrellas", "4": "4 estrellas", "5": "5 estrellas", depto: "Departamento" },
@@ -170,6 +171,7 @@ const es = {
     conAeropuerto: (ciudad: string, iata: string) => `${ciudad} (${iata})`,
     viajeros: "Viajeros",
     aviso: "El clima es real: lo busca Open-Meteo y lo verifica MET Norway. Los vuelos y hoteles todavía son de ejemplo: los reales se conectan en la próxima etapa.",
+    avisoVuelos: "El clima y los vuelos son reales (Open-Meteo y Google Flights, con verificación). Los hoteles todavía son de ejemplo.",
     secciones: "Secciones",
     nav: { itinerario: "Itinerario", vuelos: "Vuelos", alojamiento: "Alojamiento", presupuesto: "Presupuesto" },
     rutaTitulo: "Ruta sugerida",
@@ -472,6 +474,7 @@ const en: Textos = {
     reservar: "Book",
     elegir: "Choose",
     elegido: "Chosen",
+    numeros: (n) => `${n.length > 1 ? "Flights" : "Flight"} ${n.join(" + ")}`,
   },
   hotel: {
     tipos: { hostel: "Hostel", "3": "3 stars", "4": "4 stars", "5": "5 stars", depto: "Apartment" },
@@ -531,6 +534,7 @@ const en: Textos = {
     conAeropuerto: (ciudad, iata) => `${ciudad} (${iata})`,
     viajeros: "Travelers",
     aviso: "The weather is real: Open-Meteo finds it and MET Norway checks it. Flights and hotels are still sample data: real ones come in the next stage.",
+    avisoVuelos: "Weather and flights are real (Open-Meteo and Google Flights, double-checked). Hotels are still sample data.",
     secciones: "Sections",
     nav: { itinerario: "Itinerary", vuelos: "Flights", alojamiento: "Stays", presupuesto: "Budget" },
     rutaTitulo: "Suggested route",

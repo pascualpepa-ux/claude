@@ -168,3 +168,26 @@ describe("clima real", () => {
     expect(traducirViaje(plan, "en").dias[1].clima.maxima).toBe(18);
   });
 });
+
+describe("vuelos", () => {
+  it("las duraciones de ejemplo usan la distancia real: Madrid–Buenos Aires directo ronda las 12 h 40", async () => {
+    const { duracionEstimada, ajustarDuraciones } = await import("./mock");
+    const directo = duracionEstimada(10050, 0);
+    expect(directo).toBeGreaterThan(12 * 60);
+    expect(directo).toBeLessThan(13 * 60 + 15);
+    const plan = ajustarDuraciones(generarViaje({ ...viajeDeMuestra(), destino: "Lisboa" }), 9600, 9600);
+    for (const v of plan.vuelos) {
+      expect(v.ida.duracionMin).toBe(duracionEstimada(9600, v.ida.escalas.length));
+      expect(new Date(v.ida.llegada).getTime() - new Date(v.ida.salida).getTime()).toBe(v.ida.duracionMin * 60_000);
+    }
+  });
+
+  it("reconoce la aerolínea escrita por la persona", async () => {
+    const { codigoAerolinea } = await import("./aerolineas");
+    expect(codigoAerolinea("Air Europa")).toBe("UX");
+    expect(codigoAerolinea("aerolíneas argentinas")).toBe("AR");
+    expect(codigoAerolinea("ux")).toBe("UX");
+    expect(codigoAerolinea("Iberia")).toBe("IB");
+    expect(codigoAerolinea("una que no existe")).toBeNull();
+  });
+});
