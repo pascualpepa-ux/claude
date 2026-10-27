@@ -45,7 +45,7 @@ export function Ayudante() {
     if (abierto) campo.current?.focus();
   }, [abierto]);
 
-  if (ruta.startsWith("/admin")) return null;
+  if (ruta.startsWith("/admin") || ruta.startsWith("/pausa")) return null;
 
   const enviar = async (texto: string) => {
     const pregunta = texto.trim().slice(0, LIMITES.caracteres);
@@ -60,6 +60,11 @@ export function Ayudante() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mensajes: historial, contexto: contexto(ruta), idioma }),
       });
+      if (res.headers.get("X-Rumbo-Pausa")) {
+        // Malas palabras: la web queda en pausa un minuto (la cuenta regresiva está en /pausa).
+        window.location.assign("/pausa");
+        return;
+      }
       if (!res.body) throw new Error("sin respuesta");
       const lector = res.body.getReader();
       const dec = new TextDecoder();

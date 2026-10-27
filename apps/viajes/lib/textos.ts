@@ -11,6 +11,7 @@ const es = {
     planificar: "Planificar viaje · Rumbo Traveling",
     viaje: "Tu viaje · Rumbo Traveling",
     admin: "Administración · Rumbo Traveling",
+    pausa: "Pausa · Rumbo Traveling",
   },
   encabezado: {
     inicio: "Rumbo Traveling, ir al inicio",
@@ -299,6 +300,15 @@ const es = {
     enviar: "Enviar",
     sinConexion: "No pude responder. Revisá tu conexión y probá de nuevo.",
   },
+  pausa: {
+    titulo: "Tomate un minuto",
+    bajada: "Usaste palabras que no están permitidas en el chat de ayuda. Vas a poder volver a la página cuando termine la cuenta.",
+    restante: "Tiempo restante",
+    segundos: (n: number) => `${n} ${plural(n, "segundo", "segundos")}`,
+    volver: "Volver a Rumbo Traveling",
+    esperar: (n: number) => `Volvés en ${n} s`,
+    nota: "El chat es para ayudarte con tu viaje. Gracias por mantener el respeto.",
+  },
   admin: {
     titulo: "Administración",
     sinConfigurar: "El acceso de administrador todavía no está configurado.",
@@ -358,6 +368,7 @@ const en: Textos = {
     planificar: "Plan a trip · Rumbo Traveling",
     viaje: "Your trip · Rumbo Traveling",
     admin: "Admin · Rumbo Traveling",
+    pausa: "Pause · Rumbo Traveling",
   },
   encabezado: {
     inicio: "Rumbo Traveling, go to home page",
@@ -643,6 +654,15 @@ const en: Textos = {
     placeholder: "Type your question",
     enviar: "Send",
     sinConexion: "I couldn't answer. Check your connection and try again.",
+  },
+  pausa: {
+    titulo: "Take a minute",
+    bajada: "You used words that aren't allowed in the help chat. You can go back to the site when the countdown ends.",
+    restante: "Time left",
+    segundos: (n) => `${n} ${plural(n, "second", "seconds")}`,
+    volver: "Back to Rumbo Traveling",
+    esperar: (n) => `Back in ${n} s`,
+    nota: "The chat is here to help with your trip. Thanks for keeping it respectful.",
   },
   admin: {
     titulo: "Admin",

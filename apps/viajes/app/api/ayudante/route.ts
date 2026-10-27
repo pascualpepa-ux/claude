@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { BASE_AYUDA, buscarAyuda, fichaComoTexto } from "@/lib/ayuda-base";
 import { LIMITES, SISTEMA, type MensajeChat } from "@/lib/ayudante";
+import { COOKIE_PAUSA, SEGUNDOS_PAUSA, tieneGroserias } from "@/lib/groserias";
 import { esIdioma, type Idioma } from "@/lib/idioma";
 
 export const runtime = "nodejs";
@@ -13,6 +14,7 @@ const pedidos = new Map<string, number[]>();
 
 const AVISOS: Record<Idioma, Record<string, string>> = {
   es: {
+    pausa: "Ese lenguaje no está permitido. Vas a tener que esperar un minuto.",
     sinCoincidencia: "No tengo una respuesta segura para eso. Probá preguntarlo de otra forma o elegí uno de estos temas:",
     limite: "Hiciste muchas preguntas seguidas. Esperá unos minutos y volvé a probar.",
     invalido: "No pude leer tu mensaje. Probá escribirlo de nuevo.",
@@ -22,6 +24,7 @@ const AVISOS: Record<Idioma, Record<string, string>> = {
     error: "Hubo un problema al responder. Probá de nuevo.",
   },
   en: {
+    pausa: "That language isn't allowed. You'll have to wait a minute.",
     sinCoincidencia: "I don't have a reliable answer for that. Try asking another way, or pick one of these topics:",
     limite: "You've asked a lot of questions in a row. Wait a few minutes and try again.",
     invalido: "I couldn't read your message. Try writing it again.",
@@ -66,6 +69,19 @@ export async function POST(req: Request) {
   const aviso = AVISOS[idioma];
   const datos = validar(cuerpo);
   if (!datos) return texto(aviso.invalido, 400);
+
+  // Malas palabras: un minuto de pausa. La cookie la controla middleware.ts en toda la web.
+  if (tieneGroserias(datos.mensajes.at(-1)!.content)) {
+    const hasta = Date.now() + SEGUNDOS_PAUSA * 1000;
+    return new Response(aviso.pausa, {
+      status: 403,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Rumbo-Pausa": "1",
+        "Set-Cookie": `${COOKIE_PAUSA}=${hasta}; Max-Age=${SEGUNDOS_PAUSA}; Path=/; HttpOnly; Secure; SameSite=Lax`,
+      },
+    });
+  }
 
   // Sin clave de Claude, responde directo desde la ficha: siempre exacto, aunque menos flexible.
   if (!process.env.ANTHROPIC_API_KEY) {
