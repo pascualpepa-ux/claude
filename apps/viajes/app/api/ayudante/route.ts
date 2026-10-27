@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { BASE_AYUDA, buscarAyuda, fichaComoTexto } from "@/lib/ayuda-base";
 import { LIMITES, SISTEMA, type MensajeChat } from "@/lib/ayudante";
 import { COOKIE_PAUSA, SEGUNDOS_PAUSA, tieneGroserias } from "@/lib/groserias";
+import { responderCuenta } from "@/lib/calculadora";
 import { esIdioma, type Idioma } from "@/lib/idioma";
 
 export const runtime = "nodejs";
@@ -15,7 +16,7 @@ const pedidos = new Map<string, number[]>();
 const AVISOS: Record<Idioma, Record<string, string>> = {
   es: {
     pausa: "Ese lenguaje no está permitido. Vas a tener que esperar un minuto.",
-    sinCoincidencia: "No tengo una respuesta segura para eso. Probá preguntarlo de otra forma o elegí uno de estos temas:",
+    sinCoincidencia: "Todavía no puedo responder preguntas de cualquier tema: por ahora te ayudo con Rumbo y con cuentas. Probá preguntarlo de otra forma o elegí uno de estos temas:",
     limite: "Hiciste muchas preguntas seguidas. Esperá unos minutos y volvé a probar.",
     invalido: "No pude leer tu mensaje. Probá escribirlo de nuevo.",
     rechazo: "Perdón, no puedo ayudar con eso. ¿Te ayudo con algo de tu viaje?",
@@ -25,7 +26,7 @@ const AVISOS: Record<Idioma, Record<string, string>> = {
   },
   en: {
     pausa: "That language isn't allowed. You'll have to wait a minute.",
-    sinCoincidencia: "I don't have a reliable answer for that. Try asking another way, or pick one of these topics:",
+    sinCoincidencia: "I can't answer questions on any topic yet: for now I can help with Rumbo and with math. Try asking another way, or pick one of these topics:",
     limite: "You've asked a lot of questions in a row. Wait a few minutes and try again.",
     invalido: "I couldn't read your message. Try writing it again.",
     rechazo: "Sorry, I can't help with that. Can I help with something about your trip?",
@@ -82,6 +83,10 @@ export async function POST(req: Request) {
       },
     });
   }
+
+  // Cuentas ("2 más 2"): las resuelve la calculadora, exacta y sin costo, con o sin IA.
+  const cuenta = responderCuenta(datos.mensajes.at(-1)!.content, idioma);
+  if (cuenta) return texto(cuenta, 200);
 
   // Sin clave de Claude, responde directo desde la ficha: siempre exacto, aunque menos flexible.
   if (!process.env.ANTHROPIC_API_KEY) {

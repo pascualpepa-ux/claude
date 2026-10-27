@@ -38,7 +38,7 @@ const es = {
     porPersonaCon: (aerolinea: string) => `por persona, con vuelo de ${aerolinea}`,
     agentesTitulo: "Diez agentes trabajan en tu viaje.",
     agentesBajada:
-      "Cada uno tiene una tarea. Tres buscan el clima, los vuelos y los hoteles, y otros tres revisan cada dato con una segunda fuente antes de mostrártelo. Uno vigila tu viaje cada 30 minutos para avisarte si algo cambia, otro escribe esos avisos en tu idioma y otro controla que cada email esté bien y te llegue. El décimo es el asistente que responde tus dudas. Si algo no se puede confirmar, no lo inventamos: queda marcado.",
+      "Cada uno tiene una tarea. Tres buscan el clima, los vuelos y los hoteles, y otros tres revisan cada dato con una segunda fuente antes de mostrártelo. Uno vigila tu viaje cada 30 minutos para avisarte si algo cambia, otro escribe esos avisos en tu idioma y otro controla que cada email esté bien y te llegue. Y el décimo es tu guía: el asistente del chat que te acompaña y responde lo que le preguntes. Si algo no se puede confirmar, no lo inventamos: queda marcado.",
     busca: "Busca",
     verifica: "Verifica",
     agentes: {
@@ -302,7 +302,7 @@ const es = {
   },
   ayudante: {
     abrir: "¿Necesitás ayuda?",
-    titulo: "Asistente de Rumbo",
+    titulo: "Tu guía de Rumbo",
     aviso: "Respuestas automáticas. Ante la duda, confirmá en fuentes oficiales.",
     cerrar: "Cerrar asistente",
     saludo: "Hola. Te ayudo a usar Rumbo Traveling o con dudas de tu viaje. ¿Qué necesitás?",
@@ -447,7 +447,7 @@ const en: Textos = {
     porPersonaCon: (aerolinea) => `per person, flying ${aerolinea}`,
     agentesTitulo: "Ten agents work on your trip.",
     agentesBajada:
-      "Each one has a job. Three look up the weather, flights and hotels, and three more check every detail against a second source before you see it. One watches your trip every 30 minutes so it can tell you if anything changes, another writes those notifications in your language, and another makes sure every email is right and actually reaches you. The tenth is the assistant that answers your questions. If something can't be confirmed, we don't make it up: it gets flagged.",
+      "Each one has a job. Three look up the weather, flights and hotels, and three more check every detail against a second source before you see it. One watches your trip every 30 minutes so it can tell you if anything changes, another writes those notifications in your language, and another makes sure every email is right and actually reaches you. And the tenth is your guide: the chat assistant that stays with you and answers whatever you ask. If something can't be confirmed, we don't make it up: it gets flagged.",
     busca: "Searches",
     verifica: "Checks",
     agentes: {
@@ -709,7 +709,7 @@ const en: Textos = {
   },
   ayudante: {
     abrir: "Need help?",
-    titulo: "Rumbo assistant",
+    titulo: "Your Rumbo guide",
     aviso: "Automatic answers. When in doubt, check official sources.",
     cerrar: "Close assistant",
     saludo: "Hi! I can help you use Rumbo Traveling or answer questions about your trip. What do you need?",
