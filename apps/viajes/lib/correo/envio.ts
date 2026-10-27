@@ -11,7 +11,8 @@ const API = () => process.env.RESEND_API_URL || "https://api.resend.com";
 const REMITENTE = () => process.env.CORREO_REMITENTE || "Rumbo Traveling <info@rumbotraveling.com>";
 // Las respuestas van a un buzón que lee Rumbo (reply.rumbotraveling.com, en Resend): el agente contesta y te reenvía todo.
 const RESPUESTAS = () => process.env.CORREO_RESPUESTAS || "Rumbo Traveling <respuestas@reply.rumbotraveling.com>";
-export const DUENO = () => process.env.CORREO_ALERTAS || "pascualpepa@icloud.com";
+// Los avisos para el dueño (suscripciones, respuestas, fallas) van al email de la web, que se lee en iCloud.
+export const DUENO = () => process.env.CORREO_ALERTAS || "info@rumbotraveling.com";
 
 export const correoConfigurado = () => !!process.env.RESEND_API_KEY;
 
