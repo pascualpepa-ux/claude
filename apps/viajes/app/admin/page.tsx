@@ -4,6 +4,9 @@ import { cookies } from "next/headers";
 import { ArrowSquareOut, ChartBar } from "@phosphor-icons/react/dist/ssr";
 import { GraficoVisitas, type Punto } from "@/components/GraficoVisitas";
 import { ListaDesglose } from "@/components/ListaDesglose";
+import { ListaSuscriptores } from "@/components/ListaSuscriptores";
+import { dbConfigurada } from "@/lib/db";
+import { listarSuscriptores, type FilaSuscriptor } from "@/lib/suscripciones";
 import { COOKIE_ADMIN, adminConfigurado, sesionValida } from "@/lib/admin";
 import { formatoCorto } from "@/lib/fechas";
 import { estadisticas, type VisitasDia } from "@/lib/goatcounter";
@@ -46,7 +49,17 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
 
   const pedido = Number((await searchParams).dias);
   const periodo = PERIODOS.find((p) => p === pedido) ?? 30;
-  const datos = await estadisticas(periodo);
+  const [datos, suscriptores] = await Promise.all([
+    estadisticas(periodo),
+    dbConfigurada()
+      ? listarSuscriptores()
+          .then((filas) => ({ estado: "ok" as const, filas }))
+          .catch((e) => {
+            console.error("admin suscriptores:", e);
+            return { estado: "error" as const, filas: [] as FilaSuscriptor[] };
+          })
+      : Promise.resolve({ estado: "sin_base" as const, filas: [] as FilaSuscriptor[] }),
+  ]);
 
   const paisNombre = (codigo: string) => {
     try {
@@ -81,6 +94,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <BotonSalir />
         </div>
       </header>
+
+      <ListaSuscriptores filas={suscriptores.filas} estado={suscriptores.estado} idioma={idioma} T={A.suscriptores} />
 
       {datos.estado === "sin_configurar" && (
         <div className="mt-8 flex gap-3 rounded-2xl border border-arena-200 bg-papel p-5 text-sm text-arena-700 dark:border-arena-800 dark:bg-arena-900 dark:text-arena-300">
