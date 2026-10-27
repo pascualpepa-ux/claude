@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { registrarEvento } from "@/lib/correo/envio";
+import { procesarRespuesta } from "@/lib/correo/respuestas";
 
 export const runtime = "nodejs";
 
@@ -29,7 +30,10 @@ export async function POST(req: Request) {
   const firmas = req.headers.get("svix-signature") ?? "";
   if (!firmaValida(cuerpo, id, momento, firmas, secreto)) return new Response("firma inválida", { status: 401 });
   const evento = JSON.parse(cuerpo) as { type?: string; data?: { email_id?: string; bounce?: { message?: string } } };
-  if (evento.type && evento.data?.email_id) {
+  if (evento.type === "email.received" && evento.data?.email_id) {
+    // Alguien respondió un email de Rumbo: el agente contesta y le reenvía todo al dueño.
+    await procesarRespuesta(evento.data.email_id);
+  } else if (evento.type && evento.data?.email_id) {
     await registrarEvento(evento.data.email_id, evento.type, evento.data.bounce?.message ?? "");
   }
   return new Response("ok");

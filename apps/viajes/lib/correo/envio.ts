@@ -9,7 +9,8 @@ import { verificarCorreo } from "./verificador";
 
 const API = () => process.env.RESEND_API_URL || "https://api.resend.com";
 const REMITENTE = () => process.env.CORREO_REMITENTE || "Rumbo Traveling <info@rumbotraveling.com>";
-const RESPUESTAS = () => process.env.CORREO_RESPUESTAS || "pascualpepa@icloud.com";
+// Las respuestas van a un buzón que lee Rumbo (reply.rumbotraveling.com, en Resend): el agente contesta y te reenvía todo.
+const RESPUESTAS = () => process.env.CORREO_RESPUESTAS || "Rumbo Traveling <respuestas@reply.rumbotraveling.com>";
 export const DUENO = () => process.env.CORREO_ALERTAS || "pascualpepa@icloud.com";
 
 export const correoConfigurado = () => !!process.env.RESEND_API_KEY;
@@ -19,7 +20,12 @@ interface EnvioResend {
   message?: string;
 }
 
-async function mandarAResend(para: string, correo: Correo, enlaceBaja?: string): Promise<{ id?: string; error?: string }> {
+export async function mandarAResend(
+  para: string,
+  correo: Correo,
+  enlaceBaja?: string,
+  extra: { replyTo?: string; headers?: Record<string, string> } = {},
+): Promise<{ id?: string; error?: string }> {
   try {
     const res = await fetch(`${API()}/emails`, {
       method: "POST",
@@ -27,17 +33,18 @@ async function mandarAResend(para: string, correo: Correo, enlaceBaja?: string):
       body: JSON.stringify({
         from: REMITENTE(),
         to: [para],
-        reply_to: RESPUESTAS(),
+        reply_to: extra.replyTo ?? RESPUESTAS(),
         subject: correo.asunto,
         html: correo.html,
         text: correo.texto,
         // Baja en un clic desde Gmail o Apple Mail (y mejora la entrega: menos spam).
-        ...(enlaceBaja && {
-          headers: {
+        headers: {
+          ...extra.headers,
+          ...(enlaceBaja && {
             "List-Unsubscribe": `<${enlaceBaja.replace("/suscripcion/baja", "/api/suscripcion/baja")}>`,
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-          },
-        }),
+          }),
+        },
       }),
     });
     const j = (await res.json().catch(() => ({}))) as EnvioResend;
@@ -48,7 +55,7 @@ async function mandarAResend(para: string, correo: Correo, enlaceBaja?: string):
 }
 
 /** Aviso al dueño cuando un email no se pudo mandar (va directo, sin pasar por la tabla de envíos). */
-export async function alertarDueno(asunto: string, detalle: string) {
+export async function alertarDueno(asunto: string, detalle: string, responderA?: string) {
   const texto = `${detalle}\n\n--\nRumbo Traveling (aviso automático)`;
   const correo: Correo = {
     idioma: "es",
@@ -57,7 +64,8 @@ export async function alertarDueno(asunto: string, detalle: string) {
     texto,
     esperado: { frases: [], enlaces: [] },
   };
-  const r = await mandarAResend(DUENO(), correo);
+  // Si es una respuesta de alguien, "Responder" le contesta directo a esa persona.
+  const r = await mandarAResend(DUENO(), correo, undefined, { replyTo: responderA ?? DUENO() });
   if (r.error) console.error("alerta al dueño no enviada:", r.error, asunto, detalle);
 }
 

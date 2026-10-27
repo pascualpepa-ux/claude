@@ -28,6 +28,11 @@ export const TEXTOS = {
       ahora: "Ahora",
       verViaje: "Abrir Rumbo Traveling",
     },
+    respuesta: {
+      titulo: "¡Gracias por escribirnos!",
+      linea: "Recibimos tu mensaje y se lo vamos a informar a nuestro jefe. Te respondemos pronto.",
+      sinAsunto: "Tu mensaje",
+    },
     pie: "Un proyecto de Pascual Pepa",
     baja: "Darme de baja",
     sinBoton: "Si el botón no funciona, copiá este link en el navegador:",
@@ -44,6 +49,11 @@ export const TEXTOS = {
       antes: "Before",
       ahora: "Now",
       verViaje: "Open Rumbo Traveling",
+    },
+    respuesta: {
+      titulo: "Thanks for writing to us!",
+      linea: "We got your message and we'll pass it on to our boss. We'll get back to you soon.",
+      sinAsunto: "Your message",
     },
     pie: "A project by Pascual Pepa",
     baja: "Unsubscribe",
@@ -73,8 +83,8 @@ ${cuerpo}
 </table>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
 <tr><td align="center" style="padding:20px 16px;font-size:13px;line-height:20px;color:${COLOR.gris};">
-${escapar(t.pie)}<br>
-<a href="${escapar(enlaceBaja)}" style="color:${COLOR.gris};text-decoration:underline;">${escapar(t.baja)}</a>
+${escapar(t.pie)}${enlaceBaja ? `<br>
+<a href="${escapar(enlaceBaja)}" style="color:${COLOR.gris};text-decoration:underline;">${escapar(t.baja)}</a>` : ""}
 </td></tr>
 </table>
 </td></tr>
@@ -157,5 +167,23 @@ ${boton(a.verViaje, enlace)}
       frases: [aviso.titulo, aviso.detalle, a.antes, a.ahora, t.pie, t.baja, ...aviso.cambios.flatMap((c) => [c.que, c.antes, c.ahora])],
       enlaces: [enlace, baja],
     },
+  };
+}
+
+/** Respuesta automática a quien le escribe a Rumbo (no es suscripción: no lleva link de baja). */
+export function correoRespuestaAutomatica(idioma: Idioma, asuntoOriginal: string): Correo {
+  const t = TEXTOS[idioma];
+  const r = t.respuesta;
+  const asunto = /^re:/i.test(asuntoOriginal.trim()) ? asuntoOriginal.trim() : `Re: ${asuntoOriginal.trim() || r.sinAsunto}`;
+  const cuerpo = `<tr><td align="center" style="padding:16px 32px 32px;">
+<h1 style="margin:0;font-size:22px;line-height:30px;font-weight:700;color:${COLOR.olivaOscuro};">${escapar(r.titulo)}</h1>
+<p style="margin:12px 0 0;font-size:16px;line-height:24px;">${escapar(r.linea)}</p>
+</td></tr>`;
+  return {
+    idioma,
+    asunto,
+    html: plantilla(idioma, asunto, cuerpo, ""),
+    texto: `${r.titulo}\n\n${r.linea}\n\n--\n${t.pie}`,
+    esperado: { frases: [r.titulo, r.linea, t.pie], enlaces: [] },
   };
 }
