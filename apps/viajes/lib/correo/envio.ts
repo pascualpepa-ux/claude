@@ -1,6 +1,6 @@
 import { sql } from "../db";
 import type { Idioma } from "../idioma";
-import type { Correo } from "./redactor";
+import { SITIO, type Correo } from "./redactor";
 import { verificarCorreo } from "./verificador";
 
 // Envío con Resend (https://resend.com/docs/api-reference/emails/send-email) y seguimiento de la entrega.
@@ -61,8 +61,11 @@ export async function alertarDueno(asunto: string, detalle: string, responderA?:
   const correo: Correo = {
     idioma: "es",
     asunto: `[Rumbo] ${asunto}`,
-    // Letra normal (la misma del sistema), no de máquina de escribir.
-    html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:22px;color:#2b2a24;white-space:pre-wrap">${texto.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`,
+    // Con el logo arriba y letra normal (la misma del sistema), como todos los emails de Rumbo.
+    html:
+      `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:22px;color:#2b2a24;">` +
+      `<img src="${SITIO()}/marca/logo-completo-oliva.png" width="96" alt="Rumbo Traveling" style="display:block;width:96px;height:auto;border:0;margin:0 0 16px;">` +
+      `<div style="white-space:pre-wrap">${texto.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div></div>`,
     texto,
     esperado: { frases: [], enlaces: [] },
   };
