@@ -158,7 +158,7 @@ function cantidadCiudades(dias: number): number {
 
 const COSTO_COMIDA: Record<Plan, number> = { economico: 22, equilibrado: 40, premium: 85 };
 const COSTO_TRANSPORTE: Record<Plan, number> = { economico: 6, equilibrado: 12, premium: 30 };
-const PRECIO_HOTEL: Record<TipoHotel, number> = { hostel: 28, "3": 75, "4": 125, "5": 260, depto: 95 };
+const PRECIO_HOTEL: Record<TipoHotel, number> = { hostel: 28, "3": 75, "4": 125, "5": 260, depto: 95, propio: 0 };
 const MULT_CLASE = { economica: 1, premium: 1.7, business: 3.2 } as const;
 
 function clima(ciudad: string, fecha: string, idioma: Idioma): ClimaDia {
@@ -421,6 +421,11 @@ export function generarViaje(input: TripInput, idioma: Idioma = "es"): TripPlan 
   const hoteles: Record<string, OpcionHotel[]> = {};
   const hotelElegido: Record<string, string> = {};
   for (const c of ciudades) {
+    // Si ya tienen dónde quedarse (casa propia, de amigos o familia), no hay alojamiento que buscar ni pagar.
+    if (input.tipoHotel === "propio") {
+      hoteles[c.clave] = [];
+      continue;
+    }
     hoteles[c.clave] = armarHoteles(input, c, ahora, idioma);
     hotelElegido[c.clave] = input.hotelPreferido.trim()
       ? hoteles[c.clave][0].id

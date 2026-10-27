@@ -118,7 +118,8 @@ function aPedido(b: Borrador, idioma: Idioma): TripInput {
     aerolinea: b.aerolinea.trim(),
     clase: b.clase,
     tipoHotel: b.tipoHotel,
-    hotelPreferido: b.hotelPreferido.trim(),
+    // Con alojamiento propio no hay hotel preferido que buscar.
+    hotelPreferido: b.tipoHotel === "propio" ? "" : b.hotelPreferido.trim(),
     plan: b.plan,
     equipaje: b.equipaje,
   };
@@ -512,11 +513,14 @@ export function Asistente() {
                   { valor: "4", titulo: A.alojamientos["4"] },
                   { valor: "5", titulo: A.alojamientos["5"] },
                   { valor: "depto", titulo: A.alojamientos["depto"] },
+                  { valor: "propio", titulo: A.alojamientos["propio"], detalle: A.propioDetalle },
                 ]}
               />
-              <Campo etiqueta={A.hotelPreferido} ayuda={A.hotelAyuda}>
-                {(p) => <input {...p} value={b.hotelPreferido} onChange={(e) => cambiar("hotelPreferido", e.target.value)} placeholder={A.nombreHotel} autoComplete="off" />}
-              </Campo>
+              {b.tipoHotel !== "propio" && (
+                <Campo etiqueta={A.hotelPreferido} ayuda={A.hotelAyuda}>
+                  {(p) => <input {...p} value={b.hotelPreferido} onChange={(e) => cambiar("hotelPreferido", e.target.value)} placeholder={A.nombreHotel} autoComplete="off" />}
+                </Campo>
+              )}
             </>
           )}
 

@@ -191,3 +191,15 @@ describe("vuelos", () => {
     expect(codigoAerolinea("una que no existe")).toBeNull();
   });
 });
+
+describe("ya tengo dónde quedarme", () => {
+  it("no arma hoteles ni los suma al presupuesto", () => {
+    const conHotel = generarViaje({ ...viajeDeMuestra(), destino: "Lisboa" });
+    const propio = generarViaje({ ...viajeDeMuestra(), destino: "Lisboa", tipoHotel: "propio", hotelPreferido: "" });
+    expect(Object.values(propio.hoteles).every((l) => l.length === 0)).toBe(true);
+    const r = calcularResumen(propio);
+    expect(r.lineas.some((l) => l.id.startsWith("hotel-"))).toBe(false);
+    expect(r.total).toBeLessThan(calcularResumen(conHotel).total);
+    expect(traducirViaje(propio, "en").hoteles.lisboa).toEqual([]);
+  });
+});

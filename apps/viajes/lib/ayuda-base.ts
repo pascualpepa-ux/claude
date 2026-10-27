@@ -191,9 +191,10 @@ const es: EntradaAyuda[] = [
   {
     id: "alojamiento",
     pregunta: "¿Qué tipos de alojamiento hay?",
-    claves: ["hotel", "hoteles", "hostel", "hostels", "departamento", "airbnb", "alojamiento", "dormir", "barato", "baratos", "barata", "economico", "lujo", "estrellas"],
+    claves: ["hotel", "hoteles", "hostel", "hostels", "departamento", "airbnb", "alojamiento", "dormir", "barato", "baratos", "barata", "economico", "lujo", "estrellas", "casa", "amigos", "familia", "quedarme"],
     respuesta:
       "En el paso 6 elegís hostel, hotel de 3, 4 o 5 estrellas o departamento, y si querés, el nombre de un hotel que ya tengas en mente. " +
+      "Si ya tenés dónde quedarte (tu casa, la de familia o amigos), elegí \"Ya tengo dónde quedarme\" y no sumamos alojamiento al presupuesto. " +
       "Para gastar menos, elegí hostel o 3 estrellas y el estilo \"Económico\" en el paso 7. Cada hotel muestra el precio con impuestos y sus condiciones.",
   },
   {
@@ -390,6 +391,7 @@ const en: EntradaAyuda[] = [
     claves: ["hotel", "hotels", "hostel", "hostels", "apartment", "airbnb", "lodging", "stay", "sleep", "cheap", "budget hotel", "luxury", "stars"],
     respuesta:
       "In step 6 you choose a hostel, a 3, 4 or 5-star hotel or an apartment, and optionally the name of a hotel you already have in mind. " +
+      "If you already have a place to stay (your home, or with family or friends), choose \"I already have a place to stay\" and we won't add lodging to the budget. " +
       "To spend less, pick a hostel or 3 stars and the \"Budget\" style in step 7. Each hotel shows its price with taxes and its conditions.",
   },
   {

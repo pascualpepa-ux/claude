@@ -114,7 +114,7 @@ const es = {
     numeros: (n: string[]) => `${n.length > 1 ? "Vuelos" : "Vuelo"} ${n.join(" + ")}`,
   },
   hotel: {
-    tipos: { hostel: "Hostel", "3": "3 estrellas", "4": "4 estrellas", "5": "5 estrellas", depto: "Departamento" },
+    tipos: { hostel: "Hostel", "3": "3 estrellas", "4": "4 estrellas", "5": "5 estrellas", depto: "Departamento", propio: "Alojamiento propio" },
     unidad: {
       hostel: ["cama", "camas"],
       depto: ["departamento", "departamentos"],
@@ -190,6 +190,7 @@ const es = {
     vuelosUna: "Elegí la opción que más te convenga. El total se actualiza solo.",
     alojamientoTitulo: "Alojamiento",
     ciudadNoches: (ciudad: string, n: number) => `${ciudad}, ${n} ${plural(n, "noche", "noches")}`,
+    alojamientoPropio: "Ya tienen dónde quedarse, así que no buscamos alojamiento ni lo sumamos al presupuesto.",
     cambiar: "Cambiar respuestas",
     guardar: "Guardar viaje",
     guardado: "Viaje guardado",
@@ -266,7 +267,8 @@ const es = {
     conValija: "Con valija",
     conValijaDetalle: "Una valija despachada por persona",
     tipoAlojamiento: "Tipo de alojamiento",
-    alojamientos: { hostel: "Hostel", "3": "Hotel 3 estrellas", "4": "Hotel 4 estrellas", "5": "Hotel 5 estrellas", depto: "Departamento" },
+    alojamientos: { hostel: "Hostel", "3": "Hotel 3 estrellas", "4": "Hotel 4 estrellas", "5": "Hotel 5 estrellas", depto: "Departamento", propio: "Ya tengo dónde quedarme" },
+    propioDetalle: "Casa propia, de familia o de amigos",
     hotelPreferido: "Hotel preferido",
     hotelAyuda: "Opcional. Si ya tienen uno en mente, lo sumamos a las opciones.",
     nombreHotel: "Nombre del hotel",
@@ -497,7 +499,7 @@ const en: Textos = {
     numeros: (n) => `${n.length > 1 ? "Flights" : "Flight"} ${n.join(" + ")}`,
   },
   hotel: {
-    tipos: { hostel: "Hostel", "3": "3 stars", "4": "4 stars", "5": "5 stars", depto: "Apartment" },
+    tipos: { hostel: "Hostel", "3": "3 stars", "4": "4 stars", "5": "5 stars", depto: "Apartment", propio: "Own place" },
     unidad: {
       hostel: ["bed", "beds"],
       depto: ["apartment", "apartments"],
@@ -572,6 +574,7 @@ const en: Textos = {
     vuelosUna: "Pick the option that suits you best. The total updates automatically.",
     alojamientoTitulo: "Where to stay",
     ciudadNoches: (ciudad, n) => `${ciudad}, ${n} ${plural(n, "night", "nights")}`,
+    alojamientoPropio: "You already have a place to stay, so we don't look for lodging or add it to the budget.",
     cambiar: "Change answers",
     guardar: "Save trip",
     guardado: "Trip saved",
@@ -647,7 +650,8 @@ const en: Textos = {
     conValija: "Checked bag",
     conValijaDetalle: "One checked bag per person",
     tipoAlojamiento: "Type of accommodation",
-    alojamientos: { hostel: "Hostel", "3": "3-star hotel", "4": "4-star hotel", "5": "5-star hotel", depto: "Apartment" },
+    alojamientos: { hostel: "Hostel", "3": "3-star hotel", "4": "4-star hotel", "5": "5-star hotel", depto: "Apartment", propio: "I already have a place to stay" },
+    propioDetalle: "My own home, or with family or friends",
     hotelPreferido: "Preferred hotel",
     hotelAyuda: "Optional. If you already have one in mind, we'll add it to the options.",
     nombreHotel: "Hotel name",

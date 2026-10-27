@@ -1,7 +1,7 @@
 import type { Idioma } from "./idioma";
 
 export type Clase = "economica" | "premium" | "business";
-export type TipoHotel = "hostel" | "3" | "4" | "5" | "depto";
+export type TipoHotel = "hostel" | "3" | "4" | "5" | "depto" | "propio"; // propio: ya tienen dónde quedarse
 export type Plan = "economico" | "equilibrado" | "premium";
 export type Equipaje = "mano" | "valija";
 export type ModoPresupuesto = "total" | "persona";

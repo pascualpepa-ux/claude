@@ -99,6 +99,7 @@ type RespuestaHoteles = { estado: "ok"; hoteles: Record<string, OpcionHotel[]> }
 
 /** Pide hoteles reales para cada ciudad del viaje. */
 async function pedirHoteles(plan: TripPlan): Promise<RespuestaHoteles | null> {
+  if (plan.input.tipoHotel === "propio") return { estado: "sin_resultados" };
   const ciudades = estadiasPorCiudad(plan).filter((c) => c.iata && c.salida > c.entrada);
   if (!ciudades.length) return null;
   try {
@@ -463,11 +464,16 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
             <h2 id="titulo-alojamiento" className="text-xl font-semibold tracking-tight">
               {t.viaje.alojamientoTitulo}
             </h2>
-            {plan.ruta.map((r) => (
+            {input.tipoHotel === "propio" && (
+              <p className="mt-3 rounded-xl border border-arena-200 bg-papel px-4 py-3 text-sm text-arena-700 dark:border-arena-800 dark:bg-arena-900 dark:text-arena-300">
+                {t.viaje.alojamientoPropio}
+              </p>
+            )}
+            {input.tipoHotel !== "propio" && plan.ruta.map((r) => (
               <div key={r.clave} className="mt-4">
                 <h3 className="text-sm font-medium text-arena-600 dark:text-arena-400">{t.viaje.ciudadNoches(r.ciudad, r.dias)}</h3>
                 <div className="mt-3 grid gap-4">
-                  {plan.hoteles[r.clave].map((h) => (
+                  {(plan.hoteles[r.clave] ?? []).map((h) => (
                     <TarjetaHotel
                       key={h.id}
                       hotel={h}
