@@ -9,7 +9,7 @@ import { useIdioma } from "./ProveedorIdioma";
  * Suscripción a los avisos. Desde un viaje, manda también el viaje para vigilarlo.
  * El idioma que se guarda es el que la persona tiene elegido en la web en este momento.
  */
-export function FormularioSuscripcion({ plan, compacto = false }: { plan?: TripPlan; compacto?: boolean }) {
+export function FormularioSuscripcion({ plan, compacto = false, sinTitulo = false }: { plan?: TripPlan; compacto?: boolean; sinTitulo?: boolean }) {
   const { idioma, t } = useIdioma();
   const T = t.suscripcion;
   const id = useId();
@@ -64,12 +64,16 @@ export function FormularioSuscripcion({ plan, compacto = false }: { plan?: TripP
 
   return (
     <form onSubmit={enviar} noValidate className={caja}>
-      <h2 className={`flex items-center gap-2 font-semibold ${compacto ? "text-sm" : ""}`}>
-        <BellRinging size={20} weight="duotone" className="shrink-0 text-oliva-700 dark:text-oliva-300" aria-hidden />
-        {plan ? T.tituloViaje : T.tituloPie}
-      </h2>
-      <p className="mt-1 text-sm text-arena-600 dark:text-arena-400">{T.bajada}</p>
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+      {!sinTitulo && (
+        <>
+          <h2 className={`flex items-center gap-2 font-semibold ${compacto ? "text-sm" : ""}`}>
+            <BellRinging size={20} weight="duotone" className="shrink-0 text-oliva-700 dark:text-oliva-300" aria-hidden />
+            {plan ? T.tituloViaje : T.tituloPie}
+          </h2>
+          <p className="mt-1 text-sm text-arena-600 dark:text-arena-400">{T.bajada}</p>
+        </>
+      )}
+      <div className={`${sinTitulo ? "" : "mt-3"} flex flex-col gap-2 sm:flex-row`}>
         <label htmlFor={`${id}-email`} className="sr-only">
           {T.email}
         </label>

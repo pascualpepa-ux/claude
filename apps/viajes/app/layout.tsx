@@ -5,7 +5,6 @@ import { Pie } from "@/components/Pie";
 import { ContadorVisitas } from "@/components/ContadorVisitas";
 import { ProveedorIdioma } from "@/components/ProveedorIdioma";
 import { textosActuales } from "@/lib/idioma-servidor";
-import { suscripcionesActivas } from "@/lib/suscripciones";
 import "./globals.css";
 
 // Google Sans Flex: la tipografía del logo (licencia SIL OFL, ver app/fuentes/OFL.txt).
@@ -47,7 +46,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ProveedorIdioma idioma={idioma}>
           <Encabezado />
           <div className="flex-1">{children}</div>
-          <Pie suscripciones={suscripcionesActivas()} />
+          <Pie />
         </ProveedorIdioma>
         {process.env.GOATCOUNTER_CODE && <ContadorVisitas codigo={process.env.GOATCOUNTER_CODE} />}
       </body>
