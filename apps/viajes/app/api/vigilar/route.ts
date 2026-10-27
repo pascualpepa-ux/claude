@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
  * Con CRON_SECRET se puede forzar una ronda (para pruebas).
  */
 async function ronda(req: Request) {
-  if (!dbConfigurada()) return Response.json({ estado: "sin base de datos" }, { status: 503 });
+  // Sin base de datos todavía no hay suscriptores: no es un error (así la tarea programada no falla).
+  if (!dbConfigurada()) return Response.json({ estado: "sin base de datos" });
   const secreto = process.env.CRON_SECRET;
   const forzar = !!secreto && req.headers.get("authorization") === `Bearer ${secreto}` && new URL(req.url).searchParams.has("forzar");
   try {
