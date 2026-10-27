@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { BellRinging, CheckCircle, EnvelopeSimple } from "@phosphor-icons/react/dist/ssr";
+import { BellRinging, CheckCircle, EnvelopeSimple, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import type { TripPlan } from "@/lib/types";
 import { useIdioma } from "./ProveedorIdioma";
 
@@ -123,7 +123,8 @@ export function FormularioSuscripcion({
           {error}
         </p>
       )}
-      <p id={`${id}-spam`} className="mt-2 text-xs text-arena-500 dark:text-arena-400">
+      <p id={`${id}-spam`} className="mt-3 flex gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+        <WarningCircle size={18} weight="fill" className="mt-0.5 shrink-0" aria-hidden />
         {T.spam}
       </p>
     </form>

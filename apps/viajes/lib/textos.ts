@@ -36,8 +36,9 @@ const es = {
     vistaPrevia: "Vista previa de un itinerario de ejemplo",
     muestra: "5 días en China, 3 viajeros",
     porPersonaCon: (aerolinea: string) => `por persona, con vuelo de ${aerolinea}`,
-    agentesTitulo: "Cada dato pasa por dos agentes.",
-    agentesBajada: "Uno busca y otro verifica. Si algo no se puede confirmar, no lo inventamos: queda marcado.",
+    agentesTitulo: "Diez agentes trabajan en tu viaje.",
+    agentesBajada:
+      "Cada uno tiene una tarea. Tres buscan el clima, los vuelos y los hoteles, y otros tres revisan cada dato con una segunda fuente antes de mostrártelo. Uno vigila tu viaje cada 30 minutos para avisarte si algo cambia, otro escribe esos avisos en tu idioma y otro controla que cada email esté bien y te llegue. El décimo es el asistente que responde tus dudas. Si algo no se puede confirmar, no lo inventamos: queda marcado.",
     busca: "Busca",
     verifica: "Verifica",
     agentes: {
@@ -320,7 +321,7 @@ const es = {
     ejemplo: "nombre@email.com",
     boton: "Suscribirme",
     enviando: "Enviando...",
-    spam: "El email de confirmación puede llegar a la carpeta de spam o correo no deseado.",
+    spam: "Ojo: el email puede llegarte a la carpeta de spam o correo no deseado (junk). Si no lo ves en la bandeja de entrada, buscalo ahí.",
     listo: "¡Listo! Te mandamos un email para confirmar. Si no lo ves, revisá la carpeta de spam o correo no deseado.",
     otro: "Usar otro email",
     errores: {
@@ -444,8 +445,9 @@ const en: Textos = {
     vistaPrevia: "Preview of a sample itinerary",
     muestra: "5 days in China, 3 travelers",
     porPersonaCon: (aerolinea) => `per person, flying ${aerolinea}`,
-    agentesTitulo: "Every detail goes through two agents.",
-    agentesBajada: "One searches and the other checks. If something can't be confirmed, we don't make it up: it gets flagged.",
+    agentesTitulo: "Ten agents work on your trip.",
+    agentesBajada:
+      "Each one has a job. Three look up the weather, flights and hotels, and three more check every detail against a second source before you see it. One watches your trip every 30 minutes so it can tell you if anything changes, another writes those notifications in your language, and another makes sure every email is right and actually reaches you. The tenth is the assistant that answers your questions. If something can't be confirmed, we don't make it up: it gets flagged.",
     busca: "Searches",
     verifica: "Checks",
     agentes: {
@@ -726,7 +728,7 @@ const en: Textos = {
     ejemplo: "name@email.com",
     boton: "Subscribe",
     enviando: "Sending...",
-    spam: "The confirmation email may land in your spam or junk folder.",
+    spam: "Heads up: the email may land in your spam or junk folder. If it's not in your inbox, look there.",
     listo: "Done! We sent you a confirmation email. If you don't see it, check your spam or junk folder.",
     otro: "Use another email",
     errores: {
