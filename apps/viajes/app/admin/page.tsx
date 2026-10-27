@@ -14,6 +14,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export const dynamic = "force-dynamic";
 
+/** Promedio desde el primer día con visitas (así no lo bajan los días en que la web todavía no existía). */
+function promedioDiario(dias: { visitas: number }[]) {
+  const desde = dias.findIndex((d) => d.visitas > 0);
+  if (desde < 0) return 0;
+  const tramo = dias.slice(desde);
+  const promedio = tramo.reduce((s, d) => s + d.visitas, 0) / tramo.length;
+  return promedio >= 10 ? Math.round(promedio) : Math.round(promedio * 10) / 10;
+}
+
 export default async function Admin() {
   const { t } = await textosActuales();
   const A = t.admin;
@@ -66,7 +75,7 @@ export default async function Admin() {
               {[
                 [A.ultimos30, visitas.total],
                 [A.hoy, visitas.dias.at(-1)!.visitas],
-                [A.promedio, Math.round(visitas.total / visitas.dias.length)],
+                [A.promedio, promedioDiario(visitas.dias)],
               ].map(([etiqueta, valor]) => (
                 <div key={etiqueta}>
                   <dt className="text-xs text-arena-600 sm:text-sm dark:text-arena-400">{etiqueta}</dt>
