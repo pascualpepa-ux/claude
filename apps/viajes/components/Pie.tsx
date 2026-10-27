@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { FormularioSuscripcion } from "./FormularioSuscripcion";
 import { LogoCompleto } from "./Logo";
 import { useIdioma } from "./ProveedorIdioma";
 
-export function Pie() {
+export function Pie({ suscripciones = false }: { suscripciones?: boolean }) {
   const { t } = useIdioma();
   const anio = new Date().getFullYear();
   const link = "text-arena-700 hover:text-oliva-700 hover:underline dark:text-arena-300 dark:hover:text-oliva-300";
@@ -14,6 +15,11 @@ export function Pie() {
         <div className="flex flex-col items-start gap-3">
           <LogoCompleto ancho={132} />
           <p className="max-w-[36ch] text-sm text-arena-600 dark:text-arena-400">{t.pie.lema}</p>
+          {suscripciones && (
+            <div className="mt-2 w-full max-w-md">
+              <FormularioSuscripcion compacto />
+            </div>
+          )}
           <p className="text-[11px] text-arena-500 dark:text-arena-400">
             <a href="https://www.geonames.org" target="_blank" rel="noopener noreferrer" className="hover:underline">
               {t.pie.creditos}

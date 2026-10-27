@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, CircleNotch, MapTrifold, Info, Train, ArrowRight, BookmarkSimple } from "@phosphor-icons/react/dist/ssr";
+import { FormularioSuscripcion } from "@/components/FormularioSuscripcion";
 import { TarjetaDia } from "@/components/TarjetaDia";
 import { TarjetaVuelo } from "@/components/TarjetaVuelo";
 import { TarjetaHotel } from "@/components/TarjetaHotel";
@@ -191,7 +192,7 @@ function BotonGuardar({ idGuardado, error, onGuardar, onQuitar, ancho = false }:
   );
 }
 
-export function VistaViaje() {
+export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean }) {
   const params = useSearchParams();
   const esEjemplo = params.get("ejemplo") === "1";
   const { idioma, t } = useIdioma();
@@ -463,6 +464,11 @@ export function VistaViaje() {
             {t.viaje.cambiar}
           </Link>
           {!esEjemplo && <BotonGuardar idGuardado={idGuardado} error={errorGuardar} onGuardar={guardar} onQuitar={quitarGuardado} ancho />}
+          {!esEjemplo && suscripciones && (
+            <div className="mt-6">
+              <FormularioSuscripcion plan={plan} />
+            </div>
+          )}
         </aside>
       </main>
 
