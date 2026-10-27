@@ -328,6 +328,7 @@ const es = {
       limite: "Hiciste muchos intentos seguidos. Probá de nuevo en una hora.",
       envio: "No pudimos mandar el email. Probá de nuevo en un rato.",
       general: "Algo falló. Probá de nuevo.",
+      inactivo: "Las suscripciones se activan en los próximos días. ¡Volvé pronto!",
     },
   },
   pausa: {
@@ -713,6 +714,7 @@ const en: Textos = {
       limite: "Too many attempts in a row. Try again in an hour.",
       envio: "We couldn't send the email. Please try again in a little while.",
       general: "Something went wrong. Please try again.",
+      inactivo: "Subscriptions open in the next few days. Check back soon!",
     },
   },
   pausa: {

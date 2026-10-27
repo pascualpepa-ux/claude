@@ -76,6 +76,21 @@ export default async function Inicio() {
       </div>
       </section>
 
+      {/* Suscripción a los avisos: entre la portada y "Cada dato pasa por dos agentes". */}
+      <section aria-labelledby="titulo-suscripcion" className="bg-papel dark:bg-arena-950">
+        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-12 md:grid-cols-[1fr_minmax(0,28rem)] md:items-center md:gap-12 md:py-16">
+          <div>
+            <BellRinging size={32} weight="duotone" className="text-oliva-700 dark:text-oliva-300" aria-hidden />
+            <h2 id="titulo-suscripcion" className="mt-3 max-w-[24ch] text-3xl font-semibold tracking-tight text-balance md:text-4xl">
+              {ti.suscripcionTitulo}
+            </h2>
+            <p className="mt-3 max-w-[52ch] text-arena-600 dark:text-arena-400">{ti.suscripcionBajada}</p>
+          </div>
+          <FormularioSuscripcion sinTitulo activo={suscripcionesActivas()} />
+        </div>
+      </section>
+
+
       <section className="border-t border-arena-200 bg-papel py-16 md:py-24 dark:border-arena-800 dark:bg-arena-900/40">
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="max-w-[24ch] text-3xl font-semibold tracking-tight md:text-4xl">
@@ -110,22 +125,6 @@ export default async function Inicio() {
           </div>
         </div>
       </section>
-
-      {/* Suscripción a los avisos: en la mitad de la portada (se muestra cuando el envío de emails está activo). */}
-      {suscripcionesActivas() && (
-        <section aria-labelledby="titulo-suscripcion" className="border-y border-arena-200 bg-arena-100 dark:border-arena-800 dark:bg-arena-900">
-          <div className="mx-auto grid max-w-6xl gap-6 px-4 py-12 md:grid-cols-[1fr_minmax(0,28rem)] md:items-center md:gap-12 md:py-16">
-            <div>
-              <BellRinging size={32} weight="duotone" className="text-oliva-700 dark:text-oliva-300" aria-hidden />
-              <h2 id="titulo-suscripcion" className="mt-3 max-w-[24ch] text-3xl font-semibold tracking-tight text-balance md:text-4xl">
-                {ti.suscripcionTitulo}
-              </h2>
-              <p className="mt-3 max-w-[52ch] text-arena-600 dark:text-arena-400">{ti.suscripcionBajada}</p>
-            </div>
-            <FormularioSuscripcion sinTitulo />
-          </div>
-        </section>
-      )}
 
       <section className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-2 md:items-center md:py-24">
         <div>

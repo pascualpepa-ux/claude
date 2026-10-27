@@ -9,7 +9,18 @@ import { useIdioma } from "./ProveedorIdioma";
  * Suscripción a los avisos. Desde un viaje, manda también el viaje para vigilarlo.
  * El idioma que se guarda es el que la persona tiene elegido en la web en este momento.
  */
-export function FormularioSuscripcion({ plan, compacto = false, sinTitulo = false }: { plan?: TripPlan; compacto?: boolean; sinTitulo?: boolean }) {
+export function FormularioSuscripcion({
+  plan,
+  compacto = false,
+  sinTitulo = false,
+  activo = true,
+}: {
+  plan?: TripPlan;
+  compacto?: boolean;
+  sinTitulo?: boolean;
+  /** false mientras el envío de emails no está conectado: el formulario se ve, pero avisa que se activa pronto. */
+  activo?: boolean;
+}) {
   const { idioma, t } = useIdioma();
   const T = t.suscripcion;
   const id = useId();
@@ -22,6 +33,7 @@ export function FormularioSuscripcion({ plan, compacto = false, sinTitulo = fals
     e.preventDefault();
     const limpio = email.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(limpio)) return setError(T.errores.email);
+    if (!activo) return setError(T.errores.inactivo);
     setError(null);
     setEstado("enviando");
     try {
@@ -32,7 +44,7 @@ export function FormularioSuscripcion({ plan, compacto = false, sinTitulo = fals
       });
       if (res.ok) return setEstado("listo");
       const j = await res.json().catch(() => ({}));
-      setError(j.error === "email" ? T.errores.email : j.error === "limite" ? T.errores.limite : j.error === "envio" ? T.errores.envio : T.errores.general);
+      setError(j.error === "inactivo" ? T.errores.inactivo : j.error === "email" ? T.errores.email : j.error === "limite" ? T.errores.limite : j.error === "envio" ? T.errores.envio : T.errores.general);
     } catch {
       setError(T.errores.general);
     }
