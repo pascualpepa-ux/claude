@@ -4,7 +4,7 @@ import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Plus, Trash, Backpack, Suitcase } from "@phosphor-icons/react/dist/ssr";
 import { diferenciaDias, hoy, sumarDias } from "@/lib/fechas";
-import { CLAVE_BORRADOR, CLAVE_PEDIDO, CLAVE_VIAJE } from "@/lib/almacen";
+import { CLAVE_ABIERTO, CLAVE_BORRADOR, CLAVE_PEDIDO, CLAVE_VIAJE } from "@/lib/almacen";
 import type { Textos } from "@/lib/textos";
 import { LOCALE, type Idioma } from "@/lib/idioma";
 import type { Lugar } from "@/lib/lugares-tipos";
@@ -271,6 +271,8 @@ export function Asistente() {
     try {
       sessionStorage.setItem(CLAVE_PEDIDO, JSON.stringify(aPedido(b, idioma)));
       sessionStorage.removeItem(CLAVE_VIAJE);
+      // Un viaje nuevo (o con respuestas cambiadas) no pisa al guardado: se guarda aparte si la persona quiere.
+      sessionStorage.removeItem(CLAVE_ABIERTO);
     } catch {}
     router.push("/viaje");
   };

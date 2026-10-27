@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle, CircleNotch, MapTrifold, Info, Train, ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircle, CircleNotch, MapTrifold, Info, Train, ArrowRight, BookmarkSimple } from "@phosphor-icons/react/dist/ssr";
 import { TarjetaDia } from "@/components/TarjetaDia";
 import { TarjetaVuelo } from "@/components/TarjetaVuelo";
 import { TarjetaHotel } from "@/components/TarjetaHotel";
 import { ResumenPresupuesto } from "@/components/ResumenPresupuesto";
-import { CLAVE_PEDIDO, CLAVE_VIAJE } from "@/lib/almacen";
+import { CLAVE_ABIERTO, CLAVE_PEDIDO, CLAVE_VIAJE, borrarGuardado, guardarViaje, leerGuardados } from "@/lib/almacen";
 import { usd } from "@/lib/dinero";
 import { formatoCorto } from "@/lib/fechas";
 import { generarViaje, traducirViaje, viajeDeMuestra } from "@/lib/mock";
@@ -70,6 +70,51 @@ function SinViaje() {
   );
 }
 
+/** Botón para guardar el viaje en este dispositivo. Una vez guardado, los cambios se guardan solos. */
+function BotonGuardar({ idGuardado, error, onGuardar, onQuitar, ancho = false }: {
+  idGuardado: string | null;
+  error: boolean;
+  onGuardar: () => void;
+  onQuitar: () => void;
+  ancho?: boolean;
+}) {
+  const { t } = useIdioma();
+  const T = t.viaje;
+  if (idGuardado) {
+    return (
+      <div className={ancho ? "mt-3" : ""}>
+        <p className={`flex flex-wrap items-center gap-x-3 gap-y-1 ${ancho ? "justify-center" : ""}`}>
+          <span role="status" className="inline-flex items-center gap-1.5 text-sm font-medium text-oliva-700 dark:text-oliva-300">
+            <CheckCircle size={20} weight="fill" aria-hidden />
+            {T.guardado}
+          </span>
+          <button type="button" onClick={onQuitar} className="text-sm text-arena-600 underline underline-offset-2 hover:text-arena-900 dark:text-arena-400 dark:hover:text-arena-100">
+            {T.quitarGuardado}
+          </button>
+        </p>
+        <p className={`mt-1 text-xs text-arena-600 dark:text-arena-400 ${ancho ? "text-center" : ""}`}>{T.guardadoNota}</p>
+      </div>
+    );
+  }
+  return (
+    <div className={ancho ? "mt-3" : ""}>
+      <button
+        type="button"
+        onClick={onGuardar}
+        className={`inline-flex items-center justify-center gap-2 rounded-xl bg-oliva-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-oliva-800 active:scale-[0.98] dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200 ${ancho ? "w-full" : ""}`}
+      >
+        <BookmarkSimple size={18} weight="bold" aria-hidden />
+        {T.guardar}
+      </button>
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-red-700 dark:text-red-400">
+          {T.noGuardado}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function VistaViaje() {
   const params = useSearchParams();
   const esEjemplo = params.get("ejemplo") === "1";
@@ -77,6 +122,8 @@ export function VistaViaje() {
   const [plan, setPlan] = useState<TripPlan | null>(null);
   const [listos, setListos] = useState(0);
   const [estado, setEstado] = useState<"cargando" | "listo" | "vacio">("cargando");
+  const [idGuardado, setIdGuardado] = useState<string | null>(null);
+  const [errorGuardar, setErrorGuardar] = useState(false);
 
   useEffect(() => {
     const pedido: TripInput | null = esEjemplo ? viajeDeMuestra() : leer<TripInput>(CLAVE_PEDIDO);
@@ -87,6 +134,11 @@ export function VistaViaje() {
     const guardado = esEjemplo ? null : leer<TripPlan>(CLAVE_VIAJE);
     // Un viaje guardado por una versión anterior (sin idioma) se vuelve a armar.
     if (guardado?.idioma && JSON.stringify(guardado.input) === JSON.stringify(pedido)) {
+      // Si es un viaje guardado (abierto desde la portada), sigue vinculado: los cambios se guardan solos.
+      try {
+        const abierto = sessionStorage.getItem(CLAVE_ABIERTO);
+        if (abierto && leerGuardados().some((v) => v.id === abierto)) setIdGuardado(abierto);
+      } catch {}
       setPlan(traducirViaje(guardado, idioma));
       setEstado("listo");
       return;
@@ -119,6 +171,33 @@ export function VistaViaje() {
       sessionStorage.setItem(CLAVE_VIAJE, JSON.stringify(plan));
     } catch {}
   }, [plan, esEjemplo]);
+
+  // Con el viaje ya guardado, cada cambio (otro vuelo, otro hotel, actividades) actualiza la copia guardada.
+  useEffect(() => {
+    if (!plan || !idGuardado) return;
+    const previo = leerGuardados().find((v) => v.id === idGuardado);
+    if (!previo) return setIdGuardado(null); // lo borró desde otra pestaña
+    if (JSON.stringify(previo.plan) !== JSON.stringify(plan)) guardarViaje(plan, idGuardado);
+  }, [plan, idGuardado]);
+
+  const guardar = () => {
+    if (!plan) return;
+    const id = guardarViaje(plan);
+    setErrorGuardar(!id);
+    if (!id) return;
+    setIdGuardado(id);
+    try {
+      sessionStorage.setItem(CLAVE_ABIERTO, id);
+    } catch {}
+  };
+  const quitarGuardado = () => {
+    if (!idGuardado) return;
+    borrarGuardado(idGuardado);
+    setIdGuardado(null);
+    try {
+      sessionStorage.removeItem(CLAVE_ABIERTO);
+    } catch {}
+  };
 
   const resumen = useMemo(() => (plan ? calcularResumen(plan) : null), [plan]);
 
@@ -155,6 +234,11 @@ export function VistaViaje() {
                 </li>
               ))}
             </ul>
+            {!esEjemplo && (
+              <div className="mt-4">
+                <BotonGuardar idGuardado={idGuardado} error={errorGuardar} onGuardar={guardar} onQuitar={quitarGuardado} />
+              </div>
+            )}
           </header>
 
           <p className="mt-6 flex gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
@@ -284,6 +368,7 @@ export function VistaViaje() {
           >
             {t.viaje.cambiar}
           </Link>
+          {!esEjemplo && <BotonGuardar idGuardado={idGuardado} error={errorGuardar} onGuardar={guardar} onQuitar={quitarGuardado} ancho />}
         </aside>
       </main>
 

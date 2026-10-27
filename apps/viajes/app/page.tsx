@@ -3,6 +3,7 @@ import { ArrowRight, CloudSun, AirplaneTilt, Bed, Receipt } from "@phosphor-icon
 import { TarjetaDia } from "@/components/TarjetaDia";
 import { Marca } from "@/components/Logo";
 import { EstadoDato } from "@/components/EstadoDato";
+import { ViajesGuardados } from "@/components/ViajesGuardados";
 import { generarViaje, viajeDeMuestra } from "@/lib/mock";
 import { calcularResumen } from "@/lib/presupuesto";
 import { usd } from "@/lib/dinero";
@@ -24,6 +25,7 @@ export default async function Inicio() {
 
   return (
     <main>
+      <ViajesGuardados />
       <section className="relative overflow-hidden border-b border-arena-200 bg-arena-100 dark:border-arena-800 dark:bg-arena-900">
         {/* Isotipo de la marca como marca de agua detrás de la vista previa */}
         <div aria-hidden className="pointer-events-none absolute -right-24 -bottom-16 hidden opacity-[0.07] md:block dark:opacity-[0.06]">

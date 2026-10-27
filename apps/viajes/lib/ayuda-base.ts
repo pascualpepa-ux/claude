@@ -133,8 +133,9 @@ const es: EntradaAyuda[] = [
     pregunta: "¿Puedo guardar o compartir el viaje?",
     claves: ["guardar", "guardo", "compartir", "comparto", "enviar", "mandar", "link", "whatsapp", "perdi", "se borro"],
     respuesta:
-      "Todavía no. Tu viaje queda guardado mientras tengas abierta la pestaña del navegador; si la cerrás, se pierde. " +
-      "Guardar viajes y compartirlos llega pronto.",
+      "Guardar, sí: en tu viaje armado tocá \"Guardar viaje\" y lo vas a ver en la portada cada vez que entres. " +
+      "Queda solo en este dispositivo y navegador, y nadie más lo ve; si cambiás el vuelo, el hotel o las actividades, se guarda solo. " +
+      "Compartir el viaje con otras personas todavía no se puede: llega pronto.",
   },
   {
     id: "gastos",
@@ -327,7 +328,9 @@ const en: EntradaAyuda[] = [
     pregunta: "Can I save or share my trip?",
     claves: ["save", "share", "send", "link", "whatsapp", "lost", "deleted"],
     respuesta:
-      "Not yet. Your trip stays saved while the browser tab is open; if you close it, it's lost. Saving and sharing trips is coming soon.",
+      "Saving, yes: on your trip tap \"Save trip\" and you'll see it on the home page every time you visit. " +
+      "It stays on this device and browser only, and nobody else can see it; if you change the flight, hotel or activities, it saves on its own. " +
+      "Sharing a trip with other people isn't available yet: it's coming soon.",
   },
   {
     id: "gastos",
