@@ -78,6 +78,8 @@ export interface OpcionVuelo {
   };
   linkReserva: string;
   origen: Origen;
+  /** true: no es un vuelo real sino una estimación por distancia (sin aerolínea, número ni horarios). */
+  estimado?: boolean;
 }
 
 export interface OpcionHotel {

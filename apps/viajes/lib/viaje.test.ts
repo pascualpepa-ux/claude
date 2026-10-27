@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sumarDias } from "./fechas";
-import { aplicarClima, generarViaje, repartirNoches, traducirViaje, viajeDeMuestra } from "./mock";
+import { ajustarDuraciones, aplicarClima, generarViaje, repartirNoches, traducirViaje, viajeDeMuestra } from "./mock";
 import { calcularResumen } from "./presupuesto";
 
 describe("repartirNoches", () => {
@@ -90,20 +90,33 @@ describe("idiomas", () => {
     expect(en.actividades[0].nombre).toBe("Great Wall at Mutianyu");
     expect(en.dias[0].nota).toMatch(/^Arrival in Beijing/);
     expect(calcularResumen(en).total).toBeCloseTo(calcularResumen(es).total);
-    expect(calcularResumen(en).lineas[0].concepto).toBe("Flights");
+    // Sin distancia todavía, el vuelo estimado no suma precio; con la distancia, sí.
+    const conVuelo = ajustarDuraciones(en, 19000, 19000);
+    expect(calcularResumen(conVuelo).lineas[0].concepto).toBe("Flights");
+  });
+
+  it("sin vuelos reales no inventa aerolíneas: un solo vuelo estimado por la distancia", () => {
+    const plan = generarViaje({ ...viajeDeMuestra(), destino: "Lisboa" });
+    expect(plan.vuelos).toHaveLength(1);
+    expect(plan.vuelos[0]).toMatchObject({ estimado: true, aerolinea: "Vuelo estimado (aerolínea a confirmar)" });
+    expect(plan.vuelos[0].ida.numeros).toBeUndefined();
+    const conDistancia = ajustarDuraciones(plan, 2000, 2000);
+    expect(conDistancia.vuelos[0].precioPorPersona).toBeGreaterThan(200);
+    expect(conDistancia.vuelos[0].precioPorPersona).toBeLessThan(400);
+    expect(conDistancia.vuelos[0].ida.duracionMin).toBeGreaterThan(150);
   });
 
   it("al cambiar de idioma conserva el vuelo, los hoteles y las actividades elegidas", () => {
     const es = generarViaje(viajeDeMuestra(), "es");
     const editado = {
       ...es,
-      vueloElegido: "vuelo-2",
+      vueloElegido: "vuelo-estimado",
       hotelElegido: { ...es.hotelElegido, beijing: "beijing-hotel-0" },
       dias: es.dias.map((d, i) => (i === 1 ? { ...d, actividades: [] } : d)),
     };
     const en = traducirViaje(editado, "en");
     expect(en.idioma).toBe("en");
-    expect(en.vueloElegido).toBe("vuelo-2");
+    expect(en.vueloElegido).toBe("vuelo-estimado");
     expect(en.hotelElegido.beijing).toBe("beijing-hotel-0");
     expect(en.dias[1].actividades).toEqual([]);
     expect(calcularResumen(en).total).toBeCloseTo(calcularResumen(editado).total);

@@ -65,15 +65,16 @@ const es: EntradaAyuda[] = [
       "• Verificado: un segundo agente lo confirmó.\n" +
       "• Estimado: es un cálculo aproximado, no un dato confirmado.\n" +
       "• No verificado: no se pudo confirmar.\n" +
-      "El clima ya es real; los precios de vuelos y hoteles todavía son de ejemplo, así que tomalos como referencia.",
+      "El clima ya es real. El vuelo es un estimado según la distancia y los hoteles todavía son de ejemplo, así que tomalos como referencia.",
   },
   {
     id: "ejemplo",
     pregunta: "¿Los precios son reales?",
     claves: ["real", "reales", "ejemplo", "exacto", "actualizado", "precio", "precios", "cuanto sale", "cuanto cuesta", "disponibilidad"],
     respuesta:
-      "Los precios todavía no: los vuelos y hoteles son datos de ejemplo, para que veas cómo queda tu viaje armado; los reales llegan en la próxima etapa. " +
-      "El clima sí es real. Antes de pagar, confirmá siempre el precio en el sitio donde reserves.",
+      "El clima sí es real. El vuelo todavía no: mostramos un precio estimado según la distancia entre aeropuertos, sin inventar aerolíneas, " +
+      "y el botón \"Buscar vuelos reales\" abre Google Vuelos con tu ruta y fechas. Los hoteles todavía son de ejemplo. " +
+      "Antes de pagar, confirmá siempre el precio en el sitio donde reserves.",
   },
   {
     id: "reservar",
@@ -103,8 +104,9 @@ const es: EntradaAyuda[] = [
     pregunta: "¿Cómo cambio el vuelo o el hotel?",
     claves: ["cambiar vuelo", "otro vuelo", "otro hotel", "cambiar hotel", "opciones", "elegir", "elijo", "opcion"],
     respuesta:
-      "En tu viaje armado hay varias opciones de vuelo y de hotel, cada una con sus condiciones (equipaje, cambios, reembolso, desayuno, " +
-      "cancelación y horarios de check-in y check-out). Tocá \"Elegir\" en la que prefieras y el total se actualiza solo.",
+      "En tu viaje armado hay varias opciones de hotel, cada una con sus condiciones (desayuno, cancelación y horarios de check-in y check-out). " +
+      "Tocá \"Elegir\" en la que prefieras y el total se actualiza solo. El vuelo es por ahora un estimado: para ver aerolíneas y horarios reales " +
+      "tocá \"Buscar vuelos reales\".",
   },
   {
     id: "actividades",
@@ -198,6 +200,32 @@ const es: EntradaAyuda[] = [
       "Para gastar menos, elegí hostel o 3 estrellas y el estilo \"Económico\" en el paso 7. Cada hotel muestra el precio con impuestos y sus condiciones.",
   },
   {
+    id: "vuelo-real",
+    pregunta: "¿Me dice el número de vuelo y el horario?",
+    claves: ["numero de vuelo", "horario", "hora", "sale el vuelo", "boarding", "embarque", "puerta", "aerolinea", "aerolineas", "escala", "escalas", "directo"],
+    respuesta:
+      "Todavía no. Por ahora el vuelo es un estimado según la distancia, sin aerolínea ni número de vuelo, para no mostrarte datos inventados. " +
+      "Tocá \"Buscar vuelos reales\" y Google Vuelos te muestra las aerolíneas, números de vuelo y horarios reales de tu ruta. " +
+      "El horario de embarque (boarding) lo da la aerolínea en tu tarjeta de embarque: suele empezar entre 30 y 60 minutos antes de la salida.",
+  },
+  {
+    id: "guias",
+    pregunta: "¿Tienen guías de viaje?",
+    claves: ["guia", "guias", "guia de viaje", "itinerario de", "dias en", "que hacer en", "roma", "paris", "madrid", "barcelona", "londres", "nueva york", "pekin", "japon", "lisboa", "rio"],
+    respuesta:
+      "Sí, en \"Guías de viaje\" (abajo de todo, en el pie de página) hay itinerarios día por día con precios aproximados y consejos: " +
+      "Roma, París, Madrid, Barcelona, Londres, Nueva York, Pekín, Japón, Lisboa y Río de Janeiro. " +
+      "Cada guía tiene un botón \"Planear este viaje en Rumbo\" que abre el asistente con el destino y los días ya puestos.",
+  },
+  {
+    id: "opinar",
+    pregunta: "¿Cómo dejo mi opinión?",
+    claves: ["opinion", "opinar", "calificar", "calificacion", "estrellas", "feedback", "sugerencia", "queja", "reclamo", "mejorar"],
+    respuesta:
+      "En \"Dejá tu opinión\" (en el pie de página) elegís de 1 a 5 estrellas y podés escribir un comentario. Es anónima y la lee el equipo de Rumbo. " +
+      "Al final de cada guía también podés calificarla.",
+  },
+  {
     id: "saludo",
     secundaria: true,
     pregunta: "Hola",
@@ -262,14 +290,15 @@ const en: EntradaAyuda[] = [
       "• Verified: a second agent confirmed it.\n" +
       "• Estimated: an approximate calculation, not confirmed data.\n" +
       "• Not verified: it couldn't be confirmed.\n" +
-      "The weather is already real; flight and hotel prices are still sample data, so treat them as a reference.",
+      "The weather is already real. The flight is an estimate based on distance and hotels are still sample data, so treat them as a reference.",
   },
   {
     id: "ejemplo",
     pregunta: "Are the prices real?",
     claves: ["real", "sample", "exact", "up to date", "price", "prices", "how much", "cost", "availability"],
     respuesta:
-      "Prices aren't yet: flights and hotels are sample data so you can see how your trip comes together; real ones come in the next stage. The weather is real. " +
+      "The weather is real. The flight isn't yet: we show an estimated price based on the distance between airports, without making up airlines, " +
+      "and the \"Search real flights\" button opens Google Flights with your route and dates. Hotels are still sample data. " +
       "Before paying, always confirm the price on the site where you book.",
   },
   {
@@ -300,8 +329,9 @@ const en: EntradaAyuda[] = [
     pregunta: "How do I change the flight or hotel?",
     claves: ["change flight", "another flight", "another hotel", "change hotel", "options", "choose", "pick", "option"],
     respuesta:
-      "Your trip has several flight and hotel options, each with its conditions (baggage, changes, refunds, breakfast, cancellation and " +
-      "check-in and check-out times). Tap \"Choose\" on the one you prefer and the total updates on its own.",
+      "Your trip has several hotel options, each with its conditions (breakfast, cancellation and check-in and check-out times). " +
+      "Tap \"Choose\" on the one you prefer and the total updates on its own. The flight is an estimate for now: to see real airlines and times, " +
+      "tap \"Search real flights\".",
   },
   {
     id: "actividades",
@@ -393,6 +423,32 @@ const en: EntradaAyuda[] = [
       "In step 6 you choose a hostel, a 3, 4 or 5-star hotel or an apartment, and optionally the name of a hotel you already have in mind. " +
       "If you already have a place to stay (your home, or with family or friends), choose \"I already have a place to stay\" and we won't add lodging to the budget. " +
       "To spend less, pick a hostel or 3 stars and the \"Budget\" style in step 7. Each hotel shows its price with taxes and its conditions.",
+  },
+  {
+    id: "vuelo-real",
+    pregunta: "Does it tell me the flight number and times?",
+    claves: ["flight number", "schedule", "time", "departure", "boarding", "gate", "airline", "airlines", "stopover", "layover", "direct", "nonstop"],
+    respuesta:
+      "Not yet. For now the flight is an estimate based on distance, with no airline or flight number, so we don't show made-up data. " +
+      "Tap \"Search real flights\" and Google Flights shows the real airlines, flight numbers and times for your route. " +
+      "Boarding time comes from the airline on your boarding pass: it usually starts 30 to 60 minutes before departure.",
+  },
+  {
+    id: "guias",
+    pregunta: "Do you have travel guides?",
+    claves: ["guide", "guides", "travel guide", "itinerary for", "days in", "what to do in", "rome", "paris", "madrid", "barcelona", "london", "new york", "beijing", "japan", "lisbon", "rio"],
+    respuesta:
+      "Yes, under \"Travel guides\" (at the very bottom, in the footer) there are day-by-day itineraries with approximate prices and tips: " +
+      "Rome, Paris, Madrid, Barcelona, London, New York, Beijing, Japan, Lisbon and Rio de Janeiro. " +
+      "Each guide has a \"Plan this trip with Rumbo\" button that opens the planner with the destination and days already filled in.",
+  },
+  {
+    id: "opinar",
+    pregunta: "How do I leave feedback?",
+    claves: ["feedback", "review", "rate", "rating", "stars", "suggestion", "complaint", "improve", "opinion"],
+    respuesta:
+      "Under \"Leave feedback\" (in the footer) you pick 1 to 5 stars and can write a comment. It's anonymous and the Rumbo team reads it. " +
+      "You can also rate each guide at the end of it.",
   },
   {
     id: "saludo",

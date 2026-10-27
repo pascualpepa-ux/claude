@@ -242,8 +242,21 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
         const abierto = sessionStorage.getItem(CLAVE_ABIERTO);
         if (abierto && leerGuardados().some((v) => v.id === abierto)) setIdGuardado(abierto);
       } catch {}
-      setPlan(traducirViaje(guardado, idioma));
+      // Viajes armados antes de que existiera el vuelo estimado: se cambian los vuelos de ejemplo por la estimación.
+      const actualizado =
+        !guardado.vuelosReales && !guardado.vuelos.some((v) => v.estimado)
+          ? (() => {
+              const nuevos = generarViaje(guardado.input, guardado.idioma);
+              return { ...guardado, vuelos: nuevos.vuelos, vueloElegido: nuevos.vueloElegido };
+            })()
+          : guardado;
+      setPlan(traducirViaje(actualizado, idioma));
       setEstado("listo");
+      if (actualizado !== guardado) {
+        pedirVuelos(actualizado).then((v) => {
+          if (v && v.estado !== "ok") setPlan((p) => (p ? ajustarDuraciones(p, v.distanciaIda, v.distanciaVuelta) : p));
+        });
+      }
       // El clima se vuelve a pedir cada vez que se abre: así el pronóstico está siempre al día.
       pedirClima(guardado).then((datos) =>
         setPlan((p) => {

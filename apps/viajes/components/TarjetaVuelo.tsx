@@ -13,8 +13,28 @@ function textoEscalas(tramo: Tramo, t: Textos) {
   return t.vuelo.escalas(tramo.escalas.length, tramo.escalas.join(t.vuelo.y));
 }
 
-function FilaTramo({ titulo, tramo, Icono }: { titulo: string; tramo: Tramo; Icono: React.ElementType }) {
+function FilaTramo({ titulo, tramo, Icono, estimado }: { titulo: string; tramo: Tramo; Icono: React.ElementType; estimado?: boolean }) {
   const { idioma, t } = useIdioma();
+  if (estimado) {
+    // Vuelo estimado: solo la ruta y la duración aproximada; nada de horarios ni escalas inventadas.
+    return (
+      <div className="flex items-center gap-3">
+        <Icono size={20} className="shrink-0 text-arena-500" aria-hidden />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm">
+            <span className="font-medium">{titulo}</span>{" "}
+            <span className="text-arena-600 dark:text-arena-400">{formatoCorto(tramo.salida.slice(0, 10), idioma)}</span>
+          </p>
+          <p className="text-sm tabular-nums">
+            {tramo.desde} <span className="text-arena-400">{t.vuelo.a}</span> {tramo.hasta}
+          </p>
+        </div>
+        <p className="shrink-0 text-right text-xs text-arena-600 dark:text-arena-400">
+          {tramo.duracionMin ? t.vuelo.aprox(formatoDuracion(tramo.duracionMin)) : t.vuelo.sinDistancia}
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="flex items-center gap-3">
       <Icono size={20} className="shrink-0 text-arena-500" aria-hidden />
@@ -61,7 +81,9 @@ export function TarjetaVuelo({
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="font-semibold">{vuelo.aerolinea}</h3>
-          <p className="text-sm text-arena-600 dark:text-arena-400">{t.vuelo.aLaIda(textoEscalas(vuelo.ida, t))}</p>
+          <p className="max-w-[40ch] text-sm text-arena-600 dark:text-arena-400">
+            {vuelo.estimado ? t.vuelo.estimadoBajada : t.vuelo.aLaIda(textoEscalas(vuelo.ida, t))}
+          </p>
         </div>
         <div className="text-right">
           <p className="text-xl font-semibold tabular-nums">{usd(vuelo.precioPorPersona, idioma)}</p>
@@ -72,8 +94,9 @@ export function TarjetaVuelo({
       </header>
 
       <div className="mt-4 grid gap-3">
-        <FilaTramo titulo={t.vuelo.ida} tramo={vuelo.ida} Icono={AirplaneTakeoff} />
-        <FilaTramo titulo={t.vuelo.vuelta} tramo={vuelo.vuelta} Icono={AirplaneLanding} />
+        <FilaTramo titulo={t.vuelo.ida} tramo={vuelo.ida} Icono={AirplaneTakeoff} estimado={vuelo.estimado} />
+        <FilaTramo titulo={t.vuelo.vuelta} tramo={vuelo.vuelta} Icono={AirplaneLanding} estimado={vuelo.estimado} />
+        {vuelo.estimado && <p className="text-xs text-arena-600 dark:text-arena-400">{t.vuelo.horariosAConfirmar}</p>}
       </div>
 
       <details className="mt-4 rounded-xl bg-arena-50 px-3 py-2 dark:bg-arena-800/50">
@@ -95,9 +118,10 @@ export function TarjetaVuelo({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-arena-700 transition hover:bg-arena-100 dark:text-arena-300 dark:hover:bg-arena-800"
           >
-            {t.vuelo.reservar}
+            {vuelo.estimado ? t.vuelo.buscarReales : t.vuelo.reservar}
             <ArrowSquareOut size={16} aria-hidden />
           </a>
+          {!vuelo.estimado && (
           <button
             type="button"
             onClick={onElegir}
@@ -110,6 +134,7 @@ export function TarjetaVuelo({
           >
             {elegido ? t.vuelo.elegido : t.vuelo.elegir}
           </button>
+          )}
         </div>
       </footer>
     </article>

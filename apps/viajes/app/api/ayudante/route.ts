@@ -4,6 +4,7 @@ import { LIMITES, SISTEMA, type MensajeChat } from "@/lib/ayudante";
 import { COOKIE_PAUSA, SEGUNDOS_PAUSA, tieneGroserias } from "@/lib/groserias";
 import { responderCuenta } from "@/lib/calculadora";
 import { responderConGateway } from "@/lib/ia-gateway";
+import { guiaComoTexto, guiaMencionada, guiasComoTexto } from "@/lib/guias";
 import { esIdioma, type Idioma } from "@/lib/idioma";
 
 export const runtime = "nodejs";
@@ -92,6 +93,9 @@ export async function POST(req: Request) {
   const ultima = datos.mensajes.at(-1)!.content;
   // Respuesta de la ficha: exacta y sin costo. Se usa si no hay IA disponible o si la IA falla.
   const respuestaFicha = () => {
+    // Si nombra un destino con guía (Roma, Japón, ...), contesta con el resumen de esa guía.
+    const guia = guiaMencionada(ultima);
+    if (guia) return guiaComoTexto(guia, idioma);
     const entrada = buscarAyuda(ultima, idioma);
     if (entrada) return entrada.respuesta;
     const temas = BASE_AYUDA[idioma].slice(0, 6).map((e) => `• ${e.pregunta}`).join("\n");
@@ -108,7 +112,7 @@ export async function POST(req: Request) {
     idioma === "en"
       ? "La persona usa la web en inglés: respondé en inglés, salvo que escriba en otro idioma."
       : "La persona usa la web en español.";
-  const sistema = `${SISTEMA}\n\nFicha de Rumbo Traveling (única fuente sobre la web):\n${fichaComoTexto(idioma)}\n\n${idiomaWeb}${datos.contexto ? `\nContexto de la persona en la web: ${datos.contexto}` : ""}`;
+  const sistema = `${SISTEMA}\n\nFicha de Rumbo Traveling (única fuente sobre la web):\n${fichaComoTexto(idioma)}\n\nGuías de viaje de Rumbo (precios aproximados, usalos tal cual y pasá el link de la guía):\n${guiasComoTexto(idioma)}\n\n${idiomaWeb}${datos.contexto ? `\nContexto de la persona en la web: ${datos.contexto}` : ""}`;
 
   // Sin clave de Anthropic: modelos de IA del AI Gateway de Vercel. Si fallan antes de responder, contesta la ficha.
   if (!process.env.ANTHROPIC_API_KEY) {

@@ -32,6 +32,16 @@ export function Pie() {
                 {t.pie.ejemplo}
               </Link>
             </li>
+            <li>
+              <Link href="/guias" className={link}>
+                {t.pie.guias}
+              </Link>
+            </li>
+            <li>
+              <Link href="/opinar" className={link}>
+                {t.pie.opinar}
+              </Link>
+            </li>
           </ul>
         </nav>
       </div>

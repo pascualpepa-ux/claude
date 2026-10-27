@@ -3,6 +3,7 @@ import path from "node:path";
 import type { MetadataRoute } from "next";
 import { IDIOMAS } from "@/lib/idioma";
 import { urlEnIdioma } from "@/lib/seo";
+import { GUIAS } from "@/lib/guias";
 
 // /sitemap.xml: se arma solo al publicar, recorriendo las páginas de la app (cada carpeta con page.tsx).
 // Una página nueva aparece sola; las privadas se excluyen acá y también en robots.txt.
@@ -12,8 +13,8 @@ export const dynamic = "force-static";
 /** Carpetas privadas: administración, confirmación y baja de emails, la pausa y el viaje de cada persona. */
 export const PRIVADAS = ["/admin", "/suscripcion", "/pausa", "/viaje", "/api"];
 
-/** Páginas públicas que no son una carpeta propia (el viaje de ejemplo usa la página de viaje). */
-const EXTRA = ["/viaje?ejemplo=1"];
+/** Páginas públicas que no son una carpeta propia: el viaje de ejemplo y cada guía (ruta dinámica). */
+const EXTRA = ["/viaje?ejemplo=1", ...GUIAS.map((g) => `/guias/${g.slug}`)];
 
 const PRIORIDAD: Record<string, number> = { "/": 1, "/planificar": 0.9 };
 

@@ -46,7 +46,8 @@ export function calcularResumen(plan: TripPlan): Resumen {
   const t = TEXTOS[plan.idioma ?? "es"].presupuesto.lineas;
 
   const vuelo = plan.vuelos.find((v) => v.id === plan.vueloElegido);
-  if (vuelo) {
+  // Un vuelo estimado sin distancia conocida no tiene precio: no se suma un cero engañoso.
+  if (vuelo && !(vuelo.estimado && !vuelo.precioPorPersona)) {
     lineas.push({
       id: "vuelos",
       concepto: t.vuelos,

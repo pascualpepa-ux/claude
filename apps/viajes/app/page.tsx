@@ -10,7 +10,8 @@ import { ViajesGuardados } from "@/components/ViajesGuardados";
 import { FormularioSuscripcion } from "@/components/FormularioSuscripcion";
 import { suscripcionesActivas } from "@/lib/suscripciones";
 import { BellRinging } from "@phosphor-icons/react/dist/ssr";
-import { aplicarClima, generarViaje, viajeDeMuestra } from "@/lib/mock";
+import { ajustarDuraciones, aplicarClima, generarViaje, viajeDeMuestra } from "@/lib/mock";
+import { distanciaAeropuertos } from "@/lib/lugares";
 import { climaReal } from "@/lib/clima-real";
 import { calcularResumen } from "@/lib/presupuesto";
 import { usd } from "@/lib/dinero";
@@ -34,7 +35,12 @@ export default async function Inicio() {
   const clima = await climaReal(
     base.ruta.map((r) => ({ iata: r.aeropuerto, fechas: base.dias.filter((d) => d.clave === r.clave).map((d) => d.fecha) })),
   );
-  const plan = aplicarClima(base, clima, idioma);
+  // Vuelo de la muestra: estimado por la distancia real entre aeropuertos (no hay aerolínea inventada).
+  const plan = ajustarDuraciones(
+    aplicarClima(base, clima, idioma),
+    distanciaAeropuertos(base.input.aeropuertoOrigen, base.ruta[0].aeropuerto),
+    distanciaAeropuertos(base.ruta.at(-1)!.aeropuerto, base.input.aeropuertoOrigen),
+  );
   const resumen = calcularResumen(plan);
   const dia = plan.dias[1];
   const actividades = plan.actividades.filter((a) => dia.actividades.includes(a.id));
@@ -79,7 +85,7 @@ export default async function Inicio() {
           <div className="mt-3 rounded-2xl border border-arena-200 bg-papel p-4 dark:border-arena-800 dark:bg-arena-900 md:relative md:-ml-10 md:-mt-4 md:w-72 md:shadow-lg md:shadow-arena-400/30 md:dark:shadow-black/40">
             <p className="text-sm text-arena-600 dark:text-arena-400">{ti.muestra}</p>
             <p className="mt-1 text-2xl font-semibold tabular-nums">{usd(resumen.porPersona, idioma)}</p>
-            <p className="text-sm text-arena-600 dark:text-arena-400">{ti.porPersonaCon(vuelo.aerolinea)}</p>
+            <p className="text-sm text-arena-600 dark:text-arena-400">{vuelo.estimado ? ti.porPersonaEstimado : ti.porPersonaCon(vuelo.aerolinea)}</p>
           </div>
         </div>
       </div>
@@ -146,7 +152,7 @@ export default async function Inicio() {
           <li className="flex items-center justify-between gap-4">
             <span className="flex items-center gap-2 text-sm font-medium">
               <Receipt size={18} className="text-arena-500" aria-hidden />
-              {ti.vueloCon(vuelo.aerolinea)}
+              {vuelo.estimado ? vuelo.aerolinea : ti.vueloCon(vuelo.aerolinea)}
             </span>
             <span className="text-sm tabular-nums">{usd(vuelo.precioPorPersona, idioma)}</span>
           </li>

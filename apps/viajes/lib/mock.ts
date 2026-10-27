@@ -50,6 +50,12 @@ const TX = {
     reembolsable: "Reembolsable con penalidad del 20%",
     noReembolsable: "No reembolsable",
     busquedaVuelo: (o: string, d: string, ida: string, vuelta: string, a: string) => `vuelos de ${o} a ${d} ${ida} vuelta ${vuelta} ${a}`,
+    aerolineaAConfirmar: "Vuelo estimado (aerolínea a confirmar)",
+    equipajeSegun: "Equipaje de mano: según la aerolínea que elijas",
+    valijaSegun: "Valija: según la tarifa que elijas",
+    cambiosSegun: "Cambios: según la tarifa que elijas",
+    reembolsoSegun: "Reembolso: según la tarifa que elijas",
+    fuenteEstimado: "Estimado por la distancia del vuelo",
     hoteles: {
       hostel: (z: string[]) => [`Hostel Casa ${z[0]}`, `${z[1]} Backpackers`, `Hostel del Puerto ${z[2]}`],
       depto: (z: string[]) => [`Departamento luminoso en ${z[0]}`, `Loft con balcón en ${z[1]}`, `Departamento familiar en ${z[2]}`],
@@ -84,6 +90,12 @@ const TX = {
     reembolsable: "Refundable with a 20% penalty",
     noReembolsable: "Non-refundable",
     busquedaVuelo: (o: string, d: string, ida: string, vuelta: string, a: string) => `flights from ${o} to ${d} ${ida} return ${vuelta} ${a}`,
+    aerolineaAConfirmar: "Estimated flight (airline to be confirmed)",
+    equipajeSegun: "Carry-on: depends on the airline you choose",
+    valijaSegun: "Checked bag: depends on the fare you choose",
+    cambiosSegun: "Changes: depend on the fare you choose",
+    reembolsoSegun: "Refunds: depend on the fare you choose",
+    fuenteEstimado: "Estimated from the flight distance",
     hoteles: {
       hostel: (z: string[]) => [`Casa ${z[0]} Hostel`, `${z[1]} Backpackers`, `Harbor Hostel ${z[2]}`],
       depto: (z: string[]) => [`Bright apartment in ${z[0]}`, `Loft with balcony in ${z[1]}`, `Family apartment in ${z[2]}`],
@@ -201,61 +213,39 @@ export function consejoClima(c: ClimaDia, idioma: Idioma): string {
   return t.templado;
 }
 
-function armarVuelos(input: TripInput, destino: CiudadBase, regreso: CiudadBase, aerolineas: string[], ahora: string, idioma: Idioma): OpcionVuelo[] {
+/**
+ * Sin vuelos reales todavía, no se inventan aerolíneas, números ni horarios: hay un solo "vuelo estimado"
+ * (aerolínea a confirmar) con precio y duración aproximados por la distancia. Se corrigen con `ajustarDuraciones`.
+ */
+function armarVuelos(input: TripInput, destino: CiudadBase, regreso: CiudadBase, _aerolineas: string[], ahora: string, idioma: Idioma): OpcionVuelo[] {
   const t = TX[idioma];
-  const r = azar(`vuelos|${input.origen}|${input.destino}|${input.fechaIda}`);
-  const lista = input.aerolinea.trim()
-    ? [input.aerolinea.trim(), ...aerolineas.filter((x) => x.toLowerCase() !== input.aerolinea.trim().toLowerCase())]
-    : aerolineas;
-  const escalasPosibles = ["MAD", "DOH", "DXB", "GRU", "AMS", "FRA"];
-  const base = entre(r, 780, 1250) * MULT_CLASE[input.clase];
-  const perfiles = [
-    { escalas: 0, factor: 1.32, valijaIncluida: true, estado: "verificado" as const },
-    { escalas: 1, factor: 1.0, valijaIncluida: true, estado: "verificado" as const },
-    { escalas: 2, factor: 0.82, valijaIncluida: false, estado: "estimado" as const },
-  ];
-  const origenCodigo = input.aeropuertoOrigen || input.origen.trim().slice(0, 3).toUpperCase() || "EZE";
-  return perfiles.map((p, i) => {
-    const aerolinea = lista[i % lista.length];
-    const duracionIda = Math.round(entre(r, 14, 18) * 60 + p.escalas * entre(r, 120, 240));
-    const duracionVuelta = Math.round(duracionIda + entre(r, -60, 60));
-    const escalas = Array.from({ length: p.escalas }, (_, k) => escalasPosibles[(i * 2 + k) % escalasPosibles.length]);
-    const salidaIda = new Date(`${input.fechaIda}T${["22:40", "13:15", "06:05"][i]}:00Z`);
-    const salidaVuelta = new Date(`${input.fechaVuelta}T${["11:20", "18:45", "09:30"][i]}:00Z`);
-    const recargoValija = input.equipaje === "valija" && !p.valijaIncluida ? 140 : 0;
-    const precioPorPersona = redondear(base * p.factor) + recargoValija;
-    const busqueda = t.busquedaVuelo(input.origen, destino.nombre[idioma], input.fechaIda, input.fechaVuelta, aerolinea);
-    return {
-      id: `vuelo-${i}`,
-      aerolinea,
-      clase: input.clase,
-      ida: {
-        desde: origenCodigo,
-        hasta: destino.aeropuerto,
-        salida: salidaIda.toISOString(),
-        llegada: new Date(salidaIda.getTime() + duracionIda * 60_000).toISOString(),
-        escalas,
-        duracionMin: duracionIda,
-      },
-      vuelta: {
-        desde: regreso.aeropuerto,
-        hasta: origenCodigo,
-        salida: salidaVuelta.toISOString(),
-        llegada: new Date(salidaVuelta.getTime() + duracionVuelta * 60_000).toISOString(),
-        escalas: [...escalas].reverse(),
-        duracionMin: duracionVuelta,
-      },
-      precioPorPersona,
-      condiciones: {
-        equipajeMano: t.mano,
-        valija: p.valijaIncluida ? t.valijaIncluida : input.equipaje === "valija" ? t.valijaSumada : t.valijaNo,
-        cambios: p.escalas === 2 ? t.sinCambios : t.cambios(p.escalas === 0 ? 100 : 180),
-        reembolso: p.escalas === 0 ? t.reembolsable : t.noReembolsable,
-      },
-      linkReserva: `https://www.google.com/travel/flights?hl=${idioma}&q=${encodeURIComponent(busqueda)}`,
-      origen: origen(idioma, ahora, p.estado),
-    };
+  const origenCodigo = input.aeropuertoOrigen || "";
+  const tramo = (desde: string, hasta: string, fecha: string): Tramo => ({
+    desde,
+    hasta,
+    salida: `${fecha}T00:00:00.000Z`,
+    llegada: `${fecha}T00:00:00.000Z`,
+    escalas: [],
+    duracionMin: 0, // se calcula con la distancia real entre aeropuertos
   });
+  const ida = tramo(origenCodigo, destino.aeropuerto, input.fechaIda);
+  const vuelta = tramo(regreso.aeropuerto, origenCodigo, input.fechaVuelta);
+  return [
+    {
+      id: "vuelo-estimado",
+      aerolinea: t.aerolineaAConfirmar,
+      clase: input.clase,
+      ida,
+      vuelta,
+      precioPorPersona: 0, // se calcula con la distancia
+      condiciones: { equipajeMano: t.equipajeSegun, valija: t.valijaSegun, cambios: t.cambiosSegun, reembolso: t.reembolsoSegun },
+      linkReserva: `https://www.google.com/travel/flights?hl=${idioma}&q=${encodeURIComponent(
+        t.busquedaVuelo(ida.desde || input.origen, ida.hasta, input.fechaIda, input.fechaVuelta, input.aerolinea.trim()),
+      )}`,
+      origen: { fuente: t.fuenteEstimado, consultadoEn: ahora, estado: "estimado" },
+      estimado: true,
+    },
+  ];
 }
 
 function nombresHotel(tipo: TipoHotel, zonas: string[], idioma: Idioma): string[] {
@@ -524,7 +514,23 @@ export function ajustarDuraciones(plan: TripPlan, kmIda: number | null, kmVuelta
     const duracionMin = duracionEstimada(km, t.escalas.length);
     return { ...t, duracionMin, llegada: new Date(new Date(t.salida).getTime() + duracionMin * 60_000).toISOString() };
   };
-  return { ...plan, vuelos: plan.vuelos.map((v) => ({ ...v, ida: ajustar(v.ida, kmIda), vuelta: ajustar(v.vuelta, kmVuelta) })) };
+  return {
+    ...plan,
+    vuelos: plan.vuelos.map((v) => ({
+      ...v,
+      ida: ajustar(v.ida, kmIda),
+      vuelta: ajustar(v.vuelta, kmVuelta),
+      ...(v.estimado && kmIda && kmVuelta && { precioPorPersona: precioEstimado(kmIda, kmVuelta, plan.input.clase) }),
+    })),
+  };
+}
+
+/**
+ * Precio aproximado de un pasaje ida y vuelta por persona según la distancia (referencia de tarifas en clase económica:
+ * ~US$ 60 de tasas y unos US$ 0,055 por km en cada tramo). Es solo una estimación hasta tener precios reales.
+ */
+export function precioEstimado(kmIda: number, kmVuelta: number, clase: TripInput["clase"]) {
+  return redondear((60 + 0.055 * (kmIda + kmVuelta)) * MULT_CLASE[clase], 10);
 }
 
 /** Pone los vuelos reales que trajeron los agentes. La primera opción es la de la aerolínea preferida, si la hay. */
