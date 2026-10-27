@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { BASE_AYUDA, buscarAyuda, fichaComoTexto } from "@/lib/ayuda-base";
 import { LIMITES, SISTEMA, type MensajeChat } from "@/lib/ayudante";
 import { esIdioma, type Idioma } from "@/lib/idioma";
 
@@ -12,7 +13,7 @@ const pedidos = new Map<string, number[]>();
 
 const AVISOS: Record<Idioma, Record<string, string>> = {
   es: {
-    inactivo: "El asistente todavía no está activado. Volvé a probar más tarde.",
+    sinCoincidencia: "No tengo una respuesta segura para eso. Probá preguntarlo de otra forma o elegí uno de estos temas:",
     limite: "Hiciste muchas preguntas seguidas. Esperá unos minutos y volvé a probar.",
     invalido: "No pude leer tu mensaje. Probá escribirlo de nuevo.",
     rechazo: "Perdón, no puedo ayudar con eso. ¿Te ayudo con algo de tu viaje?",
@@ -21,7 +22,7 @@ const AVISOS: Record<Idioma, Record<string, string>> = {
     error: "Hubo un problema al responder. Probá de nuevo.",
   },
   en: {
-    inactivo: "The assistant isn't turned on yet. Please try again later.",
+    sinCoincidencia: "I don't have a reliable answer for that. Try asking another way, or pick one of these topics:",
     limite: "You've asked a lot of questions in a row. Wait a few minutes and try again.",
     invalido: "I couldn't read your message. Try writing it again.",
     rechazo: "Sorry, I can't help with that. Can I help with something about your trip?",
@@ -63,20 +64,29 @@ export async function POST(req: Request) {
   const cuerpo = await req.json().catch(() => null);
   const idioma: Idioma = esIdioma(cuerpo?.idioma) ? cuerpo.idioma : "es";
   const aviso = AVISOS[idioma];
-  if (!process.env.ANTHROPIC_API_KEY) return texto(aviso.inactivo, 503);
+  const datos = validar(cuerpo);
+  if (!datos) return texto(aviso.invalido, 400);
+
+  // Sin clave de Claude, responde directo desde la ficha: siempre exacto, aunque menos flexible.
+  if (!process.env.ANTHROPIC_API_KEY) {
+    const entrada = buscarAyuda(datos.mensajes.at(-1)!.content, idioma);
+    if (entrada) return texto(entrada.respuesta, 200);
+    const temas = BASE_AYUDA[idioma].slice(0, 6).map((e) => `• ${e.pregunta}`).join("\n");
+    return texto(`${aviso.sinCoincidencia}\n${temas}`, 200);
+  }
+
+  // El límite solo cuida el costo de la IA: la ficha no cuesta nada.
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "desconocida";
   if (!permitido(ip)) {
     return texto(aviso.limite, 429);
   }
-  const datos = validar(cuerpo);
-  if (!datos) return texto(aviso.invalido, 400);
 
   const client = new Anthropic();
   const idiomaWeb =
     idioma === "en"
       ? "La persona usa la web en inglés: respondé en inglés, salvo que escriba en otro idioma."
       : "La persona usa la web en español.";
-  const sistema = `${SISTEMA}\n\n${idiomaWeb}${datos.contexto ? `\nContexto de la persona en la web: ${datos.contexto}` : ""}`;
+  const sistema = `${SISTEMA}\n\nFicha de Rumbo Traveling (única fuente sobre la web):\n${fichaComoTexto(idioma)}\n\n${idiomaWeb}${datos.contexto ? `\nContexto de la persona en la web: ${datos.contexto}` : ""}`;
 
   const salida = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -85,7 +95,7 @@ export async function POST(req: Request) {
         const stream = client.beta.messages.stream({
           model: "claude-opus-5-5",
           max_tokens: 2000, // respuestas de chat cortas; tope de costo
-          output_config: { effort: "low" },
+          output_config: { effort: "medium" }, // un poco más de cuidado: la precisión importa más que la velocidad
           betas: ["server-side-fallback-2026-07-01"],
           fallbacks: "default",
           system: sistema,
