@@ -61,7 +61,8 @@ export async function alertarDueno(asunto: string, detalle: string, responderA?:
   const correo: Correo = {
     idioma: "es",
     asunto: `[Rumbo] ${asunto}`,
-    html: `<pre style="font-family:monospace;white-space:pre-wrap">${texto.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</pre>`,
+    // Letra normal (la misma del sistema), no de máquina de escribir.
+    html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:22px;color:#2b2a24;white-space:pre-wrap">${texto.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`,
     texto,
     esperado: { frases: [], enlaces: [] },
   };
