@@ -1,8 +1,17 @@
 import { ChatCenteredText, Star } from "@phosphor-icons/react/dist/ssr";
 import { formatoCorto } from "@/lib/fechas";
 import type { Idioma } from "@/lib/idioma";
+import type { Categoria } from "@/lib/clasificar-opinion";
 import type { Opinion } from "@/lib/opiniones";
 import type { Textos } from "@/lib/textos";
+
+const COLOR: Record<Categoria, string> = {
+  problema: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200",
+  mejora: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
+  elogio: "bg-oliva-100 text-oliva-800 dark:bg-oliva-900 dark:text-oliva-100",
+  comentario: "bg-arena-100 text-arena-700 dark:bg-arena-800 dark:text-arena-200",
+  sin_texto: "bg-arena-100 text-arena-600 dark:bg-arena-800 dark:text-arena-300",
+};
 
 /** Admin: promedio, reparto por estrellas y últimas opiniones. */
 export function ListaOpiniones({
@@ -10,7 +19,7 @@ export function ListaOpiniones({
   idioma,
   T,
 }: {
-  datos: { total: number; promedio: number; porEstrellas: Record<number, number>; ultimas: Opinion[] } | null;
+  datos: { total: number; promedio: number; porEstrellas: Record<number, number>; porCategoria: Partial<Record<Categoria, number>>; ultimas: Opinion[] } | null;
   idioma: Idioma;
   T: Textos["admin"]["opiniones"];
 }) {
@@ -48,6 +57,15 @@ export function ListaOpiniones({
           ))}
         </ul>
       </div>
+      {datos.total > 0 && (
+        <ul className="mt-4 flex flex-wrap gap-2 text-xs">
+          {(Object.keys(T.categorias) as Categoria[]).map((c) => (
+            <li key={c} className={`rounded-full px-2.5 py-1 ${COLOR[c]}`}>
+              {T.categorias[c]}: <span className="font-semibold tabular-nums">{datos.porCategoria[c] ?? 0}</span>
+            </li>
+          ))}
+        </ul>
+      )}
       {datos.ultimas.length === 0 ? (
         <p className="mt-4 text-sm text-arena-600 dark:text-arena-400">{T.vacio}</p>
       ) : (
@@ -58,6 +76,10 @@ export function ListaOpiniones({
                 <span className="text-amber-500" aria-label={`${o.estrellas}/5`}>
                   {"★".repeat(o.estrellas)}
                   <span className="text-arena-300 dark:text-arena-600">{"★".repeat(5 - o.estrellas)}</span>
+                </span>
+                <span className={`rounded-full px-2 py-0.5 text-xs ${COLOR[o.categoria]}`}>
+                  {T.categorias[o.categoria]}
+                  {o.prioridad === "alta" && ` · ${T.prioridad.alta}`}
                 </span>
                 <span className="text-arena-500 dark:text-arena-400">
                   {o.pagina} · {o.idioma.toUpperCase()} · {formatoCorto(new Date(o.creada).toISOString().slice(0, 10), idioma)}

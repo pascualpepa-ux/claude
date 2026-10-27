@@ -171,8 +171,10 @@ const es: EntradaAyuda[] = [
   {
     id: "contacto",
     pregunta: "¿Quién hizo Rumbo?",
-    claves: ["quien", "creador", "creo", "hizo", "contacto", "dueno", "empresa"],
-    respuesta: "Rumbo Traveling es un proyecto creado por Pascual Pepa.",
+    claves: ["quien", "creador", "creo", "hizo", "contacto", "contactar", "contactarlos", "email", "mail", "correo", "escribir", "escribirles", "dueno", "empresa"],
+    respuesta:
+      "Rumbo Traveling es un proyecto creado por Pascual Pepa. Para escribirnos: info@rumbotraveling.com, o desde la página \"Contacto\" " +
+      "(en el pie de página), donde dejás tu email y tu mensaje y te respondemos a ese email.",
   },
   {
     id: "ninos",
@@ -396,8 +398,10 @@ const en: EntradaAyuda[] = [
   {
     id: "contacto",
     pregunta: "Who made Rumbo?",
-    claves: ["who", "creator", "created", "made", "contact", "owner", "company"],
-    respuesta: "Rumbo Traveling is a project created by Pascual Pepa.",
+    claves: ["who", "creator", "made", "built", "contact", "email", "mail", "write", "reach", "owner", "company"],
+    respuesta:
+      "Rumbo Traveling is a project created by Pascual Pepa. To reach us: info@rumbotraveling.com, or use the \"Contact\" page " +
+      "(in the footer), where you leave your email and message and we reply to that email.",
   },
   {
     id: "ninos",

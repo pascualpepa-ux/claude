@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { EnvelopeSimple } from "@phosphor-icons/react/dist/ssr";
 import { LogoCompleto } from "./Logo";
 import { useIdioma } from "./ProveedorIdioma";
 
@@ -20,6 +21,7 @@ export function Pie() {
             </a>
           </p>
         </div>
+        <div className="flex flex-col gap-8 sm:flex-row sm:gap-14">
         <nav aria-label={t.pie.navegacion}>
           <ul className="grid gap-2 text-sm">
             <li>
@@ -44,6 +46,19 @@ export function Pie() {
             </li>
           </ul>
         </nav>
+        <div>
+          <p className="text-sm font-semibold">{t.pie.escribinos}</p>
+          <a href="mailto:info@rumbotraveling.com" className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-oliva-700 hover:underline dark:text-oliva-300">
+            <EnvelopeSimple size={18} weight="duotone" aria-hidden />
+            info@rumbotraveling.com
+          </a>
+          <p className="mt-2 text-sm">
+            <Link href="/contacto" className={link}>
+              {t.pie.contacto}
+            </Link>
+          </p>
+        </div>
+        </div>
       </div>
       <div className="border-t border-arena-200 dark:border-arena-800">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-1 px-4 py-4 text-center sm:flex-row sm:justify-between sm:text-left">

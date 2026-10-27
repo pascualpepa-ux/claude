@@ -16,6 +16,8 @@ import { climaReal } from "@/lib/clima-real";
 import { calcularResumen } from "@/lib/presupuesto";
 import { usd } from "@/lib/dinero";
 import { textosActuales } from "@/lib/idioma-servidor";
+import { GUIAS } from "@/lib/guias";
+import { Calificacion } from "@/components/Calificacion";
 
 // Las fechas de la muestra dependen del día de hoy.
 export const dynamic = "force-dynamic";
@@ -106,6 +108,40 @@ export default async function Inicio() {
       </section>
 
 
+      {/* Guías de viaje: grandes y bien visibles, después de la suscripción. */}
+      <section aria-labelledby="titulo-guias" className="border-t border-arena-200 py-16 md:py-20 dark:border-arena-800">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 id="titulo-guias" className="text-3xl font-semibold tracking-tight md:text-4xl">{ti.guiasTitulo}</h2>
+              <p className="mt-3 max-w-[56ch] text-arena-600 dark:text-arena-400">{ti.guiasBajada}</p>
+            </div>
+            <Link href="/guias" className="inline-flex items-center gap-1.5 font-medium text-oliva-700 hover:underline dark:text-oliva-300">
+              {ti.guiasTodas}
+              <ArrowRight size={16} weight="bold" aria-hidden />
+            </Link>
+          </div>
+          <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {GUIAS.slice(0, 6).map((g) => (
+              <li key={g.slug}>
+                <Link
+                  href={`/guias/${g.slug}`}
+                  className="group flex h-full flex-col rounded-2xl border border-arena-200 bg-papel p-6 transition hover:border-oliva-600 hover:shadow-md dark:border-arena-800 dark:bg-arena-900 dark:hover:border-oliva-300"
+                >
+                  <span className="text-xs font-medium uppercase tracking-wide text-oliva-700 dark:text-oliva-300">{t.guias.dias(g.dias)}</span>
+                  <span className="mt-2 text-xl font-semibold text-balance">{g.titulo[idioma]}</span>
+                  <span className="mt-3 flex-1 text-sm text-arena-600 dark:text-arena-400">{g.descripcion[idioma]}</span>
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-oliva-700 group-hover:underline dark:text-oliva-300">
+                    {t.guias.ver}
+                    <ArrowRight size={14} weight="bold" aria-hidden />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       <section className="border-t border-arena-200 bg-papel py-16 md:py-24 dark:border-arena-800 dark:bg-arena-900/40">
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="max-w-[24ch] text-3xl font-semibold tracking-tight md:text-4xl">
@@ -166,6 +202,17 @@ export default async function Inicio() {
             <EstadoDato origen={{ ...vuelo.origen, estado: "no_verificado" }} />
           </li>
         </ul>
+      </section>
+
+      {/* Opinión: bien visible al final de la portada. */}
+      <section aria-labelledby="titulo-opinion" className="border-t border-arena-200 bg-arena-100 dark:border-arena-800 dark:bg-arena-900/60">
+        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-14 md:grid-cols-[1fr_minmax(0,28rem)] md:items-center md:gap-12 md:py-16">
+          <div>
+            <h2 id="titulo-opinion" className="text-3xl font-semibold tracking-tight md:text-4xl">{ti.opinionTitulo}</h2>
+            <p className="mt-3 max-w-[48ch] text-arena-600 dark:text-arena-400">{ti.opinionBajada}</p>
+          </div>
+          <Calificacion pagina="/" titulo={t.opinion.estrellas} />
+        </div>
       </section>
     </main>
   );

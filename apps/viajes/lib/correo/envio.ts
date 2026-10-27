@@ -56,7 +56,8 @@ export async function mandarAResend(
 }
 
 /** Aviso al dueño cuando un email no se pudo mandar (va directo, sin pasar por la tabla de envíos). */
-export async function alertarDueno(asunto: string, detalle: string, responderA?: string) {
+/** Manda un aviso al dueño. Devuelve true si salió. */
+export async function alertarDueno(asunto: string, detalle: string, responderA?: string): Promise<boolean> {
   const texto = `${detalle}\n\n--\nRumbo Traveling (aviso automático)`;
   const correo: Correo = {
     idioma: "es",
@@ -72,6 +73,7 @@ export async function alertarDueno(asunto: string, detalle: string, responderA?:
   // Si es una respuesta de alguien, "Responder" le contesta directo a esa persona.
   const r = await mandarAResend(DUENO(), correo, undefined, { replyTo: responderA ?? DUENO() });
   if (r.error) console.error("alerta al dueño no enviada:", r.error, asunto, detalle);
+  return !r.error;
 }
 
 /**
