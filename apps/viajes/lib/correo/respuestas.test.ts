@@ -19,7 +19,7 @@ describe("respuestas a los emails", () => {
     expect(adivinarIdioma("Hi, thanks for the email, is this free?")).toBe("en");
     const es = correoRespuestaAutomatica("es", "Pascual te invita a Rumbo Traveling");
     expect(es.asunto).toBe("Re: Pascual te invita a Rumbo Traveling");
-    expect(es.texto).toContain("se lo vamos a informar a nuestro jefe");
+    expect(es.texto).toContain("se lo vamos a informar a nuestro jefe, Pascual Pepa");
     expect(es.html).not.toContain("Darme de baja");
     expect(verificarCorreo(es, "es")).toEqual([]);
     const en = correoRespuestaAutomatica("en", "Re: hello");

@@ -30,7 +30,7 @@ export const TEXTOS = {
     },
     respuesta: {
       titulo: "¡Gracias por escribirnos!",
-      linea: "Recibimos tu mensaje y se lo vamos a informar a nuestro jefe. Te respondemos pronto.",
+      linea: "Recibimos tu mensaje y se lo vamos a informar a nuestro jefe, Pascual Pepa. Te respondemos pronto.",
       sinAsunto: "Tu mensaje",
     },
     pie: "Un proyecto de Pascual Pepa",
@@ -52,7 +52,7 @@ export const TEXTOS = {
     },
     respuesta: {
       titulo: "Thanks for writing to us!",
-      linea: "We got your message and we'll pass it on to our boss. We'll get back to you soon.",
+      linea: "We got your message and we'll pass it on to our boss, Pascual Pepa. We'll get back to you soon.",
       sinAsunto: "Your message",
     },
     pie: "A project by Pascual Pepa",
