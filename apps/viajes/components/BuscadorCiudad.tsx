@@ -7,6 +7,7 @@ import type { Lugar } from "@/lib/lugares-tipos";
 import { useIdioma } from "./ProveedorIdioma";
 
 interface Props {
+  tipo: "origen" | "destino";
   texto: string;
   lugar: Lugar | null;
   aeropuerto: string;
@@ -16,10 +17,17 @@ interface Props {
   onAeropuerto: (iata: string) => void;
 }
 
-/** Busca la ciudad de salida y muestra los aeropuertos con vuelos regulares más cercanos. */
-export function BuscadorCiudad({ texto, lugar, aeropuerto, error, onTexto, onLugar, onAeropuerto }: Props) {
+/**
+ * Busca la ciudad de salida o el destino y muestra los aeropuertos con vuelos regulares más cercanos.
+ * En el destino también se puede elegir un país: la web sugiere después qué ciudades visitar.
+ */
+export function BuscadorCiudad({ tipo, texto, lugar, aeropuerto, error, onTexto, onLugar, onAeropuerto }: Props) {
   const { idioma, t } = useIdioma();
   const A = t.asistente;
+  const esDestino = tipo === "destino";
+  const textos = esDestino
+    ? { etiqueta: A.destino, ejemplo: A.destinoEj, ayuda: A.destinoAyuda, aeropuerto: A.aeropuertoLlegada, cambiar: A.cambiarDestino }
+    : { etiqueta: A.origen, ejemplo: A.origenEj, ayuda: A.origenAyuda, aeropuerto: A.aeropuertoSalida, cambiar: A.cambiarCiudad };
   const id = useId();
   const [resultados, setResultados] = useState<Lugar[]>([]);
   const [abierto, setAbierto] = useState(false);
@@ -36,6 +44,7 @@ export function BuscadorCiudad({ texto, lugar, aeropuerto, error, onTexto, onLug
   }, [idioma]);
   const pais = (codigo: string) => paises?.of(codigo) ?? codigo;
   const ubicacion = (l: Lugar) => (l.region ? `${l.region}, ${pais(l.pais)}` : pais(l.pais));
+  const titulo = (l: Lugar) => (l.tipo === "pais" ? pais(l.pais) : l.ciudad);
 
   // Busca mientras se escribe (con una pequeña espera para no pedir en cada tecla).
   useEffect(() => {
@@ -50,7 +59,9 @@ export function BuscadorCiudad({ texto, lugar, aeropuerto, error, onTexto, onLug
     const control = new AbortController();
     const espera = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/lugares?q=${encodeURIComponent(q)}`, { signal: control.signal });
+        const res = await fetch(`/api/lugares?q=${encodeURIComponent(q)}${esDestino ? "&tipo=destino" : ""}`, {
+          signal: control.signal,
+        });
         const { lugares } = (await res.json()) as { lugares: Lugar[] };
         if (ultimaBusqueda.current !== q) return;
         setResultados(lugares);
@@ -64,7 +75,7 @@ export function BuscadorCiudad({ texto, lugar, aeropuerto, error, onTexto, onLug
       clearTimeout(espera);
       control.abort();
     };
-  }, [texto, lugar]);
+  }, [texto, lugar, esDestino]);
 
   const elegir = (l: Lugar) => {
     onLugar(l);
@@ -79,7 +90,7 @@ export function BuscadorCiudad({ texto, lugar, aeropuerto, error, onTexto, onLug
   return (
     <div className="grid gap-2">
       <label htmlFor={`${id}-campo`} className="text-sm font-medium">
-        {A.origen}
+        {textos.etiqueta}
       </label>
 
       {!lugar ? (
@@ -95,7 +106,7 @@ export function BuscadorCiudad({ texto, lugar, aeropuerto, error, onTexto, onLug
             aria-describedby={`${id}-ayuda`}
             autoComplete="off"
             value={texto}
-            placeholder={A.origenEj}
+            placeholder={textos.ejemplo}
             onChange={(e) => {
               onTexto(e.target.value);
               setAbierto(true);
@@ -125,7 +136,7 @@ export function BuscadorCiudad({ texto, lugar, aeropuerto, error, onTexto, onLug
             >
               {resultados.map((l, i) => (
                 <li
-                  key={`${l.ciudad}-${l.pais}-${i}`}
+                  key={`${l.tipo}-${l.ciudad}-${l.pais}-${i}`}
                   id={`${id}-op-${i}`}
                   role="option"
                   aria-selected={i === activo}
@@ -139,10 +150,17 @@ export function BuscadorCiudad({ texto, lugar, aeropuerto, error, onTexto, onLug
                   }`}
                 >
                   <span className="min-w-0">
-                    <span className="block font-medium">{l.ciudad}</span>
-                    <span className="block text-xs text-arena-600 dark:text-arena-400">{ubicacion(l)}</span>
+                    <span className="block font-medium">{titulo(l)}</span>
+                    <span className="block text-xs text-arena-600 dark:text-arena-400">
+                      {l.tipo === "pais" ? A.pais : ubicacion(l)}
+                    </span>
                   </span>
-                  {l.aeropuertos[0] && (
+                  {l.tipo === "pais" && l.ciudades?.length ? (
+                    <span className="max-w-[45%] shrink-0 truncate text-right text-xs text-arena-600 dark:text-arena-400">
+                      {l.ciudades.map((c) => c.ciudad).join(", ")}
+                    </span>
+                  ) : null}
+                  {l.tipo === "ciudad" && l.aeropuertos[0] && (
                     <span className="shrink-0 text-right text-xs text-arena-600 tabular-nums dark:text-arena-400">
                       <span className="font-semibold text-oliva-700 dark:text-oliva-300">{l.aeropuertos[0].iata}</span>{" "}
                       {A.aKm(l.aeropuertos[0].distanciaKm)}
@@ -158,20 +176,22 @@ export function BuscadorCiudad({ texto, lugar, aeropuerto, error, onTexto, onLug
           <div className="flex items-start justify-between gap-3">
             <p className="flex items-center gap-2 font-medium">
               <MapPin size={18} weight="duotone" className="text-oliva-700 dark:text-oliva-300" aria-hidden />
-              {lugar.ciudad}, {ubicacion(lugar)}
+              {lugar.tipo === "pais" ? pais(lugar.pais) : `${lugar.ciudad}, ${ubicacion(lugar)}`}
             </p>
             <button
               type="button"
-              onClick={() => onTexto(lugar.ciudad)}
+              onClick={() => onTexto(titulo(lugar))}
               className="shrink-0 text-sm font-medium text-oliva-700 hover:underline dark:text-oliva-300"
             >
-              {A.cambiarCiudad}
+              {textos.cambiar}
             </button>
           </div>
 
-          {lugar.aeropuertos.length ? (
+          {lugar.tipo === "pais" ? (
+            <p className="mt-2 text-sm text-arena-600 dark:text-arena-400">{A.destinoPais(pais(lugar.pais))}</p>
+          ) : lugar.aeropuertos.length ? (
             <fieldset className="mt-3">
-              <legend className="mb-2 text-sm text-arena-600 dark:text-arena-400">{A.aeropuertoSalida}</legend>
+              <legend className="mb-2 text-sm text-arena-600 dark:text-arena-400">{textos.aeropuerto}</legend>
               <div className="grid gap-2">
                 {lugar.aeropuertos.map((a, i) => (
                   <label
@@ -226,7 +246,7 @@ export function BuscadorCiudad({ texto, lugar, aeropuerto, error, onTexto, onLug
                 ? A.sinResultados
                 : estado === "error"
                   ? A.errorBusqueda
-                  : A.origenAyuda}
+                  : textos.ayuda}
           </p>
         )
       )}

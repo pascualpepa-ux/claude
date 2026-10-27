@@ -23,4 +23,16 @@ describe("buscarLugares", () => {
   it("no busca con menos de 2 letras", () => {
     expect(buscarLugares("b")).toEqual([]);
   });
+
+  it("para el destino también encuentra países, en español o inglés, con sus ciudades principales", () => {
+    const [peru] = buscarLugares("Perú", 6, true);
+    expect(peru.tipo).toBe("pais");
+    expect(peru.pais).toBe("PE");
+    expect(peru.ciudades?.[0].ciudad).toBe("Lima");
+    expect(buscarLugares("Japan", 6, true)[0].pais).toBe("JP");
+  });
+
+  it("para el origen no devuelve países", () => {
+    expect(buscarLugares("Peru").every((l) => l.tipo === "ciudad")).toBe(true);
+  });
 });

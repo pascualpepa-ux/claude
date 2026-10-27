@@ -276,13 +276,14 @@ export function resolverDestino(destino: string): Resolucion {
   return { tipo: "ciudad", ciudad: ciudadGenerica(destino.trim() || "Destino") };
 }
 
-function ciudadGenerica(nombre: string): CiudadBase {
+/** Ciudad sin datos propios: actividades genéricas (para cualquier destino del mundo). */
+export function ciudadGenerica(nombre: string, aeropuerto?: string, peso = 1): CiudadBase {
   return {
     clave: normalizar(nombre).replace(/[^a-z0-9]+/g, "-") || "destino",
     nombre: { es: nombre, en: nombre },
-    peso: 1,
+    peso,
     costo: 1,
-    aeropuerto: nombre.slice(0, 3).toUpperCase(),
+    aeropuerto: aeropuerto || nombre.slice(0, 3).toUpperCase(),
     zonas: [z("Centro", "Downtown"), z("Barrio histórico", "Historic quarter")],
     actividades: [
       a(`Recorrido a pie por el centro de ${nombre}`, `Walking tour of downtown ${nombre}`, "imperdible", true, 0, 3),

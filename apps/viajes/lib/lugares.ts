@@ -1,8 +1,8 @@
 import aeropuertosJson from "@/data/lugares/aeropuertos.json";
 import ciudadesJson from "@/data/lugares/ciudades.json";
-import type { AeropuertoCercano, Lugar } from "./lugares-tipos";
+import type { AeropuertoCercano, CiudadPrincipal, Lugar } from "./lugares-tipos";
 
-export type { AeropuertoCercano, Lugar };
+export type { AeropuertoCercano, CiudadPrincipal, Lugar };
 
 // Solo para el servidor: los datos pesan ~2,5 MB y no deben llegar al navegador.
 // Fuentes: GeoNames (ciudades, CC BY 4.0) y OurAirports (aeropuertos, dominio público).
@@ -39,16 +39,58 @@ export function aeropuertosCercanos(lat: number, lon: number, max = 3, radioKm =
 }
 
 /** Busca ciudades por nombre (en cualquier idioma con alfabeto latino) y les agrega sus aeropuertos cercanos. */
-export function buscarLugares(texto: string, max = 6): Lugar[] {
+// Países: los que tienen ciudades en los datos, con su nombre en español e inglés para buscarlos.
+const NOMBRES_PAIS = {
+  es: new Intl.DisplayNames(["es"], { type: "region" }),
+  en: new Intl.DisplayNames(["en"], { type: "region" }),
+};
+const PAISES = [...new Set(CIUDADES.map((c) => c[3]))].map((codigo) => ({
+  codigo,
+  nombres: [NOMBRES_PAIS.es.of(codigo), NOMBRES_PAIS.en.of(codigo)].filter((n): n is string => Boolean(n)).map(normalizar),
+}));
+
+function puntaje(nombre: string, q: string) {
+  // Coincidencia exacta > empieza con > alguna palabra empieza con
+  return nombre === q ? 3 : nombre.startsWith(q) ? 2 : nombre.includes(` ${q}`) ? 1 : -1;
+}
+
+/** Las ciudades más pobladas de un país que tienen aeropuerto cerca (sin repetir aeropuerto). */
+export function ciudadesPrincipales(pais: string, max = 3): CiudadPrincipal[] {
+  const res: CiudadPrincipal[] = [];
+  const usados = new Set<string>();
+  for (const c of CIUDADES) {
+    if (c[3] !== pais) continue;
+    const [aeropuerto] = aeropuertosCercanos(c[4], c[5], 1, 80);
+    if (!aeropuerto || usados.has(aeropuerto.iata)) continue;
+    usados.add(aeropuerto.iata);
+    res.push({ ciudad: c[0], iata: aeropuerto.iata });
+    if (res.length >= max) break;
+  }
+  return res;
+}
+
+/**
+ * Busca ciudades por nombre (en cualquier idioma con alfabeto latino) y les agrega sus aeropuertos cercanos.
+ * Con `incluirPaises`, también devuelve países (para el destino: si se elige un país se sugieren ciudades).
+ */
+export function buscarLugares(texto: string, max = 6, incluirPaises = false): Lugar[] {
   const q = normalizar(texto);
   if (q.length < 2) return [];
+
+  const paises: Lugar[] = incluirPaises
+    ? PAISES.map((p) => ({ p, puntaje: Math.max(...p.nombres.map((n) => puntaje(n, q))) }))
+        .filter(({ puntaje }) => puntaje >= 2)
+        .sort((x, y) => y.puntaje - x.puntaje)
+        .slice(0, 2)
+        .map(({ p }) => ({ tipo: "pais", ciudad: "", region: "", pais: p.codigo, aeropuertos: [], ciudades: ciudadesPrincipales(p.codigo) }))
+    : [];
+
   const resultados: { c: FilaCiudad; nombre: string; puntaje: number }[] = [];
   for (const { c, nombres } of INDICE) {
     let mejor = -1;
     let nombreVisible = c[0];
     nombres.forEach((n, i) => {
-      // Coincidencia exacta > empieza con > alguna palabra empieza con
-      const p = n === q ? 3 : n.startsWith(q) ? 2 : n.includes(` ${q}`) ? 1 : -1;
+      const p = puntaje(n, q);
       if (p > mejor) {
         mejor = p;
         // Si coincidió con un nombre alternativo (ej. "Nueva York"), se muestra ese.
@@ -57,8 +99,10 @@ export function buscarLugares(texto: string, max = 6): Lugar[] {
     });
     if (mejor >= 0) resultados.push({ c, nombre: nombreVisible, puntaje: mejor });
   }
-  return resultados
+  const ciudades: Lugar[] = resultados
     .sort((x, y) => y.puntaje - x.puntaje || y.c[6] - x.c[6])
-    .slice(0, max)
-    .map(({ c, nombre }) => ({ ciudad: nombre, region: c[7], pais: c[3], aeropuertos: aeropuertosCercanos(c[4], c[5]) }));
+    .slice(0, max - paises.length)
+    .map(({ c, nombre }) => ({ tipo: "ciudad", ciudad: nombre, region: c[7], pais: c[3], aeropuertos: aeropuertosCercanos(c[4], c[5]) }));
+
+  return [...paises, ...ciudades];
 }

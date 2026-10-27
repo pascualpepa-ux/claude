@@ -7,9 +7,17 @@ export interface AeropuertoCercano {
   distanciaKm: number;
 }
 
-export interface Lugar {
+/** Ciudad principal de un país, con su aeropuerto más cercano (para sugerir rutas). */
+export interface CiudadPrincipal {
   ciudad: string;
+  iata: string;
+}
+
+export interface Lugar {
+  tipo: "ciudad" | "pais";
+  ciudad: string; // "" cuando es un país
   region: string; // provincia o estado ("" si no se conoce)
   pais: string; // código ISO de 2 letras
   aeropuertos: AeropuertoCercano[];
+  ciudades?: CiudadPrincipal[]; // solo países: sus ciudades principales con aeropuerto
 }

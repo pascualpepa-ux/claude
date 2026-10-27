@@ -4,9 +4,9 @@ import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Plus, Trash, Backpack, Suitcase } from "@phosphor-icons/react/dist/ssr";
 import { diferenciaDias, hoy, sumarDias } from "@/lib/fechas";
-import { resolverDestino } from "@/lib/destinos";
 import { CLAVE_BORRADOR, CLAVE_PEDIDO, CLAVE_VIAJE } from "@/lib/almacen";
 import type { Textos } from "@/lib/textos";
+import { LOCALE, type Idioma } from "@/lib/idioma";
 import type { Lugar } from "@/lib/lugares-tipos";
 import { BuscadorCiudad } from "@/components/BuscadorCiudad";
 import { useIdioma } from "@/components/ProveedorIdioma";
@@ -19,6 +19,7 @@ interface Borrador extends Omit<TripInput, "presupuestoMin" | "presupuestoMax"> 
   presupuestoMin: string;
   presupuestoMax: string;
   lugarOrigen: Lugar | null; // ciudad elegida de la lista, con sus aeropuertos cercanos
+  lugarDestino: Lugar | null; // ciudad o país elegido de la lista
 }
 
 function borradorInicial(): Borrador {
@@ -27,6 +28,9 @@ function borradorInicial(): Borrador {
     origen: "",
     aeropuertoOrigen: "",
     lugarOrigen: null,
+    aeropuertoDestino: "",
+    ciudadesDestino: [],
+    lugarDestino: null,
     destino: "",
     modoFechas: "fechas",
     fechaIda: ida,
@@ -53,7 +57,7 @@ function validar(paso: number, b: Borrador, E: Textos["asistente"]["errores"]): 
   const e: Errores = {};
   if (paso === 0) {
     if (!b.lugarOrigen || !b.aeropuertoOrigen) e.origen = E.origen;
-    if (!b.destino.trim()) e.destino = E.destino;
+    if (!b.lugarDestino) e.destino = E.destino;
   }
   if (paso === 1) {
     if (b.modoFechas === "fechas") {
@@ -86,13 +90,25 @@ function validar(paso: number, b: Borrador, E: Textos["asistente"]["errores"]): 
   return e;
 }
 
-function aPedido(b: Borrador): TripInput {
+/** Nombre del país en el idioma de la web (así lo reconoce el generador de viajes). */
+function nombrePais(codigo: string, idioma: Idioma) {
+  try {
+    return new Intl.DisplayNames([LOCALE[idioma]], { type: "region" }).of(codigo) ?? codigo;
+  } catch {
+    return codigo;
+  }
+}
+
+function aPedido(b: Borrador, idioma: Idioma): TripInput {
+  const d = b.lugarDestino;
   const fechaIda = b.modoFechas === "fechas" ? b.fechaIda : sumarDias(hoy(), 30);
   const fechaVuelta = b.modoFechas === "fechas" ? b.fechaVuelta : sumarDias(fechaIda, Number(b.cantidadDias) - 1);
   return {
     origen: b.lugarOrigen?.ciudad ?? b.origen.trim(),
     aeropuertoOrigen: b.aeropuertoOrigen,
-    destino: b.destino.trim(),
+    destino: d ? (d.tipo === "pais" ? nombrePais(d.pais, idioma) : d.ciudad) : b.destino.trim(),
+    aeropuertoDestino: d?.tipo === "ciudad" ? b.aeropuertoDestino : "",
+    ciudadesDestino: d?.tipo === "pais" ? (d.ciudades ?? []) : [],
     fechaIda,
     fechaVuelta,
     viajeros: b.viajeros.map((v) => v.trim()),
@@ -253,13 +269,12 @@ export function Asistente() {
       return;
     }
     try {
-      sessionStorage.setItem(CLAVE_PEDIDO, JSON.stringify(aPedido(b)));
+      sessionStorage.setItem(CLAVE_PEDIDO, JSON.stringify(aPedido(b, idioma)));
       sessionStorage.removeItem(CLAVE_VIAJE);
     } catch {}
     router.push("/viaje");
   };
 
-  const destinoResuelto = b.destino.trim() ? resolverDestino(b.destino) : null;
   const noches = b.modoFechas === "fechas" ? diferenciaDias(b.fechaIda || hoy(), b.fechaVuelta || hoy()) : Number(b.cantidadDias) - 1;
 
   return (
@@ -296,6 +311,7 @@ export function Asistente() {
           {paso === 0 && (
             <>
               <BuscadorCiudad
+                tipo="origen"
                 texto={b.origen}
                 lugar={b.lugarOrigen}
                 aeropuerto={b.aeropuertoOrigen}
@@ -310,19 +326,27 @@ export function Asistente() {
                 }}
                 onAeropuerto={(iata) => cambiar("aeropuertoOrigen", iata)}
               />
-              <Campo
-                etiqueta={A.destino}
+              <BuscadorCiudad
+                tipo="destino"
+                texto={b.destino}
+                lugar={b.lugarDestino}
+                aeropuerto={b.aeropuertoDestino}
                 error={errores.destino}
-                ayuda={
-                  destinoResuelto?.tipo === "pais"
-                    ? A.destinoPais(destinoResuelto.pais.nombre[idioma])
-                    : A.destinoAyuda
-                }
-              >
-                {(p) => (
-                  <input {...p} value={b.destino} onChange={(e) => cambiar("destino", e.target.value)} placeholder={A.destinoEj} autoComplete="off" />
-                )}
-              </Campo>
+                onTexto={(texto) => {
+                  setB((prev) => ({ ...prev, destino: texto, lugarDestino: null, aeropuertoDestino: "" }));
+                  setErrores((prev) => ({ ...prev, destino: undefined }));
+                }}
+                onLugar={(lugar) => {
+                  setB((prev) => ({
+                    ...prev,
+                    destino: lugar.tipo === "pais" ? nombrePais(lugar.pais, idioma) : lugar.ciudad,
+                    lugarDestino: lugar,
+                    aeropuertoDestino: lugar.aeropuertos[0]?.iata ?? "",
+                  }));
+                  setErrores((prev) => ({ ...prev, destino: undefined }));
+                }}
+                onAeropuerto={(iata) => cambiar("aeropuertoDestino", iata)}
+              />
             </>
           )}
 

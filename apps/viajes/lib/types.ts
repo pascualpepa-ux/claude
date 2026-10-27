@@ -10,7 +10,9 @@ export type ModoPresupuesto = "total" | "persona";
 export interface TripInput {
   origen: string; // ciudad de salida
   aeropuertoOrigen: string; // código IATA del aeropuerto elegido ("" si no se conoce)
-  destino: string;
+  destino: string; // ciudad o país
+  aeropuertoDestino: string; // código IATA de llegada elegido ("" si es un país o no se conoce)
+  ciudadesDestino: { ciudad: string; iata: string }[]; // si el destino es un país: sus ciudades principales
   fechaIda: string; // YYYY-MM-DD
   fechaVuelta: string; // YYYY-MM-DD
   viajeros: string[];

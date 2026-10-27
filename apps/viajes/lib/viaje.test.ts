@@ -112,4 +112,24 @@ describe("idiomas", () => {
   it("reconoce destinos escritos en inglés", () => {
     expect(generarViaje({ ...viajeDeMuestra(), destino: "Japan" }, "en").ruta[0].ciudad).toBe("Tokyo");
   });
+
+  it("con un país sin datos propios arma la ruta con sus ciudades principales", () => {
+    const plan = generarViaje({
+      ...viajeDeMuestra(),
+      destino: "Perú",
+      ciudadesDestino: [
+        { ciudad: "Lima", iata: "LIM" },
+        { ciudad: "Arequipa", iata: "AQP" },
+      ],
+    });
+    expect(plan.rutaSugerida).toBe(true);
+    expect(plan.ruta.map((r) => r.ciudad)).toEqual(["Lima", "Arequipa"]);
+    expect(plan.vuelos[0].ida.hasta).toBe("LIM");
+    expect(plan.vuelos[0].vuelta.desde).toBe("AQP");
+  });
+
+  it("usa el aeropuerto de llegada elegido", () => {
+    const plan = generarViaje({ ...viajeDeMuestra(), destino: "Roma", aeropuertoDestino: "CIA" });
+    expect(plan.vuelos[0].ida.hasta).toBe("CIA");
+  });
 });

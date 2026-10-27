@@ -145,7 +145,7 @@ export function VistaViaje() {
             <h1 className="mt-1 text-3xl font-semibold tracking-tight text-balance md:text-4xl">
               {t.viaje.titulo(
                 input.aeropuertoOrigen ? t.viaje.conAeropuerto(input.origen, input.aeropuertoOrigen) : input.origen,
-                input.destino,
+                input.aeropuertoDestino ? t.viaje.conAeropuerto(input.destino, input.aeropuertoDestino) : input.destino,
               )}
             </h1>
             <ul className="mt-3 flex flex-wrap gap-2" aria-label={t.viaje.viajeros}>

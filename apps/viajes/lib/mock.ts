@@ -1,4 +1,4 @@
-import { resolverDestino, type CiudadBase } from "./destinos";
+import { ciudadGenerica, resolverDestino, type CiudadBase } from "./destinos";
 import { diferenciaDias, hoy, sumarDias } from "./fechas";
 import type { Idioma } from "./idioma";
 import type {
@@ -335,12 +335,19 @@ export function generarViaje(input: TripInput, idioma: Idioma = "es"): TripPlan 
 
   let ciudades: CiudadBase[];
   let aerolineas: string[];
+  const otrasAerolineas = ["Aerolíneas Argentinas", "LATAM", "Iberia"];
+  const sugeridas = input.ciudadesDestino ?? [];
   if (res.tipo === "pais") {
     ciudades = res.pais.ciudades.slice(0, cantidadCiudades(totalDias));
     aerolineas = res.pais.aerolineas;
+  } else if (!res.pais && sugeridas.length) {
+    // País sin datos propios: se arma la ruta con sus ciudades principales (de la búsqueda de lugares).
+    ciudades = sugeridas.slice(0, cantidadCiudades(totalDias)).map((c, i) => ciudadGenerica(c.ciudad, c.iata, [3, 2, 2][i] ?? 1));
+    aerolineas = otrasAerolineas;
   } else {
-    ciudades = [res.ciudad];
-    aerolineas = res.pais?.aerolineas ?? ["Aerolíneas Argentinas", "LATAM", "Iberia"];
+    // Una sola ciudad: se usa el aeropuerto de llegada que eligió la persona, si eligió uno.
+    ciudades = [input.aeropuertoDestino ? { ...res.ciudad, aeropuerto: input.aeropuertoDestino } : res.ciudad];
+    aerolineas = res.pais?.aerolineas ?? otrasAerolineas;
   }
 
   const nochesPorCiudad = repartirNoches(ciudades.map((c) => c.peso), noches);
@@ -419,7 +426,7 @@ export function generarViaje(input: TripInput, idioma: Idioma = "es"): TripPlan 
     idioma,
     generadoEn: ahora,
     ruta,
-    rutaSugerida: res.tipo === "pais",
+    rutaSugerida: res.tipo === "pais" || (!res.pais && sugeridas.length > 0),
     vuelos,
     vueloElegido,
     hoteles,
@@ -452,6 +459,8 @@ export function viajeDeMuestra(): TripInput {
   return {
     origen: "Buenos Aires",
     aeropuertoOrigen: "EZE",
+    aeropuertoDestino: "",
+    ciudadesDestino: [],
     destino: "China",
     fechaIda: ida,
     fechaVuelta: sumarDias(ida, 5),
