@@ -1,12 +1,16 @@
 import type { Idioma } from "../idioma";
 import { barcelona } from "./barcelona-3-dias";
+import { bariloche } from "./bariloche-4-dias";
+import { cancun } from "./cancun-5-dias";
 import { japon } from "./japon-7-dias";
 import { lisboa } from "./lisboa-3-dias";
 import { londres } from "./londres-4-dias";
 import { madrid } from "./madrid-3-dias";
+import { miami } from "./miami-4-dias";
 import { nuevaYork } from "./nueva-york-5-dias";
 import { paris } from "./paris-4-dias";
 import { pekin } from "./pekin-5-dias";
+import { puntaCana } from "./punta-cana-5-dias";
 import { rio } from "./rio-de-janeiro-4-dias";
 import { roma } from "./roma-3-dias";
 import type { Guia, Rango } from "./tipos";
@@ -14,7 +18,7 @@ import type { Guia, Rango } from "./tipos";
 export type { Guia } from "./tipos";
 
 /** Todas las guías, en el orden en que aparecen en /guias. Para sumar una, ver _plantilla.ts. */
-export const GUIAS: Guia[] = [roma, paris, madrid, barcelona, londres, nuevaYork, pekin, japon, lisboa, rio];
+export const GUIAS: Guia[] = [roma, paris, madrid, barcelona, londres, nuevaYork, cancun, miami, puntaCana, bariloche, pekin, japon, lisboa, rio];
 
 export function guiaPorSlug(slug: string): Guia | undefined {
   return GUIAS.find((g) => g.slug === slug);

@@ -215,10 +215,10 @@ const es: EntradaAyuda[] = [
   {
     id: "guias",
     pregunta: "¿Tienen guías de viaje?",
-    claves: ["guia", "guias", "guia de viaje", "itinerario de", "dias en", "que hacer en", "roma", "paris", "madrid", "barcelona", "londres", "nueva york", "pekin", "japon", "lisboa", "rio"],
+    claves: ["guia", "guias", "guia de viaje", "itinerario de", "dias en", "que hacer en", "roma", "paris", "madrid", "barcelona", "londres", "nueva york", "cancun", "miami", "punta cana", "bariloche", "pekin", "japon", "lisboa", "rio"],
     respuesta:
       "Sí, en \"Guías de viaje\" (abajo de todo, en el pie de página) hay itinerarios día por día con precios aproximados y consejos: " +
-      "Roma, París, Madrid, Barcelona, Londres, Nueva York, Pekín, Japón, Lisboa y Río de Janeiro. " +
+      "Roma, París, Madrid, Barcelona, Londres, Nueva York, Cancún, Miami, Punta Cana, Bariloche, Pekín, Japón, Lisboa y Río de Janeiro. " +
       "Cada guía tiene un botón \"Planear este viaje en Rumbo\" que abre el asistente con el destino y los días ya puestos.",
   },
   {
@@ -444,10 +444,10 @@ const en: EntradaAyuda[] = [
   {
     id: "guias",
     pregunta: "Do you have travel guides?",
-    claves: ["guide", "guides", "travel guide", "itinerary for", "days in", "what to do in", "rome", "paris", "madrid", "barcelona", "london", "new york", "beijing", "japan", "lisbon", "rio"],
+    claves: ["guide", "guides", "travel guide", "itinerary for", "days in", "what to do in", "rome", "paris", "madrid", "barcelona", "london", "new york", "cancun", "miami", "punta cana", "bariloche", "beijing", "japan", "lisbon", "rio"],
     respuesta:
       "Yes, under \"Travel guides\" (at the very bottom, in the footer) there are day-by-day itineraries with approximate prices and tips: " +
-      "Rome, Paris, Madrid, Barcelona, London, New York, Beijing, Japan, Lisbon and Rio de Janeiro. " +
+      "Rome, Paris, Madrid, Barcelona, London, New York, Cancún, Miami, Punta Cana, Bariloche, Beijing, Japan, Lisbon and Rio de Janeiro. " +
       "Each guide has a \"Plan this trip with Rumbo\" button that opens the planner with the destination and days already filled in.",
   },
   {

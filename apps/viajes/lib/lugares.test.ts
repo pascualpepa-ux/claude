@@ -58,3 +58,12 @@ describe("aeropuertos de cada ciudad", () => {
     expect(codigos("Buenos Aires")).toEqual(["AEP", "EZE"]);
   });
 });
+
+describe("búsqueda por nombre", () => {
+  it("prioriza el nombre propio de la ciudad sobre nombres alternativos", async () => {
+    const { buscarLugares } = await import("./lugares");
+    expect(buscarLugares("Cancun", 3, false)[0]).toMatchObject({ ciudad: "Cancún", pais: "MX" });
+    expect(buscarLugares("Nueva York", 3, false)[0]).toMatchObject({ pais: "US" });
+    expect(buscarLugares("Londres", 3, false)[0]).toMatchObject({ pais: "GB" });
+  });
+});

@@ -141,7 +141,10 @@ export function buscarLugares(texto: string, max = 6, incluirPaises = false): Lu
     let mejor = -1;
     let nombreVisible = c[0];
     nombres.forEach((n, i) => {
-      const p = puntaje(n, q);
+      // El nombre propio de la ciudad pesa un poco más que sus nombres alternativos:
+      // "Cancun" es Cancún (México), no Changchun (China), que lo tiene como transliteración.
+      const base = puntaje(n, q);
+      const p = base >= 0 && i < 2 ? base + 0.5 : base;
       if (p > mejor) {
         mejor = p;
         // Si coincidió con un nombre alternativo (ej. "Nueva York"), se muestra ese.
