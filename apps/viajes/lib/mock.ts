@@ -288,8 +288,8 @@ function armarHoteles(input: TripInput, ciudad: CiudadBase, ahora: string, idiom
         checkOut: t.checkOut(hora(i === 0 ? "12:00" : "11:00", idioma)),
       },
       linkReserva: `https://www.google.com/travel/search?hl=${idioma}&q=${encodeURIComponent(`${nombre} ${ciudad.nombre[idioma]}`)}`,
-      // Un hotel elegido por el usuario no se puede confirmar con datos de ejemplo.
-      origen: origen(idioma, ahora, esPreferido ? "no_verificado" : i === 2 ? "estimado" : "verificado"),
+      // Son hoteles de ejemplo: nunca se muestran como "Verificado". El que eligió la persona no se puede confirmar.
+      origen: origen(idioma, ahora, esPreferido ? "no_verificado" : "estimado"),
     };
   });
 }
