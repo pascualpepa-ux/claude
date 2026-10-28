@@ -411,7 +411,7 @@ const es = {
     mensajeEj: "Contanos en qué te podemos ayudar",
     enviar: "Enviar mensaje",
     enviando: "Enviando...",
-    gracias: "¡Mensaje enviado! Te respondemos a tu email lo antes posible. Revisá también la carpeta de spam o correo no deseado.",
+    gracias: "¡Mensaje enviado! Te mandamos un email de confirmación y te respondemos lo antes posible. Revisá también la carpeta de spam o correo no deseado.",
     otro: "Mandar otro mensaje",
     errores: {
       email: "Escribí un email válido para que podamos responderte.",
@@ -525,6 +525,15 @@ const es = {
     hoy: "Hoy",
     promedio: "Promedio por día",
     verMas: "Ver más detalles en GoatCounter",
+    mensajes: {
+      titulo: "Mensajes de clientes",
+      vacio: "Todavía no escribió ningún cliente.",
+      formulario: "Formulario de contacto",
+      email: "Email",
+      respondido: "Le mandamos la respuesta automática",
+      responder: "Responder",
+      aviso: "Son privados: solo los ves vos. A cada cliente le contestamos al instante que le vamos a informar a Pascual Pepa, y a vos te llega una copia por email.",
+    },
     opiniones: {
       titulo: "Opiniones",
       promedio: "Promedio",
@@ -971,7 +980,7 @@ const en: Textos = {
     mensajeEj: "Tell us how we can help",
     enviar: "Send message",
     enviando: "Sending...",
-    gracias: "Message sent! We'll reply to your email as soon as we can. Please check your spam or junk folder too.",
+    gracias: "Message sent! We've emailed you a confirmation and we'll reply as soon as we can. Please check your spam or junk folder too.",
     otro: "Send another message",
     errores: {
       email: "Enter a valid email so we can reply.",
@@ -1085,6 +1094,15 @@ const en: Textos = {
     hoy: "Today",
     promedio: "Daily average",
     verMas: "See more details on GoatCounter",
+    mensajes: {
+      titulo: "Customer messages",
+      vacio: "No customer has written yet.",
+      formulario: "Contact form",
+      email: "Email",
+      respondido: "Automatic reply sent",
+      responder: "Reply",
+      aviso: "Private: only you can see them. Each customer instantly gets a reply saying we'll let Pascual Pepa know, and you get a copy by email.",
+    },
     opiniones: {
       titulo: "Feedback",
       promedio: "Average",

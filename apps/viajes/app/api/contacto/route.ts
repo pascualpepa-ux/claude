@@ -1,4 +1,8 @@
-import { alertarDueno } from "@/lib/correo/envio";
+import { alertarDueno, mandarAResend } from "@/lib/correo/envio";
+import { correoRespuestaAutomatica } from "@/lib/correo/redactor";
+import { verificarCorreo } from "@/lib/correo/verificador";
+import { dbConfigurada } from "@/lib/db";
+import { guardarMensaje } from "@/lib/mensajes";
 import { COOKIE_PAUSA, SEGUNDOS_PAUSA, tieneGroserias } from "@/lib/groserias";
 import { esIdioma } from "@/lib/idioma";
 
@@ -43,7 +47,22 @@ export async function POST(req: Request) {
       `Alguien te escribió desde la página de contacto de Rumbo.\n\nNombre: ${nombre || "(no lo puso)"}\nEmail: ${email}\nIdioma: ${idioma === "es" ? "español" : "inglés"}\n\n${mensaje}\n\nPara contestarle, tocá "Responder": le llega directo a ${email}.`,
       email,
     );
-    return enviado ? Response.json({ ok: true }) : Response.json({ error: "servidor" }, { status: 502 });
+    if (!enviado) return Response.json({ error: "servidor" }, { status: 502 });
+    // Al cliente: confirmación automática en su idioma ("le vamos a informar a nuestro jefe, Pascual Pepa").
+    // Si responde ese email, llega al buzón de respuestas y el agente de respuestas se lo reenvía al dueño.
+    const confirmacion = correoRespuestaAutomatica(idioma, idioma === "es" ? "Tu mensaje a Rumbo Traveling" : "Your message to Rumbo Traveling");
+    let respondido = false;
+    if (!verificarCorreo(confirmacion, idioma).length) {
+      const r = await mandarAResend(email, confirmacion, undefined, { headers: { "Auto-Submitted": "auto-replied" } });
+      respondido = !r.error;
+      if (r.error) console.error("contacto, confirmación:", r.error);
+    }
+    if (dbConfigurada()) {
+      await guardarMensaje({ origen: "formulario", nombre, email, asunto: "", texto: mensaje, idioma, respuesta_automatica: respondido }).catch((e) =>
+        console.error("contacto, guardar:", e),
+      );
+    }
+    return Response.json({ ok: true });
   } catch (e) {
     console.error("contacto:", e);
     return Response.json({ error: "servidor" }, { status: 500 });

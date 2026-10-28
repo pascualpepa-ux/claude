@@ -1,4 +1,5 @@
 import { sql } from "../db";
+import { guardarMensaje } from "../mensajes";
 import type { Idioma } from "../idioma";
 import { alertarDueno, mandarAResend } from "./envio";
 import { correoRespuestaAutomatica } from "./redactor";
@@ -65,25 +66,35 @@ export async function procesarRespuesta(emailId: string) {
   const cuerpo = sinCitas(r.text ?? (r.html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " "));
 
   // 1) Al dueño, siempre: con "Responder" le contesta directo a la persona.
-  await alertarDueno(`Te respondió ${desde}: ${r.subject ?? ""}`.trim(), `De: ${r.from ?? desde}\nAsunto: ${r.subject ?? ""}\n\n${cuerpo || "(sin texto)"}`, desde);
+  await alertarDueno(`📩 Te escribió ${desde}${r.subject ? `: ${r.subject}` : ""}`, `De: ${r.from ?? desde}\nAsunto: ${r.subject ?? ""}\n\n${cuerpo || "(sin texto)"}`, desde);
 
   // 2) A la persona: respuesta automática, salvo que sea otra respuesta automática o ya le contestamos hoy.
-  if (!desde || esAutomatico(desde, r.headers)) return;
-  const [{ n }] = await sql<{ n: number }>(
-    `select count(*)::int as n from respuestas_recibidas where desde = $1 and creada > now() - interval '24 hours' and email_id <> $2`,
-    [desde, emailId],
-  );
-  if (n > 0) return;
-  const [s] = await sql<{ idioma: Idioma }>(`select idioma from suscriptores where email = $1`, [desde]);
+  const automatico = !desde || esAutomatico(desde, r.headers);
+  const [{ n }] = automatico
+    ? [{ n: 1 }]
+    : await sql<{ n: number }>(
+        `select count(*)::int as n from respuestas_recibidas where desde = $1 and creada > now() - interval '24 hours' and email_id <> $2`,
+        [desde, emailId],
+      );
+  const [s] = desde ? await sql<{ idioma: Idioma }>(`select idioma from suscriptores where email = $1`, [desde]) : [];
   const idioma = s?.idioma ?? adivinarIdioma(`${r.subject ?? ""} ${cuerpo}`);
+  // 3) Queda guardado para verlo en el admin (los rebotes y respuestas automáticas, no).
+  const guardar = (respondido: boolean) =>
+    automatico
+      ? Promise.resolve()
+      : guardarMensaje({ origen: "email", nombre: (r.from ?? "").replace(/<[^>]+>/, "").replace(/"/g, "").trim(), email: desde, asunto: r.subject ?? "", texto: cuerpo || "(sin texto)", idioma, respuesta_automatica: respondido }).catch((e) =>
+          console.error("respuesta, guardar:", e),
+        );
+  if (automatico || n > 0) return guardar(false);
   const correo = correoRespuestaAutomatica(idioma, r.subject ?? "");
   const problemas = verificarCorreo(correo, idioma);
   if (problemas.length) {
     await alertarDueno("Respuesta automática frenada por el verificador", `Para: ${desde}\n- ${problemas.join("\n- ")}`);
-    return;
+    return guardar(false);
   }
   const envio = await mandarAResend(desde, correo, undefined, {
     headers: { "Auto-Submitted": "auto-replied", ...(r.message_id && { "In-Reply-To": r.message_id, References: r.message_id }) },
   });
   if (envio.error) await alertarDueno("No se pudo mandar la respuesta automática", `Para: ${desde}\nMotivo: ${envio.error}`);
+  await guardar(!envio.error);
 }

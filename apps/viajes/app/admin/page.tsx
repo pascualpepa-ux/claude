@@ -6,6 +6,8 @@ import { GraficoVisitas, type Punto } from "@/components/GraficoVisitas";
 import { ListaDesglose } from "@/components/ListaDesglose";
 import { ListaSuscriptores } from "@/components/ListaSuscriptores";
 import { ListaOpiniones } from "@/components/ListaOpiniones";
+import { ListaMensajes } from "@/components/ListaMensajes";
+import { listarMensajes } from "@/lib/mensajes";
 import { resumenOpiniones } from "@/lib/opiniones";
 import { dbConfigurada } from "@/lib/db";
 import { listarSuscriptores, type FilaSuscriptor } from "@/lib/suscripciones";
@@ -51,7 +53,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
 
   const pedido = Number((await searchParams).dias);
   const periodo = PERIODOS.find((p) => p === pedido) ?? 30;
-  const [datos, suscriptores, opiniones] = await Promise.all([
+  const [datos, suscriptores, opiniones, mensajes] = await Promise.all([
     estadisticas(periodo),
     dbConfigurada()
       ? listarSuscriptores()
@@ -62,6 +64,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           })
       : Promise.resolve({ estado: "sin_base" as const, filas: [] as FilaSuscriptor[] }),
     dbConfigurada() ? resumenOpiniones().catch(() => null) : Promise.resolve(null),
+    dbConfigurada() ? listarMensajes().catch(() => null) : Promise.resolve(null),
   ]);
 
   const paisNombre = (codigo: string) => {
@@ -99,6 +102,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       </header>
 
       <ListaSuscriptores filas={suscriptores.filas} estado={suscriptores.estado} idioma={idioma} T={A.suscriptores} />
+      <ListaMensajes mensajes={mensajes} idioma={idioma} T={A.mensajes} />
       <ListaOpiniones datos={opiniones} idioma={idioma} T={A.opiniones} />
 
       {datos.estado === "sin_configurar" && (
