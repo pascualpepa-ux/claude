@@ -451,6 +451,7 @@ export function traducirViaje(plan: TripPlan, idioma: Idioma): TripPlan {
   return {
     ...nuevo,
     climaReal: plan.climaReal,
+    gastos: plan.gastos,
     vuelosReales: plan.vuelosReales,
     hotelesReales: plan.hotelesReales,
     hoteles: plan.hotelesReales ? plan.hoteles : nuevo.hoteles,

@@ -1,3 +1,4 @@
+import type { GastoCompartido } from "./gastos";
 import type { Idioma } from "./idioma";
 
 export type Clase = "economica" | "premium" | "business";
@@ -176,4 +177,6 @@ export interface TripPlan {
   vuelosReales?: boolean;
   /** true cuando los hoteles son reales (Google Hotels) y no de ejemplo. */
   hotelesReales?: boolean;
+  /** Gastos compartidos que anotaron los viajeros (para calcular quién debe a quién). */
+  gastos?: GastoCompartido[];
 }

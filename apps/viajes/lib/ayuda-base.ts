@@ -143,10 +143,11 @@ const es: EntradaAyuda[] = [
   {
     id: "gastos",
     pregunta: "¿Cómo se dividen los gastos?",
-    claves: ["dividir", "divido", "gastos compartidos", "compartidos", "quien paga", "deber", "deuda", "split"],
+    claves: ["dividir", "divido", "gastos compartidos", "compartidos", "quien paga", "quien pago", "deber", "debe", "deuda", "le debe", "quien debe", "split"],
     respuesta:
-      "Hoy ves el total y cuánto le toca a cada persona. La calculadora de gastos compartidos (anotar quién pagó qué y quién le debe a quién) " +
-      "llega pronto; para eso usamos los nombres de los viajeros.",
+      "En tu viaje armado ves el total y cuánto le toca a cada persona. Además, en la sección \"Quién debe a quién\" (abajo del itinerario) " +
+      "anotás cada gasto, quién lo pagó y entre quiénes se divide, y la web calcula cuánto puso cada uno y quién le tiene que pagar a quién, " +
+      "con la menor cantidad de pagos. Hacen falta al menos dos viajeros; los gastos se guardan con el viaje en tu dispositivo.",
   },
   {
     id: "idioma",
@@ -373,8 +374,9 @@ const en: EntradaAyuda[] = [
     pregunta: "How are expenses split?",
     claves: ["split", "splitting", "shared expenses", "shared", "who pays", "owe", "debt"],
     respuesta:
-      "Today you see the total and each person's share. The shared-expenses calculator (logging who paid what and who owes whom) " +
-      "is coming soon; that's what the travelers' names are for.",
+      "Your trip shows the total and each person's share. Also, in the \"Who owes whom\" section (below the itinerary) you log each expense, " +
+      "who paid it and who it's split between, and the site works out how much everyone put in and who has to pay whom, with the fewest payments. " +
+      "It needs at least two travelers; expenses are saved with the trip on your device.",
   },
   {
     id: "idioma",

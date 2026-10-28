@@ -9,6 +9,8 @@ import { TarjetaDia } from "@/components/TarjetaDia";
 import { TarjetaVuelo } from "@/components/TarjetaVuelo";
 import { TarjetaHotel } from "@/components/TarjetaHotel";
 import { ResumenPresupuesto } from "@/components/ResumenPresupuesto";
+import { GastosCompartidos } from "@/components/GastosCompartidos";
+import { gastosDeMuestra } from "@/lib/gastos";
 import { CLAVE_ABIERTO, CLAVE_PEDIDO, CLAVE_VIAJE, borrarGuardado, guardarViaje, leerGuardados } from "@/lib/almacen";
 import { usd } from "@/lib/dinero";
 import { formatoCorto } from "@/lib/fechas";
@@ -288,6 +290,8 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
         if (vuelos?.estado === "ok") armado = aplicarVuelos(armado, vuelos.vuelos);
         else if (vuelos) armado = sugerirAerolineas(ajustarDuraciones(armado, vuelos.distanciaIda, vuelos.distanciaVuelta), vuelos.aerolineas);
         if (hoteles?.estado === "ok") armado = aplicarHoteles(armado, hoteles.hoteles);
+        // El viaje de ejemplo trae gastos de muestra para ver cómo funciona "quién debe a quién".
+        if (esEjemplo) armado = { ...armado, gastos: gastosDeMuestra(armado.input.viajeros, idioma) };
         setPlan(armado);
         setEstado("listo");
       }
@@ -390,6 +394,7 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
                 ["#vuelos", t.viaje.nav.vuelos],
                 ["#alojamiento", t.viaje.nav.alojamiento],
                 ["#presupuesto", t.viaje.nav.presupuesto],
+                ["#gastos", t.viaje.nav.gastos],
               ].map(([href, texto]) => (
                 <li key={href}>
                   <a href={href} className="block rounded-full border border-arena-300 px-2.5 py-1 sm:px-3 sm:py-1.5 transition hover:border-oliva-700 hover:text-oliva-800 dark:border-arena-700 dark:hover:border-oliva-300 dark:hover:text-oliva-300">
@@ -500,6 +505,12 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
               </div>
             ))}
           </section>
+
+          <GastosCompartidos
+            viajeros={plan.input.viajeros}
+            gastos={plan.gastos ?? []}
+            onCambiar={(gastos) => setPlan({ ...plan, gastos })}
+          />
         </div>
 
         <aside className="lg:sticky lg:top-20 lg:self-start">
