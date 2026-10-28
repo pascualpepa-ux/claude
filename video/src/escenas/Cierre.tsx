@@ -4,12 +4,12 @@ import { C } from "../marca";
 import type { Textos } from "../textos";
 
 /** 4-5. Cierre: logo, dirección, invitación y, al final, la firma chiquita. */
-export const Cierre: React.FC<{ t: Textos; duracion: number }> = ({ t, duracion }) => {
+export const Cierre: React.FC<{ t: Textos; duracion: number; vertical?: boolean }> = ({ t, duracion, vertical = false }) => {
   const frame = useCurrentFrame();
   const logo = useEntrada(6, 90);
   const url = useEntrada(22, 110);
   const cta = useEntrada(38, 110);
-  const firma = interpolate(frame, [duracion - 130, duracion - 100], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const firma = interpolate(frame, [duracion - (vertical ? 110 : 130), duracion - (vertical ? 85 : 100)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const brillo = interpolate((frame - 60) % 90, [0, 45, 90], [0, 1, 0]);
   return (
     <Fondo color={C.arena100}>
@@ -23,7 +23,7 @@ export const Cierre: React.FC<{ t: Textos; duracion: number }> = ({ t, duracion 
         <div
           style={{
             marginTop: 50,
-            fontSize: 104,
+            fontSize: vertical ? 92 : 104,
             fontWeight: 700,
             letterSpacing: -3,
             color: C.oliva800,
@@ -50,7 +50,7 @@ export const Cierre: React.FC<{ t: Textos; duracion: number }> = ({ t, duracion 
           {t.cta}
         </div>
       </AbsoluteFill>
-      <div style={{ position: "absolute", bottom: 46, width: "100%", textAlign: "center", fontSize: 26, color: C.arena500, opacity: firma }}>{t.firma}</div>
+      <div style={{ position: "absolute", bottom: vertical ? 420 : 46, width: "100%", textAlign: "center", fontSize: 26, color: C.arena500, opacity: firma }}>{t.firma}</div>
     </Fondo>
   );
 };

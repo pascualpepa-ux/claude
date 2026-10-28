@@ -6,7 +6,9 @@
   "scripts": {
     "estudio": "remotion studio src/index.ts",
     "es": "remotion render src/index.ts Promo-es salida/rumbo-promo-es.mp4",
-    "en": "remotion render src/index.ts Promo-en salida/rumbo-promo-en.mp4"
+    "en": "remotion render src/index.ts Promo-en salida/rumbo-promo-en.mp4",
+    "short-es": "remotion render src/index.ts Short-es salida/rumbo-short-es.mp4",
+    "short-en": "remotion render src/index.ts Short-en salida/rumbo-short-en.mp4"
   },
   "dependencies": {
     "@remotion/cli": "4.0.534",
