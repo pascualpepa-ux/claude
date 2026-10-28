@@ -26,19 +26,22 @@ export interface Estadisticas {
   origenes: Item[]; // nombre "" = directo o sin referencia
   campanas: Item[];
   panel: string;
+  /** Secciones que GoatCounter no pudo dar (se muestran vacías; el resto del panel sigue andando). */
+  fallidas: string[];
 }
 
 export type ResultadoEstadisticas =
   | { estado: "sin_configurar" }
-  | { estado: "error"; motivo: "clave" | "conexion" | "servidor"; status?: number }
+  | { estado: "error"; motivo: "clave" | "conexion" | "servidor"; status?: number; ruta?: string }
   | ({ estado: "ok" } & Estadisticas);
 
 class ErrorGoatCounter extends Error {
   constructor(
     public motivo: "clave" | "conexion" | "servidor",
     public status?: number,
+    public ruta = "",
   ) {
-    super(motivo);
+    super(`${motivo} ${status ?? ""} ${ruta}`);
   }
 }
 
@@ -61,10 +64,13 @@ export async function estadisticas(cantidadDias = 30): Promise<ResultadoEstadist
         next: { revalidate: 300 },
       });
     } catch {
-      throw new ErrorGoatCounter("conexion");
+      throw new ErrorGoatCounter("conexion", undefined, ruta);
     }
-    if (res.status === 401 || res.status === 403) throw new ErrorGoatCounter("clave");
-    if (!res.ok) throw new ErrorGoatCounter("servidor", res.status);
+    if (res.status === 401 || res.status === 403) throw new ErrorGoatCounter("clave", res.status, ruta);
+    if (!res.ok) {
+      console.error("GoatCounter:", res.status, ruta, (await res.text().catch(() => "")).slice(0, 300));
+      throw new ErrorGoatCounter("servidor", res.status, ruta);
+    }
     return (await res.json()) as T;
   }
 
@@ -75,19 +81,30 @@ export async function estadisticas(cantidadDias = 30): Promise<ResultadoEstadist
       .filter((s) => s.visitas > 0);
 
   try {
+    // El total es imprescindible; si alguna de las demás secciones falla, esa queda vacía y el resto se muestra.
+    const fallidas: string[] = [];
+    const opcional = async <T,>(ruta: string, vacio: T): Promise<T> => {
+      try {
+        return await pedir<T>(ruta);
+      } catch (e) {
+        if (e instanceof ErrorGoatCounter && e.motivo === "clave") throw e;
+        fallidas.push(ruta.split("?")[0]);
+        return vacio;
+      }
+    };
     // En dos tandas para respetar el límite de 4 pedidos por segundo.
     const [total, hits, tamanos, sistemas] = await Promise.all([
       pedir<{ total?: number; stats?: { day: string; daily: number; hourly?: number[] }[] }>("stats/total"),
-      pedir<{ hits?: { path: string; count: number }[] }>("stats/hits?limit=10"),
-      pedir<Lista>("stats/sizes"),
-      pedir<Lista>("stats/systems?limit=8"),
+      opcional<{ hits?: { path: string; count: number }[] }>("stats/hits?limit=10", {}),
+      opcional<Lista>("stats/sizes", {}),
+      opcional<Lista>("stats/systems?limit=8", {}),
     ]);
     await new Promise((r) => setTimeout(r, 1000));
     const [navegadores, paises, origenes, campanas] = await Promise.all([
-      pedir<Lista>("stats/browsers?limit=8"),
-      pedir<Lista>("stats/locations?limit=10"),
-      pedir<Lista>("stats/toprefs?limit=10"),
-      pedir<Lista>("stats/campaigns?limit=10"),
+      opcional<Lista>("stats/browsers?limit=8", {}),
+      opcional<Lista>("stats/locations?limit=10", {}),
+      opcional<Lista>("stats/toprefs?limit=10", {}),
+      opcional<Lista>("stats/campaigns?limit=10", {}),
     ]);
 
     const porDia = new Map((total.stats ?? []).map((s) => [s.day, s]));
@@ -110,9 +127,10 @@ export async function estadisticas(cantidadDias = 30): Promise<ResultadoEstadist
       origenes: (origenes.stats ?? []).map((s) => ({ id: s.name ?? "", nombre: s.name ?? "", visitas: s.count ?? 0 })).filter((s) => s.visitas > 0),
       campanas: items(campanas),
       panel: base,
+      fallidas,
     };
   } catch (e) {
-    if (e instanceof ErrorGoatCounter) return { estado: "error", motivo: e.motivo, status: e.status };
+    if (e instanceof ErrorGoatCounter) return { estado: "error", motivo: e.motivo, status: e.status, ruta: e.ruta };
     return { estado: "error", motivo: "conexion" };
   }
 }

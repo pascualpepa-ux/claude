@@ -110,7 +110,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
 
       {datos.estado === "error" && (
         <p role="alert" className="mt-8 rounded-2xl bg-red-50 p-5 text-sm text-red-800 dark:bg-red-950/50 dark:text-red-300">
-          {datos.motivo === "clave" ? A.errorClave : datos.motivo === "servidor" ? A.errorServidor(datos.status ?? 500) : A.errorConexion}
+          {datos.motivo === "clave" ? A.errorClave : datos.motivo === "servidor" ? `${A.errorServidor(datos.status ?? 500)}${datos.ruta ? ` (${datos.ruta.split("?")[0]})` : ""}` : A.errorConexion}
         </p>
       )}
 
