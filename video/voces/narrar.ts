@@ -27,11 +27,14 @@ export function hablar(t: string, idioma: Idioma): string {
     : { "US$": "dollars", "€": "euros", "£": "pounds", "¥": "yen", "R$": "reais" };
   let s = t.replace(/≈\s*/g, idioma === "es" ? "unos " : "about ");
   // Rango con moneda delante: "US$ 80–110" -> "de 80 a 110 dólares"
-  s = s.replace(/(US\$|R\$|€|£|¥)\s?([\d.,]+)\s?[–-]\s?(?:US\$|R\$|€|£|¥)?\s?([\d.,]+)/g, (_, m, a, b) =>
+  const NUM = String.raw`\d+(?:[.,]\d+)*`;
+  s = s.replace(new RegExp(String.raw`(US\$|R\$|€|£|¥)\s?(${NUM})\s?[–-]\s?(?:US\$|R\$|€|£|¥)?\s?(${NUM})`, "g"), (_, m, a, b) =>
     idioma === "es" ? `de ${a} a ${b} ${mon[m as keyof typeof mon]}` : `${a} to ${b} ${mon[m as keyof typeof mon]}`);
-  s = s.replace(/(US\$|R\$|€|£|¥)\s?([\d.,]+)/g, (_, m, a) => `${a} ${mon[m as keyof typeof mon]}`);
+  s = s.replace(new RegExp(String.raw`(US\$|R\$|€|£|¥)\s?(${NUM})`, "g"), (_: string, m: string, a: string) => `${a} ${mon[m as keyof typeof mon]}`);
   s = s.replace(/\s*\/\s*/g, idioma === "es" ? " o " : " or ").replace(/\+/g, idioma === "es" ? " más " : " plus ");
-  s = s.replace(/[()]/g, ", ").replace(/→/g, idioma === "es" ? " a " : " to ").replace(/\s+,/g, ",").replace(/\s{2,}/g, " ");
+  // Paréntesis como pausas cortas, sin dejar comas sueltas antes de un punto.
+  s = s.replace(/\s*\(\s*/g, ", ").replace(/\s*\)\s*/g, ", ").replace(/→/g, idioma === "es" ? " a " : " to ");
+  s = s.replace(/,\s*([.;:])/g, "$1").replace(/,\s*,/g, ",").replace(/\s+,/g, ",").replace(/\s{2,}/g, " ");
   return s.trim();
 }
 
@@ -39,8 +42,12 @@ function guion(g: Guia, idioma: Idioma): string[] {
   const es = idioma === "es";
   const textos = [
     es ? `${g.titulo.es}. Itinerario día por día, y cuánto cuesta.` : `${g.titulo.en}. A day-by-day itinerary, and what it costs.`,
-    ...g.itinerario.map((d) => `${d.titulo[idioma].replace(":", ".")}. ${d.actividades.slice(0, 3).map((a) => a[idioma].replace(/\.$/, "")).join(". ")}.`),
-    (es ? "Cuánto cuesta. " : "What it costs. ") + g.precios.slice(0, 3).map((p) => `${p.concepto[idioma]}: ${p.monto[idioma]}`).join(". ") + ".",
+    ...g.itinerario.map((d) => {
+      const [dia, ...tema] = d.titulo[idioma].split(":");
+      const t = tema.join(":").trim();
+      return `${dia}: ${t.charAt(0).toUpperCase()}${t.slice(1)}. ${d.actividades.slice(0, 2).map((a) => a[idioma].replace(/\.$/, "")).join(". ")}.`;
+    }),
+    (es ? "Cuánto cuesta. " : "What it costs. ") + g.precios.slice(0, 2).map((p) => `${p.concepto[idioma]}: ${p.monto[idioma]}`).join(". ") + ".",
     es
       ? `Por persona y por día, sin el vuelo: económico, US$ ${g.porDia.economico[0]}–${g.porDia.economico[1]}. Equilibrado, US$ ${g.porDia.equilibrado[0]}–${g.porDia.equilibrado[1]}. Premium, US$ ${g.porDia.premium[0]}–${g.porDia.premium[1]}.`
       : `Per person per day, without flights: budget, US$ ${g.porDia.economico[0]}–${g.porDia.economico[1]}. Balanced, US$ ${g.porDia.equilibrado[0]}–${g.porDia.equilibrado[1]}. Premium, US$ ${g.porDia.premium[0]}–${g.porDia.premium[1]}.`,
@@ -63,7 +70,7 @@ for (const slug of process.argv.slice(2)) {
     const textos = guion(g, idioma);
     const segundos = textos.map((texto, i) => {
       const wav = path.join(dir, `${i}.wav`);
-      execFileSync("python3", ["-m", "piper", "-m", path.join(RAIZ, "voces", VOZ[idioma]), "-f", wav, "--length-scale", idioma === "es" ? "0.95" : "0.92"], { input: texto });
+      execFileSync("python3", ["-m", "piper", "-m", path.join(RAIZ, "voces", VOZ[idioma]), "-f", wav, "--length-scale", idioma === "es" ? "0.92" : "0.85"], { input: texto });
       return Number(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", wav]).toString().trim());
     });
     voz[id] = { textos, segundos };
