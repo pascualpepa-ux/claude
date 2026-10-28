@@ -21,13 +21,20 @@ const CIUDAD: Record<string, Record<Idioma, string>> = {
   "japon-7-dias-cuanto-cuesta": { es: "Japón", en: "Japan" },
   "lisboa-3-dias": { es: "Lisboa", en: "Lisbon" },
   "rio-de-janeiro-4-dias": { es: "Río de Janeiro", en: "Rio de Janeiro" },
+  "cancun-5-dias": { es: "Cancún", en: "Cancún" },
+  "miami-4-dias": { es: "Miami", en: "Miami" },
+  "punta-cana-5-dias": { es: "Punta Cana", en: "Punta Cana" },
+  "bariloche-4-dias": { es: "Bariloche", en: "Bariloche" },
 };
+
+type G = { slug: string; porDia: { economico: [number, number] } };
+const ORDEN = (guias as unknown as G[]).slice().sort((a, b) => a.porDia.economico[0] - b.porDia.economico[0] || a.porDia.economico[1] - b.porDia.economico[1]);
 
 const T = {
   es: {
     cejilla: "Viajar barato",
     titulo: "¿Qué ciudad es la más barata para viajar?",
-    bajada: "10 destinos, de la más barata a la más cara",
+    bajada: `${ORDEN.length} destinos, de la más barata a la más cara`,
     lista: "Presupuesto por día",
     nota: "Por persona, viajando económico, sin el vuelo. Según las guías de Rumbo.",
     cierre: "Itinerario y precios de cada ciudad, gratis en",
@@ -36,7 +43,7 @@ const T = {
   en: {
     cejilla: "Budget travel",
     titulo: "Which city is the cheapest to visit?",
-    bajada: "10 destinations, from cheapest to most expensive",
+    bajada: `${ORDEN.length} destinations, from cheapest to most expensive`,
     lista: "Budget per day",
     nota: "Per person, traveling on a budget, excluding flights. From Rumbo's guides.",
     cierre: "Itinerary and prices for every city, free at",
@@ -44,8 +51,6 @@ const T = {
   },
 };
 
-type G = { slug: string; porDia: { economico: [number, number] } };
-const ORDEN = (guias as unknown as G[]).slice().sort((a, b) => a.porDia.economico[0] - b.porDia.economico[0] || a.porDia.economico[1] - b.porDia.economico[1]);
 
 export const DUR_RANKING = { gancho: 105, lista: 360, cierre: 140 };
 const TR = 10;
@@ -81,9 +86,9 @@ const Lista: React.FC<{ idioma: Idioma }> = ({ idioma }) => {
         <Sube>
           <div style={{ fontSize: 80, fontWeight: 700, letterSpacing: -2, color: C.oliva800 }}>{t.lista}</div>
         </Sube>
-        <div style={{ marginTop: 40, display: "grid", gap: 28 }}>
+        <div style={{ marginTop: 34, display: "grid", gap: ORDEN.length > 10 ? 16 : 28 }}>
           {ORDEN.map((g, i) => (
-            <Fila key={g.slug} puesto={i + 1} ciudad={CIUDAD[g.slug][idioma]} min={g.porDia.economico[0]} max={g.porDia.economico[1]} maximo={maximo} desde={12 + i * 14} />
+            <Fila key={g.slug} puesto={i + 1} ciudad={CIUDAD[g.slug][idioma]} min={g.porDia.economico[0]} max={g.porDia.economico[1]} maximo={maximo} desde={12 + i * (ORDEN.length > 10 ? 11 : 14)} />
           ))}
         </div>
         <div style={{ marginTop: 36, fontSize: 30, lineHeight: 1.3, color: C.arena500, opacity: interpolate(frame, [170, 200], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>

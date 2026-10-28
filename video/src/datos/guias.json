@@ -1236,6 +1236,787 @@
   ]
  },
  {
+  "slug": "cancun-5-dias",
+  "dias": 5,
+  "claves": [
+   "cancun",
+   "riviera maya",
+   "tulum",
+   "chichen itza",
+   "isla mujeres",
+   "playa del carmen"
+  ],
+  "destino": {
+   "buscar": "Cancun",
+   "pais": "MX",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Cancún en 5 días",
+   "en": "What to do in Cancún in 5 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 5 días en Cancún: playas, Isla Mujeres, Chichén Itzá, Tulum y cenotes, con precios aproximados y consejos.",
+   "en": "A 5-day Cancún itinerary: beaches, Isla Mujeres, Chichén Itzá, Tulum and cenotes, with approximate prices and tips."
+  },
+  "intro": {
+   "es": "Cancún es mucho más que la zona hotelera: en cinco días combinás playas de agua turquesa, una isla, ruinas mayas y cenotes para nadar. Los buses ADO conectan todo de forma barata y segura.",
+   "en": "Cancún is much more than the hotel zone: in five days you combine turquoise beaches, an island, Mayan ruins and cenotes to swim in. ADO buses connect it all cheaply and safely."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: playas de la zona hotelera",
+     "en": "Day 1: hotel zone beaches"
+    },
+    "actividades": [
+     {
+      "es": "Playa Delfines y el mirador del cartel de Cancún.",
+      "en": "Playa Delfines and the Cancún sign viewpoint."
+     },
+     {
+      "es": "Atardecer en la laguna Nichupté.",
+      "en": "Sunset over the Nichupté lagoon."
+     },
+     {
+      "es": "Cena de tacos en el Parque de las Palapas (centro).",
+      "en": "Taco dinner at Parque de las Palapas (downtown)."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: Isla Mujeres",
+     "en": "Day 2: Isla Mujeres"
+    },
+    "actividades": [
+     {
+      "es": "Ferry desde Puerto Juárez (unos 20 minutos).",
+      "en": "Ferry from Puerto Juárez (about 20 minutes)."
+     },
+     {
+      "es": "Playa Norte, de las más lindas del Caribe mexicano.",
+      "en": "Playa Norte, one of the prettiest beaches in the Mexican Caribbean."
+     },
+     {
+      "es": "Recorrer la isla en carrito de golf hasta Punta Sur.",
+      "en": "Ride a golf cart around the island to Punta Sur."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: Chichén Itzá y Valladolid",
+     "en": "Day 3: Chichén Itzá and Valladolid"
+    },
+    "actividades": [
+     {
+      "es": "Chichén Itzá temprano, antes del calor y de los grupos.",
+      "en": "Chichén Itzá early, before the heat and the tour groups."
+     },
+     {
+      "es": "Nadar en el cenote Ik Kil.",
+      "en": "Swim in the Ik Kil cenote."
+     },
+     {
+      "es": "Paseo y cena en el pueblo colonial de Valladolid.",
+      "en": "A walk and dinner in colonial Valladolid."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 4: Tulum",
+     "en": "Day 4: Tulum"
+    },
+    "actividades": [
+     {
+      "es": "Ruinas de Tulum frente al mar.",
+      "en": "The seaside ruins of Tulum."
+     },
+     {
+      "es": "Playa Paraíso.",
+      "en": "Playa Paraíso."
+     },
+     {
+      "es": "Snorkel en el Gran Cenote.",
+      "en": "Snorkeling at Gran Cenote."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 5: arrecife y despedida",
+     "en": "Day 5: reef and farewell"
+    },
+    "actividades": [
+     {
+      "es": "Snorkel en el arrecife de Puerto Morelos.",
+      "en": "Snorkeling on the Puerto Morelos reef."
+     },
+     {
+      "es": "Última tarde de playa y vuelta al aeropuerto.",
+      "en": "One last beach afternoon and back to the airport."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Entrada a Chichén Itzá (extranjeros)",
+     "en": "Chichén Itzá entry (foreigners)"
+    },
+    "monto": {
+     "es": "≈ MXN 650",
+     "en": "≈ MXN 650"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Ferry a Isla Mujeres, ida y vuelta",
+     "en": "Isla Mujeres ferry, return"
+    },
+    "monto": {
+     "es": "≈ MXN 450",
+     "en": "≈ MXN 450"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Entrada a un cenote",
+     "en": "Cenote entry"
+    },
+    "monto": {
+     "es": "MXN 150–500",
+     "en": "MXN 150–500"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Bus ADO aeropuerto–centro",
+     "en": "ADO bus airport–downtown"
+    },
+    "monto": {
+     "es": "≈ MXN 120",
+     "en": "≈ MXN 120"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Tacos al pastor / cena en restaurante",
+     "en": "Tacos al pastor / restaurant dinner"
+    },
+    "monto": {
+     "es": "MXN 25 c/u / US$ 20–40",
+     "en": "MXN 25 each / US$20–40"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "US$ 15–30 / US$ 110–200",
+     "en": "US$15–30 / US$110–200"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    50,
+    80
+   ],
+   "equilibrado": [
+    140,
+    200
+   ],
+   "premium": [
+    350,
+    550
+   ]
+  },
+  "consejos": [
+   {
+    "es": "Quintana Roo cobra un impuesto turístico (Visitax) que se paga online antes de volver: tenelo en cuenta.",
+    "en": "Quintana Roo charges a tourist tax (Visitax) paid online before you fly home: budget for it."
+   },
+   {
+    "es": "Pagá en pesos mexicanos: en dólares casi siempre te cobran más.",
+    "en": "Pay in Mexican pesos: paying in dollars almost always costs more."
+   },
+   {
+    "es": "En los cenotes usá protector solar biodegradable o directamente no uses: lo piden para cuidar el agua.",
+    "en": "Use reef-safe sunscreen in cenotes, or none at all: they ask to protect the water."
+   }
+  ]
+ },
+ {
+  "slug": "miami-4-dias",
+  "dias": 4,
+  "claves": [
+   "miami",
+   "miami beach",
+   "south beach",
+   "wynwood",
+   "everglades",
+   "florida"
+  ],
+  "destino": {
+   "buscar": "Miami",
+   "pais": "US",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Miami en 4 días",
+   "en": "What to do in Miami in 4 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 4 días en Miami: South Beach, Wynwood, Little Havana, los Everglades y Vizcaya, con precios aproximados y consejos.",
+   "en": "A 4-day Miami itinerary: South Beach, Wynwood, Little Havana, the Everglades and Vizcaya, with approximate prices and tips."
+  },
+  "intro": {
+   "es": "Miami mezcla playa, arte urbano y cultura latina. En cuatro días ves South Beach, los murales de Wynwood, la Calle Ocho y te escapás a los Everglades a ver caimanes.",
+   "en": "Miami mixes beach, street art and Latin culture. In four days you see South Beach, the Wynwood murals, Calle Ocho and escape to the Everglades to see alligators."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: South Beach",
+     "en": "Day 1: South Beach"
+    },
+    "actividades": [
+     {
+      "es": "Playa de South Beach y los puestos de salvavidas de colores.",
+      "en": "South Beach and its colorful lifeguard towers."
+     },
+     {
+      "es": "Ocean Drive y los edificios Art Deco.",
+      "en": "Ocean Drive and the Art Deco buildings."
+     },
+     {
+      "es": "Paseo y cena en Lincoln Road.",
+      "en": "Stroll and dinner on Lincoln Road."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: Wynwood y Little Havana",
+     "en": "Day 2: Wynwood and Little Havana"
+    },
+    "actividades": [
+     {
+      "es": "Murales de Wynwood Walls y las calles del barrio.",
+      "en": "Wynwood Walls murals and the neighborhood's streets."
+     },
+     {
+      "es": "Design District.",
+      "en": "Design District."
+     },
+     {
+      "es": "Calle Ocho: café cubano, Máximo Gómez Park y cena cubana.",
+      "en": "Calle Ocho: Cuban coffee, Máximo Gómez Park and a Cuban dinner."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: Everglades",
+     "en": "Day 3: the Everglades"
+    },
+    "actividades": [
+     {
+      "es": "Paseo en aerobote por los Everglades (caimanes y aves).",
+      "en": "Airboat ride through the Everglades (alligators and birds)."
+     },
+     {
+      "es": "Tarde en Key Biscayne y el faro de Bill Baggs.",
+      "en": "Afternoon in Key Biscayne and the Bill Baggs lighthouse."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 4: Brickell y Vizcaya",
+     "en": "Day 4: Brickell and Vizcaya"
+    },
+    "actividades": [
+     {
+      "es": "Museo y jardines de Vizcaya.",
+      "en": "Vizcaya Museum and Gardens."
+     },
+     {
+      "es": "Brickell y Bayside Marketplace.",
+      "en": "Brickell and Bayside Marketplace."
+     },
+     {
+      "es": "Recorrer el centro gratis en el Metromover.",
+      "en": "Ride the free Metromover around downtown."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Paseo en aerobote por los Everglades",
+     "en": "Everglades airboat ride"
+    },
+    "monto": {
+     "es": "≈ US$ 35–60",
+     "en": "≈ US$35–60"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Museo y jardines de Vizcaya",
+     "en": "Vizcaya Museum and Gardens"
+    },
+    "monto": {
+     "es": "≈ US$ 25",
+     "en": "≈ US$25"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Metromover / Metrorail",
+     "en": "Metromover / Metrorail"
+    },
+    "monto": {
+     "es": "Gratis / ≈ US$ 2,25",
+     "en": "Free / ≈ US$2.25"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Sándwich cubano / cena en restaurante",
+     "en": "Cuban sandwich / restaurant dinner"
+    },
+    "monto": {
+     "es": "US$ 10–15 / US$ 30–60",
+     "en": "US$10–15 / US$30–60"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "US$ 40–70 / US$ 180–300",
+     "en": "US$40–70 / US$180–300"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    110,
+    160
+   ],
+   "equilibrado": [
+    250,
+    350
+   ],
+   "premium": [
+    550,
+    800
+   ]
+  },
+  "consejos": [
+   {
+    "es": "En restaurantes se deja propina (18–20 %) y los precios no incluyen impuestos.",
+    "en": "Restaurants expect an 18–20% tip and prices exclude tax."
+   },
+   {
+    "es": "Muchos hoteles cobran un \"resort fee\" por noche aparte del precio: revisalo al reservar.",
+    "en": "Many hotels charge a nightly resort fee on top of the rate: check before booking."
+   },
+   {
+    "es": "De junio a noviembre es temporada de huracanes: mirá el pronóstico antes de viajar.",
+    "en": "June to November is hurricane season: check the forecast before you travel."
+   }
+  ]
+ },
+ {
+  "slug": "punta-cana-5-dias",
+  "dias": 5,
+  "claves": [
+   "punta cana",
+   "bavaro",
+   "republica dominicana",
+   "dominicana",
+   "isla saona"
+  ],
+  "destino": {
+   "buscar": "Punta Cana",
+   "pais": "DO",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Punta Cana en 5 días",
+   "en": "What to do in Punta Cana in 5 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 5 días en Punta Cana: playas de Bávaro y Macao, Isla Saona, Hoyo Azul y Altos de Chavón, con precios aproximados y consejos.",
+   "en": "A 5-day Punta Cana itinerary: Bávaro and Macao beaches, Saona Island, Hoyo Azul and Altos de Chavón, with approximate prices and tips."
+  },
+  "intro": {
+   "es": "Punta Cana es sinónimo de playa caribeña y hoteles todo incluido, pero vale la pena salir: Isla Saona, un cenote azul y un pueblo de piedra sobre el río completan cinco días perfectos.",
+   "en": "Punta Cana means Caribbean beaches and all-inclusive resorts, but it's worth heading out: Saona Island, a blue sinkhole and a stone village above a river round out five perfect days."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: playa de Bávaro",
+     "en": "Day 1: Bávaro beach"
+    },
+    "actividades": [
+     {
+      "es": "Llegada y tarde en la playa de Bávaro.",
+      "en": "Arrival and an afternoon on Bávaro beach."
+     },
+     {
+      "es": "Cena en Los Corales, frente al mar.",
+      "en": "Dinner in Los Corales, by the sea."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: Isla Saona",
+     "en": "Day 2: Saona Island"
+    },
+    "actividades": [
+     {
+      "es": "Excursión en catamarán y lancha a Isla Saona.",
+      "en": "Catamaran and speedboat trip to Saona Island."
+     },
+     {
+      "es": "Parada en la piscina natural con estrellas de mar.",
+      "en": "Stop at the natural pool with starfish."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: Hoyo Azul",
+     "en": "Day 3: Hoyo Azul"
+    },
+    "actividades": [
+     {
+      "es": "Nadar en el Hoyo Azul, un cenote de agua turquesa.",
+      "en": "Swim in Hoyo Azul, a turquoise sinkhole."
+     },
+     {
+      "es": "Tirolesas y cuevas en el parque.",
+      "en": "Ziplines and caves in the park."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 4: Altos de Chavón",
+     "en": "Day 4: Altos de Chavón"
+    },
+    "actividades": [
+     {
+      "es": "Altos de Chavón, réplica de un pueblo mediterráneo sobre el río Chavón.",
+      "en": "Altos de Chavón, a replica Mediterranean village above the Chavón river."
+     },
+     {
+      "es": "Paseo por La Romana.",
+      "en": "A stroll through La Romana."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 5: Macao y Juanillo",
+     "en": "Day 5: Macao and Juanillo"
+    },
+    "actividades": [
+     {
+      "es": "Playa Macao, con olas y sin hoteles enormes.",
+      "en": "Macao beach, with waves and no huge resorts."
+     },
+     {
+      "es": "Playa Juanillo en Cap Cana y vuelta.",
+      "en": "Juanillo beach in Cap Cana, then home."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Excursión a Isla Saona con almuerzo",
+     "en": "Saona Island trip with lunch"
+    },
+    "monto": {
+     "es": "≈ US$ 80–130",
+     "en": "≈ US$80–130"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Parque del Hoyo Azul",
+     "en": "Hoyo Azul park"
+    },
+    "monto": {
+     "es": "≈ US$ 90–150",
+     "en": "≈ US$90–150"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Taxi aeropuerto–Bávaro",
+     "en": "Taxi airport–Bávaro"
+    },
+    "monto": {
+     "es": "≈ US$ 30–40",
+     "en": "≈ US$30–40"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Plato del día dominicano / cena en restaurante",
+     "en": "Dominican dish of the day / restaurant dinner"
+    },
+    "monto": {
+     "es": "US$ 8–12 / US$ 25–50",
+     "en": "US$8–12 / US$25–50"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Hostal / hotel todo incluido (noche, por persona)",
+     "en": "Guesthouse / all-inclusive resort (night, per person)"
+    },
+    "monto": {
+     "es": "US$ 35–60 / US$ 120–250",
+     "en": "US$35–60 / US$120–250"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    70,
+    110
+   ],
+   "equilibrado": [
+    180,
+    260
+   ],
+   "premium": [
+    400,
+    650
+   ]
+  },
+  "consejos": [
+   {
+    "es": "Un hotel todo incluido suele salir más barato que pagar comidas y bebidas por separado.",
+    "en": "An all-inclusive resort is usually cheaper than paying for meals and drinks separately."
+   },
+   {
+    "es": "Acordá el precio del taxi antes de subir: no usan taxímetro.",
+    "en": "Agree on the taxi fare before getting in: they don't use meters."
+   },
+   {
+    "es": "Se paga en pesos dominicanos o dólares; con dólares en efectivo chicos todo es más fácil.",
+    "en": "You can pay in Dominican pesos or dollars; small US dollar bills make everything easier."
+   }
+  ]
+ },
+ {
+  "slug": "bariloche-4-dias",
+  "dias": 4,
+  "claves": [
+   "bariloche",
+   "san carlos de bariloche",
+   "patagonia",
+   "cerro catedral",
+   "llao llao",
+   "nahuel huapi"
+  ],
+  "destino": {
+   "buscar": "Bariloche",
+   "pais": "AR",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Bariloche en 4 días",
+   "en": "What to do in Bariloche in 4 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 4 días en Bariloche: Circuito Chico, Cerro Campanario, Cerro Catedral e Isla Victoria, con precios aproximados y consejos.",
+   "en": "A 4-day Bariloche itinerary: Circuito Chico, Cerro Campanario, Cerro Catedral and Victoria Island, with approximate prices and tips."
+  },
+  "intro": {
+   "es": "Bariloche tiene lagos, montañas y chocolate. En cuatro días hacés el Circuito Chico, subís a los miradores más lindos de la Patagonia y navegás el Nahuel Huapi, en invierno o en verano.",
+   "en": "Bariloche has lakes, mountains and chocolate. In four days you drive the Circuito Chico, ride up to Patagonia's best viewpoints and sail Lake Nahuel Huapi, in winter or summer."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: el centro",
+     "en": "Day 1: downtown"
+    },
+    "actividades": [
+     {
+      "es": "Centro Cívico y la costanera del lago Nahuel Huapi.",
+      "en": "The Civic Center and the Nahuel Huapi lakefront."
+     },
+     {
+      "es": "Chocolaterías de la calle Mitre.",
+      "en": "Chocolate shops on Mitre street."
+     },
+     {
+      "es": "Cena de cordero patagónico o trucha.",
+      "en": "Patagonian lamb or trout for dinner."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: Circuito Chico",
+     "en": "Day 2: Circuito Chico"
+    },
+    "actividades": [
+     {
+      "es": "Aerosilla al Cerro Campanario, una de las mejores vistas del mundo.",
+      "en": "Chairlift up Cerro Campanario, one of the world's great views."
+     },
+     {
+      "es": "Hotel Llao Llao y Puerto Pañuelo.",
+      "en": "Llao Llao Hotel and Puerto Pañuelo."
+     },
+     {
+      "es": "Punto Panorámico y Bahía López.",
+      "en": "Punto Panorámico and Bahía López."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: Cerro Catedral",
+     "en": "Day 3: Cerro Catedral"
+    },
+    "actividades": [
+     {
+      "es": "En invierno, esquí o snowboard; en verano, trekking y vistas.",
+      "en": "Skiing or snowboarding in winter; trekking and views in summer."
+     },
+     {
+      "es": "Merienda en una casa de té de Villa Catedral.",
+      "en": "Afternoon tea in Villa Catedral."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 4: Isla Victoria y Arrayanes",
+     "en": "Day 4: Victoria Island and Arrayanes"
+    },
+    "actividades": [
+     {
+      "es": "Navegación por el Nahuel Huapi a Isla Victoria.",
+      "en": "Boat trip on Lake Nahuel Huapi to Victoria Island."
+     },
+     {
+      "es": "Bosque de Arrayanes, árboles de tronco color canela.",
+      "en": "Arrayanes Forest, trees with cinnamon-colored trunks."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Aerosilla del Cerro Campanario",
+     "en": "Cerro Campanario chairlift"
+    },
+    "monto": {
+     "es": "≈ US$ 15–20",
+     "en": "≈ US$15–20"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Navegación a Isla Victoria y Arrayanes",
+     "en": "Boat trip to Victoria Island and Arrayanes"
+    },
+    "monto": {
+     "es": "≈ US$ 45–70",
+     "en": "≈ US$45–70"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Pase de esquí de un día en Cerro Catedral (invierno)",
+     "en": "One-day ski pass at Cerro Catedral (winter)"
+    },
+    "monto": {
+     "es": "≈ US$ 70–90",
+     "en": "≈ US$70–90"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Colectivo con tarjeta SUBE",
+     "en": "Bus with a SUBE card"
+    },
+    "monto": {
+     "es": "≈ US$ 1",
+     "en": "≈ US$1"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "US$ 20–35 / US$ 70–130",
+     "en": "US$20–35 / US$70–130"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    45,
+    70
+   ],
+   "equilibrado": [
+    110,
+    170
+   ],
+   "premium": [
+    280,
+    450
+   ]
+  },
+  "consejos": [
+   {
+    "es": "Sacá la tarjeta SUBE apenas llegues: los colectivos al Circuito Chico y al Catedral no aceptan efectivo.",
+    "en": "Get a SUBE card as soon as you arrive: buses to Circuito Chico and Catedral don't take cash."
+   },
+   {
+    "es": "El clima cambia rápido aunque sea verano: llevá abrigo en capas.",
+    "en": "The weather changes fast even in summer: dress in layers."
+   },
+   {
+    "es": "En julio (vacaciones de invierno) todo se llena: reservá alojamiento y excursiones con tiempo.",
+    "en": "July (winter school holidays) gets packed: book lodging and tours well ahead."
+   }
+  ]
+ },
+ {
   "slug": "pekin-5-dias",
   "dias": 5,
   "claves": [
