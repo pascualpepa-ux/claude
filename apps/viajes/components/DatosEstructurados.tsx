@@ -1,5 +1,5 @@
 import type { Idioma } from "@/lib/idioma";
-import { SITIO_URL } from "@/lib/seo";
+import { SITIO_URL, YOUTUBE_URL } from "@/lib/seo";
 import { TEXTOS } from "@/lib/textos";
 
 /**
@@ -19,6 +19,7 @@ export function DatosEstructurados({ idioma }: { idioma: Idioma }) {
         logo: { "@type": "ImageObject", url: `${SITIO_URL}/marca/icono-512.png`, width: 512, height: 512 },
         email: "info@rumbotraveling.com",
         founder: { "@type": "Person", name: "Pascual Pepa" },
+        sameAs: [YOUTUBE_URL],
       },
       {
         "@type": "WebSite",

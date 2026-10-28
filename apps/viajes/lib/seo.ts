@@ -5,6 +5,8 @@ import { IDIOMAS, type Idioma } from "./idioma";
 // Cada página existe en español (sin parámetro) y en inglés (?lang=en). El middleware lee ?lang.
 
 export const SITIO_URL = "https://rumbotraveling.com";
+/** Canal de YouTube de Rumbo Traveling. */
+export const YOUTUBE_URL = "https://www.youtube.com/@rumbotraveling";
 export const PARAM_IDIOMA = "lang";
 export const HEADER_IDIOMA = "x-rumbo-idioma";
 export const IDIOMA_PRINCIPAL: Idioma = "es";
