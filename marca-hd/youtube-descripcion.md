@@ -1,42 +1,26 @@
 # Descripción del canal de YouTube — Rumbo Traveling
 
-Pegá cada versión en YouTube Studio → Personalización → Información básica → Descripción. YouTube permite hasta 1000 caracteres; las dos entran.
+Pegá esta descripción en YouTube Studio → Personalización → Información básica → Descripción. Va primero en inglés y después en español, con el link a la web en las dos partes (742 caracteres; YouTube permite hasta 1000).
 
-## Español
-
-Rumbo Traveling es la web gratis para planificar tus viajes en minutos. 🌍✈️
-
-Contestás unas preguntas y Rumbo arma tu viaje completo:
-• Itinerario día por día, con el clima real de cada ciudad
-• Vuelos, hoteles y presupuesto por persona en un solo lugar
-• Quién debe a quién: anotá los gastos del grupo y Rumbo calcula los pagos para quedar a mano
-• Guías de viaje con precios: Roma, París, Madrid, Japón, Nueva York y más
-• Avisos por email si algo cambia en tu viaje
-• En español e inglés
-
-En este canal vas a encontrar ideas de viaje, guías rápidas y tutoriales para sacarle el máximo a Rumbo.
-
-👉 Planificá tu viaje gratis: https://rumbotraveling.com
-
-Un proyecto de Pascual Pepa. Contacto: info@rumbotraveling.com
-
-## English
-
-Rumbo Traveling is the free website to plan your trips in minutes. 🌍✈️
-
-Answer a few questions and Rumbo builds your whole trip:
-• A day-by-day itinerary with each city's real weather
-• Flights, hotels and a per-person budget in one place
-• Who owes whom: log the group's expenses and Rumbo works out the payments to settle up
-• Travel guides with prices: Rome, Paris, Madrid, Japan, New York and more
-• Email alerts if anything changes on your trip
-• In Spanish and English
-
-On this channel you'll find trip ideas, quick guides and tutorials to get the most out of Rumbo.
-
+```
+🇬🇧 Rumbo Traveling is the free website to plan your trips in minutes ✈️
+• Day-by-day itinerary with real weather
+• Flights, hotels and budget per person in one place
+• Who owes whom: split your group's costs
+• Travel guides with prices
+• Available in English and Spanish
 👉 Plan your trip for free: https://rumbotraveling.com/?lang=en
 
-A project by Pascual Pepa. Contact: info@rumbotraveling.com
+🇪🇸 Rumbo Traveling es la web gratis para planificar tus viajes en minutos ✈️
+• Itinerario día por día con el clima real
+• Vuelos, hoteles y presupuesto por persona en un solo lugar
+• Quién debe a quién: dividí los gastos del grupo
+• Guías de viaje con precios
+• En español e inglés
+👉 Planificá tu viaje gratis: https://rumbotraveling.com
+
+A project by / Un proyecto de Pascual Pepa · info@rumbotraveling.com
+```
 
 ## Links del canal
 
