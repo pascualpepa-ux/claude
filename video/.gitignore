@@ -2,3 +2,9 @@ node_modules/
 salida/
 # La música se genera con musica/componer.py
 public/musica/*.wav
+# Modelos de voz de Piper (se bajan de huggingface.co/rhasspy/piper-voices)
+voces/*.onnx
+voces/*.onnx.json
+voces/voices.json
+# Voz en off generada con voces/narrar.ts
+public/voz/

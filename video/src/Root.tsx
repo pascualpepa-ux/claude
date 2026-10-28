@@ -39,7 +39,7 @@ export const Root: React.FC = () => (
           key={`${slug}-${idioma}`}
           id={`Guia-${slug}-${idioma}`}
           component={ShortGuia}
-          durationInFrames={duracionGuia(slug)}
+          durationInFrames={duracionGuia(slug, idioma)}
           fps={FPS}
           width={1080}
           height={1920}

@@ -1,4 +1,4 @@
-import { AbsoluteFill, Audio, interpolate, staticFile } from "remotion";
+import { AbsoluteFill, Audio, interpolate, Sequence, staticFile } from "remotion";
 import { fade } from "@remotion/transitions/fade";
 import { slide } from "@remotion/transitions/slide";
 import { springTiming, TransitionSeries } from "@remotion/transitions";
@@ -6,6 +6,7 @@ import { Fondo, MarcaDeAgua, useEntrada } from "../comunes";
 import { C } from "../marca";
 import type { Idioma } from "../textos";
 import guias from "../datos/guias.json";
+import voz from "../datos/voz.json";
 import { CierreShort, Gancho, Sube } from "./comunes";
 
 // Shorts de las guías de viaje de rumbotraveling.com: gancho, itinerario día por día, precios, presupuesto y cierre.
@@ -50,10 +51,20 @@ const T = {
 
 export const DUR = { gancho: 105, dia: 120, precios: 165, presupuesto: 150, cierre: 140 };
 const TR = 10;
-export const duracionGuia = (slug: string) => {
-  const g = (guias as unknown as Guia[]).find((x) => x.slug === slug)!;
-  const escenas = 4 + g.itinerario.length;
-  return DUR.gancho + DUR.dia * g.itinerario.length + DUR.precios + DUR.presupuesto + DUR.cierre - (escenas - 1) * TR;
+const guiaDe = (slug: string) => (guias as unknown as Guia[]).find((x) => x.slug === slug)!;
+/** Voz en off generada con voces/narrar.ts (si existe para este video). */
+const vozDe = (id: string) => (voz as Record<string, { segundos: number[] }>)[id];
+
+/** Duración de cada escena: la de base, o más larga si la voz lo necesita. */
+export function duracionesGuia(slug: string, idioma: Idioma): number[] {
+  const g = guiaDe(slug);
+  const base = [DUR.gancho, ...g.itinerario.map(() => DUR.dia), DUR.precios, DUR.presupuesto, DUR.cierre];
+  const v = vozDe(`Guia-${slug}-${idioma}`);
+  return v ? base.map((d, i) => Math.max(d, Math.ceil((v.segundos[i] ?? 0) * 30) + 26)) : base;
+}
+export const duracionGuia = (slug: string, idioma: Idioma = "es") => {
+  const d = duracionesGuia(slug, idioma);
+  return d.reduce((a, b) => a + b, 0) - (d.length - 1) * TR;
 };
 
 const mayuscula = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
@@ -148,43 +159,61 @@ const Barra: React.FC<{ desde: number; etiqueta: string; rango: string; total: s
 };
 
 export const ShortGuia: React.FC<{ slug: string; idioma: Idioma }> = ({ slug, idioma }) => {
-  const g = (guias as unknown as Guia[]).find((x) => x.slug === slug)!;
+  const g = guiaDe(slug);
   const t = T[idioma];
-  const total = duracionGuia(slug);
+  const id = `Guia-${slug}-${idioma}`;
+  const conVoz = !!vozDe(id);
+  const D = duracionesGuia(slug, idioma);
+  const total = duracionGuia(slug, idioma);
   const tiempo = springTiming({ config: { damping: 200 }, durationInFrames: TR });
   const lado = slide({ direction: "from-right" });
+  // La voz de cada escena arranca un poco después de que la escena aparece.
+  const Voz: React.FC<{ n: number }> = ({ n }) =>
+    conVoz ? (
+      <Sequence from={8}>
+        <Audio src={staticFile(`voz/${id}/${n}.wav`)} />
+      </Sequence>
+    ) : null;
+  const n0 = g.itinerario.length;
   return (
     <>
       <TransitionSeries>
-        <TransitionSeries.Sequence durationInFrames={DUR.gancho}>
+        <TransitionSeries.Sequence durationInFrames={D[0]}>
           <Gancho cejilla={t.cejilla} titulo={g.titulo[idioma]} bajada={t.bajada} />
+          <Voz n={0} />
         </TransitionSeries.Sequence>
         {g.itinerario.flatMap((d, i) => {
           const [etiqueta, ...resto] = d.titulo[idioma].split(":");
           return [
             <TransitionSeries.Transition key={`t${i}`} presentation={i === 0 ? fade() : lado} timing={tiempo} />,
-            <TransitionSeries.Sequence key={`d${i}`} durationInFrames={DUR.dia}>
+            <TransitionSeries.Sequence key={`d${i}`} durationInFrames={D[i + 1]}>
               <Dia etiqueta={etiqueta.trim()} titulo={mayuscula(resto.join(":").trim() || etiqueta)} actividades={d.actividades.map((a) => a[idioma])} />
+              <Voz n={i + 1} />
             </TransitionSeries.Sequence>,
           ];
         })}
         <TransitionSeries.Transition presentation={lado} timing={tiempo} />
-        <TransitionSeries.Sequence durationInFrames={DUR.precios}>
+        <TransitionSeries.Sequence durationInFrames={D[n0 + 1]}>
           <Precios g={g} idioma={idioma} />
+          <Voz n={n0 + 1} />
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={lado} timing={tiempo} />
-        <TransitionSeries.Sequence durationInFrames={DUR.presupuesto}>
+        <TransitionSeries.Sequence durationInFrames={D[n0 + 2]}>
           <Presupuesto g={g} idioma={idioma} />
+          <Voz n={n0 + 2} />
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={fade()} timing={tiempo} />
-        <TransitionSeries.Sequence durationInFrames={DUR.cierre}>
+        <TransitionSeries.Sequence durationInFrames={D[n0 + 3]}>
           <CierreShort frase={t.cierre} url="rumbotraveling.com" firma={t.firma} />
+          <Voz n={n0 + 3} />
         </TransitionSeries.Sequence>
       </TransitionSeries>
       <Audio
         src={staticFile("musica/rumbo.wav")}
         startFrom={30 * 8}
-        volume={(f) => interpolate(f, [0, 12, total - 45, total], [0, 0.85, 0.85, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
+        loop
+        // Con voz, la música queda de fondo, bajita.
+        volume={(f) => interpolate(f, [0, 12, total - 45, total], [0, conVoz ? 0.22 : 0.85, conVoz ? 0.22 : 0.85, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
       />
     </>
   );
