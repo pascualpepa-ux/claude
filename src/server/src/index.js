@@ -1,6 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { v4 as uuid } from "uuid";
@@ -13,10 +15,37 @@ import { verifySocketToken } from "./middleware.js";
 
 const PORT = process.env.PORT || 4000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+const MAX_MESSAGE_LENGTH = 4000;
 
 const app = express();
+// App chạy công khai trên Internet — tin tưởng header X-Forwarded-* từ đúng 1 reverse
+// proxy phía trước (Render/Fly/nginx...) để rate-limit theo IP thật của client, không
+// phải IP của proxy.
+app.set("trust proxy", 1);
+app.use(helmet());
 app.use(cors({ origin: CLIENT_ORIGIN }));
-app.use(express.json());
+app.use(express.json({ limit: "16kb" }));
+
+// Giới hạn chung cho toàn bộ API — chặn abuse/scrape thô sơ.
+app.use(
+  "/api",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
+
+// Giới hạn chặt hơn cho đăng ký/đăng nhập — chống brute-force password và spam tạo
+// tài khoản hàng loạt (app public, đăng ký mở cho bất kỳ ai).
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Quá nhiều yêu cầu, vui lòng thử lại sau ít phút." },
+});
 
 // userId -> Set of socket ids (a user can have multiple tabs open)
 const onlineUsers = new Map();
@@ -25,13 +54,15 @@ const onlineUserIds = {
 };
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
-app.use("/api/auth", authRouter);
+app.use("/api/auth", authLimiter, authRouter);
 app.use("/api/friends", createFriendsRouter(onlineUserIds));
 app.use("/api/messages", messagesRouter);
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: CLIENT_ORIGIN },
+  // Chặn payload WebSocket bất thường lớn (mặc định 1MB) — tin nhắn text không cần vậy.
+  maxHttpBufferSize: 64 * 1024,
 });
 
 function friendIdsOf(userId) {
@@ -77,6 +108,7 @@ io.on("connection", (socket) => {
 
   socket.on("message:send", ({ receiverId, content }) => {
     if (typeof content !== "string" || !content.trim()) return;
+    if (content.length > MAX_MESSAGE_LENGTH) return;
     if (typeof receiverId !== "string") return;
     if (!areFriends(userId, receiverId)) return;
 

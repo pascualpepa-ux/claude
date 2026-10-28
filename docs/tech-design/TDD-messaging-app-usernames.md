@@ -79,9 +79,33 @@ Server: kiểm tra receiver có socket đang connect không
 ## 6. Bảo mật (mức MVP, không chạy security-audit-stride đầy đủ vì không đụng payment/PII nhạy cảm)
 - Password hash bằng bcrypt (cost 10), không bao giờ trả password_hash ra API.
 - JWT ký bằng secret từ biến môi trường, không hardcode.
-- Validate input server-side (username regex `^[a-zA-Z0-9_]{3,20}$`, password ≥ 6 ký tự).
+- Validate input server-side (username regex `^[a-zA-Z0-9_]{3,20}$`, password 6-72 ký tự —
+  72 là giới hạn byte của bcrypt).
 - Escape/parameterized query (better-sqlite3 dùng prepared statement mặc định) → chống SQL injection.
-- CORS giới hạn origin của client trong dev.
+- CORS giới hạn 1 origin client cụ thể qua `CLIENT_ORIGIN`.
+
+### 6.1 Hardening bổ sung cho app public (đăng ký mở cho bất kỳ ai)
+
+> App được xác nhận là **public** — ai cũng tự đăng ký được, không chỉ bạn bè được mời —
+> nên các mục dưới đây là bắt buộc trước khi chạy ngoài Internet, không chỉ "nice to have":
+
+- `helmet()` — set các security header chuẩn (HSTS, X-Content-Type-Options, X-Frame-Options...).
+- `app.set("trust proxy", 1)` — để `express-rate-limit` đọc đúng IP thật của client khi app
+  chạy sau 1 reverse proxy (Render/Fly/nginx...), không bị tính nhầm theo IP của proxy.
+- Rate limit 2 tầng: 300 request/15 phút cho toàn bộ `/api` (chống scrape/abuse thô), và
+  20 request/15 phút riêng cho `/api/auth/*` (chống brute-force password + tạo tài khoản
+  hàng loạt).
+- `express.json({ limit: "16kb" })` + Socket.IO `maxHttpBufferSize: 64KB` — chặn payload bất
+  thường lớn gây tốn tài nguyên.
+- Giới hạn nội dung tin nhắn server-side ≤ 4000 ký tự (không chỉ dựa vào `maxLength` phía client).
+- `username` UNIQUE theo `COLLATE NOCASE` (không phân biệt hoa/thường) — chặn việc đăng ký
+  `Alice` khi `alice` đã tồn tại để mạo danh.
+- Dependency đã chạy `npm audit fix` — 0 lỗ hổng đã biết tại thời điểm viết (server và client).
+
+**Chưa làm, cân nhắc thêm nếu traffic/rủi ro abuse tăng:** CAPTCHA khi đăng ký, giới hạn số
+bạn bè/tin nhắn gửi theo giờ cho mỗi tài khoản, cơ chế report/block user, và một reverse proxy
+HTTPS thật trước server (bản thân Node server ở đây chạy HTTP trần, expect có proxy
+TLS-terminating phía trước khi deploy công khai).
 
 ## 7. Cấu trúc thư mục code
 ```

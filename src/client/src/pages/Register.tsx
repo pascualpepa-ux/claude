@@ -60,6 +60,7 @@ export default function Register() {
             placeholder="Ít nhất 6 ký tự"
             required
             minLength={6}
+            maxLength={72}
           />
         </div>
 

@@ -28,8 +28,10 @@ authRouter.post("/register", (req, res) => {
         "Username phải từ 3-20 ký tự, chỉ gồm chữ, số và dấu gạch dưới.",
     });
   }
-  if (typeof password !== "string" || password.length < 6) {
-    return res.status(400).json({ error: "Mật khẩu phải có ít nhất 6 ký tự." });
+  if (typeof password !== "string" || password.length < 6 || password.length > 72) {
+    return res
+      .status(400)
+      .json({ error: "Mật khẩu phải từ 6 đến 72 ký tự." });
   }
 
   const existing = db

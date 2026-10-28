@@ -102,7 +102,7 @@ export default function Chat() {
           <label className="text-sm font-medium text-slate-700">Thêm bạn theo username</label>
           <div className="flex gap-2">
             <input
-              className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 min-w-0 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={newFriendUsername}
               onChange={(e) => setNewFriendUsername(e.target.value)}
               placeholder="username"
@@ -175,10 +175,11 @@ export default function Chat() {
 
             <form onSubmit={onSendMessage} className="p-4 bg-white border-t border-slate-200 flex gap-2">
               <input
-                className="flex-1 rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-1 min-w-0 rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder="Nhập tin nhắn..."
+                maxLength={4000}
               />
               <button className="rounded-lg bg-indigo-600 text-white px-4 font-medium hover:bg-indigo-700">
                 Gửi
