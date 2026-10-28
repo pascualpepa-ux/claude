@@ -1,4 +1,5 @@
 import { esIdioma } from "@/lib/idioma";
+import { buscarHorarios } from "@/lib/horarios-reales";
 import { buscarVuelos } from "@/lib/vuelos-reales";
 
 export const runtime = "nodejs";
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
     typeof c.aerolinea === "string" &&
     c.aerolinea.length <= 60;
   if (!valido) return Response.json({ error: "pedido inválido" }, { status: 400 });
-  const resultado = await buscarVuelos({
+  const pedido = {
     origen: c.origen,
     destino: c.destino,
     regreso: c.regreso,
@@ -29,7 +30,13 @@ export async function POST(req: Request) {
     clase: c.clase,
     aerolinea: c.aerolinea,
     equipaje: c.equipaje,
-    idioma: esIdioma(c.idioma) ? c.idioma : "es",
-  });
+    idioma: esIdioma(c.idioma) ? (c.idioma as "es" | "en") : ("es" as const),
+  };
+  let resultado = await buscarVuelos(pedido);
+  // Sin precios reales (sin clave o sin cupo de Google Flights): vuelos con número y horario reales y precio estimado.
+  if (resultado.estado !== "ok") {
+    const horarios = await buscarHorarios(pedido);
+    if (horarios?.length) resultado = { estado: "ok", vuelos: horarios };
+  }
   return Response.json(resultado, { headers: { "Cache-Control": "no-store" } });
 }

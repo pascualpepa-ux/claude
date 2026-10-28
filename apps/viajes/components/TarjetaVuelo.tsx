@@ -141,7 +141,7 @@ export function TarjetaVuelo({
         <div>
           <h3 className="font-semibold">{vuelo.aerolinea}</h3>
           <p className="max-w-[40ch] text-sm text-arena-600 dark:text-arena-400">
-            {vuelo.estimado ? t.vuelo.estimadoBajada : t.vuelo.aLaIda(textoEscalas(vuelo.ida, t))}
+            {vuelo.estimado ? t.vuelo.estimadoBajada : vuelo.precioEstimado ? t.vuelo.horarioRealBajada : t.vuelo.aLaIda(textoEscalas(vuelo.ida, t))}
           </p>
         </div>
         <div className="text-right">
