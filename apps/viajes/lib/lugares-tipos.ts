@@ -5,6 +5,7 @@ export interface AeropuertoCercano {
   nombre: string;
   ciudad: string;
   distanciaKm: number;
+  internacional?: boolean; // aeropuerto grande, con vuelos internacionales
 }
 
 /** Ciudad principal de un país, con su aeropuerto más cercano (para sugerir rutas). */

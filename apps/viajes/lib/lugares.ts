@@ -42,8 +42,12 @@ export function coordenadasAeropuerto(iata: string): { lat: number; lon: number;
 export function aeropuertosDeLaCiudad(iata: string): string {
   const a = coordenadasAeropuerto(iata);
   if (!a) return iata;
-  const otros = aeropuertosCercanos(a.lat, a.lon, 4, 60).map((x) => x.iata).filter((x) => x !== iata.toUpperCase());
-  return [iata.toUpperCase(), ...otros.slice(0, 2)].join(",");
+  // Los grandes de la zona (hasta 80 km), y si no hay, los demás cercanos (hasta 60 km).
+  const zona = AEROPUERTOS.map((x) => ({ x, d: distanciaKm(a.lat, a.lon, x[4], x[5]) }))
+    .filter(({ x, d }) => x[0] !== iata.toUpperCase() && x[3] === a.pais && (x[6] ? d <= 80 : d <= 60))
+    .sort((p, q) => q.x[6] - p.x[6] || p.d - q.d);
+  const grandes = zona.filter(({ x }) => x[6]);
+  return [iata.toUpperCase(), ...(grandes.length ? grandes : zona).slice(0, 3).map(({ x }) => x[0])].join(",");
 }
 
 /** Distancia en km entre dos aeropuertos, o null si alguno no está en los datos. */
@@ -53,13 +57,36 @@ export function distanciaAeropuertos(a: string, b: string): number | null {
   return x && y ? Math.round(distanciaKm(x.lat, x.lon, y.lat, y.lon)) : null;
 }
 
+const aCercano = ({ a, d }: { a: FilaAeropuerto; d: number }): AeropuertoCercano => ({
+  iata: a[0],
+  nombre: a[1],
+  ciudad: a[2],
+  distanciaKm: Math.round(d),
+  ...(a[6] ? { internacional: true } : {}),
+});
+
 /** Aeropuertos con vuelos regulares más cercanos a un punto (hasta `max`, dentro de `radioKm`). */
 export function aeropuertosCercanos(lat: number, lon: number, max = 3, radioKm = 250): AeropuertoCercano[] {
   return AEROPUERTOS.map((a) => ({ a, d: distanciaKm(lat, lon, a[4], a[5]) }))
     .filter(({ d }) => d <= radioKm)
     .sort((x, y) => x.d - y.d)
     .slice(0, max)
-    .map(({ a, d }) => ({ iata: a[0], nombre: a[1], ciudad: a[2], distanciaKm: Math.round(d) }));
+    .map(aCercano);
+}
+
+/**
+ * Aeropuertos para una ciudad: primero los grandes (internacionales) a menos de 100 km, del más cercano al más lejano,
+ * y después los demás hasta completar `max`. Así Nueva York muestra JFK, LaGuardia y Newark antes que Teterboro.
+ * Si hay aeropuertos del mismo país, no se mezclan los de otro (Buenos Aires no muestra Montevideo).
+ */
+export function aeropuertosDeCiudad(lat: number, lon: number, pais?: string, max = 5): AeropuertoCercano[] {
+  let lista = AEROPUERTOS.map((a) => ({ a, d: distanciaKm(lat, lon, a[4], a[5]) }))
+    .filter(({ d }) => d <= 250)
+    .sort((x, y) => x.d - y.d);
+  if (pais && lista.some(({ a, d }) => a[3] === pais && d <= 150)) lista = lista.filter(({ a }) => a[3] === pais);
+  const grandes = lista.filter(({ a, d }) => a[6] && d <= 100);
+  const resto = lista.filter((x) => !grandes.includes(x));
+  return [...grandes, ...resto].slice(0, max).map(aCercano);
 }
 
 /** Busca ciudades por nombre (en cualquier idioma con alfabeto latino) y les agrega sus aeropuertos cercanos. */
@@ -126,7 +153,7 @@ export function buscarLugares(texto: string, max = 6, incluirPaises = false): Lu
   const ciudades: Lugar[] = resultados
     .sort((x, y) => y.puntaje - x.puntaje || y.c[6] - x.c[6])
     .slice(0, max - paises.length)
-    .map(({ c, nombre }) => ({ tipo: "ciudad", ciudad: nombre, region: c[7], pais: c[3], aeropuertos: aeropuertosCercanos(c[4], c[5]) }));
+    .map(({ c, nombre }) => ({ tipo: "ciudad", ciudad: nombre, region: c[7], pais: c[3], aeropuertos: aeropuertosDeCiudad(c[4], c[5], c[3]) }));
 
   return [...paises, ...ciudades];
 }

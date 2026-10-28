@@ -45,3 +45,16 @@ describe("aeropuertos de la ciudad", () => {
     expect(aeropuertosDeLaCiudad("MAD")).toBe("MAD");
   });
 });
+
+describe("aeropuertos de cada ciudad", () => {
+  it("muestra primero los internacionales y no deja afuera a los grandes", async () => {
+    const { buscarLugares } = await import("./lugares");
+    const codigos = (q: string) => buscarLugares(q, 3, false)[0].aeropuertos.map((a) => a.iata);
+    expect(codigos("New York").slice(0, 3).sort()).toEqual(["EWR", "JFK", "LGA"]);
+    expect(codigos("Los Angeles")[0]).toBe("LAX");
+    expect(codigos("Londres")).toContain("LHR");
+    expect(codigos("Chicago")).toContain("ORD");
+    // Buenos Aires no muestra aeropuertos de otro país (Montevideo).
+    expect(codigos("Buenos Aires")).toEqual(["AEP", "EZE"]);
+  });
+});

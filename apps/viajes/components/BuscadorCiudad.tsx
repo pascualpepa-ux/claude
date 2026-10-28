@@ -193,7 +193,7 @@ export function BuscadorCiudad({ tipo, texto, lugar, aeropuerto, error, onTexto,
             <fieldset className="mt-3">
               <legend className="mb-2 text-sm text-arena-600 dark:text-arena-400">{textos.aeropuerto}</legend>
               <div className="grid gap-2">
-                {lugar.aeropuertos.map((a, i) => (
+                {lugar.aeropuertos.map((a) => (
                   <label
                     key={a.iata}
                     className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-oliva-600/40 ${
@@ -222,7 +222,10 @@ export function BuscadorCiudad({ tipo, texto, lugar, aeropuerto, error, onTexto,
                       </span>
                       <span className="block text-xs text-arena-600 dark:text-arena-400">
                         {A.aKm(a.distanciaKm)}
-                        {i === 0 && lugar.aeropuertos.length > 1 && `, ${A.masCercano.toLowerCase()}`}
+                        {a.internacional && `, ${A.internacional}`}
+                        {lugar.aeropuertos.length > 1 &&
+                          a.distanciaKm === Math.min(...lugar.aeropuertos.map((x) => x.distanciaKm)) &&
+                          `, ${A.masCercano.toLowerCase()}`}
                       </span>
                     </span>
                   </label>
