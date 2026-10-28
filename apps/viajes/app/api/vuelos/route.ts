@@ -3,6 +3,7 @@ import { aerolineasParaRuta } from "@/lib/aerolineas-pais";
 import { buscarHorarios } from "@/lib/horarios-reales";
 import { coordenadasAeropuerto } from "@/lib/lugares";
 import { buscarVuelos } from "@/lib/vuelos-reales";
+import { buscarTravelpayouts } from "@/lib/vuelos-travelpayouts";
 
 export const runtime = "nodejs";
 // La búsqueda profunda en Google Flights y la verificación tardan: hasta un minuto.
@@ -35,7 +36,12 @@ export async function POST(req: Request) {
     idioma: esIdioma(c.idioma) ? (c.idioma as "es" | "en") : ("es" as const),
   };
   let resultado = await buscarVuelos(pedido);
-  // Sin precios reales (sin clave o sin cupo de Google Flights): vuelos con número y horario reales y precio estimado.
+  // Sin Google Flights: el agente de Aviasales (vuelos y precios reales buscados en las últimas 48 h).
+  if (resultado.estado !== "ok") {
+    const aviasales = await buscarTravelpayouts(pedido);
+    if (aviasales?.length) resultado = { estado: "ok", vuelos: aviasales };
+  }
+  // Si tampoco hay: vuelos con número y horario reales (tablero del aeropuerto) y precio estimado.
   if (resultado.estado !== "ok") {
     const horarios = await buscarHorarios(pedido);
     if (horarios?.length) resultado = { estado: "ok", vuelos: horarios };

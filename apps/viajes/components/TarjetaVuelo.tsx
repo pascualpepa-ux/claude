@@ -11,6 +11,8 @@ import { useIdioma } from "./ProveedorIdioma";
 
 function textoEscalas(tramo: Tramo, t: Textos) {
   if (tramo.escalas.length === 0) return t.vuelo.directo;
+  // Algunas fuentes dicen cuántas escalas hay pero no dónde.
+  if (tramo.escalas.every((e) => !e)) return t.vuelo.escalasSinLugar(tramo.escalas.length);
   return t.vuelo.escalas(tramo.escalas.length, tramo.escalas.join(t.vuelo.y));
 }
 

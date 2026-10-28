@@ -121,6 +121,7 @@ const es = {
   vuelo: {
     directo: "Directo",
     escalas: (n: number, lugares: string) => `${n} ${plural(n, "escala", "escalas")} en ${lugares}`,
+    escalasSinLugar: (n: number) => `${n} ${plural(n, "escala", "escalas")}`,
     y: " y ",
     aLaIda: (escalas: string) => `${escalas} a la ida`,
     porPersonaTotal: (total: string) => `por persona, ${total} en total`,
@@ -653,6 +654,7 @@ const en: Textos = {
   vuelo: {
     directo: "Nonstop",
     escalas: (n, lugares) => `${n} ${plural(n, "stop", "stops")} in ${lugares}`,
+    escalasSinLugar: (n) => `${n} ${plural(n, "stop", "stops")}`,
     y: " and ",
     aLaIda: (escalas) => `${escalas} outbound`,
     porPersonaTotal: (total) => `per person, ${total} total`,

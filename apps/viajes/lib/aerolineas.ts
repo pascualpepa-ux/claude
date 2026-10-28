@@ -68,3 +68,18 @@ export function codigoAerolinea(nombre: string): string | null {
   for (const [codigo, nombres] of AEROLINEAS) if (nombres.some((x) => n.includes(normalizar(x)) && normalizar(x).length > 3)) return codigo;
   return null;
 }
+
+/** Nombre para mostrar de cada código IATA de aerolínea (si no está, se muestra el código). */
+export const NOMBRE_AEROLINEA: Record<string, string> = {
+  UX: "Air Europa", IB: "Iberia", I2: "Iberia Express", AR: "Aerolíneas Argentinas", LA: "LATAM", JJ: "LATAM Brasil", AA: "American Airlines",
+  UA: "United", DL: "Delta", AF: "Air France", KL: "KLM", LH: "Lufthansa", BA: "British Airways", EK: "Emirates", QR: "Qatar Airways",
+  EY: "Etihad", TK: "Turkish Airlines", CM: "Copa Airlines", AV: "Avianca", G3: "GOL", AD: "Azul", JA: "JetSMART", FO: "Flybondi",
+  H2: "Sky Airline", AM: "Aeroméxico", AZ: "ITA Airways", TP: "TAP Air Portugal", LX: "Swiss", AC: "Air Canada", VY: "Vueling",
+  FR: "Ryanair", U2: "easyJet", PU: "Plus Ultra", DM: "Arajet", OB: "Boliviana de Aviación", ZP: "Paranair", CA: "Air China",
+  MU: "China Eastern", CZ: "China Southern", CX: "Cathay Pacific", SQ: "Singapore Airlines", JL: "Japan Airlines", NH: "ANA",
+  KE: "Korean Air", OZ: "Asiana", ET: "Ethiopian Airlines", AT: "Royal Air Maroc", MS: "EgyptAir", SK: "SAS", AY: "Finnair",
+  EI: "Aer Lingus", LO: "LOT", OS: "Austrian Airlines", SN: "Brussels Airlines", QF: "Qantas", NZ: "Air New Zealand", VS: "Virgin Atlantic",
+  WS: "WestJet", Y4: "Volaris", VB: "Viva Aerobus", DY: "Norwegian", A3: "Aegean", LY: "El Al", TG: "Thai Airways", AI: "Air India",
+  "6E": "IndiGo", HU: "Hainan Airlines", MF: "Xiamen Airlines", W6: "Wizz Air", B6: "JetBlue", WN: "Southwest", AS: "Alaska Airlines",
+  SV: "Saudia", WY: "Oman Air", GF: "Gulf Air", KQ: "Kenya Airways", SA: "South African Airways", "2Z": "Voepass", O6: "Avianca Brasil",
+};
