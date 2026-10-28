@@ -1,0 +1,637 @@
+[
+ {
+  "slug": "roma-3-dias",
+  "dias": 3,
+  "claves": [
+   "roma",
+   "rome",
+   "coliseo",
+   "colosseum",
+   "vaticano",
+   "vatican"
+  ],
+  "destino": {
+   "buscar": "Roma",
+   "pais": "IT",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Roma en 3 días",
+   "en": "What to do in Rome in 3 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 3 días en Roma: Coliseo, Vaticano, Trastevere y fuentes, con precios de entradas verificados y consejos para ahorrar.",
+   "en": "A 3-day Rome itinerary: Colosseum, Vatican, Trastevere and fountains, with verified ticket prices and tips to save money."
+  },
+  "intro": {
+   "es": "Tres días alcanzan para ver la Roma antigua, el Vaticano y los barrios con más vida, si reservás las entradas grandes con tiempo y caminás mucho. El centro se recorre a pie.",
+   "en": "Three days are enough for ancient Rome, the Vatican and the liveliest neighbourhoods, if you book the big tickets ahead and walk a lot. The centre is best seen on foot."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: la Roma antigua",
+     "en": "Day 1: ancient Rome"
+    },
+    "actividades": [
+     {
+      "es": "Coliseo a primera hora (con horario reservado).",
+      "en": "Colosseum first thing (with a timed booking)."
+     },
+     {
+      "es": "Foro Romano y monte Palatino (misma entrada).",
+      "en": "Roman Forum and Palatine Hill (same ticket)."
+     },
+     {
+      "es": "Tarde: Plaza Venecia, Capitolio y vista desde el Vittoriano.",
+      "en": "Afternoon: Piazza Venezia, the Capitoline and the view from the Vittoriano."
+     },
+     {
+      "es": "Cena en el barrio de Monti.",
+      "en": "Dinner in the Monti neighbourhood."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: Vaticano y Trastevere",
+     "en": "Day 2: Vatican and Trastevere"
+    },
+    "actividades": [
+     {
+      "es": "Museos Vaticanos y Capilla Sixtina (reserva online).",
+      "en": "Vatican Museums and Sistine Chapel (book online)."
+     },
+     {
+      "es": "Basílica de San Pedro (gratis; se puede subir a la cúpula pagando aparte).",
+      "en": "St Peter's Basilica (free; the dome climb is paid separately)."
+     },
+     {
+      "es": "Castel Sant'Angelo por fuera y cruce del río.",
+      "en": "Castel Sant'Angelo from outside and across the river."
+     },
+     {
+      "es": "Atardecer y cena en Trastevere.",
+      "en": "Sunset and dinner in Trastevere."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: plazas y fuentes",
+     "en": "Day 3: squares and fountains"
+    },
+    "actividades": [
+     {
+      "es": "Panteón temprano.",
+      "en": "Pantheon early."
+     },
+     {
+      "es": "Plaza Navona, Campo de' Fiori y Fontana di Trevi.",
+      "en": "Piazza Navona, Campo de' Fiori and the Trevi Fountain."
+     },
+     {
+      "es": "Escalinata de Plaza de España y paseo por Villa Borghese.",
+      "en": "Spanish Steps and a walk through Villa Borghese."
+     },
+     {
+      "es": "Si querés un museo más: Galería Borghese (cupos limitados, reservar).",
+      "en": "If you want one more museum: Borghese Gallery (limited slots, book ahead)."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Coliseo + Foro + Palatino",
+     "en": "Colosseum + Forum + Palatine"
+    },
+    "monto": {
+     "es": "€18 (+€2 de reserva online)",
+     "en": "€18 (+€2 online booking fee)"
+    },
+    "enlace": "https://ticketing.colosseo.it",
+    "verificado": true
+   },
+   {
+    "concepto": {
+     "es": "Museos Vaticanos + Capilla Sixtina",
+     "en": "Vatican Museums + Sistine Chapel"
+    },
+    "monto": {
+     "es": "€20 + €5 de reserva online",
+     "en": "€20 + €5 online booking"
+    },
+    "enlace": "https://tickets.museivaticani.va",
+    "verificado": true
+   },
+   {
+    "concepto": {
+     "es": "Panteón",
+     "en": "Pantheon"
+    },
+    "monto": {
+     "es": "≈ €5",
+     "en": "≈ €5"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Boleto de metro/bus (100 minutos)",
+     "en": "Metro/bus ticket (100 minutes)"
+    },
+    "monto": {
+     "es": "≈ €1,50",
+     "en": "≈ €1.50"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Tren Leonardo Express (aeropuerto Fiumicino)",
+     "en": "Leonardo Express train (Fiumicino airport)"
+    },
+    "monto": {
+     "es": "≈ €14",
+     "en": "≈ €14"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Pizza al taglio o supplì",
+     "en": "Pizza al taglio or supplì"
+    },
+    "monto": {
+     "es": "€5–10",
+     "en": "€5–10"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cena en trattoria",
+     "en": "Trattoria dinner"
+    },
+    "monto": {
+     "es": "€25–40",
+     "en": "€25–40"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "€35–55 / €120–190",
+     "en": "€35–55 / €120–190"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    80,
+    110
+   ],
+   "equilibrado": [
+    180,
+    250
+   ],
+   "premium": [
+    400,
+    600
+   ]
+  },
+  "consejos": [
+   {
+    "es": "Reservá el Coliseo y el Vaticano apenas tengas fechas: los horarios buenos se agotan.",
+    "en": "Book the Colosseum and the Vatican as soon as you have dates: good time slots sell out."
+   },
+   {
+    "es": "Para entrar a las iglesias (y al Vaticano) hay que tener hombros y rodillas cubiertos.",
+    "en": "To enter churches (and the Vatican) shoulders and knees must be covered."
+   },
+   {
+    "es": "El agua de las fuentes públicas (nasoni) es potable: llevá una botella.",
+    "en": "Water from the public fountains (nasoni) is drinkable: bring a bottle."
+   },
+   {
+    "es": "Los hoteles cobran una tasa turística por noche que se paga aparte.",
+    "en": "Hotels charge a nightly tourist tax that is paid separately."
+   }
+  ]
+ },
+ {
+  "slug": "paris-4-dias",
+  "dias": 4,
+  "claves": [
+   "paris",
+   "louvre",
+   "eiffel",
+   "versalles",
+   "versailles"
+  ],
+  "destino": {
+   "buscar": "Paris",
+   "pais": "FR",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en París en 4 días",
+   "en": "What to do in Paris in 4 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 4 días en París: Louvre, Torre Eiffel, Montmartre, Le Marais y Versalles, con precios de entradas verificados y consejos.",
+   "en": "A 4-day Paris itinerary: the Louvre, Eiffel Tower, Montmartre, Le Marais and Versailles, with verified ticket prices and tips."
+  },
+  "intro": {
+   "es": "Con cuatro días ves lo esencial de París sin correr: los grandes museos, la Torre Eiffel, dos barrios con personalidad y una excursión a Versalles. El metro te lleva a todos lados.",
+   "en": "Four days let you see Paris's essentials without rushing: the great museums, the Eiffel Tower, two neighbourhoods with character and a day trip to Versailles. The metro takes you everywhere."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: el centro y la isla de la Cité",
+     "en": "Day 1: the centre and Île de la Cité"
+    },
+    "actividades": [
+     {
+      "es": "Notre-Dame (entrada gratis) y Sainte-Chapelle.",
+      "en": "Notre-Dame (free entry) and Sainte-Chapelle."
+     },
+     {
+      "es": "Barrio Latino y Jardines de Luxemburgo.",
+      "en": "Latin Quarter and Luxembourg Gardens."
+     },
+     {
+      "es": "Paseo en barco por el Sena al atardecer.",
+      "en": "Seine boat ride at sunset."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: Louvre y Champs-Élysées",
+     "en": "Day 2: Louvre and Champs-Élysées"
+    },
+    "actividades": [
+     {
+      "es": "Museo del Louvre (con horario reservado).",
+      "en": "The Louvre (with a timed booking)."
+     },
+     {
+      "es": "Jardín de las Tullerías y Plaza de la Concordia.",
+      "en": "Tuileries Garden and Place de la Concorde."
+     },
+     {
+      "es": "Champs-Élysées hasta el Arco del Triunfo.",
+      "en": "Champs-Élysées up to the Arc de Triomphe."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: Torre Eiffel y Montmartre",
+     "en": "Day 3: Eiffel Tower and Montmartre"
+    },
+    "actividades": [
+     {
+      "es": "Torre Eiffel temprano y Trocadero para la foto.",
+      "en": "Eiffel Tower early and Trocadéro for the photo."
+     },
+     {
+      "es": "Museo de Orsay (impresionistas).",
+      "en": "Musée d'Orsay (Impressionists)."
+     },
+     {
+      "es": "Tarde en Montmartre y el Sacré-Cœur.",
+      "en": "Afternoon in Montmartre and Sacré-Cœur."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 4: Versalles y Le Marais",
+     "en": "Day 4: Versailles and Le Marais"
+    },
+    "actividades": [
+     {
+      "es": "Palacio y jardines de Versalles (tren RER C, unos 40 minutos).",
+      "en": "Palace and gardens of Versailles (RER C train, about 40 minutes)."
+     },
+     {
+      "es": "Vuelta a París: Le Marais y Plaza de los Vosgos.",
+      "en": "Back in Paris: Le Marais and Place des Vosges."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Museo del Louvre (visitantes de fuera de la UE)",
+     "en": "The Louvre (non-EU visitors)"
+    },
+    "monto": {
+     "es": "€32",
+     "en": "€32"
+    },
+    "enlace": "https://www.louvre.fr",
+    "verificado": true
+   },
+   {
+    "concepto": {
+     "es": "Torre Eiffel: cima en ascensor / 2.º piso",
+     "en": "Eiffel Tower: summit by lift / 2nd floor"
+    },
+    "monto": {
+     "es": "€36,70 / €23,50",
+     "en": "€36.70 / €23.50"
+    },
+    "enlace": "https://www.toureiffel.paris",
+    "verificado": true
+   },
+   {
+    "concepto": {
+     "es": "Museo de Orsay",
+     "en": "Musée d'Orsay"
+    },
+    "monto": {
+     "es": "≈ €16",
+     "en": "≈ €16"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Palacio de Versalles (pase de un día)",
+     "en": "Palace of Versailles (day pass)"
+    },
+    "monto": {
+     "es": "≈ €32",
+     "en": "≈ €32"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Boleto de metro",
+     "en": "Metro ticket"
+    },
+    "monto": {
+     "es": "≈ €2,50",
+     "en": "≈ €2.50"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Café y croissant / menú del mediodía",
+     "en": "Coffee and croissant / lunch set menu"
+    },
+    "monto": {
+     "es": "€5–8 / €18–28",
+     "en": "€5–8 / €18–28"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "€40–60 / €140–220",
+     "en": "€40–60 / €140–220"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    100,
+    130
+   ],
+   "equilibrado": [
+    220,
+    300
+   ],
+   "premium": [
+    450,
+    700
+   ]
+  },
+  "consejos": [
+   {
+    "es": "Los museos nacionales cierran un día por semana (el Louvre, los martes; Orsay, los lunes): revisalo al armar el plan.",
+    "en": "National museums close one day a week (the Louvre on Tuesdays, Orsay on Mondays): check before you plan."
+   },
+   {
+    "es": "Subí a la Torre Eiffel a primera hora o de noche: hay menos fila.",
+    "en": "Go up the Eiffel Tower first thing or at night: queues are shorter."
+   },
+   {
+    "es": "El menú del mediodía (formule) es la forma más barata de comer bien.",
+    "en": "The lunch set menu (formule) is the cheapest way to eat well."
+   }
+  ]
+ },
+ {
+  "slug": "japon-7-dias-cuanto-cuesta",
+  "dias": 7,
+  "claves": [
+   "japon",
+   "japan",
+   "tokio",
+   "tokyo",
+   "kioto",
+   "kyoto",
+   "osaka",
+   "jr pass"
+  ],
+  "destino": {
+   "buscar": "Japon",
+   "pais": "JP",
+   "tipo": "pais"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Cuánto cuesta viajar a Japón 7 días",
+   "en": "How much a 7-day trip to Japan costs"
+  },
+  "descripcion": {
+   "es": "Cuánto cuesta una semana en Japón: Tokio, Kioto, Nara y Osaka, con precios de alojamiento, comida, trenes y el JR Pass verificado.",
+   "en": "What a week in Japan costs: Tokyo, Kyoto, Nara and Osaka, with prices for lodging, food, trains and the verified JR Pass."
+  },
+  "intro": {
+   "es": "Japón es más accesible de lo que parece: comer bien es barato y el transporte es impecable. El gasto grande es el alojamiento y el tren bala. Esta ruta clásica de 7 días va de Tokio a Osaka.",
+   "en": "Japan is more affordable than it looks: eating well is cheap and transport is flawless. The big costs are lodging and the bullet train. This classic 7-day route goes from Tokyo to Osaka."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Días 1–3: Tokio",
+     "en": "Days 1–3: Tokyo"
+    },
+    "actividades": [
+     {
+      "es": "Asakusa y el templo Senso-ji; Akihabara.",
+      "en": "Asakusa and Senso-ji temple; Akihabara."
+     },
+     {
+      "es": "Shibuya (el cruce), Harajuku y el santuario Meiji.",
+      "en": "Shibuya (the crossing), Harajuku and Meiji Shrine."
+     },
+     {
+      "es": "Shinjuku de noche y mirador gratis del gobierno metropolitano.",
+      "en": "Shinjuku at night and the free Metropolitan Government observatory."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Días 4–5: Kioto",
+     "en": "Days 4–5: Kyoto"
+    },
+    "actividades": [
+     {
+      "es": "Shinkansen Tokio–Kioto (unas 2 h 15 min).",
+      "en": "Shinkansen Tokyo–Kyoto (about 2 h 15 min)."
+     },
+     {
+      "es": "Fushimi Inari temprano, Kiyomizu-dera y Gion.",
+      "en": "Fushimi Inari early, Kiyomizu-dera and Gion."
+     },
+     {
+      "es": "Bosque de bambú de Arashiyama y Kinkaku-ji.",
+      "en": "Arashiyama bamboo grove and Kinkaku-ji."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 6: Nara",
+     "en": "Day 6: Nara"
+    },
+    "actividades": [
+     {
+      "es": "Tren local desde Kioto (unos 45 minutos).",
+      "en": "Local train from Kyoto (about 45 minutes)."
+     },
+     {
+      "es": "Templo Todai-ji y el parque de los ciervos.",
+      "en": "Todai-ji temple and the deer park."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 7: Osaka",
+     "en": "Day 7: Osaka"
+    },
+    "actividades": [
+     {
+      "es": "Castillo de Osaka.",
+      "en": "Osaka Castle."
+     },
+     {
+      "es": "Comer en Dotonbori (takoyaki y okonomiyaki) y vuelo de regreso desde Kansai.",
+      "en": "Eat in Dotonbori (takoyaki and okonomiyaki) and fly home from Kansai."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "JR Pass de 7 días (ordinario / Green)",
+     "en": "7-day JR Pass (ordinary / Green)"
+    },
+    "monto": {
+     "es": "¥53.000 / ¥74.000",
+     "en": "¥53,000 / ¥74,000"
+    },
+    "enlace": "https://japanrailpass.net",
+    "verificado": true
+   },
+   {
+    "concepto": {
+     "es": "Shinkansen Tokio–Kioto, solo ida (sin pase)",
+     "en": "Shinkansen Tokyo–Kyoto, one way (no pass)"
+    },
+    "monto": {
+     "es": "≈ ¥14.000",
+     "en": "≈ ¥14,000"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Tarjeta de transporte (Suica/ICOCA): viaje en metro",
+     "en": "Transit card (Suica/ICOCA): metro ride"
+    },
+    "monto": {
+     "es": "¥180–300",
+     "en": "¥180–300"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Ramen / comida de konbini",
+     "en": "Ramen / konbini meal"
+    },
+    "monto": {
+     "es": "¥1.000–1.500 / ¥600–900",
+     "en": "¥1,000–1,500 / ¥600–900"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Templos (Kiyomizu-dera, Kinkaku-ji)",
+     "en": "Temples (Kiyomizu-dera, Kinkaku-ji)"
+    },
+    "monto": {
+     "es": "¥400–500 cada uno",
+     "en": "¥400–500 each"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel business (noche)",
+     "en": "Hostel bed / business hotel (night)"
+    },
+    "monto": {
+     "es": "¥4.000–6.500 / ¥12.000–22.000",
+     "en": "¥4,000–6,500 / ¥12,000–22,000"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    90,
+    130
+   ],
+   "equilibrado": [
+    200,
+    280
+   ],
+   "premium": [
+    450,
+    700
+   ]
+  },
+  "consejos": [
+   {
+    "es": "Para esta ruta (Tokio → Kioto → Osaka, solo ida) el JR Pass de 7 días no conviene: comprá los tickets sueltos. Conviene si hacés ida y vuelta o más ciudades lejanas.",
+    "en": "For this route (Tokyo → Kyoto → Osaka, one way) the 7-day JR Pass doesn't pay off: buy single tickets. It's worth it for return trips or more distant cities."
+   },
+   {
+    "es": "Cargá una tarjeta Suica o ICOCA en el celular: sirve para trenes, buses y konbinis.",
+    "en": "Load a Suica or ICOCA card on your phone: it works on trains, buses and at konbinis."
+   },
+   {
+    "es": "En Japón no se deja propina.",
+    "en": "There is no tipping in Japan."
+   },
+   {
+    "es": "Mandá la valija entre hoteles con takkyubin y viajá liviano en el tren.",
+    "en": "Send your suitcase between hotels with takkyubin and ride the train light."
+   }
+  ]
+ }
+]

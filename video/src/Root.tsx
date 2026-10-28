@@ -2,6 +2,10 @@ import { Composition, continueRender, delayRender, staticFile } from "remotion";
 import { FPS } from "./marca";
 import { Promo, TOTAL } from "./Promo";
 import { Short, TOTAL_SHORT } from "./short/Short";
+import { duracionGuia, ShortGuia } from "./shorts/ShortGuia";
+import { ShortGastos, TOTAL_GASTOS } from "./shorts/ShortGastos";
+
+const GUIAS_SHORT = ["roma-3-dias", "paris-4-dias", "japon-7-dias-cuanto-cuesta"];
 
 // La tipografía de la web (Google Sans Flex, licencia OFL), cargada antes de dibujar el primer cuadro.
 const esperaFuente = delayRender("Cargando la tipografía de Rumbo");
@@ -23,5 +27,21 @@ export const Root: React.FC = () => (
     <Composition id="Promo-en" component={Promo} durationInFrames={TOTAL} fps={FPS} width={1920} height={1080} defaultProps={{ idioma: "en" as const }} />
     <Composition id="Short-es" component={Short} durationInFrames={TOTAL_SHORT} fps={FPS} width={1080} height={1920} defaultProps={{ idioma: "es" as const }} />
     <Composition id="Short-en" component={Short} durationInFrames={TOTAL_SHORT} fps={FPS} width={1080} height={1920} defaultProps={{ idioma: "en" as const }} />
+    {GUIAS_SHORT.flatMap((slug) =>
+      (["es", "en"] as const).map((idioma) => (
+        <Composition
+          key={`${slug}-${idioma}`}
+          id={`Guia-${slug}-${idioma}`}
+          component={ShortGuia}
+          durationInFrames={duracionGuia(slug)}
+          fps={FPS}
+          width={1080}
+          height={1920}
+          defaultProps={{ slug, idioma }}
+        />
+      )),
+    )}
+    <Composition id="Gastos-es" component={ShortGastos} durationInFrames={TOTAL_GASTOS} fps={FPS} width={1080} height={1920} defaultProps={{ idioma: "es" as const }} />
+    <Composition id="Gastos-en" component={ShortGastos} durationInFrames={TOTAL_GASTOS} fps={FPS} width={1080} height={1920} defaultProps={{ idioma: "en" as const }} />
   </>
 );
