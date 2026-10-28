@@ -4,6 +4,8 @@ import { Promo, TOTAL } from "./Promo";
 import { Short, TOTAL_SHORT } from "./short/Short";
 import { duracionGuia, ShortGuia } from "./shorts/ShortGuia";
 import { ShortGastos, TOTAL_GASTOS } from "./shorts/ShortGastos";
+import { ShortRanking, TOTAL_RANKING } from "./shorts/ShortRanking";
+import { ShortConsejos, SLUGS_CONSEJOS, totalConsejos } from "./shorts/ShortConsejos";
 
 import guias from "./datos/guias.json";
 
@@ -46,5 +48,21 @@ export const Root: React.FC = () => (
     )}
     <Composition id="Gastos-es" component={ShortGastos} durationInFrames={TOTAL_GASTOS} fps={FPS} width={1080} height={1920} defaultProps={{ idioma: "es" as const }} />
     <Composition id="Gastos-en" component={ShortGastos} durationInFrames={TOTAL_GASTOS} fps={FPS} width={1080} height={1920} defaultProps={{ idioma: "en" as const }} />
+    <Composition id="Ranking-es" component={ShortRanking} durationInFrames={TOTAL_RANKING} fps={FPS} width={1080} height={1920} defaultProps={{ idioma: "es" as const }} />
+    <Composition id="Ranking-en" component={ShortRanking} durationInFrames={TOTAL_RANKING} fps={FPS} width={1080} height={1920} defaultProps={{ idioma: "en" as const }} />
+    {SLUGS_CONSEJOS.flatMap((slug) =>
+      (["es", "en"] as const).map((idioma) => (
+        <Composition
+          key={`consejos-${slug}-${idioma}`}
+          id={`Consejos-${slug}-${idioma}`}
+          component={ShortConsejos}
+          durationInFrames={totalConsejos(slug)}
+          fps={FPS}
+          width={1080}
+          height={1920}
+          defaultProps={{ slug, idioma }}
+        />
+      )),
+    )}
   </>
 );

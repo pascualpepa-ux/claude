@@ -9,6 +9,7 @@ export const C = {
   arena100: "#f2ecdc",
   arena200: "#e6dec8",
   arena300: "#d3c8ac",
+  arena400: "#ab9f84",
   arena500: "#736b58",
   arena600: "#5e5747",
   arena900: "#211f19",
