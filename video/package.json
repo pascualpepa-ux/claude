@@ -1,0 +1,22 @@
+{
+  "name": "rumbo-video-promo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Video promocional de Rumbo Traveling (Remotion)",
+  "scripts": {
+    "estudio": "remotion studio src/index.ts",
+    "es": "remotion render src/index.ts Promo-es salida/rumbo-promo-es.mp4",
+    "en": "remotion render src/index.ts Promo-en salida/rumbo-promo-en.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "@remotion/transitions": "4.0.534",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.8",
+    "typescript": "5.8.3"
+  }
+}

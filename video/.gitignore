@@ -1,0 +1,4 @@
+node_modules/
+salida/
+# La música se genera con musica/componer.py
+public/musica/*.wav
