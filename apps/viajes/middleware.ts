@@ -23,5 +23,5 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   // Solo páginas: sin la propia pausa, la API, el admin ni los archivos de la web.
-  matcher: ["/((?!pausa|api|admin|_next|marca|og|iconos|fuentes|icon|apple-icon|favicon|manifest|robots|sitemap).*)"],
+  matcher: ["/((?!pausa|api|admin|_next|marca|og|iconos|fuentes|icon|apple-icon|apple-touch-icon|favicon|manifest|robots|sitemap).*)"],
 };
