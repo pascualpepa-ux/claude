@@ -5,7 +5,10 @@ import { Short, TOTAL_SHORT } from "./short/Short";
 import { duracionGuia, ShortGuia } from "./shorts/ShortGuia";
 import { ShortGastos, TOTAL_GASTOS } from "./shorts/ShortGastos";
 
-const GUIAS_SHORT = ["roma-3-dias", "paris-4-dias", "japon-7-dias-cuanto-cuesta"];
+import guias from "./datos/guias.json";
+
+// Un Short por cada guía de la web (en español y en inglés).
+const GUIAS_SHORT = (guias as { slug: string }[]).map((g) => g.slug);
 
 // La tipografía de la web (Google Sans Flex, licencia OFL), cargada antes de dibujar el primer cuadro.
 const esperaFuente = delayRender("Cargando la tipografía de Rumbo");

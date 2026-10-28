@@ -433,6 +433,1033 @@
   ]
  },
  {
+  "slug": "madrid-3-dias",
+  "dias": 3,
+  "claves": [
+   "madrid",
+   "prado",
+   "toledo"
+  ],
+  "destino": {
+   "buscar": "Madrid",
+   "pais": "ES",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Madrid en 3 días",
+   "en": "What to do in Madrid in 3 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 3 días en Madrid: Prado, Retiro, Palacio Real, tapas en La Latina y excursión a Toledo, con precios aproximados y consejos.",
+   "en": "A 3-day Madrid itinerary: the Prado, Retiro, Royal Palace, tapas in La Latina and a Toledo day trip, with approximate prices and tips."
+  },
+  "intro": {
+   "es": "Madrid se disfruta caminando y comiendo: museos de primer nivel a pocas cuadras, parques enormes y bares de tapas hasta tarde. Tres días dan para la ciudad y una escapada a Toledo.",
+   "en": "Madrid is best enjoyed walking and eating: world-class museums a few blocks apart, huge parks and tapas bars open late. Three days cover the city and a trip to Toledo."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: el Madrid de los Austrias",
+     "en": "Day 1: Habsburg Madrid"
+    },
+    "actividades": [
+     {
+      "es": "Puerta del Sol y Plaza Mayor.",
+      "en": "Puerta del Sol and Plaza Mayor."
+     },
+     {
+      "es": "Palacio Real y Catedral de la Almudena.",
+      "en": "Royal Palace and Almudena Cathedral."
+     },
+     {
+      "es": "Mercado de San Miguel y tapas en La Latina.",
+      "en": "San Miguel Market and tapas in La Latina."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: arte y Retiro",
+     "en": "Day 2: art and Retiro"
+    },
+    "actividades": [
+     {
+      "es": "Museo del Prado por la mañana.",
+      "en": "Prado Museum in the morning."
+     },
+     {
+      "es": "Parque del Retiro y el Palacio de Cristal.",
+      "en": "Retiro Park and the Crystal Palace."
+     },
+     {
+      "es": "Reina Sofía (el Guernica) por la tarde.",
+      "en": "Reina Sofía (Guernica) in the afternoon."
+     },
+     {
+      "es": "Noche en Malasaña o Chueca.",
+      "en": "Evening in Malasaña or Chueca."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: excursión a Toledo",
+     "en": "Day 3: day trip to Toledo"
+    },
+    "actividades": [
+     {
+      "es": "Tren de alta velocidad desde Atocha (unos 35 minutos).",
+      "en": "High-speed train from Atocha (about 35 minutes)."
+     },
+     {
+      "es": "Catedral, judería y miradores sobre el Tajo.",
+      "en": "Cathedral, Jewish quarter and viewpoints over the Tagus."
+     },
+     {
+      "es": "Vuelta a Madrid y atardecer en el Templo de Debod.",
+      "en": "Back to Madrid and sunset at the Temple of Debod."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Museo del Prado (gratis las últimas 2 horas del día)",
+     "en": "Prado Museum (free for the last 2 hours of the day)"
+    },
+    "monto": {
+     "es": "≈ €15",
+     "en": "≈ €15"
+    },
+    "enlace": "https://www.museodelprado.es"
+   },
+   {
+    "concepto": {
+     "es": "Museo Reina Sofía",
+     "en": "Reina Sofía Museum"
+    },
+    "monto": {
+     "es": "≈ €12",
+     "en": "≈ €12"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Palacio Real",
+     "en": "Royal Palace"
+    },
+    "monto": {
+     "es": "≈ €14",
+     "en": "≈ €14"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Tren Madrid–Toledo ida y vuelta",
+     "en": "Madrid–Toledo return train"
+    },
+    "monto": {
+     "es": "≈ €25",
+     "en": "≈ €25"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Viaje en metro (suplemento al aeropuerto aparte)",
+     "en": "Metro ride (airport supplement extra)"
+    },
+    "monto": {
+     "es": "€1,50–2",
+     "en": "€1.50–2"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Caña y tapa / menú del día",
+     "en": "Small beer and tapa / menú del día"
+    },
+    "monto": {
+     "es": "€3–5 / €13–18",
+     "en": "€3–5 / €13–18"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "€30–45 / €100–160",
+     "en": "€30–45 / €100–160"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    70,
+    100
+   ],
+   "equilibrado": [
+    150,
+    210
+   ],
+   "premium": [
+    350,
+    500
+   ]
+  },
+  "consejos": [
+   {
+    "es": "El menú del día (entrada, plato, postre y bebida) es la comida más conveniente de lunes a viernes.",
+    "en": "The menú del día (starter, main, dessert and drink) is the best-value meal on weekdays."
+   },
+   {
+    "es": "En Madrid se cena tarde: muchos restaurantes abren a las 20:30 o 21.",
+    "en": "Madrid dines late: many restaurants open at 8:30 or 9 pm."
+   },
+   {
+    "es": "Comprá el tren a Toledo con anticipación los fines de semana.",
+    "en": "Buy the Toledo train in advance at weekends."
+   }
+  ]
+ },
+ {
+  "slug": "barcelona-3-dias",
+  "dias": 3,
+  "claves": [
+   "barcelona",
+   "sagrada familia",
+   "park guell",
+   "gaudi"
+  ],
+  "destino": {
+   "buscar": "Barcelona",
+   "pais": "ES",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Barcelona en 3 días",
+   "en": "What to do in Barcelona in 3 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 3 días en Barcelona: Sagrada Família, Park Güell, Gótico, Born y playa, con precios de entradas verificados y consejos.",
+   "en": "A 3-day Barcelona itinerary: Sagrada Família, Park Güell, the Gothic Quarter, El Born and the beach, with verified ticket prices and tips."
+  },
+  "intro": {
+   "es": "Barcelona mezcla Gaudí, barrios medievales y mar. En tres días ves las obras principales, caminás el centro histórico y te queda tiempo para la playa y Montjuïc.",
+   "en": "Barcelona mixes Gaudí, medieval streets and the sea. In three days you see the main works, walk the old town and still have time for the beach and Montjuïc."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: Gaudí",
+     "en": "Day 1: Gaudí"
+    },
+    "actividades": [
+     {
+      "es": "Sagrada Família (entrada con horario).",
+      "en": "Sagrada Família (timed entry)."
+     },
+     {
+      "es": "Paseo de Gracia: Casa Batlló y La Pedrera.",
+      "en": "Passeig de Gràcia: Casa Batlló and La Pedrera."
+     },
+     {
+      "es": "Tarde en el barrio de Gràcia.",
+      "en": "Afternoon in the Gràcia neighbourhood."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: ciudad vieja y mar",
+     "en": "Day 2: old town and the sea"
+    },
+    "actividades": [
+     {
+      "es": "Barrio Gótico y Catedral.",
+      "en": "Gothic Quarter and Cathedral."
+     },
+     {
+      "es": "Mercado de la Boquería y La Rambla.",
+      "en": "La Boqueria market and La Rambla."
+     },
+     {
+      "es": "El Born y Santa María del Mar.",
+      "en": "El Born and Santa Maria del Mar."
+     },
+     {
+      "es": "Atardecer en la Barceloneta.",
+      "en": "Sunset at Barceloneta."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: Park Güell y Montjuïc",
+     "en": "Day 3: Park Güell and Montjuïc"
+    },
+    "actividades": [
+     {
+      "es": "Park Güell a primera hora (entrada con horario).",
+      "en": "Park Güell first thing (timed entry)."
+     },
+     {
+      "es": "Montjuïc: castillo, miradores y Fundación Miró.",
+      "en": "Montjuïc: castle, viewpoints and the Miró Foundation."
+     },
+     {
+      "es": "Cena en Poble-sec (calle Blai, pinchos).",
+      "en": "Dinner in Poble-sec (Carrer de Blai, pintxos)."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Sagrada Família: básica / con torre",
+     "en": "Sagrada Família: basic / with tower"
+    },
+    "monto": {
+     "es": "€26 / €36",
+     "en": "€26 / €36"
+    },
+    "enlace": "https://sagradafamilia.org",
+    "verificado": true
+   },
+   {
+    "concepto": {
+     "es": "Park Güell",
+     "en": "Park Güell"
+    },
+    "monto": {
+     "es": "≈ €18",
+     "en": "≈ €18"
+    },
+    "enlace": "https://parkguell.barcelona"
+   },
+   {
+    "concepto": {
+     "es": "Casa Batlló",
+     "en": "Casa Batlló"
+    },
+    "monto": {
+     "es": "desde ≈ €35",
+     "en": "from ≈ €35"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Tarjeta de 10 viajes (T-casual)",
+     "en": "10-ride card (T-casual)"
+    },
+    "monto": {
+     "es": "≈ €13",
+     "en": "≈ €13"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Menú del mediodía / tapas para cenar",
+     "en": "Lunch set menu / tapas dinner"
+    },
+    "monto": {
+     "es": "€15–20 / €20–35",
+     "en": "€15–20 / €20–35"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "€35–55 / €120–200",
+     "en": "€35–55 / €120–200"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    80,
+    110
+   ],
+   "equilibrado": [
+    170,
+    240
+   ],
+   "premium": [
+    380,
+    550
+   ]
+  },
+  "consejos": [
+   {
+    "es": "La Sagrada Família y el Park Güell solo venden entradas con horario: comprá online antes de ir.",
+    "en": "Sagrada Família and Park Güell only sell timed tickets: buy online before you go."
+   },
+   {
+    "es": "Cuidá el celular y la billetera en La Rambla y el metro: hay muchos carteristas.",
+    "en": "Watch your phone and wallet on La Rambla and the metro: pickpockets are common."
+   },
+   {
+    "es": "La tasa turística de Barcelona se cobra por noche y es de las más altas de Europa.",
+    "en": "Barcelona's tourist tax is charged per night and is among the highest in Europe."
+   }
+  ]
+ },
+ {
+  "slug": "londres-4-dias",
+  "dias": 4,
+  "claves": [
+   "londres",
+   "london"
+  ],
+  "destino": {
+   "buscar": "London",
+   "pais": "GB",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Londres en 4 días",
+   "en": "What to do in London in 4 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 4 días en Londres: Westminster, Torre de Londres, museos gratis, Camden y Notting Hill, con precios aproximados y consejos.",
+   "en": "A 4-day London itinerary: Westminster, the Tower of London, free museums, Camden and Notting Hill, with approximate prices and tips."
+  },
+  "intro": {
+   "es": "Londres es cara para dormir pero tiene muchísimo gratis: los grandes museos no cobran entrada. En cuatro días ves lo clásico, los mercados y un par de barrios distintos.",
+   "en": "London is expensive to sleep in but much of it is free: the major museums charge no entry. In four days you see the classics, the markets and a couple of very different neighbourhoods."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: Westminster",
+     "en": "Day 1: Westminster"
+    },
+    "actividades": [
+     {
+      "es": "Big Ben, Parlamento y Abadía de Westminster.",
+      "en": "Big Ben, Parliament and Westminster Abbey."
+     },
+     {
+      "es": "Cambio de guardia en el Palacio de Buckingham (revisá los días).",
+      "en": "Changing of the Guard at Buckingham Palace (check the days)."
+     },
+     {
+      "es": "St James's Park, Trafalgar Square y National Gallery (gratis).",
+      "en": "St James's Park, Trafalgar Square and the National Gallery (free)."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: la City y el río",
+     "en": "Day 2: the City and the river"
+    },
+    "actividades": [
+     {
+      "es": "Torre de Londres y las Joyas de la Corona.",
+      "en": "Tower of London and the Crown Jewels."
+     },
+     {
+      "es": "Tower Bridge y paseo por la orilla sur.",
+      "en": "Tower Bridge and a walk along the South Bank."
+     },
+     {
+      "es": "Borough Market y Tate Modern (gratis).",
+      "en": "Borough Market and Tate Modern (free)."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: museos de Kensington",
+     "en": "Day 3: Kensington museums"
+    },
+    "actividades": [
+     {
+      "es": "Museo Británico por la mañana (gratis).",
+      "en": "British Museum in the morning (free)."
+     },
+     {
+      "es": "Museo de Historia Natural o Victoria & Albert (gratis).",
+      "en": "Natural History Museum or the V&A (free)."
+     },
+     {
+      "es": "Hyde Park y noche en el West End (teatro).",
+      "en": "Hyde Park and an evening in the West End (theatre)."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 4: mercados y barrios",
+     "en": "Day 4: markets and neighbourhoods"
+    },
+    "actividades": [
+     {
+      "es": "Notting Hill y Portobello Road (sábado, día de mercado grande).",
+      "en": "Notting Hill and Portobello Road (Saturday is the big market day)."
+     },
+     {
+      "es": "Camden Market y Regent's Canal.",
+      "en": "Camden Market and Regent's Canal."
+     },
+     {
+      "es": "Vista gratis desde Sky Garden (reserva previa).",
+      "en": "Free view from the Sky Garden (book ahead)."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Torre de Londres",
+     "en": "Tower of London"
+    },
+    "monto": {
+     "es": "≈ £35",
+     "en": "≈ £35"
+    },
+    "enlace": "https://www.hrp.org.uk/tower-of-london/"
+   },
+   {
+    "concepto": {
+     "es": "Abadía de Westminster",
+     "en": "Westminster Abbey"
+    },
+    "monto": {
+     "es": "≈ £30",
+     "en": "≈ £30"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Museo Británico, National Gallery, Tate Modern",
+     "en": "British Museum, National Gallery, Tate Modern"
+    },
+    "monto": {
+     "es": "Gratis",
+     "en": "Free"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Metro con tarjeta sin contacto (tope diario zonas 1–2)",
+     "en": "Tube with contactless (daily cap, zones 1–2)"
+    },
+    "monto": {
+     "es": "≈ £9",
+     "en": "≈ £9"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Pub: plato y bebida",
+     "en": "Pub: main and a drink"
+    },
+    "monto": {
+     "es": "£20–30",
+     "en": "£20–30"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "£35–60 / £150–250",
+     "en": "£35–60 / £150–250"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    110,
+    150
+   ],
+   "equilibrado": [
+    250,
+    330
+   ],
+   "premium": [
+    500,
+    800
+   ]
+  },
+  "consejos": [
+   {
+    "es": "Pagá el transporte con tarjeta o celular sin contacto: se aplica solo el tope diario.",
+    "en": "Pay for transport with a contactless card or phone: the daily cap applies automatically."
+   },
+   {
+    "es": "Usá siempre la misma tarjeta para entrar y salir del metro, si no, te cobra de más.",
+    "en": "Always tap in and out with the same card, or you'll be overcharged."
+   },
+   {
+    "es": "Muchos teatros venden entradas de último momento más baratas el mismo día.",
+    "en": "Many theatres sell cheaper last-minute tickets on the day."
+   }
+  ]
+ },
+ {
+  "slug": "nueva-york-5-dias",
+  "dias": 5,
+  "claves": [
+   "nueva york",
+   "new york",
+   "nyc",
+   "manhattan",
+   "brooklyn"
+  ],
+  "destino": {
+   "buscar": "New York",
+   "pais": "US",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Nueva York en 5 días",
+   "en": "What to do in New York in 5 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 5 días en Nueva York: Estatua de la Libertad, Central Park, MET, Brooklyn y miradores, con precios aproximados y consejos.",
+   "en": "A 5-day New York itinerary: the Statue of Liberty, Central Park, the Met, Brooklyn and observation decks, with approximate prices and tips."
+  },
+  "intro": {
+   "es": "Nueva York se recorre por barrios. En cinco días ves el bajo Manhattan, Midtown, Central Park con sus museos, Brooklyn y algún mirador, usando el subte y caminando mucho.",
+   "en": "New York is best explored neighbourhood by neighbourhood. In five days you see Lower Manhattan, Midtown, Central Park and its museums, Brooklyn and an observation deck, by subway and on foot."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: el bajo Manhattan",
+     "en": "Day 1: Lower Manhattan"
+    },
+    "actividades": [
+     {
+      "es": "Ferry a la Estatua de la Libertad y Ellis Island.",
+      "en": "Ferry to the Statue of Liberty and Ellis Island."
+     },
+     {
+      "es": "Wall Street y Memorial del 11-S.",
+      "en": "Wall Street and the 9/11 Memorial."
+     },
+     {
+      "es": "Cruzar el puente de Brooklyn a pie al atardecer.",
+      "en": "Walk across the Brooklyn Bridge at sunset."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: Midtown",
+     "en": "Day 2: Midtown"
+    },
+    "actividades": [
+     {
+      "es": "Grand Central, Biblioteca Pública y Bryant Park.",
+      "en": "Grand Central, the Public Library and Bryant Park."
+     },
+     {
+      "es": "Rockefeller Center y la Quinta Avenida.",
+      "en": "Rockefeller Center and Fifth Avenue."
+     },
+     {
+      "es": "Times Square de noche (y un musical de Broadway si entra en el presupuesto).",
+      "en": "Times Square at night (and a Broadway show if the budget allows)."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: Central Park y museos",
+     "en": "Day 3: Central Park and museums"
+    },
+    "actividades": [
+     {
+      "es": "Central Park caminando o en bici.",
+      "en": "Central Park on foot or by bike."
+     },
+     {
+      "es": "Museo Metropolitano (MET) o Museo de Historia Natural.",
+      "en": "The Met or the Natural History Museum."
+     },
+     {
+      "es": "Upper West Side y cena.",
+      "en": "Upper West Side and dinner."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 4: West Side y Village",
+     "en": "Day 4: West Side and the Village"
+    },
+    "actividades": [
+     {
+      "es": "High Line, Chelsea Market y Hudson Yards.",
+      "en": "The High Line, Chelsea Market and Hudson Yards."
+     },
+     {
+      "es": "Greenwich Village y SoHo.",
+      "en": "Greenwich Village and SoHo."
+     },
+     {
+      "es": "Chinatown y Little Italy para cenar.",
+      "en": "Chinatown and Little Italy for dinner."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 5: Brooklyn y un mirador",
+     "en": "Day 5: Brooklyn and a view"
+    },
+    "actividades": [
+     {
+      "es": "DUMBO y Brooklyn Bridge Park.",
+      "en": "DUMBO and Brooklyn Bridge Park."
+     },
+     {
+      "es": "Williamsburg (mercados y cafés).",
+      "en": "Williamsburg (markets and cafés)."
+     },
+     {
+      "es": "Mirador al atardecer: Top of the Rock, Empire State o Edge.",
+      "en": "Observation deck at sunset: Top of the Rock, Empire State or Edge."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Ferry a la Estatua de la Libertad y Ellis Island",
+     "en": "Statue of Liberty and Ellis Island ferry"
+    },
+    "monto": {
+     "es": "≈ US$ 25",
+     "en": "≈ US$25"
+    },
+    "enlace": "https://www.nps.gov/stli/"
+   },
+   {
+    "concepto": {
+     "es": "MET (visitantes de fuera del estado)",
+     "en": "The Met (out-of-state visitors)"
+    },
+    "monto": {
+     "es": "≈ US$ 30",
+     "en": "≈ US$30"
+    },
+    "enlace": "https://www.metmuseum.org"
+   },
+   {
+    "concepto": {
+     "es": "Mirador (Top of the Rock, Empire State, Edge)",
+     "en": "Observation deck (Top of the Rock, Empire State, Edge)"
+    },
+    "monto": {
+     "es": "US$ 40–50",
+     "en": "US$40–50"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Viaje en subte o bus",
+     "en": "Subway or bus ride"
+    },
+    "monto": {
+     "es": "≈ US$ 3",
+     "en": "≈ US$3"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Porción de pizza / almuerzo en deli",
+     "en": "Pizza slice / deli lunch"
+    },
+    "monto": {
+     "es": "US$ 4–6 / US$ 15–20",
+     "en": "US$4–6 / US$15–20"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "US$ 60–90 / US$ 200–320",
+     "en": "US$60–90 / US$200–320"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    150,
+    200
+   ],
+   "equilibrado": [
+    300,
+    420
+   ],
+   "premium": [
+    600,
+    900
+   ]
+  },
+  "consejos": [
+   {
+    "es": "En el subte pagás tocando con tarjeta o celular: después de 12 viajes en 7 días, el resto de la semana es gratis.",
+    "en": "Pay on the subway by tapping a card or phone: after 12 rides in 7 days, the rest of the week is free."
+   },
+   {
+    "es": "En restaurantes se deja propina (18–20 %) y los precios no incluyen impuestos.",
+    "en": "Restaurants expect an 18–20% tip and prices exclude sales tax."
+   },
+   {
+    "es": "El ferry gratis a Staten Island pasa cerca de la Estatua de la Libertad (no para en la isla).",
+    "en": "The free Staten Island Ferry passes near the Statue of Liberty (it doesn't stop on the island)."
+   }
+  ]
+ },
+ {
+  "slug": "pekin-5-dias",
+  "dias": 5,
+  "claves": [
+   "pekin",
+   "beijing",
+   "gran muralla",
+   "great wall",
+   "ciudad prohibida",
+   "forbidden city"
+  ],
+  "destino": {
+   "buscar": "Beijing",
+   "pais": "CN",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Pekín (Beijing) en 5 días",
+   "en": "What to do in Beijing in 5 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 5 días en Pekín: Ciudad Prohibida, Gran Muralla en Mutianyu, Templo del Cielo y hutongs, con precios aproximados y consejos.",
+   "en": "A 5-day Beijing itinerary: the Forbidden City, the Great Wall at Mutianyu, the Temple of Heaven and the hutongs, with approximate prices and tips."
+  },
+  "intro": {
+   "es": "Pekín es enorme y muy barata para comer y moverse. En cinco días ves los palacios imperiales, una parte bien conservada de la Gran Muralla y los callejones tradicionales.",
+   "en": "Beijing is huge and very cheap for food and transport. In five days you see the imperial palaces, a well-kept stretch of the Great Wall and the traditional alleys."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: el corazón imperial",
+     "en": "Day 1: the imperial heart"
+    },
+    "actividades": [
+     {
+      "es": "Plaza de Tiananmén (llevá el pasaporte).",
+      "en": "Tiananmen Square (bring your passport)."
+     },
+     {
+      "es": "Ciudad Prohibida (reserva con pasaporte, días antes).",
+      "en": "Forbidden City (book with your passport, days ahead)."
+     },
+     {
+      "es": "Parque Jingshan para ver el palacio desde arriba.",
+      "en": "Jingshan Park to see the palace from above."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: la Gran Muralla",
+     "en": "Day 2: the Great Wall"
+    },
+    "actividades": [
+     {
+      "es": "Mutianyu: menos gente que Badaling y muy bien restaurada.",
+      "en": "Mutianyu: fewer crowds than Badaling and well restored."
+     },
+     {
+      "es": "Subir en telesilla o teleférico y bajar en tobogán.",
+      "en": "Go up by chairlift or cable car and come down on the toboggan."
+     },
+     {
+      "es": "Cena de pato laqueado.",
+      "en": "Peking duck for dinner."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: templos y hutongs",
+     "en": "Day 3: temples and hutongs"
+    },
+    "actividades": [
+     {
+      "es": "Templo del Cielo temprano (la gente hace tai chi).",
+      "en": "Temple of Heaven early (locals practise tai chi)."
+     },
+     {
+      "es": "Templo de los Lamas.",
+      "en": "Lama Temple."
+     },
+     {
+      "es": "Hutongs de Nanluoguxiang y lagos de Houhai.",
+      "en": "Nanluoguxiang hutongs and Houhai lakes."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 4: Palacio de Verano",
+     "en": "Day 4: the Summer Palace"
+    },
+    "actividades": [
+     {
+      "es": "Palacio de Verano y lago Kunming.",
+      "en": "Summer Palace and Kunming Lake."
+     },
+     {
+      "es": "Tarde en el distrito artístico 798.",
+      "en": "Afternoon in the 798 Art District."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 5: lo moderno",
+     "en": "Day 5: modern Beijing"
+    },
+    "actividades": [
+     {
+      "es": "Parque Olímpico (Nido de Pájaro y Cubo de Agua).",
+      "en": "Olympic Park (Bird's Nest and Water Cube)."
+     },
+     {
+      "es": "Compras en Wangfujing o Sanlitun.",
+      "en": "Shopping in Wangfujing or Sanlitun."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Ciudad Prohibida (temporada alta / baja)",
+     "en": "Forbidden City (high / low season)"
+    },
+    "monto": {
+     "es": "≈ ¥60 / ¥40",
+     "en": "≈ ¥60 / ¥40"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Gran Muralla en Mutianyu (entrada + teleférico)",
+     "en": "Great Wall at Mutianyu (entry + cable car)"
+    },
+    "monto": {
+     "es": "≈ ¥40 + ¥120–140",
+     "en": "≈ ¥40 + ¥120–140"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Templo del Cielo (entrada completa)",
+     "en": "Temple of Heaven (full ticket)"
+    },
+    "monto": {
+     "es": "≈ ¥34",
+     "en": "≈ ¥34"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Palacio de Verano (entrada completa)",
+     "en": "Summer Palace (full ticket)"
+    },
+    "monto": {
+     "es": "≈ ¥60",
+     "en": "≈ ¥60"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Viaje en metro",
+     "en": "Metro ride"
+    },
+    "monto": {
+     "es": "¥3–10",
+     "en": "¥3–10"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Plato de fideos / pato laqueado para dos",
+     "en": "Bowl of noodles / Peking duck for two"
+    },
+    "monto": {
+     "es": "¥20–40 / ¥250–400",
+     "en": "¥20–40 / ¥250–400"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "¥100–180 / ¥400–700",
+     "en": "¥100–180 / ¥400–700"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    55,
+    80
+   ],
+   "equilibrado": [
+    120,
+    180
+   ],
+   "premium": [
+    280,
+    450
+   ]
+  },
+  "consejos": [
+   {
+    "es": "Revisá los requisitos de visa para tu pasaporte antes de comprar el vuelo.",
+    "en": "Check the visa requirements for your passport before buying the flight."
+   },
+   {
+    "es": "Casi todo se paga con Alipay o WeChat Pay, que aceptan tarjetas extranjeras: configuralos antes de viajar.",
+    "en": "Almost everything is paid with Alipay or WeChat Pay, which accept foreign cards: set them up before you travel."
+   },
+   {
+    "es": "Google y muchas apps occidentales no funcionan: bajá mapas sin conexión y un traductor.",
+    "en": "Google and many Western apps don't work: download offline maps and a translator."
+   }
+  ]
+ },
+ {
   "slug": "japon-7-dias-cuanto-cuesta",
   "dias": 7,
   "claves": [
@@ -631,6 +1658,364 @@
    {
     "es": "Mandá la valija entre hoteles con takkyubin y viajá liviano en el tren.",
     "en": "Send your suitcase between hotels with takkyubin and ride the train light."
+   }
+  ]
+ },
+ {
+  "slug": "lisboa-3-dias",
+  "dias": 3,
+  "claves": [
+   "lisboa",
+   "lisbon",
+   "sintra"
+  ],
+  "destino": {
+   "buscar": "Lisboa",
+   "pais": "PT",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Lisboa en 3 días",
+   "en": "What to do in Lisbon in 3 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 3 días en Lisboa: Alfama, tranvía 28, Belém, miradores y excursión a Sintra, con precios aproximados y consejos.",
+   "en": "A 3-day Lisbon itinerary: Alfama, tram 28, Belém, viewpoints and a Sintra day trip, with approximate prices and tips."
+  },
+  "intro": {
+   "es": "Lisboa es de las capitales más baratas de Europa occidental y se disfruta subiendo y bajando colinas entre miradores. Tres días dan para la ciudad, Belém y Sintra.",
+   "en": "Lisbon is one of Western Europe's cheapest capitals and is best enjoyed climbing up and down hills between viewpoints. Three days cover the city, Belém and Sintra."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: Baixa y Alfama",
+     "en": "Day 1: Baixa and Alfama"
+    },
+    "actividades": [
+     {
+      "es": "Plaza del Comercio y Rua Augusta.",
+      "en": "Praça do Comércio and Rua Augusta."
+     },
+     {
+      "es": "Tranvía 28 hacia Alfama y Castillo de San Jorge.",
+      "en": "Tram 28 to Alfama and São Jorge Castle."
+     },
+     {
+      "es": "Miradores de Santa Luzia y Graça; cena con fado.",
+      "en": "Santa Luzia and Graça viewpoints; dinner with fado."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: Belém",
+     "en": "Day 2: Belém"
+    },
+    "actividades": [
+     {
+      "es": "Monasterio de los Jerónimos y Torre de Belém.",
+      "en": "Jerónimos Monastery and Belém Tower."
+     },
+     {
+      "es": "Pasteles de Belém en la confitería original.",
+      "en": "Pastéis de Belém at the original bakery."
+     },
+     {
+      "es": "LX Factory y atardecer en el Bairro Alto.",
+      "en": "LX Factory and sunset in Bairro Alto."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: Sintra",
+     "en": "Day 3: Sintra"
+    },
+    "actividades": [
+     {
+      "es": "Tren desde Rossio (unos 40 minutos).",
+      "en": "Train from Rossio (about 40 minutes)."
+     },
+     {
+      "es": "Palacio da Pena y Quinta da Regaleira.",
+      "en": "Pena Palace and Quinta da Regaleira."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Monasterio de los Jerónimos",
+     "en": "Jerónimos Monastery"
+    },
+    "monto": {
+     "es": "≈ €18",
+     "en": "≈ €18"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Torre de Belém",
+     "en": "Belém Tower"
+    },
+    "monto": {
+     "es": "≈ €12",
+     "en": "≈ €12"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Palacio da Pena (Sintra)",
+     "en": "Pena Palace (Sintra)"
+    },
+    "monto": {
+     "es": "≈ €20",
+     "en": "≈ €20"
+    },
+    "enlace": "https://www.parquesdesintra.pt"
+   },
+   {
+    "concepto": {
+     "es": "Pase de transporte de 24 h",
+     "en": "24-hour transport pass"
+    },
+    "monto": {
+     "es": "≈ €7",
+     "en": "≈ €7"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Pastel de nata / almuerzo en tasca",
+     "en": "Pastel de nata / tasca lunch"
+    },
+    "monto": {
+     "es": "€1,30–1,60 / €12–18",
+     "en": "€1.30–1.60 / €12–18"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "€25–40 / €90–150",
+     "en": "€25–40 / €90–150"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    65,
+    95
+   ],
+   "equilibrado": [
+    140,
+    200
+   ],
+   "premium": [
+    320,
+    480
+   ]
+  },
+  "consejos": [
+   {
+    "es": "Llevá calzado cómodo con buena suela: las veredas de piedra resbalan.",
+    "en": "Wear comfy shoes with good grip: the stone pavements are slippery."
+   },
+   {
+    "es": "El tranvía 28 se llena: subite temprano o en la parada de cabecera (Martim Moniz).",
+    "en": "Tram 28 gets packed: board early or at the first stop (Martim Moniz)."
+   },
+   {
+    "es": "En Sintra, entrá a la Pena a primera hora y reservá la entrada online.",
+    "en": "In Sintra, visit Pena first thing and book online."
+   }
+  ]
+ },
+ {
+  "slug": "rio-de-janeiro-4-dias",
+  "dias": 4,
+  "claves": [
+   "rio de janeiro",
+   "rio",
+   "cristo redentor",
+   "pan de azucar",
+   "sugarloaf",
+   "copacabana"
+  ],
+  "destino": {
+   "buscar": "Rio de Janeiro",
+   "pais": "BR",
+   "tipo": "ciudad"
+  },
+  "revisado": "2026-10",
+  "titulo": {
+   "es": "Qué hacer en Río de Janeiro en 4 días",
+   "en": "What to do in Rio de Janeiro in 4 days"
+  },
+  "descripcion": {
+   "es": "Itinerario de 4 días en Río: Cristo Redentor, Pan de Azúcar, Copacabana, Ipanema y Santa Teresa, con precios aproximados y consejos.",
+   "en": "A 4-day Rio itinerary: Christ the Redeemer, Sugarloaf, Copacabana, Ipanema and Santa Teresa, with approximate prices and tips."
+  },
+  "intro": {
+   "es": "Río combina playas urbanas, morros con vistas enormes y mucha música. En cuatro días ves los dos íconos, las playas del sur y el centro histórico, dejando margen por si llueve.",
+   "en": "Rio combines city beaches, hills with huge views and lots of music. In four days you see both icons, the southern beaches and the historic centre, with room to spare if it rains."
+  },
+  "itinerario": [
+   {
+    "titulo": {
+     "es": "Día 1: Copacabana e Ipanema",
+     "en": "Day 1: Copacabana and Ipanema"
+    },
+    "actividades": [
+     {
+      "es": "Playa de Copacabana y fuerte de Copacabana.",
+      "en": "Copacabana beach and Copacabana fort."
+     },
+     {
+      "es": "Caminata a Ipanema; atardecer en la Piedra del Arpoador.",
+      "en": "Walk to Ipanema; sunset at Arpoador rock."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 2: Cristo Redentor",
+     "en": "Day 2: Christ the Redeemer"
+    },
+    "actividades": [
+     {
+      "es": "Tren del Corcovado temprano y en día despejado.",
+      "en": "Corcovado train early on a clear day."
+     },
+     {
+      "es": "Jardín Botánico y laguna Rodrigo de Freitas.",
+      "en": "Botanical Garden and Rodrigo de Freitas lagoon."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 3: Pan de Azúcar y centro",
+     "en": "Day 3: Sugarloaf and downtown"
+    },
+    "actividades": [
+     {
+      "es": "Escalera Selarón y Arcos de Lapa.",
+      "en": "Selarón Steps and the Lapa Arches."
+     },
+     {
+      "es": "Santa Teresa en el tranvía (bondinho).",
+      "en": "Santa Teresa on the tram (bondinho)."
+     },
+     {
+      "es": "Teleférico al Pan de Azúcar al atardecer.",
+      "en": "Cable car up Sugarloaf at sunset."
+     }
+    ]
+   },
+   {
+    "titulo": {
+     "es": "Día 4: playa y fútbol",
+     "en": "Day 4: beach and football"
+    },
+    "actividades": [
+     {
+      "es": "Leblon y mirador Dois Irmãos (con guía) o día de playa.",
+      "en": "Leblon and the Dois Irmãos viewpoint (with a guide) or a beach day."
+     },
+     {
+      "es": "Partido en el Maracanã si hay fecha, o recorrido del estadio.",
+      "en": "A match at the Maracanã if there's one, or a stadium tour."
+     }
+    ]
+   }
+  ],
+  "precios": [
+   {
+    "concepto": {
+     "es": "Tren del Corcovado + Cristo Redentor",
+     "en": "Corcovado train + Christ the Redeemer"
+    },
+    "monto": {
+     "es": "≈ R$ 100–130",
+     "en": "≈ R$100–130"
+    },
+    "enlace": "https://www.tremdocorcovado.rio"
+   },
+   {
+    "concepto": {
+     "es": "Teleférico del Pan de Azúcar",
+     "en": "Sugarloaf cable car"
+    },
+    "monto": {
+     "es": "≈ R$ 195",
+     "en": "≈ R$195"
+    },
+    "enlace": "https://www.bondinho.com.br"
+   },
+   {
+    "concepto": {
+     "es": "Viaje en metro",
+     "en": "Metro ride"
+    },
+    "monto": {
+     "es": "≈ R$ 7,50",
+     "en": "≈ R$7.50"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Coco en la playa / plato del día",
+     "en": "Coconut on the beach / dish of the day"
+    },
+    "monto": {
+     "es": "R$ 8–12 / R$ 35–60",
+     "en": "R$8–12 / R$35–60"
+    }
+   },
+   {
+    "concepto": {
+     "es": "Cama en hostel / hotel de 3 estrellas (noche)",
+     "en": "Hostel bed / 3-star hotel (night)"
+    },
+    "monto": {
+     "es": "R$ 80–150 / R$ 400–700",
+     "en": "R$80–150 / R$400–700"
+    }
+   }
+  ],
+  "porDia": {
+   "economico": [
+    55,
+    85
+   ],
+   "equilibrado": [
+    130,
+    190
+   ],
+   "premium": [
+    300,
+    480
+   ]
+  },
+  "consejos": [
+   {
+    "es": "Subí al Cristo y al Pan de Azúcar solo con cielo despejado: si hay nubes no se ve nada.",
+    "en": "Only go up Christ and Sugarloaf on a clear day: with clouds you won't see a thing."
+   },
+   {
+    "es": "En la playa llevá lo justo y no dejes cosas solas; de noche, movete en taxi o app.",
+    "en": "Take only the essentials to the beach and don't leave things alone; at night, use a taxi or ride app."
+   },
+   {
+    "es": "Revisá si tu pasaporte necesita visa para Brasil antes de viajar.",
+    "en": "Check whether your passport needs a visa for Brazil before travelling."
    }
   ]
  }

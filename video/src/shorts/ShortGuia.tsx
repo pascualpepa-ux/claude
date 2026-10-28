@@ -56,6 +56,7 @@ export const duracionGuia = (slug: string) => {
   return DUR.gancho + DUR.dia * g.itinerario.length + DUR.precios + DUR.presupuesto + DUR.cierre - (escenas - 1) * TR;
 };
 
+const mayuscula = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const usd = (n: number, idioma: Idioma) => `US$ ${n.toLocaleString(idioma === "es" ? "es-AR" : "en-US")}`;
 
 const Dia: React.FC<{ etiqueta: string; titulo: string; actividades: string[] }> = ({ etiqueta, titulo, actividades }) => (
@@ -163,7 +164,7 @@ export const ShortGuia: React.FC<{ slug: string; idioma: Idioma }> = ({ slug, id
           return [
             <TransitionSeries.Transition key={`t${i}`} presentation={i === 0 ? fade() : lado} timing={tiempo} />,
             <TransitionSeries.Sequence key={`d${i}`} durationInFrames={DUR.dia}>
-              <Dia etiqueta={etiqueta.trim()} titulo={resto.join(":").trim() || etiqueta} actividades={d.actividades.map((a) => a[idioma])} />
+              <Dia etiqueta={etiqueta.trim()} titulo={mayuscula(resto.join(":").trim() || etiqueta)} actividades={d.actividades.map((a) => a[idioma])} />
             </TransitionSeries.Sequence>,
           ];
         })}
