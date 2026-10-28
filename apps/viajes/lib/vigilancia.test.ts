@@ -29,6 +29,20 @@ describe("vigilancia de vuelos", () => {
     expect(cancelado.titulo).toBe("Tu vuelo UX 41 fue cancelado");
     expect(cancelado.cambios[0]).toMatchObject({ antes: "Programado", ahora: "Cancelado" });
   });
+  it("avisa cuando se asigna la puerta y cuando empieza el embarque, con número, terminal, salida y embarque", () => {
+    const sinPuerta = { estado: "Expected", salida: "2026-12-10 23:55", puerta: "", terminal: "" };
+    const asignada = compararVuelo("UX 41", sinPuerta, ahora, "es", 765);
+    expect(asignada.titulo).toBe("Tu vuelo UX 41 sale por la puerta B12");
+    expect(asignada.cambios).toEqual([
+      { que: "Vuelo UX 41, puerta de embarque", antes: "Sin informar", ahora: "B12" },
+      { que: "Vuelo UX 41, terminal", antes: "Sin informar", ahora: "4" },
+      { que: "Vuelo UX 41, salida y embarque aprox.", antes: "—", ahora: "sale 23:55 · embarque aprox. 23:05" },
+    ]);
+    const conPuerta = { ...sinPuerta, puerta: "B12", terminal: "4" };
+    const embarcando = compararVuelo("UX 41", conPuerta, { ...ahora, estado: "Boarding" }, "en", 765);
+    expect(embarcando.titulo).toBe("Your flight UX 41 is boarding at gate B12");
+    expect(embarcando.cambios[0]).toEqual({ que: "Flight UX 41, status", antes: "Scheduled", ahora: "Boarding" });
+  });
   it("consulta poco: el día antes y desde 6 h antes de salir, y deja de consultar al despegar", () => {
     const salida = Date.parse("2026-12-10T22:55:00Z");
     const g = { estado: "Expected", salida: "2026-12-10 23:55", puerta: "", terminal: "", utc: "2026-12-10T22:55Z" };

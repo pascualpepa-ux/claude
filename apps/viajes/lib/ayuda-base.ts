@@ -207,7 +207,8 @@ const es: EntradaAyuda[] = [
     claves: ["numero de vuelo", "horario", "hora", "sale el vuelo", "boarding", "embarque", "puerta", "aerolinea", "aerolineas", "escala", "escalas", "directo"],
     respuesta:
       "Todavía no. Por ahora el vuelo es un estimado según la distancia, sin aerolínea ni número de vuelo, para no mostrarte datos inventados. " +
-      "Tocá \"Buscar vuelos reales\" y Google Vuelos te muestra las aerolíneas, números de vuelo y horarios reales de tu ruta. " +
+      "Abajo del vuelo te sugerimos las aerolíneas principales de cada país (por ejemplo, para China: Air China, China Eastern y China Southern): tocá una y Google Vuelos te muestra sus números de vuelo, horarios y precios reales. " +
+      "Si seguís tu viaje por email, cuando la aerolínea publica la puerta de embarque te avisamos con el número de vuelo, la puerta, la terminal y la hora de embarque. " +
       "El horario de embarque (boarding) lo da la aerolínea en tu tarjeta de embarque: suele empezar entre 30 y 60 minutos antes de la salida.",
   },
   {
@@ -434,7 +435,8 @@ const en: EntradaAyuda[] = [
     claves: ["flight number", "schedule", "time", "departure", "boarding", "gate", "airline", "airlines", "stopover", "layover", "direct", "nonstop"],
     respuesta:
       "Not yet. For now the flight is an estimate based on distance, with no airline or flight number, so we don't show made-up data. " +
-      "Tap \"Search real flights\" and Google Flights shows the real airlines, flight numbers and times for your route. " +
+      "Below the flight we suggest each country's main airlines (for China: Air China, China Eastern and China Southern): tap one and Google Flights shows its real flight numbers, times and prices. " +
+      "If you follow your trip by email, once the airline publishes the boarding gate we email you the flight number, gate, terminal and boarding time. " +
       "Boarding time comes from the airline on your boarding pass: it usually starts 30 to 60 minutes before departure.",
   },
   {

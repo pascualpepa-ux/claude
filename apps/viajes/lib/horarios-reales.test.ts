@@ -42,3 +42,12 @@ describe("horarios reales (AeroDataBox)", () => {
     expect(await buscarHorarios(pedido)).toBeNull();
   });
 });
+
+describe("aerolíneas sugeridas por país", () => {
+  it("pone la preferida y las principales del destino y del origen, sin repetir", async () => {
+    const { aerolineasParaRuta } = await import("./aerolineas-pais");
+    expect(aerolineasParaRuta("ES", "CN")).toEqual(["Air China", "China Eastern", "China Southern", "Iberia", "Air Europa"]);
+    expect(aerolineasParaRuta("AR", "ES", "Iberia")).toEqual(["Iberia", "Air Europa", "Vueling", "Aerolíneas Argentinas"]);
+    expect(aerolineasParaRuta("UY", "XX")).toEqual([]);
+  });
+});

@@ -94,7 +94,8 @@ export interface OpcionVuelo {
   origen: Origen;
   /** true: no es un vuelo real sino una estimación por distancia (sin aerolínea, número ni horarios). */
   estimado?: boolean;
-  precioEstimado?: boolean; // horario y número de vuelo reales, pero el precio es estimado por distancia
+  precioEstimado?: boolean;
+  sugeridas?: string[]; // vuelo estimado: aerolíneas con las que buscar la ruta (las principales de cada país) // horario y número de vuelo reales, pero el precio es estimado por distancia
 }
 
 export interface OpcionHotel {

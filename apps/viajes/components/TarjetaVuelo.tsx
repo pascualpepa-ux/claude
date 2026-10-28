@@ -156,6 +156,28 @@ export function TarjetaVuelo({
         <FilaTramo titulo={t.vuelo.ida} tramo={vuelo.ida} Icono={AirplaneTakeoff} estimado={vuelo.estimado} />
         <FilaTramo titulo={t.vuelo.vuelta} tramo={vuelo.vuelta} Icono={AirplaneLanding} estimado={vuelo.estimado} />
         {vuelo.estimado && <p className="text-xs text-arena-600 dark:text-arena-400">{t.vuelo.horariosAConfirmar}</p>}
+        {vuelo.estimado && vuelo.sugeridas?.length ? (
+          <div className="rounded-xl bg-arena-50 px-3 py-2.5 dark:bg-arena-800/50">
+            <p className="text-sm">{t.vuelo.sugeridas}</p>
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {vuelo.sugeridas.map((a) => (
+                <li key={a}>
+                  <a
+                    href={`https://www.google.com/travel/flights?hl=${idioma}&q=${encodeURIComponent(
+                      `${a} flights from ${vuelo.ida.desde} to ${vuelo.ida.hasta} on ${vuelo.ida.salida.slice(0, 10)} returning ${vuelo.vuelta.salida.slice(0, 10)}`,
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-full border border-arena-300 bg-papel px-3 py-1.5 text-sm font-medium transition hover:border-oliva-600 hover:text-oliva-700 dark:border-arena-700 dark:bg-arena-900 dark:hover:border-oliva-300 dark:hover:text-oliva-300"
+                  >
+                    {a}
+                    <ArrowSquareOut size={14} aria-hidden />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
 
       {!vuelo.estimado && (vuelo.ida.segmentos?.length || vuelo.vuelta.segmentos?.length) ? (

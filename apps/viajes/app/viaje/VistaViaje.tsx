@@ -12,7 +12,7 @@ import { ResumenPresupuesto } from "@/components/ResumenPresupuesto";
 import { CLAVE_ABIERTO, CLAVE_PEDIDO, CLAVE_VIAJE, borrarGuardado, guardarViaje, leerGuardados } from "@/lib/almacen";
 import { usd } from "@/lib/dinero";
 import { formatoCorto } from "@/lib/fechas";
-import { ajustarDuraciones, aplicarClima, aplicarHoteles, aplicarVuelos, estadiasPorCiudad, generarViaje, traducirViaje, viajeDeMuestra } from "@/lib/mock";
+import { ajustarDuraciones, sugerirAerolineas, aplicarClima, aplicarHoteles, aplicarVuelos, estadiasPorCiudad, generarViaje, traducirViaje, viajeDeMuestra } from "@/lib/mock";
 import type { DatoClima } from "@/lib/clima-real";
 import { useIdioma } from "@/components/ProveedorIdioma";
 import { calcularResumen, costoHotel, nochesPorCiudad } from "@/lib/presupuesto";
@@ -65,7 +65,7 @@ function sinClima(plan: TripPlan): DatosClima {
 
 type RespuestaVuelos =
   | { estado: "ok"; vuelos: OpcionVuelo[] }
-  | { estado: "sin_clave" | "sin_cupo" | "sin_resultados" | "error"; distanciaIda: number | null; distanciaVuelta: number | null };
+  | { estado: "sin_clave" | "sin_cupo" | "sin_resultados" | "error"; distanciaIda: number | null; distanciaVuelta: number | null; aerolineas?: string[] };
 
 /** Pide vuelos reales. Sin ellos, la respuesta trae las distancias para corregir las duraciones de ejemplo. */
 async function pedirVuelos(plan: TripPlan): Promise<RespuestaVuelos | null> {
@@ -254,7 +254,7 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
       setEstado("listo");
       if (actualizado !== guardado) {
         pedirVuelos(actualizado).then((v) => {
-          if (v && v.estado !== "ok") setPlan((p) => (p ? ajustarDuraciones(p, v.distanciaIda, v.distanciaVuelta) : p));
+          if (v && v.estado !== "ok") setPlan((p) => (p ? sugerirAerolineas(ajustarDuraciones(p, v.distanciaIda, v.distanciaVuelta), v.aerolineas) : p));
         });
       }
       // El clima se vuelve a pedir cada vez que se abre: así el pronóstico está siempre al día.
@@ -286,7 +286,7 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
         clearInterval(timer);
         let armado = aplicarClima(nuevo, clima ?? sinClima(nuevo), idioma);
         if (vuelos?.estado === "ok") armado = aplicarVuelos(armado, vuelos.vuelos);
-        else if (vuelos) armado = ajustarDuraciones(armado, vuelos.distanciaIda, vuelos.distanciaVuelta);
+        else if (vuelos) armado = sugerirAerolineas(ajustarDuraciones(armado, vuelos.distanciaIda, vuelos.distanciaVuelta), vuelos.aerolineas);
         if (hoteles?.estado === "ok") armado = aplicarHoteles(armado, hoteles.hoteles);
         setPlan(armado);
         setEstado("listo");

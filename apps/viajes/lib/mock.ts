@@ -459,7 +459,10 @@ export function traducirViaje(plan: TripPlan, idioma: Idioma): TripPlan {
       ? plan.vuelos
       : nuevo.vuelos.map((v, i) => {
           const previo = plan.vuelos[i];
-          return previo ? { ...v, ida: { ...v.ida, ...previo.ida }, vuelta: { ...v.vuelta, ...previo.vuelta } } : v;
+          if (!previo) return v;
+          // El vuelo estimado conserva su precio por distancia y las aerolíneas sugeridas.
+          const extra = previo.estimado && v.estimado ? { precioPorPersona: previo.precioPorPersona, sugeridas: previo.sugeridas } : {};
+          return { ...v, ida: { ...v.ida, ...previo.ida }, vuelta: { ...v.vuelta, ...previo.vuelta }, ...extra };
         }),
     vueloElegido: plan.vueloElegido,
     hotelElegido: { ...nuevo.hotelElegido, ...plan.hotelElegido },
@@ -508,6 +511,12 @@ export function duracionEstimada(km: number, escalas: number) {
  * Sin vuelos reales disponibles, corrige las duraciones de los vuelos de ejemplo con la distancia real
  * entre aeropuertos (así Madrid–Buenos Aires da unas 12 h 40 directo, no 17 h).
  */
+/** Al vuelo estimado le suma las aerolíneas con las que conviene buscar la ruta. */
+export function sugerirAerolineas(plan: TripPlan, aerolineas: string[] | undefined): TripPlan {
+  if (!aerolineas?.length) return plan;
+  return { ...plan, vuelos: plan.vuelos.map((v) => (v.estimado ? { ...v, sugeridas: aerolineas } : v)) };
+}
+
 export function ajustarDuraciones(plan: TripPlan, kmIda: number | null, kmVuelta: number | null): TripPlan {
   const ajustar = (t: Tramo, km: number | null): Tramo => {
     if (!km) return t;

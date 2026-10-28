@@ -1,5 +1,7 @@
 import { esIdioma } from "@/lib/idioma";
+import { aerolineasParaRuta } from "@/lib/aerolineas-pais";
 import { buscarHorarios } from "@/lib/horarios-reales";
+import { coordenadasAeropuerto } from "@/lib/lugares";
 import { buscarVuelos } from "@/lib/vuelos-reales";
 
 export const runtime = "nodejs";
@@ -37,6 +39,11 @@ export async function POST(req: Request) {
   if (resultado.estado !== "ok") {
     const horarios = await buscarHorarios(pedido);
     if (horarios?.length) resultado = { estado: "ok", vuelos: horarios };
+  }
+  if (resultado.estado !== "ok") {
+    // Sin vuelos reales: con qué aerolíneas buscar la ruta (la preferida y las principales de cada país).
+    const aerolineas = aerolineasParaRuta(coordenadasAeropuerto(pedido.origen)?.pais, coordenadasAeropuerto(pedido.destino)?.pais, pedido.aerolinea);
+    return Response.json({ ...resultado, aerolineas }, { headers: { "Cache-Control": "no-store" } });
   }
   return Response.json(resultado, { headers: { "Cache-Control": "no-store" } });
 }

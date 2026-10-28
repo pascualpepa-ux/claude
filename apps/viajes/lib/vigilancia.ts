@@ -5,6 +5,7 @@ import { sql } from "./db";
 import { usd } from "./dinero";
 import { precioHotelAhora } from "./hoteles-reales";
 import { estadiasPorCiudad } from "./mock";
+import { minutosEmbarque } from "./embarque";
 import { diferenciaDias, formatoCorto, formatoDia, hoy } from "./fechas";
 import type { Idioma } from "./idioma";
 import { TEXTOS } from "./textos";
@@ -54,6 +55,11 @@ const TX = {
     salida: (n: string, desde: string) => `Vuelo ${n}, salida de ${desde}`,
     puerta: (n: string) => `Vuelo ${n}, puerta de embarque`,
     estado: (n: string) => `Vuelo ${n}, estado`,
+    puertaAsignada: (n: string, puerta: string) => `Tu vuelo ${n} sale por la puerta ${puerta}`,
+    embarcando: (n: string, puerta: string) => (puerta ? `Tu vuelo ${n} está embarcando por la puerta ${puerta}` : `Tu vuelo ${n} está embarcando`),
+    terminal: (n: string) => `Vuelo ${n}, terminal`,
+    horarios: (n: string) => `Vuelo ${n}, salida y embarque aprox.`,
+    salidaYEmbarque: (salida: string, embarque: string) => `sale ${salida} · embarque aprox. ${embarque}`,
     sinDato: "Sin informar",
     hotelPrecio: (h: string) => `Cambió el precio de tu hotel ${h}`,
     hotelSinLugar: (h: string) => `Tu hotel ${h} ya no tiene lugar para tus fechas`,
@@ -74,6 +80,11 @@ const TX = {
     salida: (n: string, desde: string) => `Flight ${n}, departure from ${desde}`,
     puerta: (n: string) => `Flight ${n}, boarding gate`,
     estado: (n: string) => `Flight ${n}, status`,
+    puertaAsignada: (n: string, puerta: string) => `Your flight ${n} departs from gate ${puerta}`,
+    embarcando: (n: string, puerta: string) => (puerta ? `Your flight ${n} is boarding at gate ${puerta}` : `Your flight ${n} is boarding`),
+    terminal: (n: string) => `Flight ${n}, terminal`,
+    horarios: (n: string) => `Flight ${n}, departure and approx. boarding`,
+    salidaYEmbarque: (salida: string, embarque: string) => `departs ${salida} · boarding approx. ${embarque}`,
     sinDato: "Not announced",
     hotelPrecio: (h: string) => `The price of your hotel ${h} changed`,
     hotelSinLugar: (h: string) => `Your hotel ${h} has no availability for your dates anymore`,
@@ -183,7 +194,13 @@ async function estadoVuelo(numero: string, fecha: string): Promise<VueloGuardado
 const minutos = (a: string, b: string) => Math.round((new Date(`${b.replace(" ", "T")}Z`).getTime() - new Date(`${a.replace(" ", "T")}Z`).getTime()) / 60000);
 
 /** Compara el estado real de un vuelo con el último visto. Devuelve los cambios y el título del aviso. */
-export function compararVuelo(numero: string, antes: VueloGuardado | undefined, ahora: VueloGuardado & { programada: string; desde: string }, idioma: Idioma) {
+export function compararVuelo(
+  numero: string,
+  antes: VueloGuardado | undefined,
+  ahora: VueloGuardado & { programada: string; desde: string },
+  idioma: Idioma,
+  duracionMin = 0,
+) {
   const t = TX[idioma];
   const hora = (s: string) => s.slice(11, 16);
   const ref: VueloGuardado = antes ?? { estado: "Expected", salida: ahora.programada, puerta: "", terminal: "" };
@@ -197,7 +214,27 @@ export function compararVuelo(numero: string, antes: VueloGuardado | undefined, 
   if (ref.puerta && ahora.puerta && ref.puerta !== ahora.puerta) {
     cambios.push({ que: t.puerta(numero), antes: ref.puerta, ahora: ahora.puerta });
   }
-  const titulo = cancelado ? t.vueloCancelado(numero) : demora >= 15 ? t.vueloDemorado(numero) : t.vueloCambio(numero);
+  // La puerta se publica unas horas antes: aviso con todo lo que hace falta para embarcar.
+  const puertaNueva = !ref.puerta && !!ahora.puerta && !cancelado;
+  const embarcando = ahora.estado === "Boarding" && ref.estado !== "Boarding";
+  if (puertaNueva) {
+    cambios.push({ que: t.puerta(numero), antes: t.sinDato, ahora: ahora.puerta });
+    if (ahora.terminal && ahora.terminal !== ref.terminal) cambios.push({ que: t.terminal(numero), antes: ref.terminal || t.sinDato, ahora: ahora.terminal });
+  }
+  if (embarcando) cambios.push({ que: t.estado(numero), antes: t.estados[ref.estado] ?? ref.estado, ahora: t.estados.Boarding });
+  if ((puertaNueva || embarcando) && !cancelado) {
+    const embarque = new Date(Date.parse(`${ahora.salida.replace(" ", "T")}:00Z`) - minutosEmbarque(duracionMin) * 60_000).toISOString().slice(11, 16);
+    cambios.push({ que: t.horarios(numero), antes: "—", ahora: t.salidaYEmbarque(hora(ahora.salida), embarque) });
+  }
+  const titulo = cancelado
+    ? t.vueloCancelado(numero)
+    : demora >= 15
+      ? t.vueloDemorado(numero)
+      : embarcando
+        ? t.embarcando(numero, ahora.puerta)
+        : puertaNueva
+          ? t.puertaAsignada(numero, ahora.puerta)
+          : t.vueloCambio(numero);
   return { cambios, titulo };
 }
 
@@ -234,7 +271,7 @@ export async function vigilarVuelos(plan: TripPlan, v: Vigilancia, idioma: Idiom
     const fecha = tramo.salida.slice(0, 10);
     const ahora = await estadoVuelo(numero, fecha);
     if (!ahora) continue;
-    const { cambios, titulo } = compararVuelo(numero, antes, ahora, idioma);
+    const { cambios, titulo } = compararVuelo(numero, antes, ahora, idioma, tramo.segmentos?.[0]?.duracionMin ?? tramo.duracionMin);
     if (cambios.length) {
       // Verificador: consulta de nuevo antes de avisar; si el dato no se repite, espera a la próxima ronda.
       const otra = await estadoVuelo(numero, fecha);
