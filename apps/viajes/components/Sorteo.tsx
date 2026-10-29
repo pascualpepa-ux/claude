@@ -13,7 +13,7 @@ export function BarraSorteo() {
   const S = SORTEO[idioma];
   return (
     <Link
-      href="/sorteo"
+      href="/concurso"
       className="block bg-oliva-800 px-4 py-2 text-center text-sm font-medium text-arena-50 transition hover:bg-oliva-900 dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200"
     >
       <Gift size={16} weight="fill" className="mr-1.5 inline -translate-y-px text-amber-300 dark:text-oliva-800" aria-hidden />
@@ -40,7 +40,7 @@ export function CartelSorteo({ idioma, conBoton = true }: { idioma: Idioma; conB
         </p>
         {conBoton && (
           <Link
-            href="/sorteo"
+            href="/concurso"
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-arena-50 px-6 py-3 text-lg font-semibold text-oliva-800 transition hover:bg-white active:scale-[0.98]"
           >
             {S.participar}

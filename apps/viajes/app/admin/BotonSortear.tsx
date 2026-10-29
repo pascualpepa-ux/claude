@@ -14,7 +14,7 @@ export function BotonSortear({ idioma }: { idioma: Idioma }) {
         type="button"
         disabled={estado === "sorteando"}
         onClick={async () => {
-          if (!confirm(es ? "¿Hacer el sorteo ahora? El resultado queda registrado." : "Run the draw now? The result is recorded.")) return;
+          if (!confirm(es ? "¿Elegir uno al azar como sugerencia? Queda anotado en la lista." : "Pick one at random as a suggestion? It is noted in the list.")) return;
           setEstado("sorteando");
           const res = await fetch("/api/admin/sorteo", { method: "POST" }).catch(() => null);
           setEstado(res?.ok ? "inicio" : "error");
@@ -22,7 +22,7 @@ export function BotonSortear({ idioma }: { idioma: Idioma }) {
         }}
         className="rounded-xl bg-oliva-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-oliva-800 disabled:opacity-60 dark:bg-oliva-300 dark:text-arena-950"
       >
-        {estado === "sorteando" ? (es ? "Sorteando…" : "Drawing…") : es ? "Sortear ganador" : "Draw winner"}
+        {estado === "sorteando" ? (es ? "Sorteando…" : "Drawing…") : es ? "Sugerir uno al azar" : "Suggest one at random"}
       </button>
       {estado === "error" && <p role="alert" className="mt-2 text-sm text-red-700 dark:text-red-400">{es ? "No se pudo sortear. Probá de nuevo." : "The draw failed. Try again."}</p>}
     </div>

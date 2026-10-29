@@ -38,7 +38,7 @@ export default async function PaginaSorteo({ searchParams }: { searchParams: Pro
           </div>
           <p className="mt-4 text-sm text-arena-600 dark:text-arena-400">
             {fecha && `${S.cierre(fecha)} `}
-            <Link href="/sorteo/bases" className="underline underline-offset-2 hover:text-arena-900 dark:hover:text-arena-100">
+            <Link href="/concurso/bases" className="underline underline-offset-2 hover:text-arena-900 dark:hover:text-arena-100">
               {S.bases}
             </Link>
           </p>
