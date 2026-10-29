@@ -13,11 +13,11 @@ import { CierreShort, Sube } from "./comunes";
 const T = {
   es: {
     alerta: "¡Alerta de concurso!",
-    titulo: "Ganate un viaje a Copenhague para 2",
+    titulo: "Ganate un viaje a Copenhague, Dinamarca, para 2",
     premio: [
       { icono: "✈️", texto: "Vuelos de ida y vuelta" },
       { icono: "🏨", texto: "Hotel, 2 noches" },
-      { icono: "🇩🇰", texto: "3 días en Copenhague" },
+      { icono: "🇩🇰", texto: "3 días en Copenhague, Dinamarca" },
     ],
     dias: "Para vos + un acompañante",
     como: "Cómo participar",
@@ -29,11 +29,11 @@ const T = {
   },
   en: {
     alerta: "Contest alert!",
-    titulo: "Win a trip to Copenhagen for 2",
+    titulo: "Win a trip to Copenhagen, Denmark, for 2",
     premio: [
       { icono: "✈️", texto: "Round-trip flights" },
       { icono: "🏨", texto: "Hotel, 2 nights" },
-      { icono: "🇩🇰", texto: "3 days in Copenhagen" },
+      { icono: "🇩🇰", texto: "3 days in Copenhagen, Denmark" },
     ],
     dias: "For you + a companion",
     como: "How to enter",
