@@ -6,7 +6,7 @@ export const SORTEO = {
   es: {
     alerta: "¡Alerta de concurso!",
     titulo: "Ganate 3 días en Europa para 2",
-    premio: "Vos y un acompañante: vuelo + hotel + planes incluidos",
+    premio: "Vos y un acompañante: vuelo + hotel + planes incluidos. Valorado en 2.000–3.000 €",
     bajada: "Suscribite gratis a Rumbo Traveling y ya estás participando.",
     compartir: "Pasáselo a tus amigos y a tu familia: cada uno que se suscriba con tu link te suma una chance más. El ganador lo elegimos nosotros entre los suscriptores.",
     participar: "Participar gratis",
@@ -30,7 +30,7 @@ export const SORTEO = {
   en: {
     alerta: "Contest alert!",
     titulo: "Win 3 days in Europe for 2",
-    premio: "You and a companion: flight + hotel + activities included",
+    premio: "You and a companion: flight + hotel + activities included. Worth €2,000–3,000",
     bajada: "Subscribe to Rumbo Traveling for free and you're in.",
     compartir: "Share it with friends and family: every person who subscribes with your link gives you one more chance. We pick the winner among our subscribers.",
     participar: "Enter for free",
