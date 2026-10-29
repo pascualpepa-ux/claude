@@ -158,6 +158,9 @@ const Barra: React.FC<{ desde: number; etiqueta: string; rango: string; total: s
   );
 };
 
+/** Guías con su propia canción tranquila (musica/componer_calma.py); el resto usa la de siempre. */
+const MUSICA_PROPIA: Record<string, string> = { "miami-4-dias": "musica/miami.wav" };
+
 export const ShortGuia: React.FC<{ slug: string; idioma: Idioma }> = ({ slug, idioma }) => {
   const g = guiaDe(slug);
   const t = T[idioma];
@@ -209,8 +212,8 @@ export const ShortGuia: React.FC<{ slug: string; idioma: Idioma }> = ({ slug, id
         </TransitionSeries.Sequence>
       </TransitionSeries>
       <Audio
-        src={staticFile("musica/rumbo.wav")}
-        startFrom={0}
+        src={staticFile(MUSICA_PROPIA[slug] ?? "musica/rumbo.wav")}
+        startFrom={MUSICA_PROPIA[slug] ? 0 : 30 * 8}
         loop
         // Con voz, la música queda de fondo, bajita.
         volume={(f) => interpolate(f, [0, 12, total - 45, total], [0, conVoz ? 0.22 : 0.85, conVoz ? 0.22 : 0.85, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
