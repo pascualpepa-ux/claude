@@ -20,6 +20,8 @@ import { GUIAS } from "@/lib/guias";
 import { Calificacion } from "@/components/Calificacion";
 import { YOUTUBE_URL } from "@/lib/seo";
 import { YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
+import { CartelSorteo } from "@/components/Sorteo";
+import { sorteoActivo } from "@/lib/sorteo";
 
 // Las fechas de la muestra dependen del día de hoy.
 export const dynamic = "force-dynamic";
@@ -53,6 +55,11 @@ export default async function Inicio() {
   return (
     <main>
       <EnlacesIdioma ruta="/" idioma={idioma} />
+      {sorteoActivo() && (
+        <div className="mx-auto max-w-6xl px-4 pt-6">
+          <CartelSorteo idioma={idioma} />
+        </div>
+      )}
       <ViajesGuardados />
       <section className="relative overflow-hidden border-b border-arena-200 bg-arena-100 dark:border-arena-800 dark:bg-arena-900">
         {/* Isotipo de la marca como marca de agua detrás de la vista previa */}

@@ -5,6 +5,7 @@ import { CheckCircle, CircleNotch, WarningCircle } from "@phosphor-icons/react/d
 import { useIdioma } from "@/components/ProveedorIdioma";
 import type { Idioma } from "@/lib/idioma";
 import { PAGINAS } from "@/lib/textos-suscripcion";
+import { CompartirSorteo } from "@/components/Sorteo";
 
 type Estado = "cargando" | "ok" | "vencido" | "invalido" | "error";
 
@@ -17,13 +18,15 @@ export function Confirmar({ token }: { token: string }) {
   const { idioma: idiomaWeb } = useIdioma();
   const [estado, setEstado] = useState<Estado>("cargando");
   const [idioma, setIdioma] = useState<Idioma>(idiomaWeb);
+  const [sorteo, setSorteo] = useState<{ codigo: string; chances: number } | null>(null);
 
   const confirmar = () => {
     setEstado("cargando");
     fetch("/api/suscripcion/confirmar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ t: token }) })
       .then((r) => r.json())
-      .then((j: { estado: Estado; idioma?: Idioma | null }) => {
+      .then((j: { estado: Estado; idioma?: Idioma | null; sorteo?: { codigo: string; chances: number } }) => {
         if (j.idioma) setIdioma(j.idioma);
+        if (j.sorteo) setSorteo(j.sorteo);
         setEstado(["ok", "vencido", "invalido"].includes(j.estado) ? j.estado : "error");
       })
       .catch(() => setEstado("error"));
@@ -51,6 +54,11 @@ export function Confirmar({ token }: { token: string }) {
         {titulo}
       </h1>
       {bajada && <p className="mt-3 text-arena-600 dark:text-arena-400">{bajada}</p>}
+      {estado === "ok" && sorteo && (
+        <div className="mt-8 w-full">
+          <CompartirSorteo idioma={idioma} codigo={sorteo.codigo} chances={sorteo.chances} />
+        </div>
+      )}
       {estado !== "cargando" && (
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           {estado === "error" && (

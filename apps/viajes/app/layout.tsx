@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Encabezado } from "@/components/Encabezado";
 import { Pie } from "@/components/Pie";
+import { BarraSorteo } from "@/components/Sorteo";
+import { sorteoActivo } from "@/lib/sorteo";
 import { ContadorVisitas } from "@/components/ContadorVisitas";
 import { ProveedorIdioma } from "@/components/ProveedorIdioma";
 import { textosActuales } from "@/lib/idioma-servidor";
@@ -45,6 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={idioma} className={marca.variable}>
       <body className="flex min-h-[100dvh] flex-col font-sans">
         <ProveedorIdioma idioma={idioma}>
+          {sorteoActivo() && <BarraSorteo />}
           <Encabezado />
           <div className="flex-1">{children}</div>
           <Pie />

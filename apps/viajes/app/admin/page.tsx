@@ -18,6 +18,8 @@ import { LOCALE } from "@/lib/idioma";
 import { textosActuales } from "@/lib/idioma-servidor";
 import { FormularioAdmin } from "./FormularioAdmin";
 import { BotonSalir } from "./BotonSalir";
+import { PanelSorteo } from "./PanelSorteo";
+import { participantes, sorteoActivo, sorteosHechos } from "@/lib/sorteo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await textosActuales();
@@ -53,6 +55,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
 
   const pedido = Number((await searchParams).dias);
   const periodo = PERIODOS.find((p) => p === pedido) ?? 30;
+  const sorteo =
+    sorteoActivo() && dbConfigurada()
+      ? await Promise.all([participantes(), sorteosHechos()])
+          .then(([lista, hechos]) => ({ lista, hechos }))
+          .catch(() => null)
+      : null;
   const [datos, suscriptores, opiniones, mensajes] = await Promise.all([
     estadisticas(periodo),
     dbConfigurada()
@@ -101,6 +109,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         </div>
       </header>
 
+      {sorteo && <PanelSorteo idioma={idioma} lista={sorteo.lista} hechos={sorteo.hechos} />}
       <ListaSuscriptores filas={suscriptores.filas} estado={suscriptores.estado} idioma={idioma} T={A.suscriptores} />
       <ListaMensajes mensajes={mensajes} idioma={idioma} T={A.mensajes} />
       <ListaOpiniones datos={opiniones} idioma={idioma} T={A.opiniones} />

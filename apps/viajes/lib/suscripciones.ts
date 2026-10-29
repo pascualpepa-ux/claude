@@ -4,6 +4,13 @@ import { SITIO, correoConfirmacion, enlaceBaja } from "./correo/redactor";
 import { dbConfigurada, sql } from "./db";
 import type { Idioma } from "./idioma";
 import type { TripPlan } from "./types";
+import { chancesDe, codigoDe, sorteoActivo } from "./sorteo";
+
+/** Con el sorteo activo, quien confirma recibe su link para invitar y ve cuántas chances tiene. */
+async function datosSorteo(suscriptorId: string) {
+  if (!sorteoActivo()) return undefined;
+  return { codigo: await codigoDe(suscriptorId), chances: await chancesDe(suscriptorId) };
+}
 
 export const HORAS_CONFIRMACION = 48;
 
@@ -26,14 +33,21 @@ interface Suscriptor {
  * Pide la suscripción: guarda email + idioma (y el viaje, si vino desde un viaje) y manda el email de confirmación.
  * Siempre responde igual, para no revelar si un email ya estaba suscripto.
  */
-export async function suscribir(emailCrudo: string, idioma: Idioma, plan: TripPlan | null): Promise<"ok" | "limite" | "error"> {
+export async function suscribir(
+  emailCrudo: string,
+  idioma: Idioma,
+  plan: TripPlan | null,
+  ref: string | null = null,
+): Promise<"ok" | "limite" | "error"> {
   const email = emailCrudo.trim().toLowerCase();
+  // Quién lo invitó (sorteo) queda fijo la primera vez: volver a suscribirse con otro link no lo cambia.
   const [s] = await sql<Suscriptor>(
-    `insert into suscriptores (email, idioma, token_baja) values ($1, $2, $3)
+    `insert into suscriptores (email, idioma, token_baja, invitado_por)
+       values ($1, $2, $3, (select id from suscriptores where codigo = $4 and email <> $1))
      on conflict (email) do update set idioma = excluded.idioma,
        estado = case when suscriptores.estado = 'baja' then 'pendiente' else suscriptores.estado end
      returning id, email, idioma, estado, token_baja`,
-    [email, idioma, token()],
+    [email, idioma, token(), ref],
   );
   // Máximo 3 emails de confirmación por hora a la misma dirección (evita usar la web para molestar a alguien).
   const [{ n }] = await sql<{ n: number }>(
@@ -64,7 +78,7 @@ export async function suscribir(emailCrudo: string, idioma: Idioma, plan: TripPl
   return ok ? "ok" : "error";
 }
 
-export type ResultadoConfirmacion = { estado: "ok" | "vencido" | "invalido"; idioma: Idioma | null };
+export type ResultadoConfirmacion = { estado: "ok" | "vencido" | "invalido"; idioma: Idioma | null; sorteo?: { codigo: string; chances: number } };
 
 /** Confirma con el token del email: activa la suscripción y el viaje que venía con ella. */
 export async function confirmar(t: string): Promise<ResultadoConfirmacion> {
@@ -74,13 +88,13 @@ export async function confirmar(t: string): Promise<ResultadoConfirmacion> {
     [hash(t)],
   );
   if (!c) return { estado: "invalido", idioma: null };
-  if (c.usada) return { estado: "ok", idioma: c.idioma }; // volver a apretar el botón no es un error
+  if (c.usada) return { estado: "ok", idioma: c.idioma, sorteo: await datosSorteo(c.suscriptor_id) }; // volver a apretar el botón no es un error
   if (c.vencido) return { estado: "vencido", idioma: c.idioma };
   await sql(`update confirmaciones set usada = now() where token_hash = $1`, [hash(t)]);
   await sql(`update suscriptores set estado = 'activo', confirmado = coalesce(confirmado, now()), dado_de_baja = null where id = $1`, [c.suscriptor_id]);
   if (c.viaje_id) await sql(`update viajes_seguidos set estado = 'activo' where id = $1`, [c.viaje_id]);
   await avisarAlDueno(c.suscriptor_id, "Nuevo suscriptor", c.viaje_id);
-  return { estado: "ok", idioma: c.idioma };
+  return { estado: "ok", idioma: c.idioma, sorteo: await datosSorteo(c.suscriptor_id) };
 }
 
 /** Datos para la página de baja (no da de baja: eso pasa al apretar el botón). */

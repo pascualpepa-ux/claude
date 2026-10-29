@@ -14,12 +14,15 @@ export function FormularioSuscripcion({
   compacto = false,
   sinTitulo = false,
   activo = true,
+  codigoSorteo,
 }: {
   plan?: TripPlan;
   compacto?: boolean;
   sinTitulo?: boolean;
   /** false mientras el envío de emails no está conectado: el formulario se ve, pero avisa que se activa pronto. */
   activo?: boolean;
+  /** Código de quien invitó al sorteo (viene del link ?ref=). */
+  codigoSorteo?: string;
 }) {
   const { idioma, t } = useIdioma();
   const T = t.suscripcion;
@@ -40,7 +43,7 @@ export function FormularioSuscripcion({
       const res = await fetch("/api/suscripcion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: limpio, idioma, plan, sitio }),
+        body: JSON.stringify({ email: limpio, idioma, plan, sitio, ref: codigoSorteo }),
       });
       if (res.ok) return setEstado("listo");
       const j = await res.json().catch(() => ({}));

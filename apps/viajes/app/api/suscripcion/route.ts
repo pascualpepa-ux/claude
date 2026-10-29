@@ -21,12 +21,12 @@ const pareceViaje = (p: unknown): p is TripPlan => {
   return !!v && typeof v === "object" && !!v.input && Array.isArray(v.dias) && Array.isArray(v.vuelos) && Array.isArray(v.ruta);
 };
 
-/** POST { email, idioma, plan?, sitio } — "sitio" es un campo trampa invisible: si viene lleno, es un robot. */
+/** POST { email, idioma, plan?, ref?, sitio } — "ref" es el código de quien invitó al sorteo; "sitio" es un campo trampa invisible: si viene lleno, es un robot. */
 export async function POST(req: Request) {
   if (!suscripcionesActivas()) return Response.json({ error: "inactivo" }, { status: 503 });
   const texto = await req.text();
   if (texto.length > 400_000) return Response.json({ error: "grande" }, { status: 413 });
-  let c: { email?: unknown; idioma?: unknown; plan?: unknown; sitio?: unknown } | null = null;
+  let c: { email?: unknown; idioma?: unknown; plan?: unknown; sitio?: unknown; ref?: unknown } | null = null;
   try {
     c = JSON.parse(texto);
   } catch {}
@@ -37,7 +37,8 @@ export async function POST(req: Request) {
   const idioma = esIdioma(c.idioma) ? c.idioma : "es";
   const plan = pareceViaje(c.plan) ? c.plan : null;
   try {
-    const r = await suscribir(c.email, idioma, plan);
+    const ref = typeof c.ref === "string" && /^[\w-]{1,20}$/.test(c.ref) ? c.ref : null;
+    const r = await suscribir(c.email, idioma, plan, ref);
     if (r === "limite") return Response.json({ error: "limite" }, { status: 429 });
     if (r === "error") return Response.json({ error: "envio" }, { status: 502 });
     return Response.json({ ok: true });

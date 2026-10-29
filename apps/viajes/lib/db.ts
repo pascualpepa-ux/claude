@@ -48,6 +48,17 @@ create table if not exists envios (
   actualizado timestamptz not null default now()
 );
 create index if not exists envios_resend on envios (resend_id);
+-- Sorteo: cada suscriptor tiene un código para invitar; quien se suscribe con ese link queda anotado.
+alter table suscriptores add column if not exists codigo text unique;
+alter table suscriptores add column if not exists invitado_por uuid references suscriptores(id) on delete set null;
+create table if not exists sorteos (
+  id uuid primary key default gen_random_uuid(),
+  ganador text not null,
+  chances int not null,
+  participantes int not null,
+  total_chances int not null,
+  creado timestamptz not null default now()
+);
 create table if not exists vigilancias (
   id int primary key,
   ultima timestamptz not null
