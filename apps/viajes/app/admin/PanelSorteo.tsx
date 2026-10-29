@@ -2,7 +2,7 @@ import { Gift } from "@phosphor-icons/react/dist/ssr";
 import type { Idioma } from "@/lib/idioma";
 import { LOCALE } from "@/lib/idioma";
 import type { Participante, ResultadoSorteo } from "@/lib/sorteo";
-import { BotonSortear } from "./BotonSortear";
+import { BotonElegir, BotonSortear } from "./BotonSortear";
 
 /** Admin: quién participa del concurso y cuántas personas invitó cada uno. El ganador lo elige el dueño; el botón al azar es solo una ayuda. */
 export function PanelSorteo({ idioma, lista, hechos }: { idioma: Idioma; lista: Participante[]; hechos: ResultadoSorteo[] }) {
@@ -28,9 +28,13 @@ export function PanelSorteo({ idioma, lista, hechos }: { idioma: Idioma; lista: 
           {hechos.map((h) => (
             <li key={h.creado} className="rounded-xl bg-oliva-50 px-4 py-3 text-sm dark:bg-oliva-900/30">
               <strong>{h.ganador}</strong> —{" "}
-              {es
-                ? `salió al azar con ${h.chances} de ${h.totalChances} chances (${h.participantes} participantes), ${cuando(h.creado)}`
-                : `came up at random with ${h.chances} of ${h.totalChances} chances (${h.participantes} entrants), ${cuando(h.creado)}`}
+              {h.modo === "elegido"
+                ? es
+                  ? `🏆 ganador elegido por vos, ${cuando(h.creado)}`
+                  : `🏆 winner picked by you, ${cuando(h.creado)}`
+                : es
+                  ? `sugerencia al azar (${h.chances} de ${h.totalChances} chances), ${cuando(h.creado)}`
+                  : `random suggestion (${h.chances} of ${h.totalChances} chances), ${cuando(h.creado)}`}
             </li>
           ))}
         </ul>
@@ -43,6 +47,7 @@ export function PanelSorteo({ idioma, lista, hechos }: { idioma: Idioma; lista: 
                 <th className="py-2 font-medium">Email</th>
                 <th className="py-2 text-right font-medium">{es ? "Invitó" : "Invited"}</th>
                 <th className="py-2 text-right font-medium">{es ? "Chances" : "Chances"}</th>
+                <th className="py-2" />
               </tr>
             </thead>
             <tbody>
@@ -51,6 +56,9 @@ export function PanelSorteo({ idioma, lista, hechos }: { idioma: Idioma; lista: 
                   <td className="py-2 break-all">{p.email}</td>
                   <td className="py-2 text-right tabular-nums">{p.invitados}</td>
                   <td className="py-2 text-right font-semibold tabular-nums">{p.chances}</td>
+                  <td className="py-2 pl-3 text-right">
+                    <BotonElegir email={p.email} idioma={idioma} />
+                  </td>
                 </tr>
               ))}
             </tbody>

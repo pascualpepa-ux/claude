@@ -28,3 +28,26 @@ export function BotonSortear({ idioma }: { idioma: Idioma }) {
     </div>
   );
 }
+
+/** Botón de cada participante: lo deja anotado como ganador elegido por el dueño. */
+export function BotonElegir({ email, idioma }: { email: string; idioma: Idioma }) {
+  const router = useRouter();
+  const [ocupado, setOcupado] = useState(false);
+  const es = idioma === "es";
+  return (
+    <button
+      type="button"
+      disabled={ocupado}
+      onClick={async () => {
+        if (!confirm(es ? `¿Elegir a ${email} como ganador?` : `Pick ${email} as the winner?`)) return;
+        setOcupado(true);
+        await fetch("/api/admin/sorteo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) }).catch(() => null);
+        setOcupado(false);
+        router.refresh();
+      }}
+      className="rounded-lg border border-oliva-300 px-3 py-1 text-xs font-semibold text-oliva-800 transition hover:bg-oliva-50 disabled:opacity-60 dark:border-oliva-700 dark:text-oliva-200 dark:hover:bg-oliva-900/40"
+    >
+      {es ? "Elegir ganador" : "Pick winner"}
+    </button>
+  );
+}

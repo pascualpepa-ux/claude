@@ -59,6 +59,7 @@ create table if not exists sorteos (
   total_chances int not null,
   creado timestamptz not null default now()
 );
+alter table sorteos add column if not exists modo text not null default 'azar';
 create table if not exists vigilancias (
   id int primary key,
   ultima timestamptz not null

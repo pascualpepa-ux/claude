@@ -63,6 +63,8 @@ export function elegir<T extends { chances: number }>(lista: T[], azar: (max: nu
 
 export interface ResultadoSorteo {
   ganador: string;
+  /** "elegido": lo eligió el dueño; "azar": sugerencia al azar. */
+  modo: "elegido" | "azar";
   chances: number;
   participantes: number;
   totalChances: number;
@@ -73,17 +75,27 @@ export interface ResultadoSorteo {
 export async function sortear(): Promise<ResultadoSorteo | null> {
   const lista = await participantes();
   const g = elegir(lista);
-  if (!g) return null;
+  return g ? anotar(g, lista, "azar") : null;
+}
+
+/** El dueño elige al ganador: tiene que ser un participante (suscriptor confirmado). */
+export async function elegirGanador(email: string): Promise<ResultadoSorteo | null> {
+  const lista = await participantes();
+  const g = lista.find((p) => p.email === email.trim().toLowerCase());
+  return g ? anotar(g, lista, "elegido") : null;
+}
+
+async function anotar(g: Participante, lista: Participante[], modo: ResultadoSorteo["modo"]): Promise<ResultadoSorteo> {
   const totalChances = lista.reduce((s, p) => s + p.chances, 0);
   const [r] = await sql<{ creado: string }>(
-    `insert into sorteos (ganador, chances, participantes, total_chances) values ($1, $2, $3, $4) returning creado`,
-    [g.email, g.chances, lista.length, totalChances],
+    `insert into sorteos (ganador, chances, participantes, total_chances, modo) values ($1, $2, $3, $4, $5) returning creado`,
+    [g.email, g.chances, lista.length, totalChances, modo],
   );
-  return { ganador: g.email, chances: g.chances, participantes: lista.length, totalChances, creado: r.creado };
+  return { ganador: g.email, modo, chances: g.chances, participantes: lista.length, totalChances, creado: r.creado };
 }
 
 export async function sorteosHechos(): Promise<ResultadoSorteo[]> {
   return sql<ResultadoSorteo>(
-    `select ganador, chances, participantes, total_chances as "totalChances", creado from sorteos order by creado desc limit 20`,
+    `select ganador, modo, chances, participantes, total_chances as "totalChances", creado from sorteos order by creado desc limit 20`,
   );
 }
