@@ -213,9 +213,9 @@ export default async function Inicio() {
             href={YOUTUBE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col items-start gap-6 rounded-3xl border border-arena-200 bg-papel p-6 transition hover:border-[#ff0000]/60 hover:shadow-md sm:flex-row sm:items-center md:p-8 dark:border-arena-800 dark:bg-arena-900"
+            className="group flex flex-col items-start gap-6 rounded-3xl border border-arena-200 bg-papel p-6 transition hover:border-oliva-300 hover:shadow-md sm:flex-row sm:items-center md:p-8 dark:border-arena-800 dark:bg-arena-900"
           >
-            <span className="grid size-20 shrink-0 place-items-center rounded-2xl bg-[#ff0000] text-white">
+            <span className="grid size-20 shrink-0 place-items-center rounded-2xl bg-oliva-100 text-oliva-700 dark:bg-oliva-900/40 dark:text-oliva-300">
               <YoutubeLogo size={48} weight="fill" aria-hidden />
             </span>
             <span className="flex-1">
@@ -223,7 +223,7 @@ export default async function Inicio() {
               <span className="mt-2 block max-w-[60ch] text-arena-600 dark:text-arena-400">{ti.youtubeBajada}</span>
               <span className="mt-2 block text-sm font-medium text-arena-500 dark:text-arena-400">youtube.com/@rumbotraveling</span>
             </span>
-            <span className="inline-flex items-center gap-2 rounded-xl bg-[#ff0000] px-5 py-3 font-semibold text-white transition group-hover:bg-[#cc0000]">
+            <span className="inline-flex items-center gap-2 rounded-xl bg-oliva-700 px-5 py-3 font-semibold text-white transition group-hover:bg-oliva-800 dark:bg-oliva-300 dark:text-arena-950 dark:group-hover:bg-oliva-200">
               <YoutubeLogo size={20} weight="fill" aria-hidden />
               {ti.youtubeBoton}
             </span>

@@ -62,7 +62,7 @@ export function Pie() {
             href={YOUTUBE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#ff0000] px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-[#cc0000]"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-oliva-700 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-oliva-800 dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200"
           >
             <YoutubeLogo size={20} weight="fill" aria-hidden />
             {t.pie.youtube}
