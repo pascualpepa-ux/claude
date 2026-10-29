@@ -5,12 +5,12 @@ import type { Idioma } from "./idioma";
 export const SORTEO = {
   es: {
     alerta: "¡Alerta de concurso!",
-    titulo: "Ganate 3 días en Europa para 2",
-    premio: "Vos y un acompañante: vuelo + hotel + planes incluidos. Valorado en 2.000–3.000 €",
+    titulo: "Ganate 3 días en Copenhague para 2",
+    premio: "Vos y un acompañante: vuelos de ida y vuelta + hotel",
     bajada: "Suscribite gratis a Rumbo Traveling y ya estás participando.",
     compartir: "Pasáselo a tus amigos y a tu familia: cada uno que se suscriba con tu link te suma una chance más. El ganador lo elegimos nosotros entre los suscriptores.",
     participar: "Participar gratis",
-    barra: "Concurso: ganate 3 días en Europa para 2, con vuelo y hotel",
+    barra: "Concurso: ganate 3 días en Copenhague para 2, con vuelos y hotel",
     barraBoton: "Participar",
     pasos: [
       { titulo: "Suscribite", texto: "Dejá tu email y confirmalo con el botón que te llega." },
@@ -24,17 +24,17 @@ export const SORTEO = {
     copiar: "Copiar link",
     copiado: "¡Copiado!",
     whatsapp: "Mandar por WhatsApp",
-    mensaje: (url: string) => `¡Estoy participando para ganar 3 días en Europa para 2 personas, con vuelo y hotel! Suscribite gratis con mi link y los dos sumamos: ${url}`,
+    mensaje: (url: string) => `¡Estoy participando para ganar 3 días en Copenhague para 2 personas, con vuelos y hotel! Suscribite gratis con mi link y los dos sumamos: ${url}`,
     invitado: "Te invitaron al concurso: si te suscribís, los dos suman una chance.",
   },
   en: {
     alerta: "Contest alert!",
-    titulo: "Win 3 days in Europe for 2",
-    premio: "You and a companion: flight + hotel + activities included. Worth €2,000–3,000",
+    titulo: "Win 3 days in Copenhagen for 2",
+    premio: "You and a companion: round-trip flights + hotel",
     bajada: "Subscribe to Rumbo Traveling for free and you're in.",
     compartir: "Share it with friends and family: every person who subscribes with your link gives you one more chance. We pick the winner among our subscribers.",
     participar: "Enter for free",
-    barra: "Contest: win 3 days in Europe for 2, with flight and hotel",
+    barra: "Contest: win 3 days in Copenhagen for 2, with flights and hotel",
     barraBoton: "Enter",
     pasos: [
       { titulo: "Subscribe", texto: "Leave your email and confirm it with the button we send you." },
@@ -48,7 +48,7 @@ export const SORTEO = {
     copiar: "Copy link",
     copiado: "Copied!",
     whatsapp: "Send on WhatsApp",
-    mensaje: (url: string) => `I'm entering to win 3 days in Europe for 2, with flight and hotel! Subscribe for free with my link and we both get a chance: ${url}`,
+    mensaje: (url: string) => `I'm entering to win 3 days in Copenhagen for 2, with flights and hotel! Subscribe for free with my link and we both get a chance: ${url}`,
     invitado: "You were invited to the contest: if you subscribe, you both get a chance.",
   },
 } satisfies Record<Idioma, unknown>;

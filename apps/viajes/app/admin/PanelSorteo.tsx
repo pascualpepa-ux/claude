@@ -15,7 +15,7 @@ export function PanelSorteo({ idioma, lista, hechos }: { idioma: Idioma; lista: 
         <div>
           <h2 id="titulo-sorteo" className="flex items-center gap-2 font-semibold">
             <Gift size={22} weight="duotone" className="text-oliva-700 dark:text-oliva-300" aria-hidden />
-            {es ? "Concurso: 3 días en Europa para 2" : "Contest: 3 days in Europe for 2"}
+            {es ? "Concurso: 3 días en Copenhague para 2" : "Contest: 3 days in Copenhagen for 2"}
           </h2>
           <p className="mt-1 text-sm text-arena-600 dark:text-arena-400">
             {es ? `${lista.length} participantes · ${total} chances en total` : `${lista.length} entrants · ${total} chances in total`}
