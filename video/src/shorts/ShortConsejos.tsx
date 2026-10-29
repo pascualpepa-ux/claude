@@ -86,7 +86,7 @@ export const ShortConsejos: React.FC<{ slug: string; idioma: Idioma }> = ({ slug
       </TransitionSeries>
       <Audio
         src={staticFile("musica/rumbo.wav")}
-        startFrom={30 * 8}
+        startFrom={0}
         volume={(f) => interpolate(f, [0, 12, total - 45, total], [0, 0.85, 0.85, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
       />
     </>
