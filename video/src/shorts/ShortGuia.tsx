@@ -158,6 +158,9 @@ const Barra: React.FC<{ desde: number; etiqueta: string; rango: string; total: s
   );
 };
 
+/** Guías con la música desde el principio, como el Short de introducción: arranca tranquila. */
+const MUSICA_DESDE_EL_INICIO = new Set(["miami-4-dias"]);
+
 export const ShortGuia: React.FC<{ slug: string; idioma: Idioma }> = ({ slug, idioma }) => {
   const g = guiaDe(slug);
   const t = T[idioma];
@@ -210,7 +213,7 @@ export const ShortGuia: React.FC<{ slug: string; idioma: Idioma }> = ({ slug, id
       </TransitionSeries>
       <Audio
         src={staticFile("musica/rumbo.wav")}
-        startFrom={30 * 8}
+        startFrom={MUSICA_DESDE_EL_INICIO.has(slug) ? 0 : 30 * 8}
         loop
         // Con voz, la música queda de fondo, bajita.
         volume={(f) => interpolate(f, [0, 12, total - 45, total], [0, conVoz ? 0.22 : 0.85, conVoz ? 0.22 : 0.85, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
