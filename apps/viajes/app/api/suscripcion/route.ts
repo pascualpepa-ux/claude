@@ -1,4 +1,5 @@
 import { esIdioma } from "@/lib/idioma";
+import { emailBloqueado } from "@/lib/bloqueados";
 import { emailValido, suscribir, suscripcionesActivas } from "@/lib/suscripciones";
 import type { TripPlan } from "@/lib/types";
 
@@ -32,6 +33,7 @@ export async function POST(req: Request) {
   } catch {}
   if (!c || typeof c.email !== "string" || !emailValido(c.email.trim())) return Response.json({ error: "email" }, { status: 400 });
   if (c.sitio) return Response.json({ ok: true }); // robot: se le responde como si nada
+  if (emailBloqueado(c.email)) return Response.json({ ok: true }); // bloqueado por el dueño: tampoco se le avisa
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "desconocida";
   if (!permitido(ip)) return Response.json({ error: "limite" }, { status: 429 });
   const idioma = esIdioma(c.idioma) ? c.idioma : "es";

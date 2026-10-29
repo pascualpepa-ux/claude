@@ -1,5 +1,6 @@
 import { randomBytes, randomInt } from "node:crypto";
 import { sql } from "./db";
+import { emailsBloqueados } from "./bloqueados";
 
 // Sorteo para suscriptores: participa cada suscriptor confirmado, con 1 chance
 // más 1 por cada persona que se suscribió y confirmó con su link.
@@ -42,8 +43,9 @@ export async function participantes(): Promise<Participante[]> {
     `select s.email,
        (select count(*)::int from suscriptores i where i.invitado_por = s.id and i.estado = 'activo') as invitados,
        1 + (select count(*)::int from suscriptores i where i.invitado_por = s.id and i.estado = 'activo') as chances
-     from suscriptores s where s.estado = 'activo'
+     from suscriptores s where s.estado = 'activo' and not (lower(s.email) = any($1::text[]))
      order by chances desc, s.confirmado asc`,
+    [emailsBloqueados()],
   );
 }
 

@@ -1,3 +1,4 @@
+import { emailBloqueado } from "@/lib/bloqueados";
 import { alertarDueno, mandarAResend } from "@/lib/correo/envio";
 import { correoRespuestaAutomatica } from "@/lib/correo/redactor";
 import { verificarCorreo } from "@/lib/correo/verificador";
@@ -30,6 +31,7 @@ export async function POST(req: Request) {
   const mensaje = texto(c?.mensaje, 3000);
   if (c?.sitio) return Response.json({ ok: true }); // campo trampa para robots
   if (!EMAIL.test(email)) return Response.json({ error: "email" }, { status: 400 });
+  if (emailBloqueado(email)) return Response.json({ ok: true }); // bloqueado por el dueño
   if (mensaje.length < 5) return Response.json({ error: "mensaje" }, { status: 400 });
   if (tieneGroserias(`${nombre} ${mensaje}`)) {
     const hasta = Date.now() + SEGUNDOS_PAUSA * 1000;
