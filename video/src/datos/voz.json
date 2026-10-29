@@ -41,30 +41,34 @@
  },
  "Concurso-es": {
   "textos": [
-   "¡Atención! Te podés ganar un viaje a Europa para dos personas.",
-   "Vuelo de ida y vuelta, hotel y planes. Tres días, para vos y un acompañante.",
-   "Para participar, suscribite gratis en Rumbo Traveling. Después compartí tu link: cada amigo que se suscriba te suma una chance.",
-   "Participás hasta el 15 de noviembre. Entrá a rumbotraveling punto com."
+   "¡Atención! Te podés ganar un viaje a Copenhague para dos personas.",
+   "Te pagamos los vuelos de ida y vuelta y el hotel. Tres días en Copenhague, para vos y un acompañante.",
+   "Para participar, entrá a rumbotraveling punto com y suscribite gratis. Confirmá tu email y te llega tu link. Compartilo: cada amigo que se suscriba te suma una chance más.",
+   "Es gratis. Uno de los dos viajeros tiene que ser mayor de edad. Participás hasta el 15 de noviembre, y anunciamos al ganador en este canal.",
+   "Entrá ya a rumbotraveling punto com."
   ],
   "segundos": [
-   3.192744,
-   3.889342,
-   6.106848,
-   3.494603
+   3.088254,
+   4.690431,
+   8.068934,
+   6.849887,
+   1.764717
   ]
  },
  "Concurso-en": {
   "textos": [
-   "Heads up! You could win a trip to Europe for two.",
-   "Round-trip flights, a hotel and activities. Three days, for you and a companion.",
-   "To enter, subscribe to Rumbo Traveling for free. Then share your link: every friend who subscribes gives you one more chance.",
-   "You can enter until November 15th. Go to rumbotraveling dot com."
+   "Heads up! You could win a trip to Copenhagen for two.",
+   "We pay for round-trip flights and the hotel. Three days in Copenhagen, for you and a companion.",
+   "To enter, go to rumbotraveling dot com and subscribe for free. Confirm your email and you get your link. Share it: every friend who subscribes gives you one more chance.",
+   "It's free. One of the two travelers must be eighteen or older. You can enter until November 15th, and we announce the winner on this channel.",
+   "Go to rumbotraveling dot com now."
   ],
   "segundos": [
-   2.600635,
-   4.690431,
-   7.140136,
-   3.552653
+   2.856054,
+   5.36381,
+   9.380862,
+   7.198186,
+   1.892426
   ]
  }
 }

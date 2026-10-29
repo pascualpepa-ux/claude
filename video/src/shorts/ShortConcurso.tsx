@@ -8,45 +8,49 @@ import type { Idioma } from "../textos";
 import voz from "../datos/voz.json";
 import { CierreShort, Sube } from "./comunes";
 
-// Short del concurso: 3 días en Europa para 2. Con voz en off (Piper) y música propia (musica/concurso.wav).
+// Short del concurso: 3 días en Copenhague para 2 (vuelos y hotel). Con voz en off (Piper) y música propia (musica/concurso.wav).
 
 const T = {
   es: {
     alerta: "¡Alerta de concurso!",
-    titulo: "Ganate un viaje a Europa para 2",
+    titulo: "Ganate un viaje a Copenhague para 2",
     premio: [
-      { icono: "✈️", texto: "Vuelo de ida y vuelta" },
-      { icono: "🏨", texto: "Hotel" },
-      { icono: "🎟️", texto: "Planes incluidos" },
+      { icono: "✈️", texto: "Vuelos de ida y vuelta" },
+      { icono: "🏨", texto: "Hotel, 2 noches" },
+      { icono: "🇩🇰", texto: "3 días en Copenhague" },
     ],
-    dias: "3 días · vos + un acompañante",
+    dias: "Para vos + un acompañante",
     como: "Cómo participar",
-    pasos: ["Suscribite gratis en Rumbo Traveling", "Compartí tu link con amigos y familia", "Cada amigo que se suscribe = 1 chance más"],
-    cierre: "Participás hasta el 15 de noviembre",
+    pasos: ["Entrá a rumbotraveling.com y suscribite gratis", "Confirmá tu email: te llega tu link", "Compartilo: cada amigo que se suscribe = 1 chance más"],
+    reglas: "Reglas",
+    lista: ["Es gratis", "Uno de los dos viajeros tiene que ser mayor de edad", "Participás hasta el 15 de noviembre", "Anunciamos al ganador en este canal"],
+    cierre: "Participá gratis",
     firma: "Un proyecto de Pascual Pepa",
   },
   en: {
     alerta: "Contest alert!",
-    titulo: "Win a trip to Europe for 2",
+    titulo: "Win a trip to Copenhagen for 2",
     premio: [
       { icono: "✈️", texto: "Round-trip flights" },
-      { icono: "🏨", texto: "Hotel" },
-      { icono: "🎟️", texto: "Activities included" },
+      { icono: "🏨", texto: "Hotel, 2 nights" },
+      { icono: "🇩🇰", texto: "3 days in Copenhagen" },
     ],
-    dias: "3 days · you + a companion",
+    dias: "For you + a companion",
     como: "How to enter",
-    pasos: ["Subscribe to Rumbo Traveling for free", "Share your link with friends and family", "Every friend who subscribes = 1 more chance"],
-    cierre: "Enter by November 15",
+    pasos: ["Go to rumbotraveling.com and subscribe for free", "Confirm your email: you get your link", "Share it: every friend who subscribes = 1 more chance"],
+    reglas: "Rules",
+    lista: ["It's free", "One of the two travelers must be 18 or older", "Enter by November 15", "We announce the winner on this channel"],
+    cierre: "Enter for free",
     firma: "A project by Pascual Pepa",
   },
 };
 
 const TR = 10;
-const BASE = [110, 140, 200, 150];
+const BASE = [110, 150, 220, 180, 120];
 const segundos = (idioma: Idioma) => (voz as Record<string, { segundos: number[] }>)[`Concurso-${idioma}`]?.segundos ?? [];
 /** Cada escena dura lo de base, o más si la voz lo necesita. */
 export const duracionesConcurso = (idioma: Idioma) => BASE.map((d, i) => Math.max(d, Math.ceil((segundos(idioma)[i] ?? 0) * 30) + 30));
-export const totalConcurso = (idioma: Idioma) => duracionesConcurso(idioma).reduce((a, b) => a + b, 0) - 3 * TR;
+export const totalConcurso = (idioma: Idioma) => duracionesConcurso(idioma).reduce((a, b) => a + b, 0) - 4 * TR;
 
 const Alerta: React.FC<{ idioma: Idioma }> = ({ idioma }) => {
   const t = T[idioma];
@@ -128,6 +132,33 @@ const Como: React.FC<{ idioma: Idioma }> = ({ idioma }) => {
   );
 };
 
+const Reglas: React.FC<{ idioma: Idioma }> = ({ idioma }) => {
+  const t = T[idioma];
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  return (
+    <Fondo color={C.arena100}>
+      <MarcaDeAgua opacidad={0.05} />
+      <AbsoluteFill style={{ justifyContent: "center", padding: "0 70px" }}>
+        <Sube>
+          <div style={{ fontSize: 96, fontWeight: 700, letterSpacing: -2, color: C.oliva800 }}>{t.reglas}</div>
+        </Sube>
+        <div style={{ marginTop: 46, display: "grid", gap: 26 }}>
+          {t.lista.map((r, i) => {
+            const v = spring({ frame: frame - 10 - i * 26, fps, config: { damping: 15, stiffness: 130 } });
+            return (
+              <div key={r} style={{ display: "flex", alignItems: "center", gap: 26, padding: "26px 32px", borderRadius: 30, backgroundColor: C.papel, border: `2px solid ${C.arena200}`, opacity: v, transform: `translateX(${interpolate(v, [0, 1], [120, 0])}px)` }}>
+                <span style={{ fontSize: 54, color: C.oliva600, fontWeight: 800 }}>✓</span>
+                <span style={{ fontSize: 50, fontWeight: 600, lineHeight: 1.15, color: C.arena900 }}>{r}</span>
+              </div>
+            );
+          })}
+        </div>
+      </AbsoluteFill>
+    </Fondo>
+  );
+};
+
 export const ShortConcurso: React.FC<{ idioma: Idioma }> = ({ idioma }) => {
   const t = T[idioma];
   const D = duracionesConcurso(idioma);
@@ -155,10 +186,15 @@ export const ShortConcurso: React.FC<{ idioma: Idioma }> = ({ idioma }) => {
           <Como idioma={idioma} />
           <Voz n={2} />
         </TransitionSeries.Sequence>
-        <TransitionSeries.Transition presentation={fade()} timing={tiempo} />
+        <TransitionSeries.Transition presentation={slide({ direction: "from-right" })} timing={tiempo} />
         <TransitionSeries.Sequence durationInFrames={D[3]}>
-          <CierreShort frase={t.cierre} url="rumbotraveling.com" firma={t.firma} />
+          <Reglas idioma={idioma} />
           <Voz n={3} />
+        </TransitionSeries.Sequence>
+        <TransitionSeries.Transition presentation={fade()} timing={tiempo} />
+        <TransitionSeries.Sequence durationInFrames={D[4]}>
+          <CierreShort frase={t.cierre} url="rumbotraveling.com" firma={t.firma} />
+          <Voz n={4} />
         </TransitionSeries.Sequence>
       </TransitionSeries>
       <Audio
