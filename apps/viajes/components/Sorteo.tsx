@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Check, Copy, Gift, WhatsappLogo } from "@phosphor-icons/react/dist/ssr";
@@ -27,8 +28,9 @@ export function BarraSorteo() {
 export function CartelSorteo({ idioma, conBoton = true }: { idioma: Idioma; conBoton?: boolean }) {
   const S = SORTEO[idioma];
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-oliva-800 px-6 py-8 text-arena-50 shadow-lg shadow-oliva-900/20 md:px-10 md:py-10 dark:bg-oliva-900">
-      <Gift aria-hidden size={220} weight="duotone" className="pointer-events-none absolute -right-8 -bottom-10 text-oliva-700/70 md:size-[280px]" />
+    <div className="relative isolate overflow-hidden rounded-3xl bg-oliva-900 px-6 py-8 text-arena-50 shadow-lg shadow-oliva-900/20 md:px-10 md:py-12">
+      <Image src="/fotos/copenhague.jpg" alt="" fill sizes="(min-width: 1152px) 1152px, 100vw" className="-z-20 object-cover object-[60%_50%]" />
+      <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-oliva-950/95 via-oliva-950/80 to-oliva-950/20 max-md:to-oliva-950/75" />
       <div className="relative">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300 px-3 py-1 text-sm font-bold tracking-wide text-arena-950 uppercase">
           {S.alerta}

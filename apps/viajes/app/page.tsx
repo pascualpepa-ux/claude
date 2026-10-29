@@ -4,7 +4,6 @@ import { metadatosPagina } from "@/lib/seo";
 import { EnlacesIdioma } from "@/components/EnlacesIdioma";
 import { ArrowRight, CloudSun, AirplaneTilt, Bed, Receipt } from "@phosphor-icons/react/dist/ssr";
 import { TarjetaDia } from "@/components/TarjetaDia";
-import { Marca } from "@/components/Logo";
 import { EstadoDato } from "@/components/EstadoDato";
 import { ViajesGuardados } from "@/components/ViajesGuardados";
 import { FormularioSuscripcion } from "@/components/FormularioSuscripcion";
@@ -16,11 +15,15 @@ import { climaReal } from "@/lib/clima-real";
 import { calcularResumen } from "@/lib/presupuesto";
 import { usd } from "@/lib/dinero";
 import { textosActuales } from "@/lib/idioma-servidor";
-import { GUIAS } from "@/lib/guias";
 import { Calificacion } from "@/components/Calificacion";
 import { YOUTUBE_URL } from "@/lib/seo";
 import { YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
 import { CartelSorteo } from "@/components/Sorteo";
+import Image from "next/image";
+import { CheckCircle } from "@phosphor-icons/react/dist/ssr";
+import { Destinos } from "@/components/portada/Destinos";
+import { ComoFunciona } from "@/components/portada/ComoFunciona";
+import { PORTADA } from "@/lib/textos-portada";
 import { sorteoActivo } from "@/lib/sorteo";
 
 // Las fechas de la muestra dependen del día de hoy.
@@ -36,6 +39,7 @@ const ICONOS = { clima: CloudSun, vuelos: AirplaneTilt, hoteles: Bed };
 export default async function Inicio() {
   const { idioma, t } = await textosActuales();
   const ti = t.inicio;
+  const P = PORTADA[idioma];
   // La vista previa también muestra el clima real (se guarda una hora en caché).
   const base = generarViaje(viajeDeMuestra(), idioma);
   const clima = await climaReal(
@@ -55,52 +59,62 @@ export default async function Inicio() {
   return (
     <main>
       <EnlacesIdioma ruta="/" idioma={idioma} />
+      <ViajesGuardados />
+      {/* Portada con foto: texto sobre la imagen y, al costado, cómo se ve un día del viaje. */}
+      <section className="relative isolate overflow-hidden bg-oliva-950 text-arena-50">
+        <Image src="/fotos/portada.jpg" alt="" fill priority sizes="100vw" className="-z-20 object-cover object-[70%_50%]" />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-oliva-950/95 via-oliva-950/75 to-oliva-950/25 max-md:to-oliva-950/70" />
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-14 pb-16 md:grid-cols-[1.05fr_1fr] md:pt-24 md:pb-28">
+          <div className="aparecer">
+            <p className="inline-flex rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-amber-200 ring-1 ring-white/15 backdrop-blur">{P.cejilla}</p>
+            <h1 className="mt-5 text-4xl font-bold leading-[1.05] tracking-tight text-balance md:text-5xl lg:text-6xl">{ti.titulo}</h1>
+            <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-arena-100">{ti.bajada}</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/planificar"
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-200 px-6 py-3.5 text-lg font-semibold text-oliva-950 shadow-lg shadow-black/20 transition hover:bg-amber-100 active:scale-[0.98]"
+              >
+                {ti.planificar}
+                <ArrowRight size={20} weight="bold" aria-hidden />
+              </Link>
+              <Link
+                href="/viaje?ejemplo=1"
+                className="inline-flex items-center rounded-xl bg-white/10 px-6 py-3.5 text-lg font-medium text-white ring-1 ring-white/25 backdrop-blur transition hover:bg-white/20 active:scale-[0.98]"
+              >
+                {ti.ejemplo}
+              </Link>
+            </div>
+            <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-arena-100">
+              {P.sellos.map((s) => (
+                <li key={s} className="flex items-center gap-1.5">
+                  <CheckCircle size={18} weight="fill" className="text-amber-200" aria-hidden />
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="aparecer relative text-arena-950 [animation-delay:120ms] dark:text-arena-50" aria-label={ti.vistaPrevia}>
+            <div className="rounded-3xl shadow-2xl shadow-black/40">
+              <TarjetaDia numero={2} dia={dia} actividades={actividades} />
+            </div>
+            <div className="mt-3 rounded-2xl border border-arena-200 bg-papel p-4 shadow-xl shadow-black/30 md:relative md:-mt-4 md:-ml-10 md:w-72 dark:border-arena-800 dark:bg-arena-900">
+              <p className="text-sm text-arena-600 dark:text-arena-400">{ti.muestra}</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums">{usd(resumen.porPersona, idioma)}</p>
+              <p className="text-sm text-arena-600 dark:text-arena-400">{vuelo.estimado ? ti.porPersonaEstimado : ti.porPersonaCon(vuelo.aerolinea)}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {sorteoActivo() && (
-        <div className="mx-auto max-w-6xl px-4 pt-6">
+        <div className="mx-auto max-w-6xl px-4 pt-10 md:pt-14">
           <CartelSorteo idioma={idioma} />
         </div>
       )}
-      <ViajesGuardados />
-      <section className="relative overflow-hidden border-b border-arena-200 bg-arena-100 dark:border-arena-800 dark:bg-arena-900">
-        {/* Isotipo de la marca como marca de agua detrás de la vista previa */}
-        <div aria-hidden className="pointer-events-none absolute -right-24 -bottom-16 hidden opacity-[0.07] md:block dark:opacity-[0.06]">
-          <Marca alto={560} />
-        </div>
-      <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-10 pb-16 md:grid-cols-[1.05fr_1fr] md:pt-20 md:pb-24">
-        <div className="aparecer">
-          <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-balance text-oliva-800 md:text-5xl lg:text-6xl dark:text-arena-50">
-            {ti.titulo}
-          </h1>
-          <p className="mt-5 max-w-[48ch] text-lg leading-relaxed text-arena-600 dark:text-arena-400">
-            {ti.bajada}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/planificar"
-              className="inline-flex items-center gap-2 rounded-xl bg-oliva-700 px-5 py-3 font-medium text-white shadow-sm shadow-oliva-900/20 transition hover:bg-oliva-800 active:scale-[0.98] dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200"
-            >
-              {ti.planificar}
-              <ArrowRight size={18} weight="bold" aria-hidden />
-            </Link>
-            <Link
-              href="/viaje?ejemplo=1"
-              className="inline-flex items-center rounded-xl border border-arena-300 bg-papel px-5 py-3 font-medium text-arena-900 transition hover:bg-arena-100 active:scale-[0.98] dark:border-arena-700 dark:bg-arena-900 dark:text-arena-100 dark:hover:bg-arena-800"
-            >
-              {ti.ejemplo}
-            </Link>
-          </div>
-        </div>
 
-        <div className="aparecer relative [animation-delay:120ms]" aria-label={ti.vistaPrevia}>
-          <TarjetaDia numero={2} dia={dia} actividades={actividades} />
-          <div className="mt-3 rounded-2xl border border-arena-200 bg-papel p-4 dark:border-arena-800 dark:bg-arena-900 md:relative md:-ml-10 md:-mt-4 md:w-72 md:shadow-lg md:shadow-arena-400/30 md:dark:shadow-black/40">
-            <p className="text-sm text-arena-600 dark:text-arena-400">{ti.muestra}</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">{usd(resumen.porPersona, idioma)}</p>
-            <p className="text-sm text-arena-600 dark:text-arena-400">{vuelo.estimado ? ti.porPersonaEstimado : ti.porPersonaCon(vuelo.aerolinea)}</p>
-          </div>
-        </div>
-      </div>
-      </section>
+      <Destinos idioma={idioma} />
+      <ComoFunciona idioma={idioma} />
 
       {/* Suscripción a los avisos: entre la portada y "Cada dato pasa por dos agentes". */}
       <section aria-labelledby="titulo-suscripcion" className="bg-papel dark:bg-arena-950">
@@ -116,40 +130,6 @@ export default async function Inicio() {
         </div>
       </section>
 
-
-      {/* Guías de viaje: grandes y bien visibles, después de la suscripción. */}
-      <section aria-labelledby="titulo-guias" className="border-t border-arena-200 py-16 md:py-20 dark:border-arena-800">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 id="titulo-guias" className="text-3xl font-semibold tracking-tight md:text-4xl">{ti.guiasTitulo}</h2>
-              <p className="mt-3 max-w-[56ch] text-arena-600 dark:text-arena-400">{ti.guiasBajada}</p>
-            </div>
-            <Link href="/guias" className="inline-flex items-center gap-1.5 font-medium text-oliva-700 hover:underline dark:text-oliva-300">
-              {ti.guiasTodas}
-              <ArrowRight size={16} weight="bold" aria-hidden />
-            </Link>
-          </div>
-          <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {GUIAS.slice(0, 6).map((g) => (
-              <li key={g.slug}>
-                <Link
-                  href={`/guias/${g.slug}`}
-                  className="group flex h-full flex-col rounded-2xl border border-arena-200 bg-papel p-6 transition hover:border-oliva-600 hover:shadow-md dark:border-arena-800 dark:bg-arena-900 dark:hover:border-oliva-300"
-                >
-                  <span className="text-xs font-medium uppercase tracking-wide text-oliva-700 dark:text-oliva-300">{t.guias.dias(g.dias)}</span>
-                  <span className="mt-2 text-xl font-semibold text-balance">{g.titulo[idioma]}</span>
-                  <span className="mt-3 flex-1 text-sm text-arena-600 dark:text-arena-400">{g.descripcion[idioma]}</span>
-                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-oliva-700 group-hover:underline dark:text-oliva-300">
-                    {t.guias.ver}
-                    <ArrowRight size={14} weight="bold" aria-hidden />
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
 
       <section className="border-t border-arena-200 bg-papel py-16 md:py-24 dark:border-arena-800 dark:bg-arena-900/40">
         <div className="mx-auto max-w-6xl px-4">
