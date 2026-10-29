@@ -44,3 +44,27 @@ export function sesionValida(valor: string | undefined) {
   if (!vence || !firma || !iguales(firma, firmar(vence, clave))) return false;
   return Number(vence) > Date.now() / 1000;
 }
+
+// Dispositivo autorizado: el admin solo funciona en el dispositivo que abrió una vez el link secreto
+// /api/admin/dispositivo?clave=... (la clave vive en ADMIN_DISPOSITIVO_CLAVE). Sin esa variable, no se exige.
+export const COOKIE_DISPOSITIVO = "rumbo_dispositivo";
+export const DURACION_DISPOSITIVO_SEG = 60 * 60 * 24 * 400; // lo máximo que guardan los navegadores
+
+export const dispositivoExigido = () => Boolean(process.env.ADMIN_DISPOSITIVO_CLAVE);
+
+export function claveDispositivoValida(intento: string) {
+  const real = process.env.ADMIN_DISPOSITIVO_CLAVE;
+  if (!real || !secreto()) return false;
+  return iguales(firmar(intento, secreto()!), firmar(real, secreto()!));
+}
+
+/** Valor de la cookie del dispositivo: depende de la clave, así cambiar la clave saca a todos los dispositivos. */
+export function valorDispositivo() {
+  return firmar(`dispositivo:${process.env.ADMIN_DISPOSITIVO_CLAVE}`, secreto()!);
+}
+
+export function dispositivoValido(valor: string | undefined) {
+  if (!dispositivoExigido()) return true;
+  if (!valor || !secreto()) return false;
+  return iguales(valor, valorDispositivo());
+}

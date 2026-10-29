@@ -11,7 +11,8 @@ import { listarMensajes } from "@/lib/mensajes";
 import { resumenOpiniones } from "@/lib/opiniones";
 import { dbConfigurada } from "@/lib/db";
 import { listarSuscriptores, type FilaSuscriptor } from "@/lib/suscripciones";
-import { COOKIE_ADMIN, adminConfigurado, sesionValida } from "@/lib/admin";
+import { COOKIE_ADMIN, COOKIE_DISPOSITIVO, adminConfigurado, dispositivoValido, sesionValida } from "@/lib/admin";
+import { notFound } from "next/navigation";
 import { formatoCorto } from "@/lib/fechas";
 import { estadisticas, type VisitasDia } from "@/lib/goatcounter";
 import { LOCALE } from "@/lib/idioma";
@@ -50,7 +51,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     );
   }
 
-  const sesion = (await cookies()).get(COOKIE_ADMIN)?.value;
+  const galletas = await cookies();
+  // En un dispositivo que no es el del dueño, el admin directamente no existe.
+  if (!dispositivoValido(galletas.get(COOKIE_DISPOSITIVO)?.value)) notFound();
+  const sesion = galletas.get(COOKIE_ADMIN)?.value;
   if (!sesionValida(sesion)) return <FormularioAdmin />;
 
   const pedido = Number((await searchParams).dias);

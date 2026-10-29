@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { COOKIE_ADMIN, adminConfigurado, contrasenaValida, crearSesion } from "@/lib/admin";
+import { cookies } from "next/headers";
+import { COOKIE_ADMIN, COOKIE_DISPOSITIVO, adminConfigurado, contrasenaValida, crearSesion, dispositivoValido } from "@/lib/admin";
 
 export async function POST(req: Request) {
   if (!adminConfigurado()) {
     return NextResponse.json({ error: "El acceso de administrador no está configurado." }, { status: 503 });
   }
+  if (!dispositivoValido((await cookies()).get(COOKIE_DISPOSITIVO)?.value)) return NextResponse.json({ error: "No encontrado." }, { status: 404 });
   const datos = await req.json().catch(() => ({}));
   const intento = typeof datos?.contrasena === "string" ? datos.contrasena : "";
   if (!contrasenaValida(intento)) {
