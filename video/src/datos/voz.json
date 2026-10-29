@@ -38,5 +38,33 @@
    10.507029,
    4.028662
   ]
+ },
+ "Concurso-es": {
+  "textos": [
+   "¡Atención! Te podés ganar un viaje a Europa para dos personas.",
+   "Vuelo de ida y vuelta, hotel y planes. Tres días, para vos y un acompañante.",
+   "Para participar, suscribite gratis en Rumbo Traveling. Después compartí tu link: cada amigo que se suscriba te suma una chance.",
+   "Participás hasta el 15 de noviembre. Entrá a rumbotraveling punto com, barra concurso."
+  ],
+  "segundos": [
+   3.192744,
+   3.889342,
+   6.106848,
+   4.179592
+  ]
+ },
+ "Concurso-en": {
+  "textos": [
+   "Heads up! You could win a trip to Europe for two.",
+   "Round-trip flights, a hotel and activities. Three days, for you and a companion.",
+   "To enter, subscribe to Rumbo Traveling for free. Then share your link: every friend who subscribes gives you one more chance.",
+   "You can enter until November 15th. Go to rumbotraveling dot com, slash concurso."
+  ],
+  "segundos": [
+   2.600635,
+   4.690431,
+   7.140136,
+   4.89941
+  ]
  }
 }

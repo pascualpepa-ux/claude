@@ -1,7 +1,7 @@
 """Música original tranquila para Shorts (sin derechos de terceros: se genera acá).
 Mismo estilo que componer.py (colchón, arpegio, bajo), pero más lenta, sin batería fuerte
 y con un tema distinto por video.
-Uso: python3 componer_calma.py <tema> salida.wav     (temas: miami, ranking)
+Uso: python3 componer_calma.py <tema> salida.wav     (temas: miami, ranking, concurso)
 """
 import sys
 import wave
@@ -46,6 +46,21 @@ TEMAS = {
         "timbre": "guitarra",
         "melodia": [76, None, 74, None, 72, 74, None, 71, 72, None, None, 67, 69, None, 71, None],
         "shaker": False,
+    },
+    # Concurso: guitarra punteada con más ilusión, en Re. Re - La - Si m7 - Sol maj7.
+    "concurso": {
+        "bpm": 96,
+        "semilla": 41,
+        "acordes": [
+            (38, [57, 62, 66, 69]),
+            (45, [57, 61, 64, 69]),
+            (47, [57, 59, 62, 66]),
+            (43, [55, 59, 62, 66]),
+        ],
+        "arpegio": [0, 2, 1, 3, 1, 2, 3, 2],
+        "timbre": "guitarra",
+        "melodia": [78, None, 76, 74, None, 76, 78, None, 81, None, 78, 76, None, 74, 73, None],
+        "shaker": True,
     },
 }
 
