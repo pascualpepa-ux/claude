@@ -81,7 +81,7 @@ export const ShortConsejos: React.FC<{ slug: string; idioma: Idioma }> = ({ slug
         ])}
         <TransitionSeries.Transition presentation={fade()} timing={tiempo} />
         <TransitionSeries.Sequence durationInFrames={DUR_CONSEJOS.cierre}>
-          <CierreShort frase={t.cierre} url="rumbotraveling.com/guias" firma={t.firma} />
+          <CierreShort frase={t.cierre} url="rumbotraveling.com" firma={t.firma} />
         </TransitionSeries.Sequence>
       </TransitionSeries>
       <Audio

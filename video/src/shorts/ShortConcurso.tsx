@@ -157,7 +157,7 @@ export const ShortConcurso: React.FC<{ idioma: Idioma }> = ({ idioma }) => {
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={fade()} timing={tiempo} />
         <TransitionSeries.Sequence durationInFrames={D[3]}>
-          <CierreShort frase={t.cierre} url="rumbotraveling.com/concurso" firma={t.firma} />
+          <CierreShort frase={t.cierre} url="rumbotraveling.com" firma={t.firma} />
           <Voz n={3} />
         </TransitionSeries.Sequence>
       </TransitionSeries>
