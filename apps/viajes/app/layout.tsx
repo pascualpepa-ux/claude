@@ -10,7 +10,8 @@ import { ProveedorIdioma } from "@/components/ProveedorIdioma";
 import { textosActuales } from "@/lib/idioma-servidor";
 import { SITIO_URL, metadatosPagina } from "@/lib/seo";
 import { DatosEstructurados } from "@/components/DatosEstructurados";
-import { esPremium, usuarioDeSesion } from "@/lib/cuentas";
+import { cuentasConfiguradas, esPremium, usuarioDeSesion } from "@/lib/cuentas";
+import { dbConfigurada } from "@/lib/db";
 import "./globals.css";
 
 // Google Sans Flex: la tipografía del logo (licencia SIL OFL, ver app/fuentes/OFL.txt).
@@ -45,9 +46,10 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { idioma } = await textosActuales();
-  // Premium: si no hay sesión o el usuario todavía no es Premium, se ve la barra arriba de todo.
-  const usuario = await usuarioDeSesion();
-  const mostrarBarraPremium = !usuario || !esPremium(usuario);
+  // Premium: si no hay sesión o el usuario todavía no es Premium, se ve la barra arriba de todo
+  // (solo cuando las cuentas ya están activadas: si no, la barra llevaría a un callejón sin salida).
+  const usuario = dbConfigurada() && cuentasConfiguradas() ? await usuarioDeSesion() : null;
+  const mostrarBarraPremium = (dbConfigurada() && cuentasConfiguradas()) && (!usuario || !esPremium(usuario));
   return (
     <html lang={idioma} className={marca.variable}>
       <body className="flex min-h-[100dvh] flex-col font-sans">
