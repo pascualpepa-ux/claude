@@ -235,6 +235,7 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
         precio: j.precio ?? elegido.precio,
         moneda: j.moneda ?? elegido.moneda,
         creado: new Date().toISOString(),
+        viaje: { fecha: entrada, ciudad: destino.lugar?.ciudad || destino.texto, iata: destino.aeropuerto },
       });
     }
     setPaso("listo");

@@ -8,6 +8,13 @@ import { CLAVE_VIAJE } from "@/lib/almacen";
 import { LIMITES, type MensajeChat } from "@/lib/ayudante";
 import type { TripPlan } from "@/lib/types";
 import { useIdioma } from "./ProveedorIdioma";
+import { separarViaje } from "@/lib/viaje-chat";
+import { TarjetaViajeChat } from "./TarjetaViajeChat";
+
+const hoyLocal = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
 
 /** Resumen de lo que la persona está mirando, para que las respuestas tengan contexto. */
 function contexto(ruta: string) {
@@ -145,19 +152,25 @@ export function Ayudante() {
                 </ul>
               </div>
             )}
-            {mensajes.map((m, i) => (
-              <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
-                <p
+            {mensajes.map((m, i) => {
+              // Si el guía propuso un viaje, la línea [[VIAJE ...]] se cambia por una tarjeta con precios reales.
+              const { texto, viaje } = m.role === "assistant" ? separarViaje(m.content, hoyLocal()) : { texto: m.content, viaje: null };
+              const ultimo = i === mensajes.length - 1;
+              return (
+              <div key={i} className={m.role === "user" ? "flex justify-end" : "flex flex-col items-start gap-2"}>
+                {(texto || !viaje) && <p
                   className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed whitespace-pre-wrap ${
                     m.role === "user"
                       ? "bg-oliva-700 text-white dark:bg-oliva-300 dark:text-arena-950"
                       : "bg-arena-100 text-arena-900 dark:bg-arena-800 dark:text-arena-100"
                   }`}
                 >
-                  {m.content || <span className="inline-block animate-pulse text-arena-500">{T.escribiendo}</span>}
-                </p>
+                  {texto || <span className="inline-block animate-pulse text-arena-500">{T.escribiendo}</span>}
+                </p>}
+                {viaje && <TarjetaViajeChat viaje={viaje} idioma={idioma} listo={!(ultimo && esperando)} />}
               </div>
-            ))}
+              );
+            })}
           </div>
 
           <form

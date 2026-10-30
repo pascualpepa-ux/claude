@@ -231,6 +231,11 @@ export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba
         precio: elegida.precio,
         moneda: elegida.moneda,
         creado: new Date().toISOString(),
+        viaje: {
+          fecha: ida.salida.slice(0, 10),
+          ciudad: destino.lugar?.ciudad || destino.texto || ida.segmentos[ida.segmentos.length - 1].hasta,
+          iata: ida.segmentos[ida.segmentos.length - 1].hasta,
+        },
       });
     }
     setPaso("listo");

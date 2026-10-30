@@ -81,8 +81,9 @@ const es: EntradaAyuda[] = [
     pregunta: "¿Rumbo cobra o reserva?",
     claves: ["reservar", "reserva", "reservo", "comprar", "compro", "pagar", "pago", "cobra", "cobran", "tarjeta", "pasaje", "pasajes"],
     respuesta:
-      "No. Rumbo no cobra ni reserva nada. El botón \"Reservar\" de cada vuelo u hotel abre una búsqueda en Google (Vuelos o Hoteles), " +
-      "y la compra la hacés directo en el sitio que elijas.",
+      "Sí. En \"Vuelos y hoteles\" (y debajo de cada viaje armado) podés comprar vuelos y reservar hoteles acá mismo, con tarjeta. " +
+      "El pasaje lo emite la aerolínea y te llega todo por email, con un link para cancelar. Los precios ya incluyen la comisión de Rumbo. " +
+      "Mientras la web esté en modo prueba lo avisa arriba de la página, y no se cobra nada de verdad.",
   },
   {
     id: "gratis",
@@ -310,8 +311,9 @@ const en: EntradaAyuda[] = [
     pregunta: "Does Rumbo charge or book anything?",
     claves: ["book", "booking", "buy", "pay", "payment", "charge", "charges", "card", "ticket", "tickets"],
     respuesta:
-      "No. Rumbo doesn't charge or book anything. The \"Book\" button on each flight or hotel opens a Google search (Flights or Hotels), " +
-      "and you buy directly on the site you choose.",
+      "Yes. In \"Flights & hotels\" (and below each planned trip) you can buy flights and book hotels right here, by card. " +
+      "The airline issues the ticket and you get everything by email, with a link to cancel. Prices already include Rumbo's commission. " +
+      "While the site is in test mode it says so at the top of the page, and nothing is really charged.",
   },
   {
     id: "gratis",

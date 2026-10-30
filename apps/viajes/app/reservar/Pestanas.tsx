@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CuentaRegresiva } from "@/components/CuentaRegresiva";
 import { AirplaneTilt, Bed } from "@phosphor-icons/react/dist/ssr";
 import { useIdioma } from "@/components/ProveedorIdioma";
 import { Reservar, type InicialVuelo } from "./Reservar";
@@ -32,6 +33,9 @@ export function Pestanas({
   );
   return (
     <>
+      <div className="mx-auto max-w-3xl px-4 pt-6 empty:hidden">
+        <CuentaRegresiva />
+      </div>
       {vuelos && hoteles && (
         <div className="mx-auto flex max-w-3xl gap-2 px-4 pt-8" role="tablist">
           {boton("vuelos", idioma === "es" ? "Vuelos" : "Flights", AirplaneTilt)}

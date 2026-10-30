@@ -27,6 +27,12 @@ export function Encabezado() {
             </Link>
           )}
           <Link
+            href="/explorar"
+            className="hidden shrink-0 rounded-xl px-3 py-2 text-sm font-medium text-arena-800 transition hover:bg-arena-100 md:inline-block dark:text-arena-200 dark:hover:bg-arena-800"
+          >
+            🌍 {idioma === "es" ? "Explorar" : "Explore"}
+          </Link>
+          <Link
             href="/guias"
             className="hidden shrink-0 rounded-xl px-3 py-2 text-sm font-medium text-arena-800 transition hover:bg-arena-100 sm:inline-block dark:text-arena-200 dark:hover:bg-arena-800"
           >

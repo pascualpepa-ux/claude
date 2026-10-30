@@ -71,3 +71,16 @@
     transform: none;
   }
 }
+
+/* Avioncito de la cuenta regresiva: cruza la tarjeta de izquierda a derecha. */
+@keyframes avion-cruza {
+  from { left: -3rem; transform: translateY(0.5rem) rotate(8deg); }
+  50% { transform: translateY(-0.25rem) rotate(0deg); }
+  to { left: calc(100% + 3rem); transform: translateY(0.5rem) rotate(-6deg); }
+}
+.avion-cruza {
+  animation: avion-cruza 9s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .avion-cruza { display: none; }
+}

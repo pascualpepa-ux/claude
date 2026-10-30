@@ -7,7 +7,7 @@ import { LogoCompleto } from "./Logo";
 import { useIdioma } from "./ProveedorIdioma";
 
 export function Pie() {
-  const { t } = useIdioma();
+  const { idioma, t } = useIdioma();
   const anio = new Date().getFullYear();
   const link = "text-arena-700 hover:text-oliva-700 hover:underline dark:text-arena-300 dark:hover:text-oliva-300";
   return (
@@ -38,6 +38,11 @@ export function Pie() {
             <li>
               <Link href="/guias" className={link}>
                 {t.pie.guias}
+              </Link>
+            </li>
+            <li>
+              <Link href="/explorar" className={link}>
+                {idioma === "es" ? "Explorá el mundo en 3D" : "Explore the world in 3D"}
               </Link>
             </li>
             <li>

@@ -82,6 +82,8 @@ export interface ReservaGuardada {
   precio: number;
   moneda: string;
   creado: string; // ISO
+  /** Para la cuenta regresiva: el día que empieza el viaje, a dónde y su aeropuerto (para el clima). */
+  viaje?: { fecha: string; ciudad: string; iata: string };
 }
 
 export function leerReservas(): ReservaGuardada[] {
