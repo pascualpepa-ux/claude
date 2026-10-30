@@ -76,6 +76,8 @@ export interface Tramo {
 export interface Oferta {
   id: string;
   aerolinea: string;
+  /** Aerolínea socia (Volotea): solo cuando la propia búsqueda devuelve un vuelo suyo en esa ruta. */
+  recomendada: boolean;
   logo: string | null;
   precio: number; // con nuestra comisión
   moneda: string;
@@ -84,10 +86,19 @@ export interface Oferta {
   pasajeros: string[]; // ids de pasajero de Duffel, en orden
 }
 
+/**
+ * Aerolíneas socias que se destacan (por ahora Volotea, código V7), activadas con AEROLINEAS_SOCIAS=V7 en Vercel.
+ * Nunca se inventa una ruta: solo se destaca un vuelo que la aerolínea realmente ofrece en esa búsqueda
+ * (Madrid → Londres puede aparecer; China → Inglaterra no, porque Volotea no vuela ahí y no lo devuelve).
+ */
+const socias = () => (process.env.AEROLINEAS_SOCIAS ?? "").split(",").map((x) => x.trim().toUpperCase()).filter(Boolean);
+const esSocia = (o: OfertaDuffel) => socias().includes(o.owner.iata_code) && o.slices.every((s) => s.segments.every((g) => socias().includes(g.marketing_carrier.iata_code)));
+
 function aOferta(o: OfertaDuffel): Oferta {
   return {
     id: o.id,
     aerolinea: o.owner.name,
+    recomendada: esSocia(o),
     logo: o.owner.logo_symbol_url ?? null,
     precio: conComision(Number(o.total_amount)),
     moneda: o.total_currency,
@@ -128,7 +139,7 @@ export async function buscarOfertas(b: Busqueda): Promise<Oferta[]> {
     cabin_class: "economy",
   });
   // En prueba, Duffel hace fallar a propósito vuelos de otras aerolíneas; su aerolínea de prueba (Duffel Airways) siempre funciona.
-  const primero = (o: OfertaDuffel) => (modoPrueba() && o.owner.iata_code === "ZZ" ? 0 : 1);
+  const primero = (o: OfertaDuffel) => (esSocia(o) ? 0 : modoPrueba() && o.owner.iata_code === "ZZ" ? 1 : 2);
   return r.offers
     .sort((a, b) => primero(a) - primero(b) || Number(a.total_amount) - Number(b.total_amount))
     .map(aOferta)
@@ -152,7 +163,7 @@ export interface Pasajero {
 }
 
 /** Emite el pasaje. Paga Duffel con el saldo de la cuenta (en prueba, saldo de mentira). */
-export async function emitir(ofertaId: string, pasajeros: Pasajero[]) {
+export async function emitir(ofertaId: string, pasajeros: Pasajero[], metadata: Record<string, string> = {}) {
   const { oferta, totalAerolinea } = await ofertaActual(ofertaId);
   if (pasajeros.length !== oferta.pasajeros.length) throw new ErrorDuffel(400, "pasajeros");
   const orden = await pedir<{ id: string; booking_reference: string; total_amount: string; total_currency: string }>("/air/orders", {
@@ -169,6 +180,15 @@ export async function emitir(ofertaId: string, pasajeros: Pasajero[]) {
       phone_number: p.telefono,
     })),
     payments: [{ type: "balance", currency: oferta.moneda, amount: totalAerolinea }],
+    metadata,
   });
   return { codigo: orden.booking_reference, orden: orden.id, oferta, costo: Number(totalAerolinea) };
+}
+
+/** Busca entre las órdenes recientes la que tenga nuestra reserva en la metadata (por si se emitió y no nos enteramos). */
+export async function ordenDeReserva(reservaId: string) {
+  const ordenes = await pedir<{ id: string; booking_reference: string; total_amount: string; metadata?: Record<string, string> | null }[]>(
+    "/air/orders?limit=200",
+  );
+  return ordenes.find((o) => o.metadata?.reserva === reservaId) ?? null;
 }

@@ -73,6 +73,16 @@ create table if not exists reservas (
   prueba boolean not null,
   creado timestamptz not null default now()
 );
+-- Agentes de reservas: cada compra queda anotada antes de pagar, así el vigilante no se olvida de ninguna.
+alter table reservas alter column codigo drop not null;
+alter table reservas alter column orden drop not null;
+alter table reservas add column if not exists estado text not null default 'emitida';
+alter table reservas add column if not exists oferta_id text;
+alter table reservas add column if not exists pasajeros jsonb;
+alter table reservas add column if not exists intentos int not null default 0;
+alter table reservas add column if not exists error text;
+alter table reservas add column if not exists avisado boolean not null default false;
+alter table reservas add column if not exists actualizado timestamptz not null default now();
 create table if not exists vigilancias (
   id int primary key,
   ultima timestamptz not null

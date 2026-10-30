@@ -21,6 +21,7 @@ const T = {
     buscando: "Buscando vuelos en las aerolíneas…",
     sinVuelos: "No encontramos vuelos para esa fecha. Probá con otro día.",
     elegir: "Elegir",
+    recomendada: "Aerolínea recomendada",
     directo: "Directo",
     escalas: (n: number) => (n === 1 ? "1 escala" : `${n} escalas`),
     total: (n: number) => (n === 1 ? "total" : `total para ${n}`),
@@ -40,6 +41,8 @@ const T = {
     pagando: "Emitiendo el pasaje…",
     pagoPrueba: "En modo prueba no se pide tarjeta: el pago es simulado.",
     listo: "¡Listo! Tu vuelo está reservado",
+    confirmando: "Estamos confirmando tu pasaje con la aerolínea",
+    confirmandoAyuda: "Nuestro agente lo termina en unos minutos y te manda el código de reserva por email. No vuelvas a comprarlo.",
     codigo: "Código de reserva",
     codigoAyuda: "Con este código hacés el check-in en la web de la aerolínea.",
     otra: "Buscar otro vuelo",
@@ -65,6 +68,7 @@ const T = {
     buscando: "Searching airlines…",
     sinVuelos: "No flights found for that date. Try another day.",
     elegir: "Select",
+    recomendada: "Recommended airline",
     directo: "Direct",
     escalas: (n: number) => (n === 1 ? "1 stop" : `${n} stops`),
     total: (n: number) => (n === 1 ? "total" : `total for ${n}`),
@@ -84,6 +88,8 @@ const T = {
     pagando: "Issuing the ticket…",
     pagoPrueba: "In test mode no card is needed: the payment is simulated.",
     listo: "Done! Your flight is booked",
+    confirmando: "We're confirming your ticket with the airline",
+    confirmandoAyuda: "Our agent finishes it in a few minutes and emails you the booking reference. Don't buy it again.",
     codigo: "Booking reference",
     codigoAyuda: "Use this code to check in on the airline's website.",
     otra: "Search another flight",
@@ -184,7 +190,7 @@ export function Reservar({ prueba }: { prueba: boolean }) {
       });
       const j = await r.json().catch(() => ({}));
       if (r.ok) {
-        setCodigo(j.codigo);
+        setCodigo(j.codigo ?? "");
         setPaso("listo");
         window.scrollTo({ top: 0 });
       } else setError(mensajeError(j.error));
@@ -302,6 +308,7 @@ export function Reservar({ prueba }: { prueba: boolean }) {
                     <p className="mb-2 flex items-center gap-2 font-semibold">
                       {o.logo && <img src={o.logo} alt="" width={22} height={22} className="size-[22px]" />}
                       {o.aerolinea}
+                      {o.recomendada && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">⭐ {t.recomendada}</span>}
                     </p>
                     <Vuelo o={o} />
                   </div>
@@ -389,13 +396,19 @@ export function Reservar({ prueba }: { prueba: boolean }) {
       {paso === "listo" && elegida && (
         <section className="mt-8 rounded-3xl border border-oliva-200 bg-oliva-50 p-6 text-center md:p-10 dark:border-oliva-800 dark:bg-oliva-900/30" aria-live="polite">
           <CheckCircle size={56} weight="fill" className="mx-auto text-oliva-700 dark:text-oliva-300" aria-hidden />
-          <h2 className="mt-4 text-2xl font-semibold">{t.listo}</h2>
-          <p className="mt-6 text-sm text-arena-600 dark:text-arena-400">{t.codigo}</p>
-          <p className="mt-1 flex items-center justify-center gap-2 text-4xl font-bold tracking-widest">
-            <Ticket size={32} weight="duotone" aria-hidden />
-            {codigo}
-          </p>
-          <p className="mt-2 text-sm text-arena-600 dark:text-arena-400">{t.codigoAyuda}</p>
+          <h2 className="mt-4 text-2xl font-semibold">{codigo ? t.listo : t.confirmando}</h2>
+          {codigo ? (
+            <>
+              <p className="mt-6 text-sm text-arena-600 dark:text-arena-400">{t.codigo}</p>
+              <p className="mt-1 flex items-center justify-center gap-2 text-4xl font-bold tracking-widest">
+                <Ticket size={32} weight="duotone" aria-hidden />
+                {codigo}
+              </p>
+              <p className="mt-2 text-sm text-arena-600 dark:text-arena-400">{t.codigoAyuda}</p>
+            </>
+          ) : (
+            <p className="mx-auto mt-3 max-w-md text-arena-600 dark:text-arena-400">{t.confirmandoAyuda}</p>
+          )}
           <div className="mx-auto mt-6 max-w-md rounded-2xl bg-papel p-4 text-left dark:bg-arena-900">
             <Vuelo o={elegida} />
           </div>

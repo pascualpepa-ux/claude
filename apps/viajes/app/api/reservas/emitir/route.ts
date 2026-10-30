@@ -1,6 +1,6 @@
-import { emitir, ErrorDuffel, modoPrueba, ventaPermitida, type Pasajero } from "@/lib/duffel";
-import { alertarDueno } from "@/lib/correo/envio";
-import { dbConfigurada, sql } from "@/lib/db";
+import { agenteVuelos, registrar } from "@/lib/agentes-reservas";
+import { ErrorDuffel, ofertaActual, ventaPermitida, type Pasajero } from "@/lib/duffel";
+import { dbConfigurada } from "@/lib/db";
 import { ipDe, permitido } from "@/lib/limite";
 
 export const runtime = "nodejs";
@@ -19,9 +19,12 @@ function pasajeroValido(p: Partial<Pasajero>): p is Pasajero {
   );
 }
 
-/** POST { ofertaId, pasajeros } → emite el pasaje y devuelve el código de reserva de la aerolínea. */
+/**
+ * POST { ofertaId, pasajeros } → anota la compra y el agente de vuelos emite el pasaje.
+ * Si la aerolínea no responde, la compra queda pendiente y el vigilante la sigue hasta terminarla.
+ */
 export async function POST(req: Request) {
-  if (!ventaPermitida()) return Response.json({ error: "inactivo" }, { status: 503 });
+  if (!ventaPermitida() || !dbConfigurada()) return Response.json({ error: "inactivo" }, { status: 503 });
   if (!permitido(`emitir:${ipDe(req)}`, 6, 60 * 60 * 1000)) return Response.json({ error: "limite" }, { status: 429 });
   const c = await req.json().catch(() => null);
   const pasajeros = Array.isArray(c?.pasajeros) ? c.pasajeros : [];
@@ -29,23 +32,16 @@ export async function POST(req: Request) {
     return Response.json({ error: "datos" }, { status: 400 });
   }
   try {
-    const r = await emitir(c.ofertaId, pasajeros);
-    const ruta = r.oferta.tramos.map((t) => `${t.segmentos[0].desde}→${t.segmentos[t.segmentos.length - 1].hasta} ${t.salida.slice(0, 10)}`).join(", ");
-    if (dbConfigurada()) {
-      await sql(
-        `insert into reservas (codigo, orden, email, ruta, precio, costo, moneda, prueba) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [r.codigo, r.orden, pasajeros[0].email, ruta, r.oferta.precio, r.costo, r.oferta.moneda, modoPrueba()],
-      ).catch((e) => console.error("guardar reserva:", e));
-    }
-    await alertarDueno(
-      `${modoPrueba() ? "[PRUEBA] " : ""}Pasaje vendido: ${ruta}`,
-      `Código de reserva: ${r.codigo}\nRuta: ${ruta}\nAerolínea: ${r.oferta.aerolinea}\nPrecio cobrado: ${r.oferta.precio} ${r.oferta.moneda}\nCosto (aerolínea): ${r.costo} ${r.oferta.moneda}\nComisión: ${(r.oferta.precio - r.costo).toFixed(2)} ${r.oferta.moneda}\nCliente: ${pasajeros[0].email}\nPasajeros: ${pasajeros.length}`,
-    ).catch(() => {});
-    return Response.json({ codigo: r.codigo, oferta: r.oferta });
+    const { oferta } = await ofertaActual(c.ofertaId);
+    if (oferta.pasajeros.length !== pasajeros.length) return Response.json({ error: "datos" }, { status: 400 });
+    const id = await registrar(oferta, pasajeros);
+    const r = await agenteVuelos(id);
+    if (r.estado === "emitida") return Response.json({ codigo: r.codigo, oferta });
+    if (r.estado === "pendiente") return Response.json({ pendiente: true, oferta }, { status: 202 });
+    return Response.json({ error: "oferta" }, { status: 409 });
   } catch (e) {
     console.error("emitir pasaje:", e);
     if (e instanceof ErrorDuffel && e.status < 500) return Response.json({ error: "oferta" }, { status: 409 });
-    if (e instanceof ErrorDuffel) return Response.json({ error: "aerolinea" }, { status: 502 });
     return Response.json({ error: "servidor" }, { status: 502 });
   }
 }
