@@ -115,7 +115,7 @@ export async function buscarHoteles(p: PedidoHoteles): Promise<ResultadoHoteles>
       p.tipo === "depto" ? { vacation_rentals: "true" } : p.tipo === "hostel" ? {} : { hotel_class: p.tipo };
     const q = p.tipo === "hostel" ? t.hostel(c.ciudad) : t.hotel(c.ciudad);
     const [general, preferido] = await Promise.all([
-      serpapiHoteles({ ...base, ...filtros, q, sort_by: "8" }), // 8 = mejor puntuados
+      serpapiHoteles({ ...base, ...filtros, q, sort_by: "3" }), // 3 = precio más bajo primero (público joven, presupuesto ajustado)
       p.preferido.trim() ? serpapiHoteles({ ...base, q: `${p.preferido.trim()} ${c.ciudad}` }) : Promise.resolve(null),
     ]);
     const candidatos = [...(preferido?.properties?.slice(0, 1) ?? []), ...(general?.properties ?? [])].filter(
