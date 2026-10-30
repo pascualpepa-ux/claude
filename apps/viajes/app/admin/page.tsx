@@ -21,6 +21,8 @@ import { FormularioAdmin } from "./FormularioAdmin";
 import { BotonSalir } from "./BotonSalir";
 import { PanelSorteo } from "./PanelSorteo";
 import { PanelGanancias } from "./PanelGanancias";
+import { ListaReservas } from "./ListaReservas";
+import { listarReservas } from "@/lib/agentes-reservas";
 import { ganancias } from "@/lib/ganancias";
 import { modoPrueba, duffelConfigurado } from "@/lib/duffel";
 import { hotelesConfigurado, hotelesPrueba } from "@/lib/hoteles";
@@ -67,6 +69,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   const ventas = (duffelConfigurado() || hotelesConfigurado()) && dbConfigurada();
   const enPrueba = (!duffelConfigurado() || modoPrueba()) && (!hotelesConfigurado() || hotelesPrueba());
   const plata = ventas ? await ganancias(enPrueba).catch(() => null) : null;
+  const reservas = ventas ? await listarReservas().catch(() => null) : null;
   const sorteo =
     sorteoActivo() && dbConfigurada()
       ? await Promise.all([participantes(), sorteosHechos()])
@@ -122,6 +125,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       </header>
 
       {plata && <PanelGanancias idioma={idioma} datos={plata} prueba={enPrueba} banco={process.env.CUENTA_BANCARIA_VISIBLE ?? null} />}
+      {reservas && <ListaReservas filas={reservas} idioma={idioma} />}
       {sorteo && <PanelSorteo idioma={idioma} lista={sorteo.lista} hechos={sorteo.hechos} />}
       <ListaSuscriptores filas={suscriptores.filas} estado={suscriptores.estado} idioma={idioma} T={A.suscriptores} />
       <ListaMensajes mensajes={mensajes} idioma={idioma} T={A.mensajes} />

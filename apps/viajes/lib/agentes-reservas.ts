@@ -269,3 +269,32 @@ export async function cancelarReserva(token: string) {
   ).catch(() => {});
   return { estado: "ok" as const, devolucion, moneda };
 }
+
+export interface FilaAdminReserva {
+  id: string;
+  tipo: Tipo;
+  estado: FilaReserva["estado"];
+  codigo: string | null;
+  ruta: string;
+  email: string;
+  precio: string;
+  costo: string;
+  moneda: string;
+  prueba: boolean;
+  cancelada: string | null;
+  creado: string;
+}
+
+/** Para el admin: las últimas reservas, con su estado. */
+export function listarReservas() {
+  return sql<FilaAdminReserva>(
+    `select id, tipo, estado, codigo, ruta, email, precio, costo, moneda, prueba, cancelada, creado from reservas order by creado desc limit 50`,
+  );
+}
+
+/** El admin cancela una reserva (la misma cancelación que el link del email). */
+export async function cancelarDesdeAdmin(id: string) {
+  const [r] = await sql<{ token_cancelar: string | null }>(`select token_cancelar from reservas where id = $1`, [id]);
+  if (!r?.token_cancelar) return { estado: "invalida" as const };
+  return cancelarReserva(r.token_cancelar);
+}
