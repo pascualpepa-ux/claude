@@ -42,6 +42,7 @@ export async function POST(req: Request) {
   } catch (e) {
     console.error("emitir pasaje:", e);
     if (e instanceof ErrorDuffel && e.status < 500) return Response.json({ error: "oferta" }, { status: 409 });
+    if (e instanceof ErrorDuffel) return Response.json({ error: "aerolinea" }, { status: 502 });
     return Response.json({ error: "servidor" }, { status: 502 });
   }
 }
