@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChartBar, ChartLine } from "@phosphor-icons/react/dist/ssr";
 import { useIdioma } from "./ProveedorIdioma";
+import { LOCALE } from "@/lib/idioma";
 
 export interface Punto {
   clave: string;
@@ -35,10 +36,15 @@ interface Props {
   conSelector?: boolean;
   /** Cada cuántos puntos se escribe una etiqueta en el eje: en pantallas angostas (< 480px) y anchas. */
   cadaEtiqueta?: { angosto: number; ancho: number };
+  /** Para usar el gráfico con otra cosa que visitantes (por ejemplo, ganancias). */
+  columnaValor?: string;
+  /** Si los valores son plata: se muestran con esta moneda. */
+  moneda?: string;
 }
 
-export function GraficoVisitas({ puntos, descripcion, columnaEtiqueta, modoInicial = "barras", conSelector = false, cadaEtiqueta }: Props) {
-  const { t } = useIdioma();
+export function GraficoVisitas({ puntos, descripcion, columnaEtiqueta, modoInicial = "barras", conSelector = false, cadaEtiqueta, columnaValor, moneda }: Props) {
+  const { idioma, t } = useIdioma();
+  const plata = (v: number) => v.toLocaleString(LOCALE[idioma], { style: "currency", currency: moneda ?? "EUR" });
   const [modo, setModo] = useState(modoInicial);
   const [activo, setActivo] = useState<number | null>(null);
   // El dibujo usa el ancho real del contenedor para que el texto no se achique en el celular.
@@ -168,7 +174,7 @@ export function GraficoVisitas({ puntos, descripcion, columnaEtiqueta, modoInici
             }}
           >
             <p className="whitespace-nowrap text-arena-600 dark:text-arena-400">{sel.etiqueta}</p>
-            <p className="whitespace-nowrap font-semibold tabular-nums">{t.admin.visitantes(sel.valor)}</p>
+            <p className="whitespace-nowrap font-semibold tabular-nums">{moneda ? plata(sel.valor) : t.admin.visitantes(sel.valor)}</p>
           </div>
         )}
       </div>
@@ -180,14 +186,14 @@ export function GraficoVisitas({ puntos, descripcion, columnaEtiqueta, modoInici
             <thead>
               <tr className="text-left text-arena-500 dark:text-arena-400">
                 <th className="py-1 font-medium">{columnaEtiqueta}</th>
-                <th className="py-1 text-right font-medium">{t.admin.columnaVisitantes}</th>
+                <th className="py-1 text-right font-medium">{columnaValor ?? t.admin.columnaVisitantes}</th>
               </tr>
             </thead>
             <tbody>
               {[...puntos].reverse().map((p) => (
                 <tr key={p.clave} className="border-t border-arena-100 dark:border-arena-800">
                   <td className="py-1">{p.etiqueta}</td>
-                  <td className="py-1 text-right">{p.valor}</td>
+                  <td className="py-1 text-right">{moneda ? plata(p.valor) : p.valor}</td>
                 </tr>
               ))}
             </tbody>

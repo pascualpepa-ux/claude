@@ -53,6 +53,8 @@ export function PanelGanancias({ idioma, datos, prueba, banco }: { idioma: Idiom
             descripcion={es ? "Ganancia por día en los últimos 30 días" : "Earnings per day in the last 30 days"}
             columnaEtiqueta={es ? "Día" : "Day"}
             cadaEtiqueta={{ angosto: 14, ancho: 7 }}
+            columnaValor={es ? "Ganado" : "Earned"}
+            moneda={datos.moneda}
           />
         </div>
       )}
