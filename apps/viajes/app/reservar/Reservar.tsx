@@ -8,6 +8,7 @@ import { LOCALE, type Idioma } from "@/lib/idioma";
 import type { Lugar } from "@/lib/lugares-tipos";
 import type { Oferta, Pasajero } from "@/lib/duffel";
 import { guardarReserva } from "@/lib/almacen";
+import { CLAVE_OFERTA_VUELO } from "@/components/OfertasReales";
 
 const T = {
   es: {
@@ -158,7 +159,19 @@ export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba
 
   // Si viene de un viaje armado, busca solo apenas abre.
   useEffect(() => {
-    if (inicial) void buscar();
+    if (!inicial) return;
+    // Viene de "Comprar" en el viaje armado: abre directo en los datos del pasajero, sin volver a buscar.
+    try {
+      const guardada = new URLSearchParams(window.location.search).get("elegida") ? sessionStorage.getItem(CLAVE_OFERTA_VUELO) : null;
+      if (guardada) {
+        sessionStorage.removeItem(CLAVE_OFERTA_VUELO);
+        const o = JSON.parse(guardada) as Oferta;
+        setOfertas([o]);
+        elegir(o);
+        return;
+      }
+    } catch {}
+    void buscar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

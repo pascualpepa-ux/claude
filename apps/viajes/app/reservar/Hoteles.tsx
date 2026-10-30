@@ -8,6 +8,7 @@ import { LOCALE, type Idioma } from "@/lib/idioma";
 import type { Lugar } from "@/lib/lugares-tipos";
 import type { Huesped, OfertaHotel } from "@/lib/hoteles";
 import { guardarReserva } from "@/lib/almacen";
+import { CLAVE_OFERTA_HOTEL } from "@/components/OfertasReales";
 
 const T = {
   es: {
@@ -170,7 +171,20 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
 
   // Si viene de un viaje armado, busca solo apenas abre.
   useEffect(() => {
-    if (inicial) void buscar();
+    if (!inicial) return;
+    // Viene de "Reservar" en el viaje armado: abre directo en los datos, sin volver a buscar.
+    try {
+      const guardada = new URLSearchParams(window.location.search).get("elegida") ? sessionStorage.getItem(CLAVE_OFERTA_HOTEL) : null;
+      if (guardada) {
+        sessionStorage.removeItem(CLAVE_OFERTA_HOTEL);
+        const h = JSON.parse(guardada) as OfertaHotel;
+        setHoteles([h]);
+        setElegido(h);
+        setPaso("datos");
+        return;
+      }
+    } catch {}
+    void buscar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

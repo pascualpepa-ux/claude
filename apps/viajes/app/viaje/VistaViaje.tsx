@@ -19,6 +19,7 @@ import type { DatoClima } from "@/lib/clima-real";
 import { useIdioma } from "@/components/ProveedorIdioma";
 import { calcularResumen, costoHotel, nochesPorCiudad } from "@/lib/presupuesto";
 import type { OpcionHotel, OpcionVuelo, TripInput, TripPlan } from "@/lib/types";
+import { HotelesAReservar, VuelosAComprar } from "@/components/OfertasReales";
 
 const PASOS_AGENTES = 6;
 
@@ -478,13 +479,13 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
                 : t.viaje.vuelosUna}
             </p>
             {RESERVAS_ACTIVAS && input.aeropuertoOrigen && plan.ruta[0]?.aeropuerto && (
-              <a
-                href={`/reservar?origen=${input.aeropuertoOrigen}&destino=${plan.ruta[0].aeropuerto}&ida=${input.fechaIda}&vuelta=${input.fechaVuelta}&adultos=${Math.min(6, resumen.personas)}`}
-                className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-oliva-700 px-5 py-4 font-semibold text-white transition hover:bg-oliva-800 active:scale-[0.99] dark:bg-oliva-300 dark:text-arena-950"
-              >
-                <span>{idioma === "es" ? "Comprá el vuelo acá mismo, en Rumbo Traveling" : "Book the flight right here, on Rumbo Traveling"}</span>
-                <span aria-hidden>→</span>
-              </a>
+              <VuelosAComprar
+                origen={input.aeropuertoOrigen}
+                destino={plan.ruta[0].aeropuerto}
+                ida={input.fechaIda}
+                vuelta={input.fechaVuelta}
+                adultos={Math.min(6, resumen.personas)}
+              />
             )}
             <div className="mt-4 grid gap-4">
               {plan.vuelos.map((v) => (
@@ -512,18 +513,12 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
               <div key={r.clave} className="mt-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-sm font-medium text-arena-600 dark:text-arena-400">{t.viaje.ciudadNoches(r.ciudad, r.dias)}</h3>
-                  {RESERVAS_ACTIVAS && r.aeropuerto && (() => {
-                    const { entrada, salida } = fechasHotel(plan, r.clave);
-                    return (
-                      <a
-                        href={`/reservar?tipo=hotel&destino=${r.aeropuerto}&entrada=${entrada}&salida=${salida}&adultos=${Math.min(4, resumen.personas)}`}
-                        className="rounded-xl bg-oliva-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-oliva-800 dark:bg-oliva-300 dark:text-arena-950"
-                      >
-                        {idioma === "es" ? `Reservar hotel en ${r.ciudad} acá` : `Book a hotel in ${r.ciudad} here`}
-                      </a>
-                    );
-                  })()}
+
                 </div>
+                {RESERVAS_ACTIVAS && r.aeropuerto && (() => {
+                  const { entrada, salida } = fechasHotel(plan, r.clave);
+                  return <HotelesAReservar ciudad={r.ciudad} aeropuerto={r.aeropuerto} entrada={entrada} salida={salida} adultos={Math.min(4, resumen.personas)} />;
+                })()}
                 <div className="mt-3 grid gap-4">
                   {(plan.hoteles[r.clave] ?? []).map((h) => (
                     <TarjetaHotel

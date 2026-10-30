@@ -79,6 +79,14 @@ export default async function Inicio() {
                 {ti.planificar}
                 <ArrowRight size={20} weight="bold" aria-hidden />
               </Link>
+              {process.env.NEXT_PUBLIC_RESERVAS === "1" && (
+                <Link
+                  href="/reservar"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-lg font-semibold text-oliva-900 shadow-lg shadow-black/20 transition hover:bg-arena-100 active:scale-[0.98]"
+                >
+                  {idioma === "es" ? "Comprar vuelos y hoteles" : "Book flights & hotels"}
+                </Link>
+              )}
               <Link
                 href="/viaje?ejemplo=1"
                 className="inline-flex items-center rounded-xl bg-white/10 px-6 py-3.5 text-lg font-medium text-white ring-1 ring-white/25 backdrop-blur transition hover:bg-white/20 active:scale-[0.98]"

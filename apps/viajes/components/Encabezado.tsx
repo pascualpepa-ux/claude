@@ -21,7 +21,7 @@ export function Encabezado() {
           {process.env.NEXT_PUBLIC_RESERVAS === "1" && (
             <Link
               href="/reservar"
-              className="hidden shrink-0 rounded-xl px-3 py-2 text-sm font-medium text-arena-800 transition hover:bg-arena-100 md:inline-block dark:text-arena-200 dark:hover:bg-arena-800"
+              className="hidden shrink-0 rounded-xl px-3 py-2 text-sm font-semibold text-oliva-800 transition hover:bg-arena-100 sm:inline-block dark:text-oliva-200 dark:hover:bg-arena-800"
             >
               {idioma === "es" ? "Vuelos y hoteles" : "Flights & hotels"}
             </Link>
