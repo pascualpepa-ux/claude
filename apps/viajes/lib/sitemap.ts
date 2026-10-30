@@ -10,7 +10,7 @@ import { urlEnIdioma } from "./seo";
 // (ej. "/viaje?ejemplo=1&lang=en") rompe el XML y Google no puede leerlo.
 
 /** Carpetas privadas: administración, confirmación y baja de emails, la pausa y el viaje de cada persona. */
-export const PRIVADAS = ["/admin", "/suscripcion", "/pausa", "/viaje", "/api", "/concurso"];
+export const PRIVADAS = ["/admin", "/suscripcion", "/pausa", "/viaje", "/api", "/concurso", "/reservar"];
 
 /** Páginas públicas que no son una carpeta propia: el viaje de ejemplo y cada guía (ruta dinámica). */
 const EXTRA = ["/viaje?ejemplo=1", ...GUIAS.map((g) => `/guias/${g.slug}`)];

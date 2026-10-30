@@ -60,6 +60,19 @@ create table if not exists sorteos (
   creado timestamptz not null default now()
 );
 alter table sorteos add column if not exists modo text not null default 'azar';
+-- Pasajes vendidos en la web (Duffel). "prueba" marca los del modo de prueba.
+create table if not exists reservas (
+  id uuid primary key default gen_random_uuid(),
+  codigo text not null,
+  orden text not null,
+  email text not null,
+  ruta text not null,
+  precio numeric not null,
+  costo numeric not null,
+  moneda text not null,
+  prueba boolean not null,
+  creado timestamptz not null default now()
+);
 create table if not exists vigilancias (
   id int primary key,
   ultima timestamptz not null
