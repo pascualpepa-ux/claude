@@ -10,7 +10,7 @@ import { LOCALE, type Idioma } from "@/lib/idioma";
 import type { Lugar } from "@/lib/lugares-tipos";
 import { BuscadorCiudad } from "@/components/BuscadorCiudad";
 import { useIdioma } from "@/components/ProveedorIdioma";
-import type { Clase, Equipaje, ModoPresupuesto, Plan, TipoHotel, TripInput } from "@/lib/types";
+import type { Clase, Equipaje, ModoPresupuesto, Plan, TripInput } from "@/lib/types";
 
 
 interface Borrador extends Omit<TripInput, "presupuestoMin" | "presupuestoMax"> {
@@ -42,14 +42,14 @@ function borradorInicial(): Borrador {
     modoPresupuesto: "persona",
     aerolinea: "",
     clase: "economica",
-    tipoHotel: "3",
+    tipoHotel: "hostel",
     hotelPreferido: "",
     plan: "equilibrado",
     equipaje: "valija",
   };
 }
 
-const TOTAL_PASOS = 7;
+const TOTAL_PASOS = 6;
 
 type Errores = Partial<Record<string, string>>;
 
@@ -501,30 +501,6 @@ export function Asistente() {
           )}
 
           {paso === 5 && (
-            <>
-              <Opciones<TipoHotel>
-                etiqueta={A.tipoAlojamiento}
-                valor={b.tipoHotel}
-                onCambio={(v) => cambiar("tipoHotel", v)}
-                columnas={3}
-                opciones={[
-                  { valor: "hostel", titulo: A.alojamientos["hostel"] },
-                  { valor: "3", titulo: A.alojamientos["3"] },
-                  { valor: "4", titulo: A.alojamientos["4"] },
-                  { valor: "5", titulo: A.alojamientos["5"] },
-                  { valor: "depto", titulo: A.alojamientos["depto"] },
-                  { valor: "propio", titulo: A.alojamientos["propio"], detalle: A.propioDetalle },
-                ]}
-              />
-              {b.tipoHotel !== "propio" && (
-                <Campo etiqueta={A.hotelPreferido} ayuda={A.hotelAyuda}>
-                  {(p) => <input {...p} value={b.hotelPreferido} onChange={(e) => cambiar("hotelPreferido", e.target.value)} placeholder={A.nombreHotel} autoComplete="off" />}
-                </Campo>
-              )}
-            </>
-          )}
-
-          {paso === 6 && (
             <Opciones<Plan>
               etiqueta={A.estilo}
               valor={b.plan}
