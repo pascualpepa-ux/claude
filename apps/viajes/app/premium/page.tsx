@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Crown } from "@phosphor-icons/react/dist/ssr";
 import { FormularioCuenta } from "@/components/FormularioCuenta";
 import { BotonSalirCuenta } from "@/components/BotonSalirCuenta";
+import { ViajesGuardadosPremium } from "@/components/ViajesGuardadosPremium";
 import { cuentasConfiguradas, esPremium, usuarioDeSesion } from "@/lib/cuentas";
 import { dbConfigurada } from "@/lib/db";
 import { textosActuales } from "@/lib/idioma-servidor";
@@ -49,7 +50,10 @@ export default async function Premium() {
         <div className="mt-8 grid gap-4">
           <p className="text-lg font-medium">{P.hola(usuario.email)}</p>
           {esPremium(usuario) ? (
-            <p className="rounded-xl bg-oliva-100/60 px-4 py-3 text-oliva-800 dark:bg-oliva-900/40 dark:text-oliva-100">{P.yaEresPremium}</p>
+            <>
+              <p className="rounded-xl bg-oliva-100/60 px-4 py-3 text-oliva-800 dark:bg-oliva-900/40 dark:text-oliva-100">{P.yaEresPremium}</p>
+              <ViajesGuardadosPremium />
+            </>
           ) : (
             <div className="grid gap-2">
               <button
