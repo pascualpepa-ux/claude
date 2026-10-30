@@ -69,7 +69,18 @@ interface HotelLite {
   address?: string;
 }
 
-export async function buscarHoteles(b: BusquedaHotel): Promise<OfertaHotel[]> {
+/** IDs de LiteAPI para tipos de alojamiento tipo "Hostel" (no son fijos: se consultan una vez y se guardan en memoria). */
+let idsHostalCache: Promise<number[]> | null = null;
+function idsHostal(): Promise<number[]> {
+  if (!idsHostalCache) {
+    idsHostalCache = pedir<{ id: number; name: string }[]>(`${API}/data/hotelTypes`)
+      .then((tipos) => tipos.filter((t) => /hostel/i.test(t.name)).map((t) => t.id))
+      .catch(() => []);
+  }
+  return idsHostalCache;
+}
+
+async function pedirOfertas(b: BusquedaHotel, hotelTypeIds?: number[]): Promise<OfertaHotel[]> {
   const r = await fetch(`${API}/hotels/rates`, {
     method: "POST",
     headers: { "X-API-Key": process.env.LITEAPI_KEY ?? "", "Content-Type": "application/json", Accept: "application/json" },
@@ -85,6 +96,7 @@ export async function buscarHoteles(b: BusquedaHotel): Promise<OfertaHotel[]> {
       timeout: 12,
       maxRatesPerHotel: 1,
       includeHotelData: true,
+      ...(hotelTypeIds?.length ? { hotelTypeIds } : {}),
     }),
     cache: "no-store",
   });
@@ -117,7 +129,20 @@ export async function buscarHoteles(b: BusquedaHotel): Promise<OfertaHotel[]> {
       moneda: total.currency,
     });
   }
-  return ofertas.sort((a, b) => a.precio - b.precio).slice(0, 20);
+  return ofertas;
+}
+
+/** Busca hoteles reales; primero hostales (público joven, más baratos y con más onda), después el resto, siempre por precio. */
+export async function buscarHoteles(b: BusquedaHotel): Promise<OfertaHotel[]> {
+  const hostalIds = await idsHostal();
+  const [general, hostales] = await Promise.all([
+    pedirOfertas(b),
+    hostalIds.length ? pedirOfertas(b, hostalIds).catch(() => []) : Promise.resolve([]),
+  ]);
+  const hostalesOrdenados = hostales.sort((a, b) => a.precio - b.precio);
+  const idsYaIncluidos = new Set(hostalesOrdenados.map((h) => h.hotelId));
+  const restoOrdenado = general.filter((h) => !idsYaIncluidos.has(h.hotelId)).sort((a, b) => a.precio - b.precio);
+  return [...hostalesOrdenados, ...restoOrdenado].slice(0, 20);
 }
 
 /** Confirma el precio con el hotel justo antes de reservar. */
