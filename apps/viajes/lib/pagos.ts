@@ -19,7 +19,7 @@ function formulario(datos: Record<string, string | number | undefined>) {
   return f;
 }
 
-async function stripe<T>(ruta: string, datos?: Record<string, string | number | undefined>, idempotencia?: string): Promise<T> {
+export async function stripe<T>(ruta: string, datos?: Record<string, string | number | undefined>, idempotencia?: string): Promise<T> {
   const res = await fetch(`${API}${ruta}`, {
     method: datos ? "POST" : "GET",
     headers: {

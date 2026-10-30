@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { Crown } from "@phosphor-icons/react/dist/ssr";
 import { FormularioCuenta } from "@/components/FormularioCuenta";
 import { BotonSalirCuenta } from "@/components/BotonSalirCuenta";
+import { BotonSuscribirme } from "@/components/BotonSuscribirme";
+import { BotonPortalPremium } from "@/components/BotonPortalPremium";
 import { ViajesGuardadosPremium } from "@/components/ViajesGuardadosPremium";
 import { cuentasConfiguradas, esPremium, usuarioDeSesion } from "@/lib/cuentas";
 import { dbConfigurada } from "@/lib/db";
+import { premiumPagosActivos } from "@/lib/premium-pagos";
 import { textosActuales } from "@/lib/idioma-servidor";
 import { metadatosPagina } from "@/lib/seo";
 
@@ -52,8 +55,11 @@ export default async function Premium() {
           {esPremium(usuario) ? (
             <>
               <p className="rounded-xl bg-oliva-100/60 px-4 py-3 text-oliva-800 dark:bg-oliva-900/40 dark:text-oliva-100">{P.yaEresPremium}</p>
+              {usuario.stripe_customer_id && <BotonPortalPremium />}
               <ViajesGuardadosPremium />
             </>
+          ) : premiumPagosActivos() ? (
+            <BotonSuscribirme />
           ) : (
             <div className="grid gap-2">
               <button

@@ -96,6 +96,19 @@ export async function crearUsuario(email: string, contrasena: string): Promise<U
 
 export const esPremium = (u: Pick<Usuario, "premium_estado">) => u.premium_estado === "activo";
 
+/** Guarda el id de cliente de Stripe la primera vez que una cuenta arranca el checkout de Premium. */
+export async function guardarClienteStripe(usuarioId: string, customerId: string): Promise<void> {
+  await sql("update usuarios set stripe_customer_id = $1, actualizado = now() where id = $2", [customerId, usuarioId]);
+}
+
+/** Actualiza el estado Premium de la cuenta dueña de un cliente de Stripe (lo llama el webhook de suscripciones). */
+export async function actualizarPremiumPorCliente(customerId: string, estado: Usuario["premium_estado"], subscriptionId: string | null): Promise<void> {
+  await sql(
+    "update usuarios set premium_estado = $1, stripe_subscription_id = $2, actualizado = now() where stripe_customer_id = $3",
+    [estado, subscriptionId, customerId],
+  );
+}
+
 /** El usuario con sesión iniciada en esta visita (según la cookie), o null. Solo servidor. */
 export async function usuarioDeSesion(): Promise<Usuario | null> {
   if (!dbConfigurada() || !cuentasConfiguradas()) return null;
