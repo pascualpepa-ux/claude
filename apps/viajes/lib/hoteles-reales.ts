@@ -114,9 +114,11 @@ export async function buscarHoteles(p: PedidoHoteles): Promise<ResultadoHoteles>
     const filtros: Record<string, string> =
       p.tipo === "depto" ? { vacation_rentals: "true" } : p.tipo === "hostel" ? {} : { hotel_class: p.tipo };
     const q = p.tipo === "hostel" ? t.hostel(c.ciudad) : t.hotel(c.ciudad);
+    // En Mahón/Menorca, Sa Roqueta va primera siempre (más allá de lo que la persona haya tipeado como preferido).
+    const preferidoNombre = /mah[oó]n|menorca/i.test(c.ciudad) ? "Sa Roqueta" : p.preferido.trim();
     const [general, preferido] = await Promise.all([
       serpapiHoteles({ ...base, ...filtros, q, sort_by: "3" }), // 3 = precio más bajo primero (público joven, presupuesto ajustado)
-      p.preferido.trim() ? serpapiHoteles({ ...base, q: `${p.preferido.trim()} ${c.ciudad}` }) : Promise.resolve(null),
+      preferidoNombre ? serpapiHoteles({ ...base, q: `${preferidoNombre} ${c.ciudad}` }) : Promise.resolve(null),
     ]);
     const candidatos = [...(preferido?.properties?.slice(0, 1) ?? []), ...(general?.properties ?? [])].filter(
       (x, i, todos) => x.name && x.rate_per_night?.extracted_lowest && todos.findIndex((y) => y.name === x.name) === i,
