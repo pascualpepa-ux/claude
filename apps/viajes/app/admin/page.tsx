@@ -109,9 +109,6 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               </Link>
             ))}
           </nav>
-          <Link href="/admin/juegos" className="rounded-xl bg-oliva-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-oliva-800 dark:bg-oliva-300 dark:text-arena-950">
-            🎮 Juegos
-          </Link>
           <BotonSalir />
         </div>
       </header>
