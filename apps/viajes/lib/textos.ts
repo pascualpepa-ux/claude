@@ -57,9 +57,9 @@ const es = {
     youtubeBoton: "Ver el canal de YouTube",
     opinionTitulo: "¿Qué te parece Rumbo?",
     opinionBajada: "Contanos qué te gustó y qué mejorarías. Es anónimo y lo leemos todo.",
-    agentesTitulo: "Diez agentes trabajan en tu viaje.",
+    agentesTitulo: "Por qué hice esto",
     agentesBajada:
-      "Cada uno tiene una tarea. Tres buscan el clima, los vuelos y los hoteles, y otros tres revisan cada dato con una segunda fuente antes de mostrártelo. Uno vigila tu viaje cada 30 minutos para avisarte si algo cambia, otro escribe esos avisos en tu idioma y otro controla que cada email esté bien y te llegue. Y el décimo es tu guía: el asistente del chat que te acompaña y responde lo que le preguntes. Si algo no se puede confirmar, no lo inventamos: queda marcado.",
+      "Soy Pascual Pepa. Sé que Rumbo Traveling no le va a ganar a Booking.com ni a TripAdvisor — tienen recursos que yo nunca voy a tener. Lo que no tienen es un planificador pensado para menores de 25. La mayoría de los sitios te muestran los mismos hoteles de siempre y planes genéricos, sin importar quién pregunte. Este busca hostales baratos, planes que no rompen el presupuesto, y qué bares vale la pena conocer — porque a esa edad, ahorrar pesa más que una reseña de cinco estrellas. La idea me la dio mi prima, que notó que nadie más estaba haciendo algo así. Así que lo hice yo.",
     busca: "Busca",
     verifica: "Verifica",
     agentes: {
@@ -633,9 +633,9 @@ const en: Textos = {
     youtubeBoton: "Visit our YouTube channel",
     opinionTitulo: "What do you think of Rumbo?",
     opinionBajada: "Tell us what you liked and what you'd improve. It's anonymous and we read every word.",
-    agentesTitulo: "Ten agents work on your trip.",
+    agentesTitulo: "Why I built this",
     agentesBajada:
-      "Each one has a job. Three look up the weather, flights and hotels, and three more check every detail against a second source before you see it. One watches your trip every 30 minutes so it can tell you if anything changes, another writes those notifications in your language, and another makes sure every email is right and actually reaches you. And the tenth is your guide: the chat assistant that stays with you and answers whatever you ask. If something can't be confirmed, we don't make it up: it gets flagged.",
+      "I'm Pascual Pepa. I know Rumbo Traveling isn't going to out-rank Booking.com or TripAdvisor — they have resources I'll never have. What they don't have is a planner built for people under 25. Most sites show you the same hotels and generic itineraries no matter who's asking. This one looks for cheap hostels, budget-friendly plans, and the bars worth checking out — because at that age, saving money matters more than a five-star review. The idea came from my cousin, who pointed out nobody else was really doing this. So I did.",
     busca: "Searches",
     verifica: "Checks",
     agentes: {
