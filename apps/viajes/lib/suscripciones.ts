@@ -162,3 +162,16 @@ export async function listarSuscriptores(): Promise<FilaSuscriptor[]> {
      order by s.creado desc limit 500`,
   );
 }
+
+/**
+ * Quien compra en la web queda suscripto a las novedades (ya es cliente: se le avisa al comprar y puede
+ * marcar que no quiere, y cada email trae el link para darse de baja). Si ya estaba, no se toca nada.
+ */
+export async function suscribirComprador(emailCrudo: string, idioma: Idioma = "es") {
+  const email = emailCrudo.trim().toLowerCase();
+  await sql(
+    `insert into suscriptores (email, idioma, token_baja, estado, confirmado) values ($1, $2, $3, 'activo', now())
+     on conflict (email) do nothing`,
+    [email, idioma, token()],
+  );
+}

@@ -21,6 +21,11 @@ const T = {
     buscando: "Buscando hoteles con lugar…",
     sinHoteles: "No encontramos hoteles con lugar para esas fechas. Probá con otras.",
     elegir: "Elegir",
+    verFotos: "Ver la habitación",
+    ocultarFotos: "Ocultar fotos",
+    laHabitacion: "La habitación",
+    elHotel: "El hotel",
+    sinFotos: "Este hotel no tiene fotos de la habitación.",
     noches: (n: number) => (n === 1 ? "1 noche" : `${n} noches`),
     reembolsable: "Cancelación gratis",
     noReembolsable: "No reembolsable",
@@ -31,6 +36,8 @@ const T = {
     email: "Email (te mandamos la reserva acá)",
     telefono: "Teléfono con código de país (+34…)",
     pagar: (p: string) => `Pagar ${p} y reservar`,
+    avisoEmail: "Te mandamos la confirmación a este email. También vas a recibir novedades y ofertas de Rumbo Traveling (te podés dar de baja cuando quieras).",
+    sinNovedades: "No quiero recibir novedades",
     pagando: "Reservando el hotel…",
     pagoPrueba: "En modo prueba no se pide tarjeta: el pago es simulado.",
     listo: "¡Listo! Tu hotel está reservado",
@@ -59,6 +66,11 @@ const T = {
     buscando: "Searching hotels with availability…",
     sinHoteles: "No hotels available for those dates. Try other dates.",
     elegir: "Select",
+    verFotos: "See the room",
+    ocultarFotos: "Hide photos",
+    laHabitacion: "The room",
+    elHotel: "The hotel",
+    sinFotos: "This hotel has no room photos.",
     noches: (n: number) => (n === 1 ? "1 night" : `${n} nights`),
     reembolsable: "Free cancellation",
     noReembolsable: "Non-refundable",
@@ -69,6 +81,8 @@ const T = {
     email: "Email (we send the booking here)",
     telefono: "Phone with country code (+34…)",
     pagar: (p: string) => `Pay ${p} and book`,
+    avisoEmail: "We'll send the confirmation to this email. You'll also get Rumbo Traveling news and deals (unsubscribe any time).",
+    sinNovedades: "I don't want news",
     pagando: "Booking the hotel…",
     pagoPrueba: "In test mode no card is needed: the payment is simulated.",
     listo: "Done! Your hotel is booked",
@@ -91,6 +105,41 @@ const T = {
 type Paso = "buscar" | "elegir" | "datos" | "listo";
 const dia = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
 
+/** Fotos de la habitación (y del hotel), cargadas recién cuando se piden. */
+function Galeria({ hotelId, habitacion, t }: { hotelId: string; habitacion: string; t: (typeof T)["es"] }) {
+  const [fotos, setFotos] = useState<{ habitacion: string[]; hotel: string[]; nombreHabitacion: string } | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    fetch(`/api/reservas/hoteles/fotos?hotelId=${encodeURIComponent(hotelId)}&habitacion=${encodeURIComponent(habitacion)}`)
+      .then((r) => r.json())
+      .then((j) => vivo && setFotos({ habitacion: j.habitacion ?? [], hotel: j.hotel ?? [], nombreHabitacion: j.nombreHabitacion ?? "" }))
+      .catch(() => vivo && setFotos({ habitacion: [], hotel: [], nombreHabitacion: "" }));
+    return () => {
+      vivo = false;
+    };
+  }, [hotelId, habitacion]);
+  if (!fotos) return <p className="flex items-center gap-2 text-sm text-arena-500"><CircleNotch size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />…</p>;
+  const tira = (titulo: string, urls: string[]) =>
+    urls.length ? (
+      <div>
+        <p className="mb-2 text-sm font-semibold">{titulo}</p>
+        <ul className="flex snap-x gap-2 overflow-x-auto pb-2">
+          {urls.map((u) => (
+            <li key={u} className="shrink-0 snap-start">
+              <img src={u} alt="" loading="lazy" className="h-36 w-52 rounded-xl object-cover sm:h-44 sm:w-64" />
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : null;
+  return (
+    <div className="grid gap-3">
+      {fotos.habitacion.length ? tira(`${t.laHabitacion}${fotos.nombreHabitacion ? ` · ${fotos.nombreHabitacion}` : ""}`, fotos.habitacion) : <p className="text-sm text-arena-500">{t.sinFotos}</p>}
+      {tira(t.elHotel, fotos.hotel)}
+    </div>
+  );
+}
+
 export interface InicialHotel {
   destino: string;
   entrada: string;
@@ -112,6 +161,8 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [codigo, setCodigo] = useState("");
+  const [sinNovedades, setSinNovedades] = useState(false);
+  const [conFotos, setConFotos] = useState<string | null>(null);
 
   const noches = Math.max(1, Math.round((Date.parse(salida) - Date.parse(entrada)) / 86_400_000));
   const dinero = (n: number, moneda: string) => n.toLocaleString(LOCALE[idioma], { style: "currency", currency: moneda });
@@ -159,7 +210,7 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
       const r = await fetch("/api/reservas/hoteles/reservar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ oferta: elegido, entrada, salida, adultos, huesped: h }),
+        body: JSON.stringify({ oferta: elegido, entrada, salida, adultos, huesped: h, novedades: !sinNovedades }),
       });
       const j = await r.json().catch(() => ({}));
       if (r.ok) {
@@ -281,7 +332,17 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
             <ul className="mt-5 grid gap-3">
               {hoteles.map((h) => (
                 <li key={h.ofertaId} className="grid gap-4 rounded-2xl border border-arena-200 bg-papel p-4 sm:grid-cols-[1fr_auto] sm:items-center dark:border-arena-800 dark:bg-arena-900">
-                  <Ficha h={h} />
+                  <div>
+                    <Ficha h={h} />
+                    <button
+                      type="button"
+                      onClick={() => setConFotos((x) => (x === h.ofertaId ? null : h.ofertaId))}
+                      aria-expanded={conFotos === h.ofertaId}
+                      className="mt-3 text-sm font-medium text-oliva-700 underline underline-offset-2 dark:text-oliva-300"
+                    >
+                      📷 {conFotos === h.ofertaId ? t.ocultarFotos : t.verFotos}
+                    </button>
+                  </div>
                   <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
                     <p className="text-right">
                       <span className="block text-2xl font-bold tabular-nums">{dinero(h.precio, h.moneda)}</span>
@@ -300,6 +361,11 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
                       {t.elegir}
                     </button>
                   </div>
+                  {conFotos === h.ofertaId && (
+                    <div className="sm:col-span-2">
+                      <Galeria hotelId={h.hotelId} habitacion={h.habitacion} t={t as (typeof T)["es"]} />
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -313,8 +379,9 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
             <ArrowLeft size={16} aria-hidden />
             {t.volver}
           </button>
-          <div className="rounded-2xl border border-arena-200 bg-papel p-4 dark:border-arena-800 dark:bg-arena-900">
+          <div className="grid gap-4 rounded-2xl border border-arena-200 bg-papel p-4 dark:border-arena-800 dark:bg-arena-900">
             <Ficha h={elegido} />
+            <Galeria hotelId={elegido.hotelId} habitacion={elegido.habitacion} t={t as (typeof T)["es"]} />
           </div>
           <fieldset className="grid gap-4 rounded-2xl border border-arena-200 p-5 sm:grid-cols-2 dark:border-arena-800">
             <legend className="px-1 font-semibold">{t.datos}</legend>
@@ -333,6 +400,13 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
               <input required type="tel" autoComplete="tel" placeholder="+34 600 000 000" value={huesped.telefono} onChange={(e) => setHuesped((h) => ({ ...h, telefono: e.target.value }))} className={campo} />
             </label>
           </fieldset>
+          <div className="grid gap-2 text-sm text-arena-600 dark:text-arena-400">
+            <p>{t.avisoEmail}</p>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={sinNovedades} onChange={(e) => setSinNovedades(e.target.checked)} className="size-4 accent-oliva-700" />
+              {t.sinNovedades}
+            </label>
+          </div>
           {prueba && <p className="text-sm text-arena-600 dark:text-arena-400">{t.pagoPrueba}</p>}
           <button type="submit" disabled={ocupado} className={`${botonPrincipal} text-lg`}>
             {ocupado ? (

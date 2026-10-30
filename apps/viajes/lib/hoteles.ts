@@ -167,3 +167,27 @@ export async function cancelarHotel(bookingId: string) {
   if (!res.ok || j.error) throw new ErrorHoteles(res.status >= 400 ? res.status : 400, j.error?.message ?? "error");
   return { estado: j.data?.status ?? "", devolucion: j.data?.refund_amount ?? j.data?.refundAmount ?? 0, moneda: j.data?.currency ?? "" };
 }
+
+interface FichaHotelLite {
+  hotelImages?: { url?: string; urlHd?: string; caption?: string; defaultImage?: boolean }[];
+  rooms?: { roomName?: string; photos?: { url?: string; hd_url?: string }[] }[];
+}
+
+const palabras = (t: string) => new Set(t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/).filter((w) => w.length > 2));
+
+/**
+ * Fotos para mostrar antes de reservar: primero las de la habitación elegida (la que más se parece por nombre),
+ * después fotos del hotel. Hasta 6 de cada una.
+ */
+export async function fotosHotel(hotelId: string, habitacion: string) {
+  const d = await pedir<FichaHotelLite>(`${API}/data/hotel?hotelId=${encodeURIComponent(hotelId)}`);
+  const buscadas = palabras(habitacion);
+  const puntaje = (nombre: string) => [...palabras(nombre)].filter((w) => buscadas.has(w)).length;
+  const salas = (d.rooms ?? []).filter((r) => r.photos?.length).sort((a, b) => puntaje(b.roomName ?? "") - puntaje(a.roomName ?? ""));
+  const cuarto = (salas[0]?.photos ?? []).map((p) => p.hd_url || p.url).filter((u): u is string => !!u).slice(0, 6);
+  const hotel = (d.hotelImages ?? [])
+    .map((i) => i.urlHd || i.url)
+    .filter((u): u is string => !!u)
+    .slice(0, 6);
+  return { habitacion: cuarto, nombreHabitacion: salas[0]?.roomName ?? "", hotel };
+}

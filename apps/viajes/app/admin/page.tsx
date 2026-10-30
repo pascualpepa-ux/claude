@@ -20,6 +20,10 @@ import { textosActuales } from "@/lib/idioma-servidor";
 import { FormularioAdmin } from "./FormularioAdmin";
 import { BotonSalir } from "./BotonSalir";
 import { PanelSorteo } from "./PanelSorteo";
+import { PanelGanancias } from "./PanelGanancias";
+import { ganancias } from "@/lib/ganancias";
+import { modoPrueba, duffelConfigurado } from "@/lib/duffel";
+import { hotelesConfigurado, hotelesPrueba } from "@/lib/hoteles";
 import { participantes, sorteoActivo, sorteosHechos } from "@/lib/sorteo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -59,6 +63,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
 
   const pedido = Number((await searchParams).dias);
   const periodo = PERIODOS.find((p) => p === pedido) ?? 30;
+  // Ganancias: si las ventas reales ya empezaron se muestran esas; si no, las de prueba (marcadas).
+  const ventas = (duffelConfigurado() || hotelesConfigurado()) && dbConfigurada();
+  const enPrueba = (!duffelConfigurado() || modoPrueba()) && (!hotelesConfigurado() || hotelesPrueba());
+  const plata = ventas ? await ganancias(enPrueba).catch(() => null) : null;
   const sorteo =
     sorteoActivo() && dbConfigurada()
       ? await Promise.all([participantes(), sorteosHechos()])
@@ -113,6 +121,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         </div>
       </header>
 
+      {plata && <PanelGanancias idioma={idioma} datos={plata} prueba={enPrueba} banco={process.env.CUENTA_BANCARIA_VISIBLE ?? null} />}
       {sorteo && <PanelSorteo idioma={idioma} lista={sorteo.lista} hechos={sorteo.hechos} />}
       <ListaSuscriptores filas={suscriptores.filas} estado={suscriptores.estado} idioma={idioma} T={A.suscriptores} />
       <ListaMensajes mensajes={mensajes} idioma={idioma} T={A.mensajes} />

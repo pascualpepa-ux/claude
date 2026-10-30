@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { alertarDueno, mandarAResend } from "./correo/envio";
 import { SITIO } from "./correo/redactor";
 import { sql } from "./db";
+import { suscribirComprador } from "./suscripciones";
 import { confirmarCancelacion, cotizarCancelacion, emitir, ErrorDuffel, modoPrueba, ordenDeReserva, type Oferta, type Pasajero } from "./duffel";
 import { cancelarHotel, ErrorHoteles, hotelesPrueba, prereservar, reservaHotelDe, reservarHotel, type Huesped, type OfertaHotel } from "./hoteles";
 
@@ -52,17 +53,17 @@ const rutaDe = (o: Oferta) =>
   o.tramos.map((t) => `${t.segmentos[0].desde}→${t.segmentos[t.segmentos.length - 1].hasta} ${t.salida.slice(0, 10)}`).join(", ");
 
 /** Anota la compra antes de pagar: desde acá, el vigilante la sigue hasta que termine. */
-async function anotar(ofertaId: string, personas: unknown[], email: string, resumen: string, detalle: DetalleReserva, precio: number, moneda: string, esPrueba: boolean) {
+async function anotar(ofertaId: string, personas: unknown[], email: string, resumen: string, detalle: DetalleReserva, precio: number, moneda: string, esPrueba: boolean, novedades: boolean) {
   const [r] = await sql<{ id: string }>(
-    `insert into reservas (tipo, estado, oferta_id, pasajeros, email, ruta, detalle, token_cancelar, precio, costo, moneda, prueba)
-     values ($1, 'pendiente', $2, $3, $4, $5, $6, $7, $8, 0, $9, $10) returning id`,
-    [detalle.tipo, ofertaId, JSON.stringify(personas), email, resumen, JSON.stringify(detalle), randomBytes(24).toString("base64url"), precio, moneda, esPrueba],
+    `insert into reservas (tipo, estado, oferta_id, pasajeros, email, ruta, detalle, token_cancelar, precio, costo, moneda, prueba, novedades)
+     values ($1, 'pendiente', $2, $3, $4, $5, $6, $7, $8, 0, $9, $10, $11) returning id`,
+    [detalle.tipo, ofertaId, JSON.stringify(personas), email, resumen, JSON.stringify(detalle), randomBytes(24).toString("base64url"), precio, moneda, esPrueba, novedades],
   );
   return r.id;
 }
-export const registrar = (o: Oferta, pasajeros: Pasajero[]) =>
-  anotar(o.id, pasajeros, pasajeros[0].email, rutaDe(o), { tipo: "vuelo", aerolinea: o.aerolinea, tramos: o.tramos, pasajeros: pasajeros.map((p) => `${p.nombre} ${p.apellido}`) }, o.precio, o.moneda, modoPrueba());
-export const registrarHotel = (o: OfertaHotel, h: Huesped, entrada: string, salida: string, huespedes: number) =>
+export const registrar = (o: Oferta, pasajeros: Pasajero[], novedades = true) =>
+  anotar(o.id, pasajeros, pasajeros[0].email, rutaDe(o), { tipo: "vuelo", aerolinea: o.aerolinea, tramos: o.tramos, pasajeros: pasajeros.map((p) => `${p.nombre} ${p.apellido}`) }, o.precio, o.moneda, modoPrueba(), novedades);
+export const registrarHotel = (o: OfertaHotel, h: Huesped, entrada: string, salida: string, huespedes: number, novedades = true) =>
   anotar(
     o.ofertaId,
     [h],
@@ -72,6 +73,7 @@ export const registrarHotel = (o: OfertaHotel, h: Huesped, entrada: string, sali
     o.precio,
     o.moneda,
     hotelesPrueba(),
+    novedades,
   );
 
 /** Texto del email al cliente con todo lo que compró. */
@@ -109,6 +111,9 @@ function correoCliente(asunto: string, texto: string) {
 }
 
 async function marcarHecha(f: FilaReserva, codigo: string, orden: string, comision: number) {
+  // Quien compra queda suscripto (salvo que haya marcado que no quiere novedades).
+  const [n] = await sql<{ novedades: boolean }>(`select novedades from reservas where id = $1`, [f.id]);
+  if (n?.novedades !== false) await suscribirComprador(f.email).catch((e) => console.error("suscribir comprador:", e));
   const precio = Number(f.precio);
   const costo = Math.round((precio - comision) * 100) / 100;
   await sql(`update reservas set estado = 'emitida', codigo = $2, orden = $3, costo = $4, error = null, actualizado = now() where id = $1`, [f.id, codigo, orden, costo]);

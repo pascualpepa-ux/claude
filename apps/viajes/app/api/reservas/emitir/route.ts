@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   try {
     const { oferta } = await ofertaActual(c.ofertaId);
     if (oferta.pasajeros.length !== pasajeros.length) return Response.json({ error: "datos" }, { status: 400 });
-    const id = await registrar(oferta, pasajeros);
+    const id = await registrar(oferta, pasajeros, c.novedades !== false);
     const r = await agenteVuelos(id);
     if (r.estado === "emitida") return Response.json({ codigo: r.codigo, oferta });
     if (r.estado === "pendiente") return Response.json({ pendiente: true, oferta }, { status: 202 });

@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       moneda: pre.moneda,
     };
     const adultos = Math.min(4, Math.max(1, Number(c.adultos) || 1));
-    const id = await registrarHotel(oferta, h as Huesped, c.entrada, c.salida, adultos);
+    const id = await registrarHotel(oferta, h as Huesped, c.entrada, c.salida, adultos, c.novedades !== false);
     const r = await agenteHoteles(id);
     if (r.estado === "emitida") return Response.json({ codigo: r.codigo, precio: pre.precio, moneda: pre.moneda });
     if (r.estado === "pendiente") return Response.json({ pendiente: true }, { status: 202 });

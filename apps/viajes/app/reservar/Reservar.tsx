@@ -39,6 +39,8 @@ const T = {
     email: "Email (te mandamos el pasaje acá)",
     telefono: "Teléfono con código de país (+34…)",
     pagar: (p: string) => `Pagar ${p} y reservar`,
+    avisoEmail: "Te mandamos la confirmación a este email. También vas a recibir novedades y ofertas de Rumbo Traveling (te podés dar de baja cuando quieras).",
+    sinNovedades: "No quiero recibir novedades",
     pagando: "Emitiendo el pasaje…",
     pagoPrueba: "En modo prueba no se pide tarjeta: el pago es simulado.",
     listo: "¡Listo! Tu vuelo está reservado",
@@ -86,6 +88,8 @@ const T = {
     email: "Email (we send the ticket here)",
     telefono: "Phone with country code (+34…)",
     pagar: (p: string) => `Pay ${p} and book`,
+    avisoEmail: "We'll send the confirmation to this email. You'll also get Rumbo Traveling news and deals (unsubscribe any time).",
+    sinNovedades: "I don't want news",
     pagando: "Issuing the ticket…",
     pagoPrueba: "In test mode no card is needed: the payment is simulated.",
     listo: "Done! Your flight is booked",
@@ -143,6 +147,7 @@ export function Reservar({ prueba, inicial }: { prueba: boolean; inicial?: Inici
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [codigo, setCodigo] = useState("");
+  const [sinNovedades, setSinNovedades] = useState(false);
 
   const dinero = (n: number, moneda: string) => n.toLocaleString(LOCALE[idioma], { style: "currency", currency: moneda });
   const hora = (iso: string) => iso.slice(11, 16);
@@ -201,7 +206,7 @@ export function Reservar({ prueba, inicial }: { prueba: boolean; inicial?: Inici
       const r = await fetch("/api/reservas/emitir", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ofertaId: elegida.id, pasajeros: lista.map((p) => ({ ...p, nombre: p.nombre.trim(), apellido: p.apellido.trim() })) }),
+        body: JSON.stringify({ ofertaId: elegida.id, novedades: !sinNovedades, pasajeros: lista.map((p) => ({ ...p, nombre: p.nombre.trim(), apellido: p.apellido.trim() })) }),
       });
       const j = await r.json().catch(() => ({}));
       if (r.ok) {
@@ -407,6 +412,13 @@ export function Reservar({ prueba, inicial }: { prueba: boolean; inicial?: Inici
               </fieldset>
             );
           })}
+          <div className="grid gap-2 text-sm text-arena-600 dark:text-arena-400">
+            <p>{t.avisoEmail}</p>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={sinNovedades} onChange={(e) => setSinNovedades(e.target.checked)} className="size-4 accent-oliva-700" />
+              {t.sinNovedades}
+            </label>
+          </div>
           {prueba && <p className="text-sm text-arena-600 dark:text-arena-400">{t.pagoPrueba}</p>}
           <button type="submit" disabled={ocupado} className={`${botonPrincipal} text-lg`}>
             {ocupado ? (
