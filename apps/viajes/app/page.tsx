@@ -22,7 +22,6 @@ import { Destinos } from "@/components/portada/Destinos";
 import { ComoFunciona } from "@/components/portada/ComoFunciona";
 import { PORTADA } from "@/lib/textos-portada";
 import { sorteoActivo } from "@/lib/sorteo";
-import { esPremium, usuarioDeSesion } from "@/lib/cuentas";
 
 // Las fechas de la muestra dependen del día de hoy.
 export const dynamic = "force-dynamic";
@@ -53,9 +52,6 @@ export default async function Inicio() {
   const dia = plan.dias[1];
   const actividades = plan.actividades.filter((a) => dia.actividades.includes(a.id));
   const vuelo = plan.vuelos.find((v) => v.id === plan.vueloElegido)!;
-  // Premium: experiencia más limpia, sin cartel de concurso ni caja de newsletter.
-  const sesion = await usuarioDeSesion();
-  const premium = Boolean(sesion && esPremium(sesion));
 
   return (
     <main>
@@ -116,7 +112,7 @@ export default async function Inicio() {
         </div>
       </section>
 
-      {sorteoActivo() && !premium && (
+      {sorteoActivo() && (
         <div className="mx-auto max-w-6xl px-4 pt-10 md:pt-14">
           <CartelSorteo idioma={idioma} />
         </div>
@@ -125,21 +121,19 @@ export default async function Inicio() {
       <Destinos idioma={idioma} />
       <ComoFunciona idioma={idioma} />
 
-      {/* Suscripción a los avisos: entre la portada y "Cada dato pasa por dos agentes". Premium no la ve (cero anuncios). */}
-      {!premium && (
-        <section aria-labelledby="titulo-suscripcion" className="bg-papel dark:bg-arena-950">
-          <div className="mx-auto grid max-w-6xl gap-6 px-4 py-12 md:grid-cols-[1fr_minmax(0,28rem)] md:items-center md:gap-12 md:py-16">
-            <div>
-              <BellRinging size={32} weight="duotone" className="text-oliva-700 dark:text-oliva-300" aria-hidden />
-              <h2 id="titulo-suscripcion" className="mt-3 max-w-[24ch] text-3xl font-semibold tracking-tight text-balance md:text-4xl">
-                {ti.suscripcionTitulo}
-              </h2>
-              <p className="mt-3 max-w-[52ch] text-arena-600 dark:text-arena-400">{ti.suscripcionBajada}</p>
-            </div>
-            <FormularioSuscripcion sinTitulo activo={suscripcionesActivas()} />
+      {/* Suscripción a los avisos: entre la portada y "Cada dato pasa por dos agentes". */}
+      <section aria-labelledby="titulo-suscripcion" className="bg-papel dark:bg-arena-950">
+        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-12 md:grid-cols-[1fr_minmax(0,28rem)] md:items-center md:gap-12 md:py-16">
+          <div>
+            <BellRinging size={32} weight="duotone" className="text-oliva-700 dark:text-oliva-300" aria-hidden />
+            <h2 id="titulo-suscripcion" className="mt-3 max-w-[24ch] text-3xl font-semibold tracking-tight text-balance md:text-4xl">
+              {ti.suscripcionTitulo}
+            </h2>
+            <p className="mt-3 max-w-[52ch] text-arena-600 dark:text-arena-400">{ti.suscripcionBajada}</p>
           </div>
-        </section>
-      )}
+          <FormularioSuscripcion sinTitulo activo={suscripcionesActivas()} />
+        </div>
+      </section>
 
 
       <section className="border-t border-arena-200 bg-papel py-16 md:py-24 dark:border-arena-800 dark:bg-arena-900/40">

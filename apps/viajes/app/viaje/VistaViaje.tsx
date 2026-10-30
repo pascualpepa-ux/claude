@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, CircleNotch, MapTrifold, Info, Train, ArrowRight, BookmarkSimple } from "@phosphor-icons/react/dist/ssr";
@@ -11,9 +11,7 @@ import { TarjetaHotel } from "@/components/TarjetaHotel";
 import { ResumenPresupuesto } from "@/components/ResumenPresupuesto";
 import { GastosCompartidos } from "@/components/GastosCompartidos";
 import { gastosDeMuestra } from "@/lib/gastos";
-import { CLAVE_ABIERTO, CLAVE_BORRADOR, CLAVE_PEDIDO, CLAVE_VIAJE, borrarGuardado, guardarViaje, leerGuardados } from "@/lib/almacen";
-import { borrarViajePremium, guardarViajePremium } from "@/lib/guardados-premium";
-import { usePremium } from "@/components/usePremium";
+import { CLAVE_ABIERTO, CLAVE_PEDIDO, CLAVE_VIAJE, borrarGuardado, guardarViaje, leerGuardados } from "@/lib/almacen";
 import { usd } from "@/lib/dinero";
 import { formatoCorto } from "@/lib/fechas";
 import { ajustarDuraciones, sugerirAerolineas, aplicarClima, aplicarHoteles, aplicarVuelos, estadiasPorCiudad, generarViaje, traducirViaje, viajeDeMuestra } from "@/lib/mock";
@@ -244,16 +242,6 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
   const [estado, setEstado] = useState<"cargando" | "listo" | "vacio">("cargando");
   const [idGuardado, setIdGuardado] = useState<string | null>(null);
   const [errorGuardar, setErrorGuardar] = useState(false);
-  const premium = usePremium();
-  // Último plan ya guardado en la base (Premium), para no mandar un POST en cada cambio mínimo.
-  const ultimoGuardadoPremium = useRef<string | null>(null);
-  const leerBorrador = () => {
-    try {
-      return JSON.parse(sessionStorage.getItem(CLAVE_BORRADOR) ?? "null");
-    } catch {
-      return null;
-    }
-  };
 
   useEffect(() => {
     const pedido: TripInput | null = esEjemplo ? viajeDeMuestra() : leer<TripInput>(CLAVE_PEDIDO);
@@ -267,7 +255,7 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
       // Si es un viaje guardado (abierto desde la portada), sigue vinculado: los cambios se guardan solos.
       try {
         const abierto = sessionStorage.getItem(CLAVE_ABIERTO);
-        if (abierto) setIdGuardado(abierto);
+        if (abierto && leerGuardados().some((v) => v.id === abierto)) setIdGuardado(abierto);
       } catch {}
       // Viajes armados antes de que existiera el vuelo estimado: se cambian los vuelos de ejemplo por la estimación.
       const actualizado =
@@ -340,33 +328,14 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
 
   // Con el viaje ya guardado, cada cambio (otro vuelo, otro hotel, actividades) actualiza la copia guardada.
   useEffect(() => {
-    if (!plan || !idGuardado || premium === null) return;
-    if (premium) {
-      const actual = JSON.stringify(plan);
-      if (ultimoGuardadoPremium.current === actual) return;
-      ultimoGuardadoPremium.current = actual;
-      guardarViajePremium(plan, leerBorrador(), idGuardado);
-      return;
-    }
+    if (!plan || !idGuardado) return;
     const previo = leerGuardados().find((v) => v.id === idGuardado);
     if (!previo) return setIdGuardado(null); // lo borró desde otra pestaña
     if (JSON.stringify(previo.plan) !== JSON.stringify(plan)) guardarViaje(plan, idGuardado);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plan, idGuardado, premium]);
+  }, [plan, idGuardado]);
 
-  const guardar = async () => {
+  const guardar = () => {
     if (!plan) return;
-    if (premium) {
-      const id = await guardarViajePremium(plan, leerBorrador());
-      setErrorGuardar(!id);
-      if (!id) return;
-      ultimoGuardadoPremium.current = JSON.stringify(plan);
-      setIdGuardado(id);
-      try {
-        sessionStorage.setItem(CLAVE_ABIERTO, id);
-      } catch {}
-      return;
-    }
     const id = guardarViaje(plan);
     setErrorGuardar(!id);
     if (!id) return;
@@ -377,8 +346,7 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
   };
   const quitarGuardado = () => {
     if (!idGuardado) return;
-    if (premium) borrarViajePremium(idGuardado);
-    else borrarGuardado(idGuardado);
+    borrarGuardado(idGuardado);
     setIdGuardado(null);
     try {
       sessionStorage.removeItem(CLAVE_ABIERTO);

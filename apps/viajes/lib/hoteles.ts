@@ -132,22 +132,19 @@ async function pedirOfertas(b: BusquedaHotel, hotelTypeIds?: number[]): Promise<
   return ofertas;
 }
 
-/**
- * Busca hoteles reales; primero hostales (público joven, más baratos y con más onda), después el resto, siempre por precio.
- * Gente free: nada de 4-5 estrellas (0 = sin calificar, se deja pasar — típico en hostales). Premium: sin tope.
- */
-export async function buscarHoteles(b: BusquedaHotel, premium = false): Promise<OfertaHotel[]> {
+/** Busca hoteles reales; primero hostales (público joven, más baratos y con más onda), después el resto, siempre por precio. */
+export async function buscarHoteles(b: BusquedaHotel): Promise<OfertaHotel[]> {
   const hostalIds = await idsHostal();
   const [general, hostales] = await Promise.all([
     pedirOfertas(b),
     hostalIds.length ? pedirOfertas(b, hostalIds).catch(() => []) : Promise.resolve([]),
   ]);
+  // Público joven: nada de 4-5 estrellas (0 = sin calificar, se deja pasar — típico en hostales).
   const MAX_ESTRELLAS = 3;
-  const entraPorEstrellas = (h: OfertaHotel) => premium || h.estrellas <= MAX_ESTRELLAS;
-  const hostalesOrdenados = hostales.filter(entraPorEstrellas).sort((a, b) => a.precio - b.precio);
+  const hostalesOrdenados = hostales.filter((h) => h.estrellas <= MAX_ESTRELLAS).sort((a, b) => a.precio - b.precio);
   const idsYaIncluidos = new Set(hostalesOrdenados.map((h) => h.hotelId));
   const restoOrdenado = general
-    .filter((h) => !idsYaIncluidos.has(h.hotelId) && entraPorEstrellas(h))
+    .filter((h) => !idsYaIncluidos.has(h.hotelId) && h.estrellas <= MAX_ESTRELLAS)
     .sort((a, b) => a.precio - b.precio);
   return [...hostalesOrdenados, ...restoOrdenado].slice(0, 20);
 }

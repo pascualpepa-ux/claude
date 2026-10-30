@@ -1,5 +1,4 @@
 import { buscarHoteles, hotelesPermitido } from "@/lib/hoteles";
-import { esPremium, usuarioDeSesion } from "@/lib/cuentas";
 import { ipDe, permitido } from "@/lib/limite";
 
 export const runtime = "nodejs";
@@ -19,9 +18,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "datos" }, { status: 400 });
   }
   try {
-    const usuario = await usuarioDeSesion();
-    const premium = Boolean(usuario && esPremium(usuario));
-    return Response.json({ hoteles: await buscarHoteles({ aeropuerto: c.aeropuerto, entrada: c.entrada, salida: c.salida, adultos }, premium) });
+    return Response.json({ hoteles: await buscarHoteles({ aeropuerto: c.aeropuerto, entrada: c.entrada, salida: c.salida, adultos }) });
   } catch (e) {
     console.error("buscar hoteles:", e);
     return Response.json({ error: "servidor" }, { status: 502 });

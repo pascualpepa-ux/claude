@@ -95,25 +95,6 @@ create table if not exists vigilancias (
   id int primary key,
   ultima timestamptz not null
 );
--- Cuentas de usuario (Rumbo Premium): login simple, sin terceros. La contraseña nunca se guarda en texto plano.
-create table if not exists usuarios (
-  id uuid primary key default gen_random_uuid(),
-  email text not null unique,
-  contrasena_hash text not null,
-  stripe_customer_id text,
-  stripe_subscription_id text,
-  premium_estado text not null default 'inactivo' check (premium_estado in ('inactivo', 'activo', 'cancelado', 'pago_fallido')),
-  creado timestamptz not null default now(),
-  actualizado timestamptz not null default now()
-);
--- Viajes guardados de verdad (para cuentas Premium) — a diferencia de los que se guardan solo en el navegador.
-create table if not exists viajes_guardados (
-  id uuid primary key default gen_random_uuid(),
-  usuario_id uuid not null references usuarios(id) on delete cascade,
-  nombre text not null,
-  datos jsonb not null,
-  creado timestamptz not null default now()
-);
 `;
 
 let pool: Pool | null = null;
