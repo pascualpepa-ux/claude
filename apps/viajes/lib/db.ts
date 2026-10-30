@@ -83,6 +83,7 @@ alter table reservas add column if not exists intentos int not null default 0;
 alter table reservas add column if not exists error text;
 alter table reservas add column if not exists avisado boolean not null default false;
 alter table reservas add column if not exists actualizado timestamptz not null default now();
+alter table reservas add column if not exists tipo text not null default 'vuelo';
 create table if not exists vigilancias (
   id int primary key,
   ultima timestamptz not null
