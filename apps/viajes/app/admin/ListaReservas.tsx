@@ -7,6 +7,7 @@ import type { FilaAdminReserva } from "@/lib/agentes-reservas";
 import { LOCALE, type Idioma } from "@/lib/idioma";
 
 const ESTADO = {
+  esperando_pago: { es: "Sin pagar", en: "Unpaid", clase: "bg-arena-100 text-arena-700 ring-arena-300 dark:bg-arena-800 dark:text-arena-300 dark:ring-arena-700" },
   emitida: { es: "Hecha", en: "Done", clase: "bg-oliva-50 text-oliva-800 ring-oliva-200 dark:bg-oliva-950/60 dark:text-oliva-300 dark:ring-oliva-900" },
   pendiente: { es: "En curso", en: "In progress", clase: "bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:ring-amber-900" },
   fallida: { es: "Falló", en: "Failed", clase: "bg-red-50 text-red-800 ring-red-200 dark:bg-red-950/50 dark:text-red-300 dark:ring-red-900" },

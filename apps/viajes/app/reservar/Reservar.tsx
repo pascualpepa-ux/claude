@@ -8,6 +8,9 @@ import { LOCALE, type Idioma } from "@/lib/idioma";
 import type { Lugar } from "@/lib/lugares-tipos";
 import type { Oferta, Pasajero } from "@/lib/duffel";
 import { guardarReserva } from "@/lib/almacen";
+import { PagoTarjeta } from "@/components/PagoTarjeta";
+
+const CON_TARJETA = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 import { CLAVE_OFERTA_VUELO } from "@/components/OfertasReales";
 
 const T = {
@@ -45,6 +48,7 @@ const T = {
     sinNovedades: "No quiero recibir novedades",
     pagando: "Emitiendo el pasaje…",
     pagoPrueba: "En modo prueba no se pide tarjeta: el pago es simulado.",
+    continuarPago: "Continuar al pago",
     listo: "¡Listo! Tu vuelo está reservado",
     confirmando: "Estamos confirmando tu pasaje con la aerolínea",
     confirmandoAyuda: "Nuestro agente lo termina en unos minutos y te manda el código de reserva por email. No vuelvas a comprarlo.",
@@ -56,6 +60,7 @@ const T = {
       faltan: "Completá todos los datos de cada pasajero. El teléfono va con + y el código de país.",
       oferta: "Ese precio ya no está disponible. Volvé a buscar el vuelo.",
       aerolinea: "La aerolínea no pudo emitir este pasaje. Probá con otro vuelo.",
+      pago: "El pago no se completó. No se te cobró nada.",
       inactivo: "La compra de vuelos todavía no está activa.",
       limite: "Hiciste muchas búsquedas seguidas. Esperá un rato.",
       general: "Algo falló. Probá de nuevo en un momento.",
@@ -95,6 +100,7 @@ const T = {
     sinNovedades: "I don't want news",
     pagando: "Issuing the ticket…",
     pagoPrueba: "In test mode no card is needed: the payment is simulated.",
+    continuarPago: "Continue to payment",
     listo: "Done! Your flight is booked",
     confirmando: "We're confirming your ticket with the airline",
     confirmandoAyuda: "Our agent finishes it in a few minutes and emails you the booking reference. Don't buy it again.",
@@ -106,6 +112,7 @@ const T = {
       faltan: "Fill in every passenger's details. The phone starts with + and the country code.",
       oferta: "That price is no longer available. Search the flight again.",
       aerolinea: "The airline couldn't issue this ticket. Try another flight.",
+      pago: "The payment wasn't completed. You weren't charged.",
       inactivo: "Flight booking isn't active yet.",
       limite: "Too many searches in a row. Wait a bit.",
       general: "Something went wrong. Try again in a moment.",
@@ -151,6 +158,7 @@ export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba
   const [error, setError] = useState<string | null>(null);
   const [codigo, setCodigo] = useState("");
   const [sinNovedades, setSinNovedades] = useState(false);
+  const [pago, setPago] = useState<{ reserva: string; clientSecret: string; prueba: boolean } | null>(null);
 
   const dinero = (n: number, moneda: string) => n.toLocaleString(LOCALE[idioma], { style: "currency", currency: moneda });
   const hora = (iso: string) => iso.slice(11, 16);
@@ -208,6 +216,27 @@ export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba
     window.scrollTo({ top: 0 });
   };
 
+  /** La compra salió (o quedó en manos del vigilante): se guarda en el dispositivo y se muestra el código. */
+  const terminar = (j: { codigo?: string; precio?: number; moneda?: string }) => {
+    if (!elegida) return;
+    setCodigo(j.codigo ?? "");
+    // Se guarda solo en el dispositivo (y el viaje armado, si venía de uno).
+    if (j.codigo) {
+      const ida = elegida.tramos[0];
+      guardarReserva({
+        codigo: j.codigo,
+        tipo: "vuelo",
+        titulo: `${ida.segmentos[0].desde} → ${ida.segmentos[ida.segmentos.length - 1].hasta}`,
+        detalle: `${elegida.aerolinea} · ${ida.salida.slice(0, 10)}${elegida.tramos[1] ? ` – ${elegida.tramos[1].salida.slice(0, 10)}` : ""}`,
+        precio: elegida.precio,
+        moneda: elegida.moneda,
+        creado: new Date().toISOString(),
+      });
+    }
+    setPaso("listo");
+    window.scrollTo({ top: 0 });
+  };
+
   const pagar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!elegida) return;
@@ -225,24 +254,11 @@ export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba
         body: JSON.stringify({ ofertaId: elegida.id, novedades: !sinNovedades, pasajeros: lista.map((p) => ({ ...p, nombre: p.nombre.trim(), apellido: p.apellido.trim() })) }),
       });
       const j = await r.json().catch(() => ({}));
-      if (r.ok) {
-        setCodigo(j.codigo ?? "");
-        // Se guarda solo en el dispositivo (y el viaje armado, si venía de uno).
-        if (j.codigo) {
-          const ida = elegida.tramos[0];
-          guardarReserva({
-            codigo: j.codigo,
-            tipo: "vuelo",
-            titulo: `${ida.segmentos[0].desde} → ${ida.segmentos[ida.segmentos.length - 1].hasta}`,
-            detalle: `${elegida.aerolinea} · ${ida.salida.slice(0, 10)}${elegida.tramos[1] ? ` – ${elegida.tramos[1].salida.slice(0, 10)}` : ""}`,
-            precio: elegida.precio,
-            moneda: elegida.moneda,
-            creado: new Date().toISOString(),
-          });
-        }
-        setPaso("listo");
-        window.scrollTo({ top: 0 });
-      } else setError(mensajeError(j.error));
+      if (r.ok && j.pago) {
+        // Con tarjeta: se muestra el recuadro de Stripe; la compra se hace cuando la tarjeta se acepta.
+        setPago(j.pago);
+      } else if (r.ok) terminar(j);
+      else setError(mensajeError(j.error));
     } catch {
       setError(t.errores.general);
     }
@@ -435,7 +451,16 @@ export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba
               {t.sinNovedades}
             </label>
           </div>
-          {prueba && <p className="text-sm text-arena-600 dark:text-arena-400">{t.pagoPrueba}</p>}
+          {prueba && !CON_TARJETA && <p className="text-sm text-arena-600 dark:text-arena-400">{t.pagoPrueba}</p>}
+          {pago ? (
+            <PagoTarjeta
+              clientSecret={pago.clientSecret}
+              reserva={pago.reserva}
+              prueba={pago.prueba}
+              total={dinero(elegida.precio, elegida.moneda)}
+              onResultado={(r) => (r.error ? (setPago(null), setError(mensajeError(r.error))) : terminar(r))}
+            />
+          ) : (
           <button type="submit" disabled={ocupado} className={`${botonPrincipal} text-lg`}>
             {ocupado ? (
               <>
@@ -443,9 +468,10 @@ export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba
                 {t.pagando}
               </>
             ) : (
-              t.pagar(dinero(elegida.precio, elegida.moneda))
+              CON_TARJETA ? t.continuarPago : t.pagar(dinero(elegida.precio, elegida.moneda))
             )}
           </button>
+          )}
         </form>
       )}
 

@@ -88,6 +88,9 @@ alter table reservas add column if not exists detalle jsonb;
 alter table reservas add column if not exists token_cancelar text;
 alter table reservas add column if not exists cancelada timestamptz;
 alter table reservas add column if not exists novedades boolean not null default true;
+-- Pago con tarjeta (Stripe): se retiene al pagar, se cobra cuando la compra sale, se libera si falla.
+alter table reservas add column if not exists pago_id text;
+alter table reservas add column if not exists pago_estado text;
 create table if not exists vigilancias (
   id int primary key,
   ultima timestamptz not null

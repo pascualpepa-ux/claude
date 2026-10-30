@@ -1,5 +1,6 @@
 import { alertarDueno } from "@/lib/correo/envio";
-import { agenteVuelos, registrar } from "@/lib/agentes-reservas";
+import { agenteVuelos, prepararPago, registrar } from "@/lib/agentes-reservas";
+import { pagosActivos } from "@/lib/pagos";
 import { ErrorDuffel, ofertaActual, telefonoAgencia, ventaPermitida, type Pasajero } from "@/lib/duffel";
 import { dbConfigurada } from "@/lib/db";
 import { ipDe, permitido } from "@/lib/limite";
@@ -36,6 +37,8 @@ export async function POST(req: Request) {
     const { oferta } = await ofertaActual(c.ofertaId);
     if (oferta.pasajeros.length !== pasajeros.length) return Response.json({ error: "datos" }, { status: 400 });
     const id = await registrar(oferta, pasajeros, c.novedades !== false);
+    // Con tarjeta: primero se retiene la plata; el agente compra cuando Stripe lo confirma (/api/pagos/confirmar).
+    if (pagosActivos()) return Response.json({ pago: { reserva: id, ...(await prepararPago(id)) } });
     const r = await agenteVuelos(id);
     if (r.estado === "emitida") return Response.json({ codigo: r.codigo, oferta });
     if (r.estado === "pendiente") return Response.json({ pendiente: true, oferta }, { status: 202 });

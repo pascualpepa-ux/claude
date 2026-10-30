@@ -8,6 +8,9 @@ import { LOCALE, type Idioma } from "@/lib/idioma";
 import type { Lugar } from "@/lib/lugares-tipos";
 import type { Huesped, OfertaHotel } from "@/lib/hoteles";
 import { guardarReserva } from "@/lib/almacen";
+import { PagoTarjeta } from "@/components/PagoTarjeta";
+
+const CON_TARJETA = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 import { CLAVE_OFERTA_HOTEL } from "@/components/OfertasReales";
 
 const T = {
@@ -41,6 +44,7 @@ const T = {
     sinNovedades: "No quiero recibir novedades",
     pagando: "Reservando el hotel…",
     pagoPrueba: "En modo prueba no se pide tarjeta: el pago es simulado.",
+    continuarPago: "Continuar al pago",
     listo: "¡Listo! Tu hotel está reservado",
     confirmando: "Estamos confirmando tu hotel",
     confirmandoAyuda: "Nuestro agente lo termina en unos minutos y te manda la reserva por email. No vuelvas a reservarlo.",
@@ -51,6 +55,7 @@ const T = {
       datos: "Revisá los datos: destino, fechas y huéspedes.",
       faltan: "Completá nombre, apellido y email. Si ponés teléfono, que empiece con + y el código de país.",
       oferta: "Esa habitación ya no está disponible o cambió de precio. Elegí otra.",
+      pago: "El pago no se completó. No se te cobró nada.",
       inactivo: "La reserva de hoteles todavía no está activa.",
       limite: "Hiciste muchas búsquedas seguidas. Esperá un rato.",
       general: "Algo falló. Probá de nuevo en un momento.",
@@ -86,6 +91,7 @@ const T = {
     sinNovedades: "I don't want news",
     pagando: "Booking the hotel…",
     pagoPrueba: "In test mode no card is needed: the payment is simulated.",
+    continuarPago: "Continue to payment",
     listo: "Done! Your hotel is booked",
     confirmando: "We're confirming your hotel",
     confirmandoAyuda: "Our agent finishes it in a few minutes and emails you the booking. Don't book it again.",
@@ -96,6 +102,7 @@ const T = {
       datos: "Check the details: destination, dates and guests.",
       faltan: "Fill in first name, last name and email. If you add a phone, start with + and the country code.",
       oferta: "That room is no longer available or its price changed. Choose another.",
+      pago: "The payment wasn't completed. You weren't charged.",
       inactivo: "Hotel booking isn't active yet.",
       limite: "Too many searches in a row. Wait a bit.",
       general: "Something went wrong. Try again in a moment.",
@@ -163,6 +170,7 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
   const [error, setError] = useState<string | null>(null);
   const [codigo, setCodigo] = useState("");
   const [sinNovedades, setSinNovedades] = useState(false);
+  const [pago, setPago] = useState<{ reserva: string; clientSecret: string; prueba: boolean } | null>(null);
   const [conFotos, setConFotos] = useState<string | null>(null);
 
   const noches = Math.max(1, Math.round((Date.parse(salida) - Date.parse(entrada)) / 86_400_000));
@@ -213,6 +221,26 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
     setOcupado(false);
   };
 
+  /** La compra salió (o quedó en manos del vigilante): se guarda en el dispositivo y se muestra el código. */
+  const terminar = (j: { codigo?: string; precio?: number; moneda?: string }) => {
+    if (!elegido) return;
+    setCodigo(j.codigo ?? "");
+    // Se guarda solo en el dispositivo (y el viaje armado, si venía de uno).
+    if (j.codigo) {
+      guardarReserva({
+        codigo: j.codigo,
+        tipo: "hotel",
+        titulo: elegido.nombre,
+        detalle: `${entrada} – ${salida} · ${t.noches(noches)}`,
+        precio: j.precio ?? elegido.precio,
+        moneda: j.moneda ?? elegido.moneda,
+        creado: new Date().toISOString(),
+      });
+    }
+    setPaso("listo");
+    window.scrollTo({ top: 0 });
+  };
+
   const reservar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!elegido) return;
@@ -227,23 +255,11 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
         body: JSON.stringify({ oferta: elegido, entrada, salida, adultos, huesped: h, novedades: !sinNovedades }),
       });
       const j = await r.json().catch(() => ({}));
-      if (r.ok) {
-        setCodigo(j.codigo ?? "");
-        // Se guarda solo en el dispositivo (y el viaje armado, si venía de uno).
-        if (j.codigo) {
-          guardarReserva({
-            codigo: j.codigo,
-            tipo: "hotel",
-            titulo: elegido.nombre,
-            detalle: `${entrada} – ${salida} · ${t.noches(noches)}`,
-            precio: j.precio ?? elegido.precio,
-            moneda: j.moneda ?? elegido.moneda,
-            creado: new Date().toISOString(),
-          });
-        }
-        setPaso("listo");
-        window.scrollTo({ top: 0 });
-      } else setError(mensajeError(j.error));
+      if (r.ok && j.pago) {
+        // Con tarjeta: se muestra el recuadro de Stripe; la compra se hace cuando la tarjeta se acepta.
+        setPago(j.pago);
+      } else if (r.ok) terminar(j);
+      else setError(mensajeError(j.error));
     } catch {
       setError(t.errores.general);
     }
@@ -421,7 +437,16 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
               {t.sinNovedades}
             </label>
           </div>
-          {prueba && <p className="text-sm text-arena-600 dark:text-arena-400">{t.pagoPrueba}</p>}
+          {prueba && !CON_TARJETA && <p className="text-sm text-arena-600 dark:text-arena-400">{t.pagoPrueba}</p>}
+          {pago ? (
+            <PagoTarjeta
+              clientSecret={pago.clientSecret}
+              reserva={pago.reserva}
+              prueba={pago.prueba}
+              total={dinero(elegido.precio, elegido.moneda)}
+              onResultado={(r) => (r.error ? (setPago(null), setError(mensajeError(r.error))) : terminar(r))}
+            />
+          ) : (
           <button type="submit" disabled={ocupado} className={`${botonPrincipal} text-lg`}>
             {ocupado ? (
               <>
@@ -429,9 +454,10 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
                 {t.pagando}
               </>
             ) : (
-              t.pagar(dinero(elegido.precio, elegido.moneda))
+              CON_TARJETA ? t.continuarPago : t.pagar(dinero(elegido.precio, elegido.moneda))
             )}
           </button>
+          )}
         </form>
       )}
 

@@ -3,6 +3,7 @@ import { alertarDueno, mandarAResend } from "./correo/envio";
 import { SITIO } from "./correo/redactor";
 import { sql } from "./db";
 import { suscribirComprador } from "./suscripciones";
+import { aMinimo, cobrar, crearPago, devolver, liberar, pagosActivos, pagosPrueba, verPago } from "./pagos";
 import { confirmarCancelacion, cotizarCancelacion, emitir, ErrorDuffel, modoPrueba, ordenDeReserva, type Oferta, type Pasajero } from "./duffel";
 import { cancelarHotel, ErrorHoteles, hotelesPrueba, prereservar, reservaHotelDe, reservarHotel, type Huesped, type OfertaHotel } from "./hoteles";
 
@@ -37,7 +38,7 @@ interface FilaReserva {
   tipo: Tipo;
   detalle: DetalleReserva | null;
   token_cancelar: string | null;
-  estado: "pendiente" | "emitida" | "fallida";
+  estado: "esperando_pago" | "pendiente" | "emitida" | "fallida";
   oferta_id: string;
   pasajeros: (Pasajero | Huesped)[];
   email: string;
@@ -56,8 +57,10 @@ const rutaDe = (o: Oferta) =>
 async function anotar(ofertaId: string, personas: unknown[], email: string, resumen: string, detalle: DetalleReserva, precio: number, moneda: string, esPrueba: boolean, novedades: boolean) {
   const [r] = await sql<{ id: string }>(
     `insert into reservas (tipo, estado, oferta_id, pasajeros, email, ruta, detalle, token_cancelar, precio, costo, moneda, prueba, novedades)
-     values ($1, 'pendiente', $2, $3, $4, $5, $6, $7, $8, 0, $9, $10, $11) returning id`,
-    [detalle.tipo, ofertaId, JSON.stringify(personas), email, resumen, JSON.stringify(detalle), randomBytes(24).toString("base64url"), precio, moneda, esPrueba, novedades],
+     values ($1, $12, $2, $3, $4, $5, $6, $7, $8, 0, $9, $10, $11) returning id`,
+    [detalle.tipo, ofertaId, JSON.stringify(personas), email, resumen, JSON.stringify(detalle), randomBytes(24).toString("base64url"), precio, moneda, esPrueba, novedades,
+      // Con cobro con tarjeta, la compra espera a que la plata quede retenida antes de que el agente compre.
+      pagosActivos() ? "esperando_pago" : "pendiente"],
   );
   return r.id;
 }
@@ -110,7 +113,29 @@ function correoCliente(asunto: string, texto: string) {
   };
 }
 
+/** Cobra lo retenido cuando la compra salió. Si Stripe falla, avisa al dueño en el momento. */
+async function cobrarSiHay(f: FilaReserva) {
+  const [r] = await sql<{ pago_id: string | null; pago_estado: string | null }>(`select pago_id, pago_estado from reservas where id = $1`, [f.id]);
+  if (!r?.pago_id || r.pago_estado !== "retenido") return;
+  try {
+    await cobrar(r.pago_id);
+    await sql(`update reservas set pago_estado = 'cobrado' where id = $1`, [f.id]);
+  } catch (e) {
+    await alertarDueno(`URGENTE: no se pudo cobrar ${f.ruta}`, `La compra salió pero Stripe no cobró.\n\nPago: ${r.pago_id}\nCliente: ${f.email}\nError: ${e instanceof Error ? e.message : e}\n\nRevisalo en el panel de Stripe.`).catch(() => {});
+  }
+}
+
+/** Libera lo retenido cuando la compra no se pudo hacer: al cliente no se le cobra nada. */
+async function liberarSiHay(id: string) {
+  const [r] = await sql<{ pago_id: string | null; pago_estado: string | null }>(`select pago_id, pago_estado from reservas where id = $1`, [id]);
+  if (!r?.pago_id || r.pago_estado !== "retenido") return;
+  await liberar(r.pago_id)
+    .then(() => sql(`update reservas set pago_estado = 'liberado' where id = $1`, [id]))
+    .catch((e) => console.error("liberar pago:", e));
+}
+
 async function marcarHecha(f: FilaReserva, codigo: string, orden: string, comision: number) {
+  await cobrarSiHay(f);
   // Quien compra queda suscripto (salvo que haya marcado que no quiere novedades).
   const [n] = await sql<{ novedades: boolean }>(`select novedades from reservas where id = $1`, [f.id]);
   if (n?.novedades !== false) await suscribirComprador(f.email).catch((e) => console.error("suscribir comprador:", e));
@@ -139,6 +164,7 @@ async function cargar(id: string) {
 
 async function fallo(id: string, e: unknown, definitivo: boolean) {
   const detalle = e instanceof Error ? e.message : String(e);
+  if (definitivo) await liberarSiHay(id);
   await sql(`update reservas set estado = $2, error = $3, actualizado = now() where id = $1`, [id, definitivo ? "fallida" : "pendiente", detalle.slice(0, 500)]);
   return { estado: (definitivo ? "fallida" : "pendiente") as FilaReserva["estado"] };
 }
@@ -178,6 +204,12 @@ export async function agenteHoteles(id: string): Promise<{ estado: FilaReserva["
 /** Vigilante: no deja ninguna compra olvidada. Lo llama la ronda de vigilancia (cada 30 minutos). */
 export async function vigilante() {
   const resultado = { revisadas: 0, recuperadas: 0, reintentadas: 0, fallidas: 0 };
+  // Pagos con la tarjeta ya aceptada pero que la página no llegó a confirmar (se cerró, se cortó internet): se siguen igual.
+  const sinConfirmar = await sql<{ id: string }>(
+    `select id from reservas where estado = 'esperando_pago' and pago_id is not null
+     and actualizado < now() - interval '3 minutes' and creado > now() - interval '6 days' limit 20`,
+  );
+  for (const r of sinConfirmar) await pagoRetenido(r.id).catch((e) => console.error("vigilante pago:", e));
   const pendientes = await sql<FilaReserva>(
     `select ${COLUMNAS} from reservas where estado = 'pendiente' and actualizado < now() - interval '2 minutes' order by creado limit 20`,
   );
@@ -204,6 +236,7 @@ export async function vigilante() {
       await (f.tipo === "vuelo" ? agenteVuelos(f.id) : agenteHoteles(f.id));
     } else {
       await sql(`update reservas set estado = 'fallida', actualizado = now() where id = $1`, [f.id]);
+      await liberarSiHay(f.id);
     }
   }
   // Avisos de las que no se pudieron hacer (una sola vez cada una).
@@ -257,6 +290,13 @@ export async function cancelarReserva(token: string) {
     moneda = c.moneda || moneda;
   }
   await sql(`update reservas set cancelada = now(), actualizado = now() where id = $1`, [f.id]);
+  // Se le devuelve al cliente lo que devuelve la aerolínea o el hotel (nuestra comisión no se devuelve).
+  const [pg] = await sql<{ pago_id: string | null; pago_estado: string | null }>(`select pago_id, pago_estado from reservas where id = $1`, [f.id]);
+  if (pg?.pago_id && pg.pago_estado === "cobrado" && devolucion > 0 && moneda.toUpperCase() === f.moneda.toUpperCase()) {
+    await devolver(pg.pago_id, Math.min(devolucion, Number(f.precio)), f.moneda)
+      .then(() => sql(`update reservas set pago_estado = 'devuelto' where id = $1`, [f.id]))
+      .catch((e) => alertarDueno(`URGENTE: no se pudo devolver ${f.codigo}`, `Hay que devolver ${devolucion} ${moneda} al cliente ${f.email} desde Stripe.\n\nError: ${e instanceof Error ? e.message : e}`).catch(() => {}));
+  }
   const p = prueba(f.tipo);
   await alertarDueno(
     `${p}Reserva cancelada: ${f.ruta}`,
@@ -297,4 +337,31 @@ export async function cancelarDesdeAdmin(id: string) {
   const [r] = await sql<{ token_cancelar: string | null }>(`select token_cancelar from reservas where id = $1`, [id]);
   if (!r?.token_cancelar) return { estado: "invalida" as const };
   return cancelarReserva(r.token_cancelar);
+}
+
+/** Paso 1 del pago: crea el pago con retención para una compra anotada. */
+export async function prepararPago(id: string) {
+  const f = await cargar(id);
+  if (!f || f.estado !== "esperando_pago") throw new Error("reserva");
+  const pago = await crearPago(id, Number(f.precio), f.moneda, f.email, `${f.tipo === "vuelo" ? "Vuelo" : "Hotel"}: ${f.ruta}`);
+  await sql(`update reservas set pago_id = $2 where id = $1`, [id, pago.id]);
+  return { clientSecret: pago.client_secret, prueba: pagosPrueba() };
+}
+
+/**
+ * Paso 2: Stripe confirmó la tarjeta y la plata quedó retenida. Recién ahí el agente compra.
+ * Se verifica con Stripe (no con lo que diga la página) que el pago sea de esta compra y por el monto justo.
+ */
+export async function pagoRetenido(id: string): Promise<{ estado: FilaReserva["estado"]; codigo?: string }> {
+  const f = await cargar(id);
+  if (!f) return { estado: "fallida" };
+  if (f.estado !== "esperando_pago") return { estado: f.estado };
+  const [r] = await sql<{ pago_id: string | null }>(`select pago_id from reservas where id = $1`, [id]);
+  if (!r?.pago_id) return { estado: "esperando_pago" };
+  const pago = await verPago(r.pago_id);
+  if (pago.status !== "requires_capture" || pago.metadata.reserva !== id || pago.amount !== aMinimo(Number(f.precio), f.moneda)) {
+    return { estado: "esperando_pago" };
+  }
+  await sql(`update reservas set estado = 'pendiente', pago_estado = 'retenido', actualizado = now() where id = $1 and estado = 'esperando_pago'`, [id]);
+  return f.tipo === "vuelo" ? agenteVuelos(id) : agenteHoteles(id);
 }

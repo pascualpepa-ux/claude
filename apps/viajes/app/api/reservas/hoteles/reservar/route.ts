@@ -1,5 +1,6 @@
 import { alertarDueno } from "@/lib/correo/envio";
-import { agenteHoteles, registrarHotel } from "@/lib/agentes-reservas";
+import { agenteHoteles, prepararPago, registrarHotel } from "@/lib/agentes-reservas";
+import { pagosActivos } from "@/lib/pagos";
 import { dbConfigurada } from "@/lib/db";
 import { ErrorHoteles, hotelesPermitido, prereservar, type Huesped, type OfertaHotel } from "@/lib/hoteles";
 import { ipDe, permitido } from "@/lib/limite";
@@ -51,6 +52,8 @@ export async function POST(req: Request) {
     };
     const adultos = Math.min(4, Math.max(1, Number(c.adultos) || 1));
     const id = await registrarHotel(oferta, h as Huesped, c.entrada, c.salida, adultos, c.novedades !== false);
+    // Con tarjeta: primero se retiene la plata; el agente compra cuando Stripe lo confirma (/api/pagos/confirmar).
+    if (pagosActivos()) return Response.json({ pago: { reserva: id, ...(await prepararPago(id)) } });
     const r = await agenteHoteles(id);
     if (r.estado === "emitida") return Response.json({ codigo: r.codigo, precio: pre.precio, moneda: pre.moneda });
     if (r.estado === "pendiente") return Response.json({ pendiente: true }, { status: 202 });
