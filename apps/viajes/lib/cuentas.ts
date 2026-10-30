@@ -1,5 +1,6 @@
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
-import { sql } from "./db";
+import { cookies } from "next/headers";
+import { sql, dbConfigurada } from "./db";
 
 // Cuentas de usuario para Rumbo Premium: login simple con email + contraseña, sin terceros.
 // Mismo patrón que la sesión de admin (cookie firmada con HMAC), pero con su propio secreto
@@ -94,3 +95,11 @@ export async function crearUsuario(email: string, contrasena: string): Promise<U
 }
 
 export const esPremium = (u: Pick<Usuario, "premium_estado">) => u.premium_estado === "activo";
+
+/** El usuario con sesión iniciada en esta visita (según la cookie), o null. Solo servidor. */
+export async function usuarioDeSesion(): Promise<Usuario | null> {
+  if (!dbConfigurada() || !cuentasConfiguradas()) return null;
+  const usuarioId = usuarioIdDeCookie((await cookies()).get(COOKIE_USUARIO)?.value);
+  if (!usuarioId) return null;
+  return usuarioPorId(usuarioId).catch(() => null);
+}

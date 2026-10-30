@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { cookies } from "next/headers";
 import localFont from "next/font/local";
 import { Encabezado } from "@/components/Encabezado";
 import { Pie } from "@/components/Pie";
@@ -11,8 +10,7 @@ import { ProveedorIdioma } from "@/components/ProveedorIdioma";
 import { textosActuales } from "@/lib/idioma-servidor";
 import { SITIO_URL, metadatosPagina } from "@/lib/seo";
 import { DatosEstructurados } from "@/components/DatosEstructurados";
-import { COOKIE_USUARIO, cuentasConfiguradas, esPremium, usuarioIdDeCookie, usuarioPorId } from "@/lib/cuentas";
-import { dbConfigurada } from "@/lib/db";
+import { esPremium, usuarioDeSesion } from "@/lib/cuentas";
 import "./globals.css";
 
 // Google Sans Flex: la tipografía del logo (licencia SIL OFL, ver app/fuentes/OFL.txt).
@@ -48,12 +46,8 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { idioma } = await textosActuales();
   // Premium: si no hay sesión o el usuario todavía no es Premium, se ve la barra arriba de todo.
-  let mostrarBarraPremium = false;
-  if (dbConfigurada() && cuentasConfiguradas()) {
-    const usuarioId = usuarioIdDeCookie((await cookies()).get(COOKIE_USUARIO)?.value);
-    const usuario = usuarioId ? await usuarioPorId(usuarioId).catch(() => null) : null;
-    mostrarBarraPremium = !usuario || !esPremium(usuario);
-  }
+  const usuario = await usuarioDeSesion();
+  const mostrarBarraPremium = !usuario || !esPremium(usuario);
   return (
     <html lang={idioma} className={marca.variable}>
       <body className="flex min-h-[100dvh] flex-col font-sans">

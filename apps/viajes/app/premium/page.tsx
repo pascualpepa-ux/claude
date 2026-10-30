@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { Crown } from "@phosphor-icons/react/dist/ssr";
 import { FormularioCuenta } from "@/components/FormularioCuenta";
 import { BotonSalirCuenta } from "@/components/BotonSalirCuenta";
-import { COOKIE_USUARIO, cuentasConfiguradas, esPremium, usuarioIdDeCookie, usuarioPorId } from "@/lib/cuentas";
+import { cuentasConfiguradas, esPremium, usuarioDeSesion } from "@/lib/cuentas";
 import { dbConfigurada } from "@/lib/db";
 import { textosActuales } from "@/lib/idioma-servidor";
 import { metadatosPagina } from "@/lib/seo";
@@ -19,7 +18,7 @@ export default async function Premium() {
   const P = t.premium;
 
   const activo = dbConfigurada() && cuentasConfiguradas();
-  const usuario = activo ? await usuarioPorId(usuarioIdDeCookie((await cookies()).get(COOKIE_USUARIO)?.value) ?? "").catch(() => null) : null;
+  const usuario = await usuarioDeSesion();
 
   return (
     <main className="mx-auto max-w-xl px-4 pt-10 pb-20 md:pt-16">
