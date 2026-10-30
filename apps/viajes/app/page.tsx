@@ -22,6 +22,7 @@ import { Destinos } from "@/components/portada/Destinos";
 import { ComoFunciona } from "@/components/portada/ComoFunciona";
 import { PORTADA } from "@/lib/textos-portada";
 import { sorteoActivo } from "@/lib/sorteo";
+import { AnuncioRibera } from "@/components/AnuncioRibera";
 
 // Las fechas de la muestra dependen del día de hoy.
 export const dynamic = "force-dynamic";
@@ -117,6 +118,8 @@ export default async function Inicio() {
           <CartelSorteo idioma={idioma} />
         </div>
       )}
+
+      <AnuncioRibera />
 
       <Destinos idioma={idioma} />
       <ComoFunciona idioma={idioma} />
