@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowSquareOut, CheckCircle, Lightbulb } from "@phosphor-icons/react/dist/ssr";
 import { Calificacion } from "@/components/Calificacion";
 import { PlanearGuia } from "@/components/PlanearGuia";
+import { AnuncioRibera } from "@/components/AnuncioRibera";
 import { guiaPorSlug, relacionadas, totalViaje } from "@/lib/guias";
 import { usd } from "@/lib/dinero";
 import { LOCALE, type Idioma } from "@/lib/idioma";
@@ -171,6 +172,10 @@ export default async function PaginaGuia({ params }: Props) {
 
       <div className="mt-12">
         <Calificacion pagina={`/guias/${g.slug}`} titulo={t.opinion.tituloGuia} />
+      </div>
+
+      <div className="mt-12">
+        <AnuncioRibera />
       </div>
 
       <section aria-labelledby="relacionadas" className="mt-12">

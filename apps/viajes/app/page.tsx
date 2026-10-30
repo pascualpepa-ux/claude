@@ -119,7 +119,9 @@ export default async function Inicio() {
         </div>
       )}
 
-      <AnuncioRibera />
+      <div className="mx-auto max-w-6xl px-4 pt-10 md:pt-14">
+        <AnuncioRibera />
+      </div>
 
       <Destinos idioma={idioma} />
       <ComoFunciona idioma={idioma} />

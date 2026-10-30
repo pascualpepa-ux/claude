@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, CircleNotch, MapTrifold, Info, Train, ArrowRight, BookmarkSimple } from "@phosphor-icons/react/dist/ssr";
 import { FormularioSuscripcion } from "@/components/FormularioSuscripcion";
+import { AnuncioRibera } from "@/components/AnuncioRibera";
 import { TarjetaDia } from "@/components/TarjetaDia";
 import { TarjetaVuelo } from "@/components/TarjetaVuelo";
 import { TarjetaHotel } from "@/components/TarjetaHotel";
@@ -540,6 +541,10 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
             gastos={plan.gastos ?? []}
             onCambiar={(gastos) => setPlan({ ...plan, gastos })}
           />
+
+          <div className="mt-8">
+            <AnuncioRibera />
+          </div>
         </div>
 
         <aside className="lg:sticky lg:top-20 lg:self-start">
