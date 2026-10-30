@@ -1,6 +1,6 @@
 import { alertarDueno } from "@/lib/correo/envio";
 import { agenteVuelos, registrar } from "@/lib/agentes-reservas";
-import { ErrorDuffel, ofertaActual, ventaPermitida, type Pasajero } from "@/lib/duffel";
+import { ErrorDuffel, ofertaActual, telefonoAgencia, ventaPermitida, type Pasajero } from "@/lib/duffel";
 import { dbConfigurada } from "@/lib/db";
 import { ipDe, permitido } from "@/lib/limite";
 
@@ -16,7 +16,7 @@ function pasajeroValido(p: Partial<Pasajero>): p is Pasajero {
   return (
     !!p && NOMBRE.test(p.nombre ?? "") && NOMBRE.test(p.apellido ?? "") && FECHA.test(p.nacimiento ?? "") &&
     (p.genero === "m" || p.genero === "f") && ["mr", "ms", "mrs"].includes(p.tratamiento ?? "") &&
-    EMAIL.test(p.email ?? "") && TELEFONO.test(p.telefono ?? "")
+    EMAIL.test(p.email ?? "") && (TELEFONO.test(p.telefono ?? "") || (!p.telefono && TELEFONO.test(telefonoAgencia())))
   );
 }
 

@@ -7,7 +7,7 @@ import { SelectorIdioma } from "./SelectorIdioma";
 import { useIdioma } from "./ProveedorIdioma";
 
 export function Encabezado() {
-  const { t } = useIdioma();
+  const { idioma, t } = useIdioma();
   return (
     <header className="sticky top-0 z-30 border-b border-arena-200/80 bg-arena-50/90 backdrop-blur dark:border-arena-800/80 dark:bg-arena-950/90">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">
@@ -18,6 +18,14 @@ export function Encabezado() {
           </span>
         </Link>
         <div className="flex items-center gap-2">
+          {process.env.NEXT_PUBLIC_RESERVAS === "1" && (
+            <Link
+              href="/reservar"
+              className="hidden shrink-0 rounded-xl px-3 py-2 text-sm font-medium text-arena-800 transition hover:bg-arena-100 md:inline-block dark:text-arena-200 dark:hover:bg-arena-800"
+            >
+              {idioma === "es" ? "Vuelos y hoteles" : "Flights & hotels"}
+            </Link>
+          )}
           <Link
             href="/guias"
             className="hidden shrink-0 rounded-xl px-3 py-2 text-sm font-medium text-arena-800 transition hover:bg-arena-100 sm:inline-block dark:text-arena-200 dark:hover:bg-arena-800"

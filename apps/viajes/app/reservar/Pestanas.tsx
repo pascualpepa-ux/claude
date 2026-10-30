@@ -12,7 +12,7 @@ export function Pestanas({
   hoteles,
   inicial,
 }: {
-  vuelos: { prueba: boolean; inicial?: InicialVuelo } | null;
+  vuelos: { prueba: boolean; telefonoOpcional: boolean; inicial?: InicialVuelo } | null;
   hoteles: { prueba: boolean; inicial?: InicialHotel } | null;
   inicial: "vuelos" | "hoteles";
 }) {
@@ -39,7 +39,7 @@ export function Pestanas({
         </div>
       )}
       {actual === "vuelos" && vuelos ? (
-        <Reservar prueba={vuelos.prueba} inicial={vuelos.inicial} />
+        <Reservar prueba={vuelos.prueba} telefonoOpcional={vuelos.telefonoOpcional} inicial={vuelos.inicial} />
       ) : hoteles ? (
         <main className="mx-auto max-w-3xl px-4 py-10 md:py-14">
           <Hoteles prueba={hoteles.prueba} inicial={hoteles.inicial} />

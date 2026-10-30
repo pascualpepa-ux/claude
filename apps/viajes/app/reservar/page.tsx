@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { modoPrueba, ventaPermitida } from "@/lib/duffel";
+import { modoPrueba, telefonoAgencia, ventaPermitida } from "@/lib/duffel";
 import { hotelesPermitido, hotelesPrueba } from "@/lib/hoteles";
 import { Pestanas } from "./Pestanas";
 
@@ -23,7 +23,7 @@ function inicialHotel(q: Q) {
 }
 
 export default async function PaginaReservar({ searchParams }: { searchParams: Promise<Q> }) {
-  const vuelos = ventaPermitida() ? { prueba: modoPrueba() } : null;
+  const vuelos = ventaPermitida() ? { prueba: modoPrueba(), telefonoOpcional: /^\+\d{7,15}$/.test(telefonoAgencia()) } : null;
   const hoteles = hotelesPermitido() ? { prueba: hotelesPrueba() } : null;
   if (!vuelos && !hoteles) notFound();
   const q = await searchParams;

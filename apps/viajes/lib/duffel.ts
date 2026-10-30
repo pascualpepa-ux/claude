@@ -7,6 +7,8 @@ const BASE = "https://api.duffel.com";
 export const duffelConfigurado = () => !!process.env.DUFFEL_ACCESS_TOKEN;
 export const modoPrueba = () => (process.env.DUFFEL_ACCESS_TOKEN ?? "").startsWith("duffel_test_");
 /** Con clave real, no se vende hasta que esté conectado el cobro con tarjeta al cliente. */
+/** Teléfono de contacto de Rumbo Traveling: se usa cuando el cliente no deja el suyo (las aerolíneas exigen uno). */
+export const telefonoAgencia = () => process.env.RESERVAS_TELEFONO ?? "";
 export const ventaPermitida = () => duffelConfigurado() && (modoPrueba() || process.env.RESERVAS_COBRO_ACTIVO === "1");
 
 export class ErrorDuffel extends Error {
@@ -177,7 +179,7 @@ export async function emitir(ofertaId: string, pasajeros: Pasajero[], metadata: 
       gender: p.genero,
       title: p.tratamiento,
       email: p.email,
-      phone_number: p.telefono,
+      phone_number: p.telefono || telefonoAgencia(),
     })),
     payments: [{ type: "balance", currency: oferta.moneda, amount: totalAerolinea }],
     metadata,

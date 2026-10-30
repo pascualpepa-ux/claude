@@ -34,7 +34,7 @@ const T = {
     nombre: "Nombre",
     apellido: "Apellido",
     email: "Email (te mandamos la reserva acá)",
-    telefono: "Teléfono con código de país (+34…)",
+    telefono: "Teléfono (opcional, con +34…)",
     pagar: (p: string) => `Pagar ${p} y reservar`,
     avisoEmail: "Te mandamos la confirmación a este email. También vas a recibir novedades y ofertas de Rumbo Traveling (te podés dar de baja cuando quieras).",
     sinNovedades: "No quiero recibir novedades",
@@ -48,7 +48,7 @@ const T = {
     otra: "Buscar otro hotel",
     errores: {
       datos: "Revisá los datos: destino, fechas y huéspedes.",
-      faltan: "Completá nombre, apellido, email y teléfono (con + y el código de país).",
+      faltan: "Completá nombre, apellido y email. Si ponés teléfono, que empiece con + y el código de país.",
       oferta: "Esa habitación ya no está disponible o cambió de precio. Elegí otra.",
       inactivo: "La reserva de hoteles todavía no está activa.",
       limite: "Hiciste muchas búsquedas seguidas. Esperá un rato.",
@@ -79,7 +79,7 @@ const T = {
     nombre: "First name",
     apellido: "Last name",
     email: "Email (we send the booking here)",
-    telefono: "Phone with country code (+34…)",
+    telefono: "Phone (optional, with +34…)",
     pagar: (p: string) => `Pay ${p} and book`,
     avisoEmail: "We'll send the confirmation to this email. You'll also get Rumbo Traveling news and deals (unsubscribe any time).",
     sinNovedades: "I don't want news",
@@ -93,7 +93,7 @@ const T = {
     otra: "Search another hotel",
     errores: {
       datos: "Check the details: destination, dates and guests.",
-      faltan: "Fill in first name, last name, email and phone (with + and the country code).",
+      faltan: "Fill in first name, last name and email. If you add a phone, start with + and the country code.",
       oferta: "That room is no longer available or its price changed. Choose another.",
       inactivo: "Hotel booking isn't active yet.",
       limite: "Too many searches in a row. Wait a bit.",
@@ -203,7 +203,7 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
     e.preventDefault();
     if (!elegido) return;
     const h = { nombre: huesped.nombre.trim(), apellido: huesped.apellido.trim(), email: huesped.email.trim(), telefono: huesped.telefono.replace(/[\s-]/g, "") };
-    if (!h.nombre || !h.apellido || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(h.email) || !/^\+\d{7,15}$/.test(h.telefono)) return setError(t.errores.faltan);
+    if (!h.nombre || !h.apellido || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(h.email) || (h.telefono && !/^\+\d{7,15}$/.test(h.telefono))) return setError(t.errores.faltan);
     setError(null);
     setOcupado(true);
     try {
@@ -397,7 +397,7 @@ export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: Inicia
             </label>
             <label className="grid gap-1.5 text-sm font-medium">
               {t.telefono}
-              <input required type="tel" autoComplete="tel" placeholder="+34 600 000 000" value={huesped.telefono} onChange={(e) => setHuesped((h) => ({ ...h, telefono: e.target.value }))} className={campo} />
+              <input type="tel" autoComplete="tel" placeholder="+34 600 000 000" value={huesped.telefono} onChange={(e) => setHuesped((h) => ({ ...h, telefono: e.target.value }))} className={campo} />
             </label>
           </fieldset>
           <div className="grid gap-2 text-sm text-arena-600 dark:text-arena-400">

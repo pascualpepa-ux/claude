@@ -141,7 +141,7 @@ export async function reservarHotel(prebookId: string, h: Huesped, referencia: s
   const d = await pedir<{ bookingId: string; status: string; hotelConfirmationCode?: string; price: number; commission?: number }>(`${RESERVAS}/rates/book`, {
     prebookId,
     clientReference: referencia,
-    holder: { firstName: h.nombre, lastName: h.apellido, email: h.email, phone: h.telefono },
+    holder: { firstName: h.nombre, lastName: h.apellido, email: h.email, ...(h.telefono ? { phone: h.telefono } : {}) },
     guests: [{ occupancyNumber: 1, firstName: h.nombre, lastName: h.apellido, email: h.email }],
     payment: { method: "ACC_CREDIT_CARD" },
   });

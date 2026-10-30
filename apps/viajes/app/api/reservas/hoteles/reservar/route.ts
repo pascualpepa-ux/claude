@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   const nombreHotel = typeof c?.oferta?.nombre === "string" ? c.oferta.nombre.slice(0, 120) : "";
   if (
     typeof ofertaId !== "string" || ofertaId.length > 4000 || !nombreHotel || !FECHA.test(c?.entrada) || !FECHA.test(c?.salida) ||
-    !h || !NOMBRE.test(h.nombre ?? "") || !NOMBRE.test(h.apellido ?? "") || !EMAIL.test(h.email ?? "") || !TELEFONO.test(h.telefono ?? "")
+    !h || !NOMBRE.test(h.nombre ?? "") || !NOMBRE.test(h.apellido ?? "") || !EMAIL.test(h.email ?? "") || (!!h.telefono && !TELEFONO.test(h.telefono))
   ) {
     return Response.json({ error: "datos" }, { status: 400 });
   }

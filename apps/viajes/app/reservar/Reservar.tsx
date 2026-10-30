@@ -38,6 +38,7 @@ const T = {
     mujer: "Mujer",
     email: "Email (te mandamos el pasaje acá)",
     telefono: "Teléfono con código de país (+34…)",
+    telefonoOpcional: "Teléfono (opcional, con +34…)",
     pagar: (p: string) => `Pagar ${p} y reservar`,
     avisoEmail: "Te mandamos la confirmación a este email. También vas a recibir novedades y ofertas de Rumbo Traveling (te podés dar de baja cuando quieras).",
     sinNovedades: "No quiero recibir novedades",
@@ -87,6 +88,7 @@ const T = {
     mujer: "Female",
     email: "Email (we send the ticket here)",
     telefono: "Phone with country code (+34…)",
+    telefonoOpcional: "Phone (optional, with +34…)",
     pagar: (p: string) => `Pay ${p} and book`,
     avisoEmail: "We'll send the confirmation to this email. You'll also get Rumbo Traveling news and deals (unsubscribe any time).",
     sinNovedades: "I don't want news",
@@ -131,7 +133,7 @@ export interface InicialVuelo {
   adultos: number;
 }
 
-export function Reservar({ prueba, inicial }: { prueba: boolean; inicial?: InicialVuelo }) {
+export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba: boolean; telefonoOpcional?: boolean; inicial?: InicialVuelo }) {
   const { idioma } = useIdioma();
   const t = T[idioma];
   const [paso, setPaso] = useState<Paso>("buscar");
@@ -197,7 +199,8 @@ export function Reservar({ prueba, inicial }: { prueba: boolean; inicial?: Inici
     e.preventDefault();
     if (!elegida) return;
     const lista = pasajeros.map((p, i) => ({ ...p, email: p.email || pasajeros[0].email, telefono: (p.telefono || pasajeros[0].telefono).replace(/[\s-]/g, ""), tratamiento: p.genero === "m" ? "mr" : "ms" }) as Pasajero);
-    if (lista.some((p) => !p.nombre.trim() || !p.apellido.trim() || !p.nacimiento || !/^\+\d{7,15}$/.test(p.telefono) || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email))) {
+    const telefonoMal = (tel: string) => (tel ? !/^\+\d{7,15}$/.test(tel) : !telefonoOpcional);
+    if (lista.some((p) => !p.nombre.trim() || !p.apellido.trim() || !p.nacimiento || telefonoMal(p.telefono) || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email))) {
       return setError(t.errores.faltan);
     }
     setError(null);
@@ -404,8 +407,8 @@ export function Reservar({ prueba, inicial }: { prueba: boolean; inicial?: Inici
                       <input required type="email" autoComplete="email" value={p.email} onChange={(e) => cambiar({ email: e.target.value })} className={campo} />
                     </label>
                     <label className="grid gap-1.5 text-sm font-medium">
-                      {t.telefono}
-                      <input required type="tel" autoComplete="tel" placeholder="+34 600 000 000" value={p.telefono} onChange={(e) => cambiar({ telefono: e.target.value })} className={campo} />
+                      {telefonoOpcional ? t.telefonoOpcional : t.telefono}
+                      <input required={!telefonoOpcional} type="tel" autoComplete="tel" placeholder="+34 600 000 000" value={p.telefono} onChange={(e) => cambiar({ telefono: e.target.value })} className={campo} />
                     </label>
                   </>
                 )}
