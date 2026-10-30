@@ -120,7 +120,7 @@ const es = {
     sacar: (nombre: string) => `Sacar ${nombre}`,
     libre: "Día libre. Podés sumar una actividad sugerida.",
     sumar: "Sumar actividad",
-    tipos: { imperdible: "Imperdible", comida: "Comida típica", experiencia: "Experiencia" },
+    tipos: { imperdible: "Imperdible", comida: "Comida típica", experiencia: "Experiencia", vida_nocturna: "Vida nocturna", compras: "Shopping" },
   },
   vuelo: {
     directo: "Directo",
@@ -696,7 +696,7 @@ const en: Textos = {
     sacar: (nombre) => `Remove ${nombre}`,
     libre: "Free day. You can add a suggested activity.",
     sumar: "Add activity",
-    tipos: { imperdible: "Must-see", comida: "Local food", experiencia: "Experience" },
+    tipos: { imperdible: "Must-see", comida: "Local food", experiencia: "Experience", vida_nocturna: "Nightlife", compras: "Shopping" },
   },
   vuelo: {
     directo: "Nonstop",

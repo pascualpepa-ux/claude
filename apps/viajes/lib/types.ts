@@ -119,7 +119,7 @@ export interface OpcionHotel {
   propiedad?: string; // ficha real de Google Hotels, para vigilar precio y disponibilidad
 }
 
-export type TipoActividad = "imperdible" | "comida" | "experiencia";
+export type TipoActividad = "imperdible" | "comida" | "experiencia" | "vida_nocturna" | "compras";
 
 export interface Actividad {
   id: string;

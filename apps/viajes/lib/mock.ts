@@ -309,10 +309,13 @@ export function ubicarActividades(dias: DiaItinerario[], actividades: Actividad[
     const cupo = esExtremo ? 1 : porDia;
     const mojado = dia.clima.condicion === "lluvia" || dia.clima.condicion === "tormenta" || dia.clima.condicion === "nieve";
     const seco = dia.clima.condicion === "soleado" || dia.clima.condicion === "parcial";
+    // Público joven: vida nocturna y shopping compiten por los primeros lugares junto con lo imperdible,
+    // así no quedan tapados por la cantidad de actividades "imperdible" que hay por ciudad.
+    const prioridad = (tipo: Actividad["tipo"]) => (tipo === "vida_nocturna" || tipo === "compras" ? 2 : tipo === "imperdible" ? 1 : 0);
     const candidatas = actividades
       .filter((a) => a.ciudad === dia.ciudad && !usadas.has(a.id))
       .filter((a) => !(mojado && a.aireLibre))
-      .sort((x, y) => Number(y.aireLibre === seco) - Number(x.aireLibre === seco) || Number(y.tipo === "imperdible") - Number(x.tipo === "imperdible"));
+      .sort((x, y) => Number(y.aireLibre === seco) - Number(x.aireLibre === seco) || prioridad(y.tipo) - prioridad(x.tipo));
     let horas = 0;
     for (const act of candidatas) {
       if (dia.actividades.length >= cupo) break;

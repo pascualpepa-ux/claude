@@ -1,6 +1,6 @@
 "use client";
 
-import { ForkKnife, Plus, Star, Sparkle, X, Umbrella, Info } from "@phosphor-icons/react/dist/ssr";
+import { ForkKnife, Plus, Star, Sparkle, X, Umbrella, Info, Martini, ShoppingBag } from "@phosphor-icons/react/dist/ssr";
 import { usd } from "@/lib/dinero";
 import { formatoDia } from "@/lib/fechas";
 import type { Actividad, DiaItinerario } from "@/lib/types";
@@ -9,7 +9,7 @@ import { EstadoDato } from "./EstadoDato";
 import { IconoClima } from "./IconoClima";
 import { useIdioma } from "./ProveedorIdioma";
 
-const ICONO_TIPO = { imperdible: Star, comida: ForkKnife, experiencia: Sparkle };
+const ICONO_TIPO = { imperdible: Star, comida: ForkKnife, experiencia: Sparkle, vida_nocturna: Martini, compras: ShoppingBag };
 
 function formatoHoras(h: number, idioma: Idioma) {
   return h < 1 ? `${Math.round(h * 60)} min` : `${idioma === "es" ? String(h).replace(".", ",") : h} h`;
