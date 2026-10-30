@@ -139,9 +139,13 @@ export async function buscarHoteles(b: BusquedaHotel): Promise<OfertaHotel[]> {
     pedirOfertas(b),
     hostalIds.length ? pedirOfertas(b, hostalIds).catch(() => []) : Promise.resolve([]),
   ]);
-  const hostalesOrdenados = hostales.sort((a, b) => a.precio - b.precio);
+  // Público joven: nada de 4-5 estrellas (0 = sin calificar, se deja pasar — típico en hostales).
+  const MAX_ESTRELLAS = 3;
+  const hostalesOrdenados = hostales.filter((h) => h.estrellas <= MAX_ESTRELLAS).sort((a, b) => a.precio - b.precio);
   const idsYaIncluidos = new Set(hostalesOrdenados.map((h) => h.hotelId));
-  const restoOrdenado = general.filter((h) => !idsYaIncluidos.has(h.hotelId)).sort((a, b) => a.precio - b.precio);
+  const restoOrdenado = general
+    .filter((h) => !idsYaIncluidos.has(h.hotelId) && h.estrellas <= MAX_ESTRELLAS)
+    .sort((a, b) => a.precio - b.precio);
   return [...hostalesOrdenados, ...restoOrdenado].slice(0, 20);
 }
 
