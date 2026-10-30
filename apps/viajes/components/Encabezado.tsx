@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AirplaneTilt } from "@phosphor-icons/react/dist/ssr";
 import { Marca } from "./Logo";
 import { SelectorIdioma } from "./SelectorIdioma";
 import { useIdioma } from "./ProveedorIdioma";
@@ -20,9 +21,11 @@ export function Encabezado() {
           {process.env.NEXT_PUBLIC_RESERVAS === "1" && (
             <Link
               href="/reservar"
-              className="hidden shrink-0 rounded-xl px-3 py-2 text-sm font-semibold text-oliva-800 transition hover:bg-arena-100 sm:inline-block dark:text-oliva-200 dark:hover:bg-arena-800"
+              aria-label={idioma === "es" ? "Vuelos y hoteles" : "Flights & hotels"}
+              className="flex shrink-0 items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-semibold text-oliva-800 transition hover:bg-arena-100 sm:px-3 dark:text-oliva-200 dark:hover:bg-arena-800"
             >
-              {idioma === "es" ? "Vuelos y hoteles" : "Flights & hotels"}
+              <AirplaneTilt size={18} weight="bold" aria-hidden />
+              <span className="hidden sm:inline">{idioma === "es" ? "Vuelos y hoteles" : "Flights & hotels"}</span>
             </Link>
           )}
           <Link
@@ -40,15 +43,6 @@ export function Encabezado() {
           </Link>
         </div>
       </nav>
-      {/* En el celular no entra en el menú: va en una franja propia, siempre a la vista. */}
-      {process.env.NEXT_PUBLIC_RESERVAS === "1" && (
-        <Link
-          href="/reservar"
-          className="flex items-center justify-center gap-2 border-t border-arena-200/80 bg-oliva-700 px-4 py-2 text-sm font-semibold text-white sm:hidden dark:border-arena-800/80 dark:bg-oliva-300 dark:text-arena-950"
-        >
-          ✈️ {idioma === "es" ? "Comprá vuelos y hoteles acá" : "Book flights & hotels here"} →
-        </Link>
-      )}
     </header>
   );
 }
