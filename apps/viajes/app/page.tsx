@@ -16,9 +16,6 @@ import { climaReal } from "@/lib/clima-real";
 import { calcularResumen } from "@/lib/presupuesto";
 import { usd } from "@/lib/dinero";
 import { textosActuales } from "@/lib/idioma-servidor";
-import { Calificacion } from "@/components/Calificacion";
-import { YOUTUBE_URL } from "@/lib/seo";
-import { YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
 import { CartelSorteo } from "@/components/Sorteo";
 import Image from "next/image";
 import { CheckCircle } from "@phosphor-icons/react/dist/ssr";
@@ -203,41 +200,6 @@ export default async function Inicio() {
         </ul>
       </section>
 
-      {/* Canal de YouTube: bien visible, antes de la opinión. */}
-      <section aria-labelledby="titulo-youtube" className="border-t border-arena-200 dark:border-arena-800">
-        <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
-          <a
-            href={YOUTUBE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex flex-col items-start gap-6 rounded-3xl border border-arena-200 bg-papel p-6 transition hover:border-oliva-300 hover:shadow-md sm:flex-row sm:items-center md:p-8 dark:border-arena-800 dark:bg-arena-900"
-          >
-            <span className="grid size-20 shrink-0 place-items-center rounded-2xl bg-oliva-100 text-oliva-700 dark:bg-oliva-900/40 dark:text-oliva-300">
-              <YoutubeLogo size={48} weight="fill" aria-hidden />
-            </span>
-            <span className="flex-1">
-              <span id="titulo-youtube" className="block text-2xl font-semibold tracking-tight md:text-3xl">{ti.youtubeTitulo}</span>
-              <span className="mt-2 block max-w-[60ch] text-arena-600 dark:text-arena-400">{ti.youtubeBajada}</span>
-              <span className="mt-2 block text-sm font-medium text-arena-500 dark:text-arena-400">youtube.com/@rumbotraveling</span>
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-xl bg-oliva-700 px-5 py-3 font-semibold text-white transition group-hover:bg-oliva-800 dark:bg-oliva-300 dark:text-arena-950 dark:group-hover:bg-oliva-200">
-              <YoutubeLogo size={20} weight="fill" aria-hidden />
-              {ti.youtubeBoton}
-            </span>
-          </a>
-        </div>
-      </section>
-
-      {/* Opinión: bien visible al final de la portada. */}
-      <section aria-labelledby="titulo-opinion" className="border-t border-arena-200 bg-arena-100 dark:border-arena-800 dark:bg-arena-900/60">
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-14 md:grid-cols-[1fr_minmax(0,28rem)] md:items-center md:gap-12 md:py-16">
-          <div>
-            <h2 id="titulo-opinion" className="text-3xl font-semibold tracking-tight md:text-4xl">{ti.opinionTitulo}</h2>
-            <p className="mt-3 max-w-[48ch] text-arena-600 dark:text-arena-400">{ti.opinionBajada}</p>
-          </div>
-          <Calificacion pagina="/" titulo={t.opinion.estrellas} />
-        </div>
-      </section>
     </main>
   );
 }
