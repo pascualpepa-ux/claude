@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { AirplaneTilt } from "@phosphor-icons/react/dist/ssr";
+import { AirplaneTilt, EnvelopeSimple, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
+import { YOUTUBE_URL } from "@/lib/seo";
 import { Marca } from "./Logo";
 import { SelectorIdioma } from "./SelectorIdioma";
 import { useIdioma } from "./ProveedorIdioma";
@@ -34,6 +35,24 @@ export function Encabezado() {
           >
             {t.encabezado.guias}
           </Link>
+          <Link
+            href="/contacto"
+            aria-label={idioma === "es" ? "Contacto" : "Contact"}
+            className="flex shrink-0 items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-medium text-arena-800 transition hover:bg-arena-100 sm:px-3 dark:text-arena-200 dark:hover:bg-arena-800"
+          >
+            <EnvelopeSimple size={18} weight="duotone" aria-hidden />
+            <span className="hidden sm:inline">{idioma === "es" ? "Contacto" : "Contact"}</span>
+          </Link>
+          <a
+            href={YOUTUBE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-medium text-arena-800 transition hover:bg-arena-100 sm:px-3 dark:text-arena-200 dark:hover:bg-arena-800"
+          >
+            <YoutubeLogo size={18} weight="duotone" aria-hidden />
+            <span className="hidden sm:inline">YouTube</span>
+          </a>
           <SelectorIdioma />
           <Link
             href="/planificar"
