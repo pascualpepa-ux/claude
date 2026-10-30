@@ -42,6 +42,15 @@ export function Encabezado() {
           </Link>
         </div>
       </nav>
+      {/* En el celular no entra en el menú: va en una franja propia, siempre a la vista. */}
+      {process.env.NEXT_PUBLIC_RESERVAS === "1" && (
+        <Link
+          href="/reservar"
+          className="flex items-center justify-center gap-2 border-t border-arena-200/80 bg-oliva-700 px-4 py-2 text-sm font-semibold text-white sm:hidden dark:border-arena-800/80 dark:bg-oliva-300 dark:text-arena-950"
+        >
+          ✈️ {idioma === "es" ? "Comprá vuelos y hoteles acá" : "Book flights & hotels here"} →
+        </Link>
+      )}
     </header>
   );
 }
