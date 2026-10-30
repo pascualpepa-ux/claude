@@ -84,6 +84,9 @@ alter table reservas add column if not exists error text;
 alter table reservas add column if not exists avisado boolean not null default false;
 alter table reservas add column if not exists actualizado timestamptz not null default now();
 alter table reservas add column if not exists tipo text not null default 'vuelo';
+alter table reservas add column if not exists detalle jsonb;
+alter table reservas add column if not exists token_cancelar text;
+alter table reservas add column if not exists cancelada timestamptz;
 create table if not exists vigilancias (
   id int primary key,
   ultima timestamptz not null

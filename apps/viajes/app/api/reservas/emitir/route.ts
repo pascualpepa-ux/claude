@@ -1,3 +1,4 @@
+import { alertarDueno } from "@/lib/correo/envio";
 import { agenteVuelos, registrar } from "@/lib/agentes-reservas";
 import { ErrorDuffel, ofertaActual, ventaPermitida, type Pasajero } from "@/lib/duffel";
 import { dbConfigurada } from "@/lib/db";
@@ -41,6 +42,8 @@ export async function POST(req: Request) {
     return Response.json({ error: "oferta" }, { status: 409 });
   } catch (e) {
     console.error("emitir pasaje:", e);
+    // Si pasa algo raro, le llega un email al dueño en el momento.
+    await alertarDueno("Error al emitir pasaje", `Algo falló en una compra.\n\n${e instanceof Error ? e.message : String(e)}\n\nRevisá el admin y los emails de los agentes.`).catch(() => {});
     if (e instanceof ErrorDuffel && e.status < 500) return Response.json({ error: "oferta" }, { status: 409 });
     if (e instanceof ErrorDuffel) return Response.json({ error: "aerolinea" }, { status: 502 });
     return Response.json({ error: "servidor" }, { status: 502 });

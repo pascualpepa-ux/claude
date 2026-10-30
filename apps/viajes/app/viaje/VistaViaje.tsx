@@ -220,6 +220,18 @@ function BotonGuardar({ idGuardado, error, onGuardar, onQuitar, ancho = false }:
   );
 }
 
+
+/** Compra de vuelos y hoteles dentro de la web (/reservar). */
+const RESERVAS_ACTIVAS = process.env.NEXT_PUBLIC_RESERVAS === "1";
+
+/** Fechas de hotel de una ciudad del viaje: desde su primer día hasta el primer día de la siguiente (o la vuelta). */
+function fechasHotel(plan: TripPlan, clave: string) {
+  const dias = plan.dias.map((d) => ({ clave: d.clave, fecha: d.fecha }));
+  const i = dias.findIndex((d) => d.clave === clave);
+  const siguiente = dias.slice(i).find((d) => d.clave !== clave);
+  return { entrada: dias[i]?.fecha ?? plan.input.fechaIda, salida: siguiente?.fecha ?? plan.input.fechaVuelta };
+}
+
 export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean }) {
   const params = useSearchParams();
   const esEjemplo = params.get("ejemplo") === "1";
@@ -465,6 +477,15 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
                 ? t.viaje.vuelosMultiples(plan.ruta[0].ciudad, plan.ruta.at(-1)!.ciudad)
                 : t.viaje.vuelosUna}
             </p>
+            {RESERVAS_ACTIVAS && input.aeropuertoOrigen && plan.ruta[0]?.aeropuerto && (
+              <a
+                href={`/reservar?origen=${input.aeropuertoOrigen}&destino=${plan.ruta[0].aeropuerto}&ida=${input.fechaIda}&vuelta=${input.fechaVuelta}&adultos=${Math.min(6, resumen.personas)}`}
+                className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-oliva-700 px-5 py-4 font-semibold text-white transition hover:bg-oliva-800 active:scale-[0.99] dark:bg-oliva-300 dark:text-arena-950"
+              >
+                <span>{idioma === "es" ? "Comprá el vuelo acá mismo, en Rumbo Traveling" : "Book the flight right here, on Rumbo Traveling"}</span>
+                <span aria-hidden>→</span>
+              </a>
+            )}
             <div className="mt-4 grid gap-4">
               {plan.vuelos.map((v) => (
                 <TarjetaVuelo
@@ -489,7 +510,20 @@ export function VistaViaje({ suscripciones = false }: { suscripciones?: boolean 
             )}
             {input.tipoHotel !== "propio" && plan.ruta.map((r) => (
               <div key={r.clave} className="mt-4">
-                <h3 className="text-sm font-medium text-arena-600 dark:text-arena-400">{t.viaje.ciudadNoches(r.ciudad, r.dias)}</h3>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-sm font-medium text-arena-600 dark:text-arena-400">{t.viaje.ciudadNoches(r.ciudad, r.dias)}</h3>
+                  {RESERVAS_ACTIVAS && r.aeropuerto && (() => {
+                    const { entrada, salida } = fechasHotel(plan, r.clave);
+                    return (
+                      <a
+                        href={`/reservar?tipo=hotel&destino=${r.aeropuerto}&entrada=${entrada}&salida=${salida}&adultos=${Math.min(4, resumen.personas)}`}
+                        className="rounded-xl bg-oliva-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-oliva-800 dark:bg-oliva-300 dark:text-arena-950"
+                      >
+                        {idioma === "es" ? `Reservar hotel en ${r.ciudad} acá` : `Book a hotel in ${r.ciudad} here`}
+                      </a>
+                    );
+                  })()}
+                </div>
                 <div className="mt-3 grid gap-4">
                   {(plan.hoteles[r.clave] ?? []).map((h) => (
                     <TarjetaHotel

@@ -1,8 +1,9 @@
+import { randomBytes } from "node:crypto";
 import { alertarDueno, mandarAResend } from "./correo/envio";
 import { SITIO } from "./correo/redactor";
 import { sql } from "./db";
-import { emitir, ErrorDuffel, modoPrueba, ordenDeReserva, type Oferta, type Pasajero } from "./duffel";
-import { ErrorHoteles, hotelesPrueba, prereservar, reservaHotelDe, reservarHotel, type Huesped, type OfertaHotel } from "./hoteles";
+import { confirmarCancelacion, cotizarCancelacion, emitir, ErrorDuffel, modoPrueba, ordenDeReserva, type Oferta, type Pasajero } from "./duffel";
+import { cancelarHotel, ErrorHoteles, hotelesPrueba, prereservar, reservaHotelDe, reservarHotel, type Huesped, type OfertaHotel } from "./hoteles";
 
 // Agentes de reservas:
 // - Agente de vuelos: paga y emite el pasaje (Duffel).
@@ -13,9 +14,28 @@ import { ErrorHoteles, hotelesPrueba, prereservar, reservaHotelDe, reservarHotel
 const MAX_INTENTOS = 3;
 
 type Tipo = "vuelo" | "hotel";
+/** Lo que se guarda para el email y la cancelación. */
+export type DetalleReserva =
+  | { tipo: "vuelo"; aerolinea: string; tramos: Oferta["tramos"]; pasajeros: string[] }
+  | {
+      tipo: "hotel";
+      nombre: string;
+      direccion: string;
+      estrellas: number;
+      puntaje: number | null;
+      habitacion: string;
+      regimen: string;
+      reembolsable: boolean;
+      entrada: string;
+      salida: string;
+      huespedes: number;
+    };
+
 interface FilaReserva {
   id: string;
   tipo: Tipo;
+  detalle: DetalleReserva | null;
+  token_cancelar: string | null;
   estado: "pendiente" | "emitida" | "fallida";
   oferta_id: string;
   pasajeros: (Pasajero | Huesped)[];
@@ -25,25 +45,55 @@ interface FilaReserva {
   precio: string;
   moneda: string;
 }
-const COLUMNAS = "id, tipo, estado, oferta_id, pasajeros, email, ruta, intentos, precio, moneda";
+const COLUMNAS = "id, tipo, detalle, token_cancelar, estado, oferta_id, pasajeros, email, ruta, intentos, precio, moneda";
 
 const prueba = (tipo: Tipo) => ((tipo === "vuelo" ? modoPrueba() : hotelesPrueba()) ? "[PRUEBA] " : "");
 const rutaDe = (o: Oferta) =>
   o.tramos.map((t) => `${t.segmentos[0].desde}→${t.segmentos[t.segmentos.length - 1].hasta} ${t.salida.slice(0, 10)}`).join(", ");
 
 /** Anota la compra antes de pagar: desde acá, el vigilante la sigue hasta que termine. */
-async function anotar(tipo: Tipo, ofertaId: string, personas: unknown[], email: string, detalle: string, precio: number, moneda: string, esPrueba: boolean) {
+async function anotar(ofertaId: string, personas: unknown[], email: string, resumen: string, detalle: DetalleReserva, precio: number, moneda: string, esPrueba: boolean) {
   const [r] = await sql<{ id: string }>(
-    `insert into reservas (tipo, estado, oferta_id, pasajeros, email, ruta, precio, costo, moneda, prueba)
-     values ($1, 'pendiente', $2, $3, $4, $5, $6, 0, $7, $8) returning id`,
-    [tipo, ofertaId, JSON.stringify(personas), email, detalle, precio, moneda, esPrueba],
+    `insert into reservas (tipo, estado, oferta_id, pasajeros, email, ruta, detalle, token_cancelar, precio, costo, moneda, prueba)
+     values ($1, 'pendiente', $2, $3, $4, $5, $6, $7, $8, 0, $9, $10) returning id`,
+    [detalle.tipo, ofertaId, JSON.stringify(personas), email, resumen, JSON.stringify(detalle), randomBytes(24).toString("base64url"), precio, moneda, esPrueba],
   );
   return r.id;
 }
 export const registrar = (o: Oferta, pasajeros: Pasajero[]) =>
-  anotar("vuelo", o.id, pasajeros, pasajeros[0].email, rutaDe(o), o.precio, o.moneda, modoPrueba());
-export const registrarHotel = (o: OfertaHotel, h: Huesped, entrada: string, salida: string) =>
-  anotar("hotel", o.ofertaId, [h], h.email, `${o.nombre}, ${entrada} al ${salida}`, o.precio, o.moneda, hotelesPrueba());
+  anotar(o.id, pasajeros, pasajeros[0].email, rutaDe(o), { tipo: "vuelo", aerolinea: o.aerolinea, tramos: o.tramos, pasajeros: pasajeros.map((p) => `${p.nombre} ${p.apellido}`) }, o.precio, o.moneda, modoPrueba());
+export const registrarHotel = (o: OfertaHotel, h: Huesped, entrada: string, salida: string, huespedes: number) =>
+  anotar(
+    o.ofertaId,
+    [h],
+    h.email,
+    `${o.nombre}, ${entrada} al ${salida}`,
+    { tipo: "hotel", nombre: o.nombre, direccion: o.direccion, estrellas: o.estrellas, puntaje: o.puntaje, habitacion: o.habitacion, regimen: o.regimen, reembolsable: o.reembolsable, entrada, salida, huespedes },
+    o.precio,
+    o.moneda,
+    hotelesPrueba(),
+  );
+
+/** Texto del email al cliente con todo lo que compró. */
+function detalleParaCliente(f: FilaReserva, codigo: string) {
+  const precio = `${Number(f.precio).toFixed(2)} ${f.moneda}`;
+  const cancelar = f.token_cancelar ? `\n\nSi necesitás cancelar: ${SITIO()}/reservar/cancelar?t=${f.token_cancelar}` : "";
+  const d = f.detalle;
+  if (d?.tipo === "vuelo") {
+    const tramos = d.tramos
+      .map((t, i) =>
+        `${i === 0 ? "IDA" : "VUELTA"}\n` +
+        t.segmentos.map((s) => `  ${s.vuelo} (${s.aerolinea}): ${s.desde} ${s.salida.slice(0, 16).replace("T", " ")} → ${s.hasta} ${s.llegada.slice(0, 16).replace("T", " ")}${s.terminal ? `, terminal ${s.terminal}` : ""}`).join("\n"),
+      )
+      .join("\n\n");
+    return `Código de reserva: ${codigo}\nAerolínea: ${d.aerolinea}\nPasajeros: ${d.pasajeros.join(", ")}\n\n${tramos}\n\nTotal pagado: ${precio}\n\nCon el código hacés el check-in en la web de la aerolínea (suele abrir 24 a 48 horas antes).${cancelar}`;
+  }
+  if (d?.tipo === "hotel") {
+    const noches = Math.max(1, Math.round((Date.parse(d.salida) - Date.parse(d.entrada)) / 86_400_000));
+    return `Código de reserva: ${codigo}\nHotel: ${d.nombre}${d.estrellas ? ` (${"★".repeat(Math.round(d.estrellas))})` : ""}${d.puntaje ? `, puntaje ${d.puntaje}` : ""}\nDirección: ${d.direccion || "-"}\nHabitación: ${d.habitacion} · ${d.regimen}\nEntrada: ${d.entrada}\nSalida: ${d.salida} (${noches} ${noches === 1 ? "noche" : "noches"})\nHuéspedes: ${d.huespedes}\nCancelación: ${d.reembolsable ? "gratis según la política del hotel" : "no reembolsable"}\n\nTotal pagado: ${precio}\n\nMostrá este código al llegar al hotel.${cancelar}`;
+  }
+  return `Código de reserva: ${codigo}\n${f.ruta}\nTotal pagado: ${precio}${cancelar}`;
+}
 
 function correoCliente(asunto: string, texto: string) {
   return {
@@ -70,9 +120,10 @@ async function marcarHecha(f: FilaReserva, codigo: string, orden: string, comisi
   ).catch(() => {});
   await mandarAResend(
     f.email,
-    f.tipo === "vuelo"
-      ? correoCliente(`${p}Tu vuelo está reservado: ${codigo}`, `¡Hola!\n\nTu vuelo ya está reservado.\n\nCódigo de reserva: ${codigo}\nViaje: ${f.ruta}\n\nCon este código hacés el check-in en la web de la aerolínea.\n\n¡Buen viaje!\nRumbo Traveling`)
-      : correoCliente(`${p}Tu hotel está reservado: ${codigo}`, `¡Hola!\n\nTu hotel ya está reservado.\n\nCódigo de reserva: ${codigo}\nHotel: ${f.ruta}\n\nMostrá este código al llegar al hotel.\n\n¡Buen viaje!\nRumbo Traveling`),
+    correoCliente(
+      `${p}${f.tipo === "vuelo" ? "Tu vuelo está reservado" : "Tu hotel está reservado"}: ${codigo}`,
+      `¡Hola!\n\n${f.tipo === "vuelo" ? "Tu vuelo ya está reservado." : "Tu hotel ya está reservado."}\n\n${detalleParaCliente(f, codigo)}\n\n¡Buen viaje!\nRumbo Traveling`,
+    ),
   ).catch(() => {});
 }
 
@@ -172,4 +223,44 @@ export async function vigilante() {
     await sql(`update reservas set avisado = true where id = $1`, [f.id]);
   }
   return resultado;
+}
+
+/** Datos para la página de cancelación (con el token del email). */
+export async function reservaParaCancelar(token: string) {
+  const [f] = await sql<FilaReserva & { codigo: string | null; orden: string | null; cancelada: string | null }>(
+    `select ${COLUMNAS}, codigo, orden, cancelada from reservas where token_cancelar = $1`,
+    [token],
+  );
+  return f ?? null;
+}
+
+/** Cancela de verdad con la aerolínea o el hotel, y avisa al dueño y al cliente. */
+export async function cancelarReserva(token: string) {
+  const f = await reservaParaCancelar(token);
+  if (!f || f.estado !== "emitida" || !f.orden) return { estado: "invalida" as const };
+  if (f.cancelada) return { estado: "ya" as const };
+  let devolucion = 0;
+  let moneda = f.moneda;
+  if (f.tipo === "vuelo") {
+    const c = await cotizarCancelacion(f.orden);
+    await confirmarCancelacion(c.id);
+    devolucion = c.devolucion;
+    moneda = c.moneda || moneda;
+  } else {
+    const c = await cancelarHotel(f.codigo ?? f.orden);
+    devolucion = c.devolucion;
+    moneda = c.moneda || moneda;
+  }
+  await sql(`update reservas set cancelada = now(), actualizado = now() where id = $1`, [f.id]);
+  const p = prueba(f.tipo);
+  await alertarDueno(
+    `${p}Reserva cancelada: ${f.ruta}`,
+    `El cliente canceló.\n\nCódigo: ${f.codigo}\n${f.ruta}\nCliente: ${f.email}\nPagó: ${f.precio} ${f.moneda}\nDevuelve ${f.tipo === "vuelo" ? "la aerolínea" : "el hotel"}: ${devolucion} ${moneda}`,
+    f.email,
+  ).catch(() => {});
+  await mandarAResend(
+    f.email,
+    correoCliente(`${p}Tu reserva está cancelada: ${f.codigo}`, `¡Hola!\n\nCancelamos tu reserva ${f.codigo} (${f.ruta}).\n\nDevolución: ${devolucion > 0 ? `${devolucion.toFixed(2)} ${moneda}` : "esta tarifa no tenía devolución"}.\n\nRumbo Traveling`),
+  ).catch(() => {});
+  return { estado: "ok" as const, devolucion, moneda };
 }

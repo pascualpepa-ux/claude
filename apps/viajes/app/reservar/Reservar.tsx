@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AirplaneTakeoff, ArrowLeft, CheckCircle, CircleNotch, Info, Ticket, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import { BuscadorCiudad } from "@/components/BuscadorCiudad";
 import { useIdioma } from "@/components/ProveedorIdioma";
 import { LOCALE, type Idioma } from "@/lib/idioma";
 import type { Lugar } from "@/lib/lugares-tipos";
 import type { Oferta, Pasajero } from "@/lib/duffel";
+import { guardarReserva } from "@/lib/almacen";
 
 const T = {
   es: {
@@ -118,16 +119,24 @@ function duracion(iso: string | null) {
   return `${h ? `${h} h ` : ""}${m[3] ? `${Number(m[3])} min` : ""}`.trim();
 }
 
-export function Reservar({ prueba }: { prueba: boolean }) {
+export interface InicialVuelo {
+  origen: string;
+  destino: string;
+  ida: string;
+  vuelta: string;
+  adultos: number;
+}
+
+export function Reservar({ prueba, inicial }: { prueba: boolean; inicial?: InicialVuelo }) {
   const { idioma } = useIdioma();
   const t = T[idioma];
   const [paso, setPaso] = useState<Paso>("buscar");
-  const [origen, setOrigen] = useState({ texto: "", lugar: null as Lugar | null, aeropuerto: "" });
-  const [destino, setDestino] = useState({ texto: "", lugar: null as Lugar | null, aeropuerto: "" });
-  const [ida, setIda] = useState(manana());
-  const [vuelta, setVuelta] = useState("");
-  const [soloIda, setSoloIda] = useState(false);
-  const [adultos, setAdultos] = useState(1);
+  const [origen, setOrigen] = useState({ texto: inicial?.origen ?? "", lugar: null as Lugar | null, aeropuerto: inicial?.origen ?? "" });
+  const [destino, setDestino] = useState({ texto: inicial?.destino ?? "", lugar: null as Lugar | null, aeropuerto: inicial?.destino ?? "" });
+  const [ida, setIda] = useState(inicial?.ida ?? manana());
+  const [vuelta, setVuelta] = useState(inicial?.vuelta ?? "");
+  const [soloIda, setSoloIda] = useState(!!inicial && !inicial.vuelta);
+  const [adultos, setAdultos] = useState(inicial?.adultos ?? 1);
   const [ofertas, setOfertas] = useState<Oferta[]>([]);
   const [elegida, setElegida] = useState<Oferta | null>(null);
   const [pasajeros, setPasajeros] = useState<Pasajero[]>([vacio()]);
@@ -140,8 +149,14 @@ export function Reservar({ prueba }: { prueba: boolean }) {
   const dia = (iso: string) => new Date(`${iso.slice(0, 10)}T12:00:00`).toLocaleDateString(LOCALE[idioma], { weekday: "short", day: "numeric", month: "short" });
   const mensajeError = (e?: string) => t.errores[(e ?? "general") as keyof typeof t.errores] ?? t.errores.general;
 
-  const buscar = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Si viene de un viaje armado, busca solo apenas abre.
+  useEffect(() => {
+    if (inicial) void buscar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const buscar = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setError(null);
     if (!origen.aeropuerto || !destino.aeropuerto || !ida || (!soloIda && !vuelta)) return setError(t.errores.datos);
     setOcupado(true);
@@ -191,6 +206,19 @@ export function Reservar({ prueba }: { prueba: boolean }) {
       const j = await r.json().catch(() => ({}));
       if (r.ok) {
         setCodigo(j.codigo ?? "");
+        // Se guarda solo en el dispositivo (y el viaje armado, si venía de uno).
+        if (j.codigo) {
+          const ida = elegida.tramos[0];
+          guardarReserva({
+            codigo: j.codigo,
+            tipo: "vuelo",
+            titulo: `${ida.segmentos[0].desde} → ${ida.segmentos[ida.segmentos.length - 1].hasta}`,
+            detalle: `${elegida.aerolinea} · ${ida.salida.slice(0, 10)}${elegida.tramos[1] ? ` – ${elegida.tramos[1].salida.slice(0, 10)}` : ""}`,
+            precio: elegida.precio,
+            moneda: elegida.moneda,
+            creado: new Date().toISOString(),
+          });
+        }
         setPaso("listo");
         window.scrollTo({ top: 0 });
       } else setError(mensajeError(j.error));

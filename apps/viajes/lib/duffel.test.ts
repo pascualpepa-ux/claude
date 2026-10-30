@@ -4,8 +4,8 @@ import { conComision } from "./duffel";
 afterEach(() => vi.unstubAllEnvs());
 
 describe("conComision", () => {
-  it("suma 5% más 5 por defecto", () => {
-    expect(conComision(100)).toBe(110);
+  it("suma 10% por defecto", () => {
+    expect(conComision(200)).toBe(220);
   });
   it("se configura en Vercel", () => {
     vi.stubEnv("RESERVAS_COMISION_PORCENTAJE", "10");

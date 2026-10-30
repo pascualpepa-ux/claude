@@ -3,11 +3,19 @@
 import { useState } from "react";
 import { AirplaneTilt, Bed } from "@phosphor-icons/react/dist/ssr";
 import { useIdioma } from "@/components/ProveedorIdioma";
-import { Reservar } from "./Reservar";
-import { Hoteles } from "./Hoteles";
+import { Reservar, type InicialVuelo } from "./Reservar";
+import { Hoteles, type InicialHotel } from "./Hoteles";
 
 /** Vuelos y hoteles en la misma página, cada uno en su pestaña. */
-export function Pestanas({ vuelos, hoteles, inicial }: { vuelos: { prueba: boolean } | null; hoteles: { prueba: boolean } | null; inicial: "vuelos" | "hoteles" }) {
+export function Pestanas({
+  vuelos,
+  hoteles,
+  inicial,
+}: {
+  vuelos: { prueba: boolean; inicial?: InicialVuelo } | null;
+  hoteles: { prueba: boolean; inicial?: InicialHotel } | null;
+  inicial: "vuelos" | "hoteles";
+}) {
   const { idioma } = useIdioma();
   const [actual, setActual] = useState(inicial === "hoteles" && hoteles ? "hoteles" : vuelos ? "vuelos" : "hoteles");
   const boton = (id: "vuelos" | "hoteles", texto: string, Icono: typeof Bed) => (
@@ -31,10 +39,10 @@ export function Pestanas({ vuelos, hoteles, inicial }: { vuelos: { prueba: boole
         </div>
       )}
       {actual === "vuelos" && vuelos ? (
-        <Reservar prueba={vuelos.prueba} />
+        <Reservar prueba={vuelos.prueba} inicial={vuelos.inicial} />
       ) : hoteles ? (
         <main className="mx-auto max-w-3xl px-4 py-10 md:py-14">
-          <Hoteles prueba={hoteles.prueba} />
+          <Hoteles prueba={hoteles.prueba} inicial={hoteles.inicial} />
         </main>
       ) : null}
     </>

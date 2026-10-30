@@ -155,3 +155,15 @@ export async function reservaHotelDe(referencia: string) {
   ).catch(() => []);
   return d.find((b) => b.status === "CONFIRMED") ?? null;
 }
+
+/** Cancela una reserva de hotel. Solo funciona si la tarifa es reembolsable. */
+export async function cancelarHotel(bookingId: string) {
+  const res = await fetch(`${RESERVAS}/bookings/${encodeURIComponent(bookingId)}`, {
+    method: "PUT",
+    headers: { "X-API-Key": process.env.LITEAPI_KEY ?? "", Accept: "application/json" },
+    cache: "no-store",
+  });
+  const j = (await res.json().catch(() => ({}))) as { data?: { status?: string; refund_amount?: number; refundAmount?: number; currency?: string }; error?: { message?: string } };
+  if (!res.ok || j.error) throw new ErrorHoteles(res.status >= 400 ? res.status : 400, j.error?.message ?? "error");
+  return { estado: j.data?.status ?? "", devolucion: j.data?.refund_amount ?? j.data?.refundAmount ?? 0, moneda: j.data?.currency ?? "" };
+}

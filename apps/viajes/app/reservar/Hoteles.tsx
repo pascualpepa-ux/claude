@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Bed, CheckCircle, CircleNotch, Info, Star, Ticket, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import { BuscadorCiudad } from "@/components/BuscadorCiudad";
 import { useIdioma } from "@/components/ProveedorIdioma";
 import { LOCALE, type Idioma } from "@/lib/idioma";
 import type { Lugar } from "@/lib/lugares-tipos";
 import type { Huesped, OfertaHotel } from "@/lib/hoteles";
+import { guardarReserva } from "@/lib/almacen";
 
 const T = {
   es: {
@@ -90,14 +91,21 @@ const T = {
 type Paso = "buscar" | "elegir" | "datos" | "listo";
 const dia = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
 
-export function Hoteles({ prueba }: { prueba: boolean }) {
+export interface InicialHotel {
+  destino: string;
+  entrada: string;
+  salida: string;
+  adultos: number;
+}
+
+export function Hoteles({ prueba, inicial }: { prueba: boolean; inicial?: InicialHotel }) {
   const { idioma } = useIdioma();
   const t = T[idioma];
   const [paso, setPaso] = useState<Paso>("buscar");
-  const [destino, setDestino] = useState({ texto: "", lugar: null as Lugar | null, aeropuerto: "" });
-  const [entrada, setEntrada] = useState(dia(7));
-  const [salida, setSalida] = useState(dia(10));
-  const [adultos, setAdultos] = useState(2);
+  const [destino, setDestino] = useState({ texto: inicial?.destino ?? "", lugar: null as Lugar | null, aeropuerto: inicial?.destino ?? "" });
+  const [entrada, setEntrada] = useState(inicial?.entrada ?? dia(7));
+  const [salida, setSalida] = useState(inicial?.salida ?? dia(10));
+  const [adultos, setAdultos] = useState(inicial?.adultos ?? 2);
   const [hoteles, setHoteles] = useState<OfertaHotel[]>([]);
   const [elegido, setElegido] = useState<OfertaHotel | null>(null);
   const [huesped, setHuesped] = useState<Huesped>({ nombre: "", apellido: "", email: "", telefono: "" });
@@ -109,8 +117,14 @@ export function Hoteles({ prueba }: { prueba: boolean }) {
   const dinero = (n: number, moneda: string) => n.toLocaleString(LOCALE[idioma], { style: "currency", currency: moneda });
   const mensajeError = (e?: string) => t.errores[(e ?? "general") as keyof typeof t.errores] ?? t.errores.general;
 
-  const buscar = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Si viene de un viaje armado, busca solo apenas abre.
+  useEffect(() => {
+    if (inicial) void buscar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const buscar = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setError(null);
     if (!destino.aeropuerto || !entrada || !salida || salida <= entrada) return setError(t.errores.datos);
     setOcupado(true);
@@ -145,11 +159,23 @@ export function Hoteles({ prueba }: { prueba: boolean }) {
       const r = await fetch("/api/reservas/hoteles/reservar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ oferta: { ofertaId: elegido.ofertaId, nombre: elegido.nombre }, entrada, salida, huesped: h }),
+        body: JSON.stringify({ oferta: elegido, entrada, salida, adultos, huesped: h }),
       });
       const j = await r.json().catch(() => ({}));
       if (r.ok) {
         setCodigo(j.codigo ?? "");
+        // Se guarda solo en el dispositivo (y el viaje armado, si venía de uno).
+        if (j.codigo) {
+          guardarReserva({
+            codigo: j.codigo,
+            tipo: "hotel",
+            titulo: elegido.nombre,
+            detalle: `${entrada} – ${salida} · ${t.noches(noches)}`,
+            precio: j.precio ?? elegido.precio,
+            moneda: j.moneda ?? elegido.moneda,
+            creado: new Date().toISOString(),
+          });
+        }
         setPaso("listo");
         window.scrollTo({ top: 0 });
       } else setError(mensajeError(j.error));

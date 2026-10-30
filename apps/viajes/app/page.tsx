@@ -6,6 +6,7 @@ import { ArrowRight, CloudSun, AirplaneTilt, Bed, Receipt } from "@phosphor-icon
 import { TarjetaDia } from "@/components/TarjetaDia";
 import { EstadoDato } from "@/components/EstadoDato";
 import { ViajesGuardados } from "@/components/ViajesGuardados";
+import { MisReservas } from "@/components/MisReservas";
 import { FormularioSuscripcion } from "@/components/FormularioSuscripcion";
 import { suscripcionesActivas } from "@/lib/suscripciones";
 import { BellRinging } from "@phosphor-icons/react/dist/ssr";
@@ -59,6 +60,7 @@ export default async function Inicio() {
   return (
     <main>
       <EnlacesIdioma ruta="/" idioma={idioma} />
+      <MisReservas />
       <ViajesGuardados />
       {/* Portada con foto: texto sobre la imagen y, al costado, cómo se ve un día del viaje. */}
       <section className="relative isolate overflow-hidden bg-oliva-950 text-arena-50">

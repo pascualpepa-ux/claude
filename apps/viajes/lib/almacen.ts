@@ -70,3 +70,37 @@ export function abrirGuardado(v: ViajeGuardado) {
     else sessionStorage.removeItem(CLAVE_BORRADOR);
   } catch {}
 }
+
+// Reservas pagadas: se guardan solas en el dispositivo (sin apretar "Guardar viaje").
+const CLAVE_RESERVAS = "rumbo:reservas";
+
+export interface ReservaGuardada {
+  codigo: string;
+  tipo: "vuelo" | "hotel";
+  titulo: string;
+  detalle: string;
+  precio: number;
+  moneda: string;
+  creado: string; // ISO
+}
+
+export function leerReservas(): ReservaGuardada[] {
+  try {
+    const lista = JSON.parse(localStorage.getItem(CLAVE_RESERVAS) ?? "[]");
+    return Array.isArray(lista) ? lista.filter((r) => r?.codigo) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Guarda la reserva y, si venía de un viaje armado en esta pestaña, guarda también ese viaje. */
+export function guardarReserva(r: ReservaGuardada) {
+  try {
+    localStorage.setItem(CLAVE_RESERVAS, JSON.stringify([r, ...leerReservas().filter((x) => x.codigo !== r.codigo)].slice(0, 30)));
+    const plan = JSON.parse(sessionStorage.getItem(CLAVE_VIAJE) ?? "null") as TripPlan | null;
+    if (plan?.input) {
+      const id = guardarViaje(plan, sessionStorage.getItem(CLAVE_ABIERTO) ?? undefined);
+      if (id) sessionStorage.setItem(CLAVE_ABIERTO, id);
+    }
+  } catch {}
+}

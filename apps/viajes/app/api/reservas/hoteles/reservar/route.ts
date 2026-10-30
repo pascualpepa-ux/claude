@@ -1,3 +1,4 @@
+import { alertarDueno } from "@/lib/correo/envio";
 import { agenteHoteles, registrarHotel } from "@/lib/agentes-reservas";
 import { dbConfigurada } from "@/lib/db";
 import { ErrorHoteles, hotelesPermitido, prereservar, type Huesped, type OfertaHotel } from "@/lib/hoteles";
@@ -11,8 +12,11 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const TELEFONO = /^\+[1-9]\d{6,14}$/;
 const NOMBRE = /^[\p{L}][\p{L} '-]{0,39}$/u;
 
+const texto = (v: unknown, max: number) => (typeof v === "string" ? v.slice(0, max) : "");
+
 /**
- * POST { oferta: { ofertaId, nombre }, entrada, salida, huesped } → el agente de hoteles reserva.
+ * POST { oferta, entrada, salida, adultos, huesped } → el agente de hoteles reserva.
+ * De la oferta que manda la página solo se usan los datos para el email (nombre, dirección, estrellas...).
  * El precio lo confirma el hotel acá (prebook), nunca se toma el que manda la página.
  */
 export async function POST(req: Request) {
@@ -30,14 +34,31 @@ export async function POST(req: Request) {
   }
   try {
     const pre = await prereservar(ofertaId);
-    const oferta = { ofertaId, nombre: nombreHotel, precio: pre.precio, moneda: pre.moneda } as OfertaHotel;
-    const id = await registrarHotel(oferta, h as Huesped, c.entrada, c.salida);
+    const o = c.oferta;
+    const oferta: OfertaHotel = {
+      ofertaId,
+      hotelId: texto(o.hotelId, 40),
+      nombre: nombreHotel,
+      foto: null,
+      estrellas: Math.min(5, Math.max(0, Number(o.estrellas) || 0)),
+      puntaje: Number.isFinite(Number(o.puntaje)) && o.puntaje !== null ? Number(o.puntaje) : null,
+      direccion: texto(o.direccion, 200),
+      habitacion: texto(o.habitacion, 120),
+      regimen: texto(o.regimen, 60),
+      reembolsable: o.reembolsable === true,
+      precio: pre.precio,
+      moneda: pre.moneda,
+    };
+    const adultos = Math.min(4, Math.max(1, Number(c.adultos) || 1));
+    const id = await registrarHotel(oferta, h as Huesped, c.entrada, c.salida, adultos);
     const r = await agenteHoteles(id);
     if (r.estado === "emitida") return Response.json({ codigo: r.codigo, precio: pre.precio, moneda: pre.moneda });
     if (r.estado === "pendiente") return Response.json({ pendiente: true }, { status: 202 });
     return Response.json({ error: "oferta" }, { status: 409 });
   } catch (e) {
     console.error("reservar hotel:", e);
+    // Si pasa algo raro, le llega un email al dueño en el momento.
+    await alertarDueno("Error al reservar hotel", `Algo falló en una compra.\n\n${e instanceof Error ? e.message : String(e)}\n\nRevisá el admin y los emails de los agentes.`).catch(() => {});
     if (e instanceof ErrorHoteles && e.status < 500) return Response.json({ error: "oferta" }, { status: 409 });
     return Response.json({ error: "servidor" }, { status: 502 });
   }

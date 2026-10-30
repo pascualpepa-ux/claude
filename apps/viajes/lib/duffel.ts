@@ -38,10 +38,10 @@ async function pedir<T>(ruta: string, cuerpo?: unknown): Promise<T> {
   return (j as { data: T }).data;
 }
 
-/** Nuestra comisión, sumada al precio de la aerolínea: un porcentaje más un fijo (configurables en Vercel). */
+/** Nuestra comisión, sumada al precio de la aerolínea: 10% por defecto (porcentaje y fijo configurables en Vercel). */
 export function conComision(monto: number) {
-  const porcentaje = Number(process.env.RESERVAS_COMISION_PORCENTAJE ?? 5);
-  const fijo = Number(process.env.RESERVAS_COMISION_FIJA ?? 5);
+  const porcentaje = Number(process.env.RESERVAS_COMISION_PORCENTAJE ?? 10);
+  const fijo = Number(process.env.RESERVAS_COMISION_FIJA ?? 0);
   return Math.round((monto * (1 + porcentaje / 100) + fijo) * 100) / 100;
 }
 
@@ -191,4 +191,16 @@ export async function ordenDeReserva(reservaId: string) {
     "/air/orders?limit=200",
   );
   return ordenes.find((o) => o.metadata?.reserva === reservaId) ?? null;
+}
+
+/** Cancelación: primero se pide cuánto se devuelve; se confirma aparte. */
+export async function cotizarCancelacion(ordenId: string) {
+  const c = await pedir<{ id: string; refund_amount: string | null; refund_currency: string | null; expires_at: string | null }>("/air/order_cancellations", {
+    order_id: ordenId,
+  });
+  return { id: c.id, devolucion: c.refund_amount ? Number(c.refund_amount) : 0, moneda: c.refund_currency ?? "" };
+}
+
+export async function confirmarCancelacion(cancelacionId: string) {
+  await pedir(`/air/order_cancellations/${encodeURIComponent(cancelacionId)}/actions/confirm`, {});
 }
