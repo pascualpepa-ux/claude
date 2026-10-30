@@ -5,7 +5,6 @@ import { EnlacesIdioma } from "@/components/EnlacesIdioma";
 import { ArrowRight, CloudSun, AirplaneTilt, Bed, Receipt } from "@phosphor-icons/react/dist/ssr";
 import { TarjetaDia } from "@/components/TarjetaDia";
 import { EstadoDato } from "@/components/EstadoDato";
-import { ViajesGuardados } from "@/components/ViajesGuardados";
 import { MisReservas } from "@/components/MisReservas";
 import { FormularioSuscripcion } from "@/components/FormularioSuscripcion";
 import { suscripcionesActivas } from "@/lib/suscripciones";
@@ -58,7 +57,6 @@ export default async function Inicio() {
     <main>
       <EnlacesIdioma ruta="/" idioma={idioma} />
       <MisReservas />
-      <ViajesGuardados />
       {/* Portada con foto: texto sobre la imagen y, al costado, cómo se ve un día del viaje. */}
       <section className="relative isolate overflow-hidden bg-oliva-950 text-arena-50">
         <Image src="/fotos/portada.jpg" alt="" fill priority sizes="100vw" className="-z-20 object-cover object-[70%_50%]" />

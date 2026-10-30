@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { EnvelopeSimple, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
-import { YOUTUBE_URL } from "@/lib/seo";
+import { EnvelopeSimple } from "@phosphor-icons/react/dist/ssr";
 import { LogoCompleto } from "./Logo";
 import { useIdioma } from "./ProveedorIdioma";
 
@@ -52,20 +51,6 @@ export function Pie() {
           <a href="mailto:info@rumbotraveling.com" className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-oliva-700 hover:underline dark:text-oliva-300">
             <EnvelopeSimple size={18} weight="duotone" aria-hidden />
             info@rumbotraveling.com
-          </a>
-          <p className="mt-2 text-sm">
-            <Link href="/contacto" className={link}>
-              {t.pie.contacto}
-            </Link>
-          </p>
-          <a
-            href={YOUTUBE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-oliva-700 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-oliva-800 dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200"
-          >
-            <YoutubeLogo size={20} weight="fill" aria-hidden />
-            {t.pie.youtube}
           </a>
         </div>
         </div>

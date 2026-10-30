@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Marca } from "./Logo";
-import { Ayudante } from "./Ayudante";
 import { SelectorIdioma } from "./SelectorIdioma";
 import { useIdioma } from "./ProveedorIdioma";
 
@@ -33,7 +32,6 @@ export function Encabezado() {
             {t.encabezado.guias}
           </Link>
           <SelectorIdioma />
-          <Ayudante />
           <Link
             href="/planificar"
             className="shrink-0 rounded-xl bg-oliva-700 px-3 py-2 text-sm font-medium whitespace-nowrap text-white transition hover:bg-oliva-800 active:scale-[0.98] sm:px-4 dark:bg-oliva-300 dark:text-arena-950 dark:hover:bg-oliva-200"
