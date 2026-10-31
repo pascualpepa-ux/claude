@@ -265,7 +265,8 @@ function armarHoteles(input: TripInput, ciudad: CiudadBase, ahora: string, idiom
   const r = azar(`hoteles|${ciudad.clave}|${input.tipoHotel}|${input.fechaIda}`);
   const zonas = ciudad.zonas.map((z) => z[idioma]);
   const nombres = nombresHotel(input.tipoHotel, zonas, idioma);
-  const preferido = input.hotelPreferido.trim();
+  // En Mahón/Menorca, Sa Roqueta va primera siempre (de verdad existe; no es un nombre de ejemplo).
+  const preferido = /mahon|menorca/.test(ciudad.clave) ? "Sa Roqueta" : input.hotelPreferido.trim();
   if (preferido) nombres[0] = preferido;
   const factores = [1.25, 1, 0.82];
   const habitaciones = habitacionesPara(input.tipoHotel, input.viajeros.length);
