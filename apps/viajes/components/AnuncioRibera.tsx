@@ -9,13 +9,35 @@ import { useEffect, useRef } from "react";
 export function AnuncioRibera() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Autoplay manual: en Safari/iOS, si el atributo "muted" no llega a tiempo el video
-  // puede quedar pausado esperando un toque. Forzándolo acá arranca siempre solo.
+  // Autoplay manual: en Safari/iOS el atributo "muted" del HTML a veces no alcanza
+  // (React no siempre lo sincroniza bien al hidratar) y el video queda pausado
+  // esperando un toque. Se reintenta en cada evento que indique "ya hay algo para
+  // mostrar" y cuando el video entra en pantalla, para no depender de un solo intento.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     v.muted = true;
-    v.play().catch(() => {});
+    v.defaultMuted = true;
+    const intentar = () => {
+      v.play().catch(() => {});
+    };
+    intentar();
+    v.addEventListener("loadedmetadata", intentar);
+    v.addEventListener("loadeddata", intentar);
+    v.addEventListener("canplay", intentar);
+    const obs = new IntersectionObserver(
+      (entradas) => {
+        if (entradas[0]?.isIntersecting) intentar();
+      },
+      { threshold: 0.2 },
+    );
+    obs.observe(v);
+    return () => {
+      v.removeEventListener("loadedmetadata", intentar);
+      v.removeEventListener("loadeddata", intentar);
+      v.removeEventListener("canplay", intentar);
+      obs.disconnect();
+    };
   }, []);
 
   return (
@@ -37,6 +59,8 @@ export function AnuncioRibera() {
           muted
           loop
           playsInline
+          webkit-playsinline="true"
+          disablePictureInPicture
           preload="auto"
           className="block aspect-video w-full object-cover transition group-hover:scale-[1.01]"
         />
