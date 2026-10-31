@@ -169,6 +169,14 @@ async function fallo(id: string, e: unknown, definitivo: boolean) {
   return { estado: (definitivo ? "fallida" : "pendiente") as FilaReserva["estado"] };
 }
 
+/** Una vez emitido (o descartado) el pasaje, los datos del pasaporte ya no hacen falta: se borran de la base. */
+async function olvidarPasaportes(id: string) {
+  await sql(
+    `update reservas set pasajeros = (select coalesce(jsonb_agg(p - 'pasaporte'), '[]'::jsonb) from jsonb_array_elements(pasajeros::jsonb) p) where id = $1`,
+    [id],
+  ).catch((e) => console.error("olvidar pasaportes:", e));
+}
+
 /** Agente de vuelos: emite el pasaje. Devuelve "emitida", "pendiente" (lo sigue el vigilante) o "fallida". */
 export async function agenteVuelos(id: string): Promise<{ estado: FilaReserva["estado"]; codigo?: string }> {
   const f = await cargar(id);
@@ -177,10 +185,14 @@ export async function agenteVuelos(id: string): Promise<{ estado: FilaReserva["e
   try {
     const r = await emitir(f.oferta_id, f.pasajeros as Pasajero[], { reserva: id });
     await marcarHecha(f, r.codigo, r.orden, Number(f.precio) - r.costo);
+    await olvidarPasaportes(id);
     return { estado: "emitida", codigo: r.codigo };
   } catch (e) {
     // 4xx: la oferta ya no existe o cambió de precio. No se reintenta la misma.
-    return fallo(id, e, e instanceof ErrorDuffel && e.status < 500);
+    const definitivo = e instanceof ErrorDuffel && e.status < 500;
+    const res = await fallo(id, e, definitivo);
+    if (definitivo) await olvidarPasaportes(id);
+    return res;
   }
 }
 
@@ -220,6 +232,7 @@ export async function vigilante() {
       const orden = await ordenDeReserva(f.id).catch(() => null);
       if (orden) {
         await marcarHecha(f, orden.booking_reference, orden.id, Number(f.precio) - Number(orden.total_amount));
+        await olvidarPasaportes(f.id);
         resultado.recuperadas += 1;
         continue;
       }
@@ -237,6 +250,7 @@ export async function vigilante() {
     } else {
       await sql(`update reservas set estado = 'fallida', actualizado = now() where id = $1`, [f.id]);
       await liberarSiHay(f.id);
+      await olvidarPasaportes(f.id);
     }
   }
   // Avisos de las que no se pudieron hacer (una sola vez cada una).
@@ -326,9 +340,10 @@ export interface FilaAdminReserva {
 }
 
 /** Para el admin: las últimas reservas, con su estado. */
+/** Reservas reales para el admin (las de prueba no se muestran). */
 export function listarReservas() {
   return sql<FilaAdminReserva>(
-    `select id, tipo, estado, codigo, ruta, email, precio, costo, moneda, prueba, cancelada, creado from reservas order by creado desc limit 50`,
+    `select id, tipo, estado, codigo, ruta, email, precio, costo, moneda, prueba, cancelada, creado from reservas where prueba = false order by creado desc limit 50`,
   );
 }
 

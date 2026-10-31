@@ -66,6 +66,8 @@ interface OfertaDuffel {
   owner: { name: string; iata_code: string; logo_symbol_url?: string | null };
   slices: { duration: string | null; segments: Segmento[] }[];
   passengers: { id: string; type: string }[];
+  passenger_identity_documents_required?: boolean;
+  supported_passenger_identity_document_types?: string[];
 }
 
 export interface Tramo {
@@ -162,11 +164,18 @@ export interface Pasajero {
   tratamiento: "mr" | "ms" | "mrs";
   email: string;
   telefono: string; // formato internacional: +34...
+  /** Pasaporte: número, país que lo emitió (ISO de 2 letras) y vencimiento (AAAA-MM-DD). */
+  pasaporte?: { numero: string; pais: string; vence: string };
 }
 
 /** Emite el pasaje. Paga Duffel con el saldo de la cuenta (en prueba, saldo de mentira). */
 export async function emitir(ofertaId: string, pasajeros: Pasajero[], metadata: Record<string, string> = {}) {
-  const { oferta, totalAerolinea } = await ofertaActual(ofertaId);
+  const crudo = await pedir<OfertaDuffel>(`/air/offers/${encodeURIComponent(ofertaId)}`);
+  const oferta = aOferta(crudo);
+  const totalAerolinea = crudo.total_amount;
+  // El pasaporte se manda cuando la aerolínea lo pide o lo acepta (si no lo acepta, mandarlo da error).
+  const conPasaporte = !!crudo.passenger_identity_documents_required || !!crudo.supported_passenger_identity_document_types?.includes("passport");
+  if (crudo.passenger_identity_documents_required && pasajeros.some((p) => !p.pasaporte)) throw new ErrorDuffel(400, "pasaporte");
   if (pasajeros.length !== oferta.pasajeros.length) throw new ErrorDuffel(400, "pasajeros");
   const orden = await pedir<{ id: string; booking_reference: string; total_amount: string; total_currency: string }>("/air/orders", {
     type: "instant",
@@ -180,6 +189,9 @@ export async function emitir(ofertaId: string, pasajeros: Pasajero[], metadata: 
       title: p.tratamiento,
       email: p.email,
       phone_number: p.telefono || telefonoAgencia(),
+      ...(conPasaporte && p.pasaporte && {
+        identity_documents: [{ type: "passport", unique_identifier: p.pasaporte.numero, issuing_country_code: p.pasaporte.pais, expires_on: p.pasaporte.vence }],
+      }),
     })),
     payments: [{ type: "balance", currency: oferta.moneda, amount: totalAerolinea }],
     metadata,

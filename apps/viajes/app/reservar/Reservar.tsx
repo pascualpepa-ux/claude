@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AirplaneTakeoff, ArrowLeft, CheckCircle, CircleNotch, Info, Ticket, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import { BuscadorCiudad } from "@/components/BuscadorCiudad";
 import { useIdioma } from "@/components/ProveedorIdioma";
@@ -9,6 +9,8 @@ import type { Lugar } from "@/lib/lugares-tipos";
 import type { Oferta, Pasajero } from "@/lib/duffel";
 import { guardarReserva } from "@/lib/almacen";
 import { PagoTarjeta } from "@/components/PagoTarjeta";
+import { EscanerPasaporte } from "@/components/EscanerPasaporte";
+import { CODIGOS_PAIS } from "@/lib/pasaporte";
 
 const CON_TARJETA = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 import { CLAVE_OFERTA_VUELO } from "@/components/OfertasReales";
@@ -32,7 +34,7 @@ const T = {
     total: (n: number) => (n === 1 ? "total" : `total para ${n}`),
     volver: "Volver a los vuelos",
     datos: "Datos de los pasajeros",
-    datosAyuda: "Tal como figuran en el pasaporte o DNI.",
+    datosAyuda: "Tal como figuran en el pasaporte. Podés escanearlo con la cámara o escribirlo a mano.",
     pasajero: (n: number) => `Pasajero ${n}`,
     nombre: "Nombre",
     apellido: "Apellido",
@@ -40,6 +42,11 @@ const T = {
     genero: "Sexo",
     hombre: "Hombre",
     mujer: "Mujer",
+    pasaporte: "Pasaporte",
+    pasaporteNumero: "Número de pasaporte",
+    pasaportePais: "País que lo emitió",
+    pasaporteVence: "Vence el",
+    elegirPais: "Elegí el país",
     email: "Email (te mandamos el pasaje acá)",
     telefono: "Teléfono con código de país (+34…)",
     telefonoOpcional: "Teléfono (opcional, con +34…)",
@@ -58,6 +65,7 @@ const T = {
     errores: {
       datos: "Revisá los datos: ciudades, fechas y pasajeros.",
       faltan: "Completá todos los datos de cada pasajero. El teléfono va con + y el código de país.",
+      pasaporte: "Revisá el pasaporte de cada pasajero: número, país y que siga vigente hasta la vuelta.",
       oferta: "Ese precio ya no está disponible. Volvé a buscar el vuelo.",
       aerolinea: "La aerolínea no pudo emitir este pasaje. Probá con otro vuelo.",
       pago: "El pago no se completó. No se te cobró nada.",
@@ -84,7 +92,7 @@ const T = {
     total: (n: number) => (n === 1 ? "total" : `total for ${n}`),
     volver: "Back to flights",
     datos: "Passenger details",
-    datosAyuda: "Exactly as shown on the passport or ID.",
+    datosAyuda: "Exactly as shown on the passport. Scan it with the camera or type it in.",
     pasajero: (n: number) => `Passenger ${n}`,
     nombre: "First name",
     apellido: "Last name",
@@ -92,6 +100,11 @@ const T = {
     genero: "Sex",
     hombre: "Male",
     mujer: "Female",
+    pasaporte: "Passport",
+    pasaporteNumero: "Passport number",
+    pasaportePais: "Issuing country",
+    pasaporteVence: "Expires on",
+    elegirPais: "Choose the country",
     email: "Email (we send the ticket here)",
     telefono: "Phone with country code (+34…)",
     telefonoOpcional: "Phone (optional, with +34…)",
@@ -110,6 +123,7 @@ const T = {
     errores: {
       datos: "Check the details: cities, dates and passengers.",
       faltan: "Fill in every passenger's details. The phone starts with + and the country code.",
+      pasaporte: "Check each passenger's passport: number, country, and that it's still valid on the return date.",
       oferta: "That price is no longer available. Search the flight again.",
       aerolinea: "The airline couldn't issue this ticket. Try another flight.",
       pago: "The payment wasn't completed. You weren't charged.",
@@ -121,7 +135,7 @@ const T = {
 } satisfies Record<Idioma, unknown>;
 
 type Paso = "buscar" | "elegir" | "datos" | "listo";
-const vacio = (): Pasajero => ({ nombre: "", apellido: "", nacimiento: "", genero: "m", tratamiento: "mr", email: "", telefono: "" });
+const vacio = (): Pasajero => ({ nombre: "", apellido: "", nacimiento: "", genero: "m", tratamiento: "mr", email: "", telefono: "", pasaporte: { numero: "", pais: "", vence: "" } });
 const manana = () => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
 
 /** "PT2H35M" → "2 h 35 min" */
@@ -250,6 +264,10 @@ export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba
     if (lista.some((p) => !p.nombre.trim() || !p.apellido.trim() || !p.nacimiento || telefonoMal(p.telefono) || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email))) {
       return setError(t.errores.faltan);
     }
+    const ultimoDia = elegida.tramos[elegida.tramos.length - 1].llegada.slice(0, 10);
+    if (lista.some((p) => !p.pasaporte || !/^[A-Z0-9]{5,20}$/.test(p.pasaporte.numero) || !p.pasaporte.pais || !p.pasaporte.vence || p.pasaporte.vence < ultimoDia)) {
+      return setError(t.errores.pasaporte);
+    }
     setError(null);
     setOcupado(true);
     try {
@@ -270,6 +288,11 @@ export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba
     setOcupado(false);
   };
 
+  // Países para el pasaporte, con su nombre en el idioma de la web y ordenados.
+  const paises = useMemo(() => {
+    const nombres = new Intl.DisplayNames([idioma], { type: "region" });
+    return CODIGOS_PAIS.map((c) => [c, nombres.of(c) ?? c] as const).sort((a, b) => a[1].localeCompare(b[1], idioma));
+  }, [idioma]);
   const campo = "h-11 w-full rounded-xl border border-arena-300 bg-papel px-3 text-base focus:border-oliva-600 focus:ring-2 focus:ring-oliva-600/30 focus:outline-none dark:border-arena-700 dark:bg-arena-950";
   const botonPrincipal = "inline-flex items-center justify-center gap-2 rounded-xl bg-oliva-700 px-5 py-3 font-semibold text-white transition hover:bg-oliva-800 active:scale-[0.98] disabled:opacity-60 dark:bg-oliva-300 dark:text-arena-950";
 
@@ -415,6 +438,51 @@ export function Reservar({ prueba, telefonoOpcional = false, inicial }: { prueba
             return (
               <fieldset key={i} className="grid gap-4 rounded-2xl border border-arena-200 p-5 sm:grid-cols-2 dark:border-arena-800">
                 <legend className="px-1 font-semibold">{t.pasajero(i + 1)}</legend>
+                <fieldset className="grid gap-4 rounded-xl bg-arena-100/70 p-4 sm:col-span-2 sm:grid-cols-3 dark:bg-arena-800/40">
+                  <legend className="sr-only">{t.pasaporte}</legend>
+                  <div className="sm:col-span-3">
+                    <EscanerPasaporte
+                      idioma={idioma}
+                      onDatos={(d) =>
+                        cambiar({
+                          nombre: d.nombre || p.nombre,
+                          apellido: d.apellido || p.apellido,
+                          nacimiento: d.nacimiento,
+                          ...(d.genero && { genero: d.genero }),
+                          pasaporte: { numero: d.numero, pais: d.pais, vence: d.vence },
+                        })
+                      }
+                    />
+                  </div>
+                  <label className="grid gap-1.5 text-sm font-medium">
+                    {t.pasaporteNumero}
+                    <input
+                      required
+                      autoComplete="off"
+                      autoCapitalize="characters"
+                      value={p.pasaporte?.numero ?? ""}
+                      onChange={(e) => cambiar({ pasaporte: { ...p.pasaporte!, numero: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "") } })}
+                      className={`${campo} font-mono tracking-wider`}
+                    />
+                  </label>
+                  <label className="grid gap-1.5 text-sm font-medium">
+                    {t.pasaportePais}
+                    <select required value={p.pasaporte?.pais ?? ""} onChange={(e) => cambiar({ pasaporte: { ...p.pasaporte!, pais: e.target.value } })} className={campo}>
+                      <option value="" disabled>
+                        {t.elegirPais}
+                      </option>
+                      {paises.map(([codigo, nombre]) => (
+                        <option key={codigo} value={codigo}>
+                          {nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="grid gap-1.5 text-sm font-medium">
+                    {t.pasaporteVence}
+                    <input required type="date" min={new Date().toISOString().slice(0, 10)} value={p.pasaporte?.vence ?? ""} onChange={(e) => cambiar({ pasaporte: { ...p.pasaporte!, vence: e.target.value } })} className={campo} />
+                  </label>
+                </fieldset>
                 <label className="grid gap-1.5 text-sm font-medium">
                   {t.nombre}
                   <input required autoComplete={i === 0 ? "given-name" : "off"} value={p.nombre} onChange={(e) => cambiar({ nombre: e.target.value })} className={campo} />

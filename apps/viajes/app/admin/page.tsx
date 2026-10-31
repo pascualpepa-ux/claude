@@ -24,8 +24,8 @@ import { PanelGanancias } from "./PanelGanancias";
 import { ListaReservas } from "./ListaReservas";
 import { listarReservas } from "@/lib/agentes-reservas";
 import { ganancias } from "@/lib/ganancias";
-import { modoPrueba, duffelConfigurado } from "@/lib/duffel";
-import { hotelesConfigurado, hotelesPrueba } from "@/lib/hoteles";
+import { duffelConfigurado } from "@/lib/duffel";
+import { hotelesConfigurado } from "@/lib/hoteles";
 import { participantes, sorteoActivo, sorteosHechos } from "@/lib/sorteo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -65,10 +65,9 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
 
   const pedido = Number((await searchParams).dias);
   const periodo = PERIODOS.find((p) => p === pedido) ?? 30;
-  // Ganancias: si las ventas reales ya empezaron se muestran esas; si no, las de prueba (marcadas).
+  // Ganancias y reservas: solo ventas reales. Las compras de prueba no se muestran (no son plata de verdad).
   const ventas = (duffelConfigurado() || hotelesConfigurado()) && dbConfigurada();
-  const enPrueba = (!duffelConfigurado() || modoPrueba()) && (!hotelesConfigurado() || hotelesPrueba());
-  const plata = ventas ? await ganancias(enPrueba).catch(() => null) : null;
+  const plata = ventas ? await ganancias(false).catch(() => null) : null;
   const reservas = ventas ? await listarReservas().catch(() => null) : null;
   const sorteo =
     sorteoActivo() && dbConfigurada()
@@ -124,7 +123,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         </div>
       </header>
 
-      {plata && <PanelGanancias idioma={idioma} datos={plata} prueba={enPrueba} banco={process.env.CUENTA_BANCARIA_VISIBLE ?? null} />}
+      {plata && <PanelGanancias idioma={idioma} datos={plata} prueba={false} banco={process.env.CUENTA_BANCARIA_VISIBLE ?? null} />}
       {reservas && <ListaReservas filas={reservas} idioma={idioma} />}
       {sorteo && <PanelSorteo idioma={idioma} lista={sorteo.lista} hechos={sorteo.hechos} />}
       <ListaSuscriptores filas={suscriptores.filas} estado={suscriptores.estado} idioma={idioma} T={A.suscriptores} />

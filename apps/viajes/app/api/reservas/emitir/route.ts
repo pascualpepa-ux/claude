@@ -17,7 +17,16 @@ function pasajeroValido(p: Partial<Pasajero>): p is Pasajero {
   return (
     !!p && NOMBRE.test(p.nombre ?? "") && NOMBRE.test(p.apellido ?? "") && FECHA.test(p.nacimiento ?? "") &&
     (p.genero === "m" || p.genero === "f") && ["mr", "ms", "mrs"].includes(p.tratamiento ?? "") &&
-    EMAIL.test(p.email ?? "") && (TELEFONO.test(p.telefono ?? "") || (!p.telefono && TELEFONO.test(telefonoAgencia())))
+    EMAIL.test(p.email ?? "") && (TELEFONO.test(p.telefono ?? "") || (!p.telefono && TELEFONO.test(telefonoAgencia()))) &&
+    pasaporteValido(p.pasaporte)
+  );
+}
+
+/** Todo vuelo pide pasaporte: número, país que lo emitió y un vencimiento que todavía no pasó. */
+function pasaporteValido(d: Pasajero["pasaporte"]) {
+  return (
+    !!d && /^[A-Z0-9]{5,20}$/.test(d.numero ?? "") && /^[A-Z]{2}$/.test(d.pais ?? "") &&
+    FECHA.test(d.vence ?? "") && d.vence > new Date().toISOString().slice(0, 10)
   );
 }
 
@@ -36,7 +45,15 @@ export async function POST(req: Request) {
   try {
     const { oferta } = await ofertaActual(c.ofertaId);
     if (oferta.pasajeros.length !== pasajeros.length) return Response.json({ error: "datos" }, { status: 400 });
-    const id = await registrar(oferta, pasajeros, c.novedades !== false);
+    // El pasaporte tiene que seguir vigente el día que termina el viaje.
+    const ultimoDia = oferta.tramos[oferta.tramos.length - 1].llegada.slice(0, 10);
+    if ((pasajeros as Pasajero[]).some((p) => p.pasaporte!.vence < ultimoDia)) return Response.json({ error: "pasaporte" }, { status: 400 });
+    // Se guarda solo lo necesario (sin campos de más).
+    const limpios: Pasajero[] = (pasajeros as Pasajero[]).map((p) => ({
+      nombre: p.nombre, apellido: p.apellido, nacimiento: p.nacimiento, genero: p.genero, tratamiento: p.tratamiento, email: p.email, telefono: p.telefono,
+      pasaporte: { numero: p.pasaporte!.numero, pais: p.pasaporte!.pais, vence: p.pasaporte!.vence },
+    }));
+    const id = await registrar(oferta, limpios, c.novedades !== false);
     // Con tarjeta: primero se retiene la plata; el agente compra cuando Stripe lo confirma (/api/pagos/confirmar).
     if (pagosActivos()) return Response.json({ pago: { reserva: id, ...(await prepararPago(id)) } });
     const r = await agenteVuelos(id);
