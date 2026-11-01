@@ -102,7 +102,7 @@ export function Ayudante() {
           onClick={() => setAbierto(true)}
           aria-expanded={abierto}
           aria-label={T.abrir}
-          className="inline-flex size-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-arena-300 text-sm font-medium text-oliva-700 transition hover:bg-arena-100 active:scale-[0.98] sm:size-auto sm:px-3 sm:py-2 dark:border-arena-700 dark:text-oliva-300 dark:hover:bg-arena-800"
+          className="inline-flex size-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-arena-300 text-sm font-medium text-oliva-700 transition hover:bg-arena-100 active:scale-[0.98] lg:size-auto lg:px-3 lg:py-2 dark:border-arena-700 dark:text-oliva-300 dark:hover:bg-arena-800"
         >
           <ChatCircleDots size={20} weight="fill" aria-hidden />
           <span className="hidden lg:inline">{T.abrir}</span>

@@ -39,3 +39,28 @@ export function proyectar(lat: number, lon: number, phi: number, theta: number) 
 export function enfocar(lat: number, lon: number) {
   return { phi: (3 * Math.PI) / 2 - (lon * Math.PI) / 180, theta: (lat * Math.PI) / 180 };
 }
+
+export interface ClimaAhora {
+  temperatura: number;
+  codigo: number; // código WMO de Open-Meteo
+  zona: string; // zona horaria (para mostrar la hora de allá)
+}
+
+/** Clima de este momento en cada lugar, en un solo pedido a Open-Meteo (https://open-meteo.com, CC BY 4.0). Se guarda 15 minutos. */
+export async function climaAhora(lugares: { lat: number; lon: number }[]): Promise<(ClimaAhora | null)[]> {
+  const url =
+    "https://api.open-meteo.com/v1/forecast?current=temperature_2m,weather_code&timezone=auto" +
+    `&latitude=${lugares.map((l) => l.lat).join(",")}&longitude=${lugares.map((l) => l.lon).join(",")}`;
+  try {
+    const res = await fetch(url, { next: { revalidate: 900 }, signal: AbortSignal.timeout(3000) });
+    if (!res.ok) return lugares.map(() => null);
+    const json = (await res.json()) as { timezone: string; current?: { temperature_2m: number; weather_code: number } }[] | { timezone: string; current?: { temperature_2m: number; weather_code: number } };
+    const lista = Array.isArray(json) ? json : [json];
+    return lugares.map((_, i) => {
+      const c = lista[i]?.current;
+      return c ? { temperatura: Math.round(c.temperature_2m), codigo: c.weather_code, zona: lista[i].timezone } : null;
+    });
+  } catch {
+    return lugares.map(() => null);
+  }
+}

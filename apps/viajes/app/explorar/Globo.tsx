@@ -7,6 +7,8 @@ import TIERRA from "@/lib/tierra.json";
 import { ArrowRight, Bed, BookOpenText, AirplaneTilt, X } from "@phosphor-icons/react/dist/ssr";
 import { enfocar, proyectar } from "@/lib/globo";
 import { useIdioma } from "@/components/ProveedorIdioma";
+import { IconoClima } from "@/components/IconoClima";
+import type { Condicion } from "@/lib/types";
 
 export interface PuntoGlobo {
   slug: string;
@@ -19,6 +21,8 @@ export interface PuntoGlobo {
   dias: number;
   porDia: [number, number];
   descripcion: string;
+  /** Clima de este momento allá (null si Open-Meteo no respondió). */
+  clima: { temperatura: number; condicion: Condicion; zona: string } | null;
 }
 
 const T = {
@@ -32,6 +36,8 @@ const T = {
     vuelos: "Buscar vuelos",
     cerrar: "Cerrar",
     arrastra: "Arrastrá para girar",
+    ahora: "Ahora",
+    horaLocal: "hora de allá",
   },
   en: {
     titulo: "Explore the world",
@@ -43,6 +49,8 @@ const T = {
     vuelos: "Search flights",
     cerrar: "Close",
     arrastra: "Drag to spin",
+    ahora: "Now",
+    horaLocal: "local time",
   },
 };
 
@@ -59,6 +67,11 @@ export function Globo({ puntos }: { puntos: PuntoGlobo[] }) {
   const arrastre = useRef<{ x: number; y: number; phi: number; theta: number } | null>(null);
   const [ancho, setAncho] = useState(0);
   const [elegido, setElegido] = useState<PuntoGlobo | null>(null);
+  const [reloj, setReloj] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setReloj(new Date()), 30_000);
+    return () => clearInterval(t);
+  }, []);
   const elegidoRef = useRef<string | null>(null);
   elegidoRef.current = elegido?.slug ?? null;
 
@@ -273,6 +286,7 @@ export function Globo({ puntos }: { puntos: PuntoGlobo[] }) {
             style={{ opacity: 0 }}
           >
             {p.nombre}
+            {p.clima && <span className="ml-1 font-normal opacity-80">{p.clima.temperatura}°</span>}
           </button>
         ))}
         <p className="pointer-events-none absolute inset-x-0 bottom-1 text-center text-xs text-arena-400">{t.arrastra}</p>
@@ -298,6 +312,17 @@ export function Globo({ puntos }: { puntos: PuntoGlobo[] }) {
               </div>
             </div>
             <div className="p-5">
+              {elegido.clima && (
+                <p className="mb-4 flex items-center gap-3 rounded-2xl bg-arena-100 px-4 py-3 dark:bg-arena-800">
+                  <IconoClima condicion={elegido.clima.condicion} size={36} />
+                  <span>
+                    <span className="block text-2xl leading-none font-bold tabular-nums">{elegido.clima.temperatura}°C</span>
+                    <span className="text-sm text-arena-600 dark:text-arena-400">
+                      {t.ahora} · {reloj.toLocaleTimeString(idioma === "es" ? "es-ES" : "en-GB", { timeZone: elegido.clima.zona, hour: "2-digit", minute: "2-digit" })} {t.horaLocal}
+                    </span>
+                  </span>
+                </p>
+              )}
               <p className="text-sm text-arena-600 dark:text-arena-400">{elegido.descripcion}</p>
               <p className="mt-4">
                 <span className="text-2xl font-bold tabular-nums text-oliva-700 dark:text-oliva-300">

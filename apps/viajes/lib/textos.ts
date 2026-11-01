@@ -370,7 +370,7 @@ const es = {
     },
   },
   ayudante: {
-    abrir: "¿Necesitás ayuda?",
+    abrir: "Asistente de viajes",
     titulo: "Tu guía de Rumbo",
     aviso: "Respuestas automáticas. Ante la duda, confirmá en fuentes oficiales.",
     cerrar: "Cerrar asistente",
@@ -944,7 +944,7 @@ const en: Textos = {
     },
   },
   ayudante: {
-    abrir: "Need help?",
+    abrir: "Travel assistant",
     titulo: "Your Rumbo guide",
     aviso: "Automatic answers. When in doubt, check official sources.",
     cerrar: "Close assistant",

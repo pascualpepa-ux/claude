@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { GUIAS } from "@/lib/guias";
 import { DESTINOS } from "@/lib/fotos-destinos";
-import { UBICACIONES } from "@/lib/globo";
+import { climaAhora, UBICACIONES } from "@/lib/globo";
+import { condicionWmo } from "@/lib/clima-real";
 import { textosActuales } from "@/lib/idioma-servidor";
 import { metadatosPagina } from "@/lib/seo";
 import { Globo, type PuntoGlobo } from "./Globo";
@@ -25,7 +26,12 @@ export default async function Explorar() {
     const lugar = UBICACIONES[g.slug];
     const d = DESTINOS[g.slug];
     if (!lugar || !d) return [];
-    return [{ slug: g.slug, nombre: d.nombre[idioma], pais: d.pais[idioma], foto: d.foto, ...lugar, dias: g.dias, porDia: g.porDia.equilibrado, descripcion: g.descripcion[idioma] }];
+    return [{ slug: g.slug, nombre: d.nombre[idioma], pais: d.pais[idioma], foto: d.foto, ...lugar, dias: g.dias, porDia: g.porDia.equilibrado, descripcion: g.descripcion[idioma], clima: null }];
+  });
+  const climas = await climaAhora(puntos);
+  puntos.forEach((p, i) => {
+    const c = climas[i];
+    p.clima = c && { temperatura: c.temperatura, condicion: condicionWmo(c.codigo), zona: c.zona };
   });
   return (
     <main className="relative overflow-hidden bg-arena-950 bg-[radial-gradient(ellipse_at_30%_40%,rgba(90,120,80,0.35),transparent_60%)] pb-16">
