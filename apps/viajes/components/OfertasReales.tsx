@@ -145,8 +145,8 @@ export function HotelesAReservar({ ciudad, aeropuerto, entrada, salida, adultos 
     } catch {}
     router.push(`/reservar?${consulta}&elegida=1`);
   };
-  // Primero los que mejor puntaje tienen entre los más baratos.
-  const lista = (hoteles ?? []).slice(0, 8).sort((a, b) => (b.puntaje ?? 0) - (a.puntaje ?? 0)).slice(0, 3).sort((a, b) => a.precio - b.precio);
+  // Los 3 más baratos (ya vienen ordenados por precio desde la búsqueda) — público joven, prioridad es ahorrar.
+  const lista = (hoteles ?? []).slice(0, 3);
   return (
     <div className={caja}>
       <h3 className="flex items-center gap-2 text-lg font-semibold">
