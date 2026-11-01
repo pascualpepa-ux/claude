@@ -7,6 +7,7 @@ import { responderConGateway } from "@/lib/ia-gateway";
 import { guiaComoTexto, guiaMencionada, guiasComoTexto } from "@/lib/guias";
 import { esIdioma, type Idioma } from "@/lib/idioma";
 import { INSTRUCCION_VIAJE } from "@/lib/viaje-chat";
+import { entenderViaje } from "@/lib/viaje-texto";
 import { ventaPermitida } from "@/lib/duffel";
 
 export const runtime = "nodejs";
@@ -91,6 +92,12 @@ export async function POST(req: Request) {
   // Cuentas ("2 más 2"): las resuelve la calculadora, exacta y sin costo, con o sin IA.
   const cuenta = responderCuenta(datos.mensajes.at(-1)!.content, idioma);
   if (cuenta) return texto(cuenta, 200);
+
+  // Pedido de viaje ("de Madrid a Roma en diciembre, somos 2"): se arma sin IA, con vuelos y hoteles reales debajo.
+  if (ventaPermitida()) {
+    const pedido = entenderViaje(datos.mensajes.filter((m) => m.role === "user").map((m) => m.content), idioma, new Date().toISOString().slice(0, 10));
+    if (pedido) return texto(pedido.respuesta, 200);
+  }
 
   const ultima = datos.mensajes.at(-1)!.content;
   // Respuesta de la ficha: exacta y sin costo. Se usa si no hay IA disponible o si la IA falla.
