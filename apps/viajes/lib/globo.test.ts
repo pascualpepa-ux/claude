@@ -50,3 +50,40 @@ describe("climaAhora", () => {
     }
   });
 });
+
+describe("tocar el globo", () => {
+  it("desproyectar deshace proyectar", async () => {
+    const { desproyectar } = await import("./globo");
+    for (const [lat, lon] of [[41.9, 12.5], [-34.6, -58.4], [35.7, 139.7]]) {
+      // Girado un poco respecto de "de frente", para que el punto no quede justo en el centro.
+      const { phi: p0, theta: t0 } = enfocar(lat, lon);
+      const [phi, theta] = [p0 + 0.4, t0 - 0.3];
+      const p = proyectar(lat, lon, phi, theta);
+      expect(p.z).toBeGreaterThan(0);
+      const v = desproyectar(p.x, p.y, phi, theta)!;
+      expect(v.lat).toBeCloseTo(lat, 6);
+      expect(v.lon).toBeCloseTo(lon, 6);
+    }
+    expect(desproyectar(0.02, 0.02, 0, 0)).toBeNull();
+  });
+
+  it("encuentra el país en un punto", async () => {
+    const { paisEn } = await import("./fronteras");
+    expect(paisEn(41.9, 12.5)).toBe("IT");
+    expect(paisEn(-34.6, -58.4)).toBe("AR");
+    expect(paisEn(40.4, -3.7)).toBe("ES");
+    expect(paisEn(-29.6, 28.2)).toBe("LS"); // Lesoto, adentro de Sudáfrica
+    expect(paisEn(64, 100)).toBe("RU");
+    expect(paisEn(0, -30)).toBeNull(); // Atlántico
+  });
+
+  it("todos los países tienen datos y bandera", async () => {
+    const { PAISES, bandera, nombrePais, paisPorCodigo } = await import("./paises");
+    const { BORDES } = await import("./fronteras");
+    expect(PAISES.length).toBe(250);
+    for (const c of Object.keys(BORDES)) expect(paisPorCodigo(c), c).toBeDefined();
+    expect(bandera("AR")).toBe("🇦🇷");
+    expect(nombrePais("DK", "es")).toBe("Dinamarca");
+    expect(paisPorCodigo("it")?.aeropuerto).toBe("FCO");
+  });
+});

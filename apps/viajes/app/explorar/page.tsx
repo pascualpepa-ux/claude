@@ -26,7 +26,7 @@ export default async function Explorar() {
     const lugar = UBICACIONES[g.slug];
     const d = DESTINOS[g.slug];
     if (!lugar || !d) return [];
-    return [{ slug: g.slug, nombre: d.nombre[idioma], pais: d.pais[idioma], foto: d.foto, ...lugar, dias: g.dias, porDia: g.porDia.equilibrado, descripcion: g.descripcion[idioma], clima: null }];
+    return [{ slug: g.slug, nombre: d.nombre[idioma], pais: d.pais[idioma], codigoPais: g.destino.pais, foto: d.foto, ...lugar, dias: g.dias, porDia: g.porDia.equilibrado, descripcion: g.descripcion[idioma], clima: null }];
   });
   const climas = await climaAhora(puntos);
   puntos.forEach((p, i) => {

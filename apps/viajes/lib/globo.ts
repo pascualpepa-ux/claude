@@ -35,6 +35,20 @@ export function proyectar(lat: number, lon: number, phi: number, theta: number) 
   return { x: (x * 0.8 + 1) / 2, y: (1 - y * 0.8) / 2, z };
 }
 
+/** Al revés que proyectar: de un punto de la pantalla (0 a 1) a latitud y longitud. null si cae fuera del globo. */
+export function desproyectar(sx: number, sy: number, phi: number, theta: number): { lat: number; lon: number } | null {
+  const x = (sx * 2 - 1) / 0.8;
+  const y = (1 - sy * 2) / 0.8;
+  const r2 = x * x + y * y;
+  if (r2 > 1) return null;
+  const z = Math.sqrt(1 - r2);
+  const [cp, sp, ct, st] = [Math.cos(phi), Math.sin(phi), Math.cos(theta), Math.sin(theta)];
+  const m0 = cp * x + sp * st * y - sp * ct * z;
+  const m1 = ct * y + st * z;
+  const m2 = sp * x - cp * st * y + cp * ct * z;
+  return { lat: (Math.asin(Math.max(-1, Math.min(1, m1))) * 180) / Math.PI, lon: (Math.atan2(-m2, m0) * 180) / Math.PI };
+}
+
 /** Ángulos que dejan un punto en el centro, de frente. */
 export function enfocar(lat: number, lon: number) {
   return { phi: (3 * Math.PI) / 2 - (lon * Math.PI) / 180, theta: (lat * Math.PI) / 180 };

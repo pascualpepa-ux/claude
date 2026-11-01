@@ -5,7 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import TIERRA from "@/lib/tierra.json";
 import { ArrowRight, Bed, BookOpenText, AirplaneTilt, X } from "@phosphor-icons/react/dist/ssr";
-import { enfocar, proyectar } from "@/lib/globo";
+import { desproyectar, enfocar, proyectar } from "@/lib/globo";
+import { BORDES, paisEn } from "@/lib/fronteras";
+import { bandera, nombrePais, paisPorCodigo } from "@/lib/paises";
+import { condicionWmo } from "@/lib/clima-real";
 import { useIdioma } from "@/components/ProveedorIdioma";
 import { IconoClima } from "@/components/IconoClima";
 import type { Condicion } from "@/lib/types";
@@ -14,6 +17,7 @@ export interface PuntoGlobo {
   slug: string;
   nombre: string;
   pais: string;
+  codigoPais: string;
   foto?: string;
   lat: number;
   lon: number;
@@ -28,7 +32,7 @@ export interface PuntoGlobo {
 const T = {
   es: {
     titulo: "Explorá el mundo",
-    bajada: "Girá el globo y tocá un destino para ver fotos, cuánto sale y reservar.",
+    bajada: "Girá el globo y tocá cualquier país para ver su clima de ahora y su guía.",
     elegi: "Tocá un punto del globo o elegí acá:",
     porDia: "por persona y por día, sin el vuelo",
     guia: (d: number) => `Guía de ${d} días`,
@@ -38,10 +42,13 @@ const T = {
     arrastra: "Arrastrá para girar",
     ahora: "Ahora",
     horaLocal: "hora de allá",
+    enCapital: (c: string) => `en ${c}`,
+    guiaPais: (n: string) => `Guía de ${n}`,
+    cargando: "Buscando el clima…",
   },
   en: {
     titulo: "Explore the world",
-    bajada: "Spin the globe and tap a destination to see photos, prices and book.",
+    bajada: "Spin the globe and tap any country to see its weather right now and its guide.",
     elegi: "Tap a point on the globe or pick one here:",
     porDia: "per person per day, without flights",
     guia: (d: number) => `${d}-day guide`,
@@ -51,6 +58,9 @@ const T = {
     arrastra: "Drag to spin",
     ahora: "Now",
     horaLocal: "local time",
+    enCapital: (c: string) => `in ${c}`,
+    guiaPais: (n: string) => `${n} guide`,
+    cargando: "Getting the weather…",
   },
 };
 
@@ -74,6 +84,24 @@ export function Globo({ puntos }: { puntos: PuntoGlobo[] }) {
   }, []);
   const elegidoRef = useRef<string | null>(null);
   elegidoRef.current = elegido?.slug ?? null;
+  // País tocado en el globo (cualquiera, tenga o no una guía nuestra) y su clima de ahora en la capital.
+  const [pais, setPais] = useState<string | null>(null);
+  const paisRef = useRef<string | null>(null);
+  paisRef.current = pais;
+  const [climaPais, setClimaPais] = useState<{ temperatura: number; condicion: Condicion; zona: string } | null | "cargando">(null);
+  useEffect(() => {
+    const p = pais ? paisPorCodigo(pais) : null;
+    if (!p) return;
+    let vivo = true;
+    setClimaPais("cargando");
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}&current=temperature_2m,weather_code&timezone=auto`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => vivo && setClimaPais(j?.current ? { temperatura: Math.round(j.current.temperature_2m), condicion: condicionWmo(j.current.weather_code), zona: j.timezone } : null))
+      .catch(() => vivo && setClimaPais(null));
+    return () => {
+      vivo = false;
+    };
+  }, [pais]);
 
   useEffect(() => {
     const el = caja.current;
@@ -113,7 +141,7 @@ export function Globo({ puntos }: { puntos: PuntoGlobo[] }) {
         a.phi += d * 0.08;
         a.theta += (objetivo.current.theta - a.theta) * 0.08;
         if (Math.abs(d) < 0.001 && Math.abs(objetivo.current.theta - a.theta) < 0.001) objetivo.current = null;
-      } else if (!arrastre.current && !elegidoRef.current && !quieto) {
+      } else if (!arrastre.current && !elegidoRef.current && !paisRef.current && !quieto) {
         a.phi += 0.003;
       }
       cuadro++;
@@ -151,6 +179,30 @@ export function Globo({ puntos }: { puntos: PuntoGlobo[] }) {
         ctx.fill(camino);
       });
       ctx.globalAlpha = 1;
+
+      // País tocado: relleno y borde dorados (solo la parte que se ve de este lado del globo).
+      if (paisRef.current && BORDES[paisRef.current]) {
+        const borde = new Path2D();
+        for (const anillo of BORDES[paisRef.current]) {
+          let abierto = false;
+          for (const [lon, lat] of anillo) {
+            const q = proyectar(lat, lon, a.phi, a.theta);
+            if (q.z <= 0) {
+              abierto = false;
+              continue;
+            }
+            if (abierto) borde.lineTo(q.x * ancho, q.y * ancho);
+            else borde.moveTo(q.x * ancho, q.y * ancho);
+            abierto = true;
+          }
+          if (abierto) borde.closePath();
+        }
+        ctx.fillStyle = "rgba(252,211,77,0.3)";
+        ctx.fill(borde);
+        ctx.strokeStyle = "#fcd34d";
+        ctx.lineWidth = 1.5;
+        ctx.stroke(borde);
+      }
 
       // Destinos: puntos dorados; el elegido late.
       const ocupadas: [number, number, number, number][] = [];
@@ -211,10 +263,23 @@ export function Globo({ puntos }: { puntos: PuntoGlobo[] }) {
       const d = Math.hypot(q.x * ancho - (cx - rect.left), q.y * ancho - (cy - rect.top));
       if (d < 28 && (!mejor || d < mejor.d)) mejor = { p, d };
     }
-    if (mejor) elegir(mejor.p);
+    if (mejor) return elegir(mejor.p);
+    // Si no tocó un destino nuestro, se fija qué país hay ahí.
+    const punto = desproyectar((cx - rect.left) / ancho, (cy - rect.top) / ancho, phi, theta);
+    const codigo = punto && paisEn(punto.lat, punto.lon);
+    if (codigo) elegirPais(codigo);
+  };
+
+  const elegirPais = (codigo: string) => {
+    const p = paisPorCodigo(codigo);
+    if (!p) return;
+    setElegido(null);
+    setPais(codigo);
+    objetivo.current = enfocar(p.lat, p.lon);
   };
 
   const elegir = (p: PuntoGlobo) => {
+    setPais(null);
     setElegido(p);
     objetivo.current = enfocar(p.lat, p.lon);
   };
@@ -324,6 +389,9 @@ export function Globo({ puntos }: { puntos: PuntoGlobo[] }) {
                 </p>
               )}
               <p className="text-sm text-arena-600 dark:text-arena-400">{elegido.descripcion}</p>
+              <Link href={`/pais/${elegido.codigoPais.toLowerCase()}`} className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-oliva-700 hover:underline dark:text-oliva-300">
+                {bandera(elegido.codigoPais)} {t.guiaPais(nombrePais(elegido.codigoPais, idioma))} <ArrowRight size={14} aria-hidden />
+              </Link>
               <p className="mt-4">
                 <span className="text-2xl font-bold tabular-nums text-oliva-700 dark:text-oliva-300">
                   {usd(elegido.porDia[0])}–{elegido.porDia[1].toLocaleString(idioma === "es" ? "es-ES" : "en-US")}
@@ -350,12 +418,97 @@ export function Globo({ puntos }: { puntos: PuntoGlobo[] }) {
               </div>
             </div>
           </article>
+        ) : pais ? (
+          <TarjetaPais codigo={pais} clima={climaPais} t={t} idioma={idioma} reloj={reloj} destinos={puntos.filter((p) => p.codigoPais === pais)} onDestino={elegir} onCerrar={() => setPais(null)} />
         ) : (
           <p className="mb-3 text-sm text-arena-400">{t.elegi}</p>
         )}
-        <div className={elegido ? "mt-6" : ""}>{chips}</div>
+        <div className={elegido || pais ? "mt-6" : ""}>{chips}</div>
       </div>
     </div>
     </>
+  );
+}
+
+type Textos = (typeof T)["es"] | (typeof T)["en"];
+
+/** Tarjeta de cualquier país tocado en el globo: bandera, clima de ahora en la capital y link a su guía. */
+function TarjetaPais({
+  codigo,
+  clima,
+  t,
+  idioma,
+  reloj,
+  destinos,
+  onDestino,
+  onCerrar,
+}: {
+  codigo: string;
+  clima: { temperatura: number; condicion: Condicion; zona: string } | null | "cargando";
+  t: Textos;
+  idioma: "es" | "en";
+  reloj: Date;
+  destinos: PuntoGlobo[];
+  onDestino: (p: PuntoGlobo) => void;
+  onCerrar: () => void;
+}) {
+  const p = paisPorCodigo(codigo)!;
+  const nombre = nombrePais(codigo, idioma);
+  let hora = "";
+  if (clima && clima !== "cargando") {
+    try {
+      hora = reloj.toLocaleTimeString(idioma === "es" ? "es-ES" : "en-GB", { timeZone: clima.zona, hour: "2-digit", minute: "2-digit" });
+    } catch {}
+  }
+  return (
+    <article key={codigo} className="aparecer relative overflow-hidden rounded-3xl bg-papel p-6 text-arena-900 shadow-2xl dark:bg-arena-900 dark:text-arena-100">
+      <button
+        type="button"
+        onClick={onCerrar}
+        aria-label={t.cerrar}
+        className="absolute top-3 right-3 grid size-9 place-items-center rounded-full text-arena-500 transition hover:bg-arena-100 dark:hover:bg-arena-800"
+      >
+        <X size={18} weight="bold" />
+      </button>
+      <p className="text-5xl" aria-hidden>
+        {bandera(codigo)}
+      </p>
+      <h2 className="mt-2 text-3xl font-bold tracking-tight">{nombre}</h2>
+      <div className="mt-4 flex min-h-16 items-center gap-3 rounded-2xl bg-arena-100 px-4 py-3 dark:bg-arena-800">
+        {clima === "cargando" ? (
+          <span className="animate-pulse text-sm text-arena-500">{t.cargando}</span>
+        ) : clima ? (
+          <>
+            <IconoClima condicion={clima.condicion} size={36} />
+            <span>
+              <span className="block text-2xl leading-none font-bold tabular-nums">{clima.temperatura}°C</span>
+              <span className="text-sm text-arena-600 dark:text-arena-400">
+                {t.ahora} {p.capital && t.enCapital(p.capital)}
+                {hora && ` · ${hora} ${t.horaLocal}`}
+              </span>
+            </span>
+          </>
+        ) : (
+          <span className="text-sm text-arena-500">—</span>
+        )}
+      </div>
+      {destinos.length > 0 && (
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {destinos.map((d) => (
+            <li key={d.slug}>
+              <button type="button" onClick={() => onDestino(d)} className="rounded-full bg-amber-300 px-3 py-1.5 text-sm font-semibold text-arena-950 transition hover:bg-amber-200">
+                {d.nombre} · {t.guia(d.dias)}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <Link
+        href={`/pais/${codigo.toLowerCase()}`}
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-oliva-700 px-4 py-3 font-semibold text-white transition hover:bg-oliva-800 dark:bg-oliva-300 dark:text-arena-950"
+      >
+        <BookOpenText size={20} aria-hidden /> {t.guiaPais(nombre)}
+      </Link>
+    </article>
   );
 }
