@@ -123,8 +123,9 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         </div>
       </header>
 
-      {plata && <PanelGanancias idioma={idioma} datos={plata} prueba={false} banco={process.env.CUENTA_BANCARIA_VISIBLE ?? null} />}
-      {reservas && <ListaReservas filas={reservas} idioma={idioma} />}
+      {/* Nada de pagos hasta que haya al menos una venta real. */}
+      {plata && plata.ventas > 0 && <PanelGanancias idioma={idioma} datos={plata} prueba={false} banco={process.env.CUENTA_BANCARIA_VISIBLE ?? null} />}
+      {reservas && reservas.length > 0 && <ListaReservas filas={reservas} idioma={idioma} />}
       {sorteo && <PanelSorteo idioma={idioma} lista={sorteo.lista} hechos={sorteo.hechos} />}
       <ListaSuscriptores filas={suscriptores.filas} estado={suscriptores.estado} idioma={idioma} T={A.suscriptores} />
       <ListaMensajes mensajes={mensajes} idioma={idioma} T={A.mensajes} />
