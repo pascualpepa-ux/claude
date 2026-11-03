@@ -41,7 +41,7 @@ middleware.ts        refresca la sesión y protege /panel y /onboarding
 ## Poner en marcha (fase 1)
 
 1. Crea un proyecto en [supabase.com](https://supabase.com) (región **Europe – Frankfurt o París**, por el RGPD).
-2. En Supabase → **SQL Editor**, pega y ejecuta el contenido de `supabase/migrations/0001_init.sql`.
+2. En Supabase → **SQL Editor**, ejecuta en orden `supabase/migrations/0001_init.sql` y `0002_business_type.sql`.
 3. En Supabase → **Authentication → URL Configuration**:
    - Site URL: la URL de la app (en local `http://localhost:3000`).
    - Redirect URLs: añade `http://localhost:3000/auth/callback` y la de producción `https://TU-DOMINIO/auth/callback`.
@@ -73,6 +73,7 @@ Supabase → Authentication → Providers → Google: necesita un Client ID y Se
 
 - `lib/ai.ts`: Claude Opus 5.5 (`RESEKI_AI_MODEL` para cambiarlo), salida estructurada `{ language, reply }`, reintentos automáticos y modelo de reserva si un filtro de seguridad rechaza la petición.
 - La reseña se pasa como datos entre etiquetas: las instrucciones escondidas dentro de una reseña se ignoran.
+- Estilo del dueño: la IA imita las respuestas que el dueño ya tenía en Google y las que corrige a mano (no las suyas propias publicadas sin cambios). Se desactiva en Configuración.
 - Coste orientativo: alrededor de 1–2 céntimos por respuesta.
 
 ## Seguridad

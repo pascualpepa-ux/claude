@@ -5,7 +5,9 @@ import type { Restaurant } from "@/lib/types";
 /**
  * Publicación de respuestas en Google Business Profile.
  * En modo demo no se publica nada (solo se marca como publicada en Reseki).
- * La conexión real (OAuth + API de Google) se implementa en la fase 8.
+ * La conexión real (OAuth + API de Google) se implementa en la fase 8. Al sincronizar, las reseñas que
+ * ya tengan respuesta del dueño en Google se importarán como replies con source = 'google'
+ * (son los ejemplos de estilo que usa la IA, ver loadStyleExamples).
  */
 export async function publishReplyToGoogle(
   restaurant: Pick<Restaurant, "google_location_name">,

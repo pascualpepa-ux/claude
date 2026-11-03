@@ -25,6 +25,7 @@ export interface ReviewItem {
     edited: boolean;
     publishedAgo: string | null;
     error: string | null;
+    fromGoogle?: boolean; // ya estaba respondida en Google antes de usar Reseki
   } | null;
 }
 
@@ -91,7 +92,7 @@ export function ReviewCard({ item }: { item: ReviewItem }) {
               </span>
               <span className="inline-flex h-[22px] items-center gap-1 rounded-full bg-success-soft px-2 text-[12px] font-medium text-success">
                 <Check className="size-3" />
-                {reply.automatic ? "Publicada automáticamente" : reply.edited ? "Editada y aprobada por ti" : "Aprobada por ti"}
+                {reply.fromGoogle ? "Respondida por ti en Google" : reply.automatic ? "Publicada automáticamente" : reply.edited ? "Editada y aprobada por ti" : "Aprobada por ti"}
               </span>
             </div>
             <p className="whitespace-pre-line rounded-md border border-border bg-bg-subtle px-3.5 py-3 text-sm">{reply.final ?? reply.suggested}</p>

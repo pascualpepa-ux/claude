@@ -13,6 +13,8 @@ export interface DemoReview {
   language: string;
   comment: string;
   hoursAgo: number;
+  /** Respuesta que el dueño ya había publicado en Google antes de Reseki ({name} = nombre del negocio). */
+  ownerReply?: string;
 }
 
 export const INITIAL_COUNT = 10;
@@ -32,12 +34,15 @@ export const FOOD_REVIEWS: DemoReview[] = [
   { id: "demo-06", author: "Sophie Martin", rating: 5, language: "fr", hoursAgo: 98,
     comment: "Un dîner parfait. Les croquettes sont incroyables et le service très chaleureux. Merci !" },
   { id: "demo-07", author: "Carmen López", rating: 5, language: "es", hoursAgo: 140,
-    comment: "Sitio precioso y la tortilla, de las mejores que he probado. Repetiremos." },
+    comment: "Sitio precioso y la tortilla, de las mejores que he probado. Repetiremos.",
+    ownerReply: "¡Qué alegría, Carmen! La tortilla es nuestra debilidad, así que nos lo apuntamos como medalla. Aquí tienes tu mesa cuando quieras. Un abrazo grande, la familia de {name}" },
   { id: "demo-08", author: "Diego Herrera", rating: 4, language: "es", hoursAgo: 210,
-    comment: "Muy buena relación calidad-precio en el menú del día. El local se llena y hay bastante ruido." },
+    comment: "Muy buena relación calidad-precio en el menú del día. El local se llena y hay bastante ruido.",
+    ownerReply: "Gracias, Diego. Tienes razón con el ruido: a mediodía esto es una fiesta y lo estamos mirando. Nos alegra que el menú te convenza. Un abrazo grande, la familia de {name}" },
   { id: "demo-09", author: "Giulia Romano", rating: 4, language: "it", hoursAgo: 300,
     comment: "Cibo buonissimo e porzioni abbondanti. Il cameriere ci ha consigliato un vino ottimo. Unico difetto: un po' di attesa per il conto." },
-  { id: "demo-10", author: "Mateo", rating: 5, language: "es", hoursAgo: 420, comment: "" },
+  { id: "demo-10", author: "Mateo", rating: 5, language: "es", hoursAgo: 420, comment: "",
+    ownerReply: "¡Gracias por las cinco estrellas, Mateo! Un abrazo grande, la familia de {name}" },
 
   // ── Llegan después, con «Buscar nuevas» ──
   { id: "demo-11", author: "Ana Beltrán", rating: 2, language: "es", hoursAgo: 0.3,
@@ -67,12 +72,15 @@ export const GENERAL_REVIEWS: DemoReview[] = [
   { id: "gen-06", author: "Sophie Martin", rating: 5, language: "fr", hoursAgo: 98,
     comment: "Service impeccable et équipe très professionnelle. Je recommande vivement !" },
   { id: "gen-07", author: "Carmen López", rating: 5, language: "es", hoursAgo: 140,
-    comment: "Llevo años viniendo y nunca falla. Trato cercano y resultado perfecto." },
+    comment: "Llevo años viniendo y nunca falla. Trato cercano y resultado perfecto.",
+    ownerReply: "¡Qué alegría, Carmen! Años juntos ya, eso no se paga con nada. Aquí estamos para lo que necesites. Un abrazo grande, la familia de {name}" },
   { id: "gen-08", author: "Diego Herrera", rating: 4, language: "es", hoursAgo: 210,
-    comment: "Buena relación calidad-precio. Los sábados hay mucha gente y toca esperar." },
+    comment: "Buena relación calidad-precio. Los sábados hay mucha gente y toca esperar.",
+    ownerReply: "Gracias, Diego. Tienes razón con los sábados: es nuestro día más movido y lo estamos organizando mejor. Nos alegra que te compense. Un abrazo grande, la familia de {name}" },
   { id: "gen-09", author: "Giulia Romano", rating: 4, language: "it", hoursAgo: 300,
     comment: "Personale gentile e molto competente. Unico difetto: difficile trovare parcheggio vicino." },
-  { id: "gen-10", author: "Mateo", rating: 5, language: "es", hoursAgo: 420, comment: "" },
+  { id: "gen-10", author: "Mateo", rating: 5, language: "es", hoursAgo: 420, comment: "",
+    ownerReply: "¡Gracias por las cinco estrellas, Mateo! Un abrazo grande, la familia de {name}" },
   { id: "gen-11", author: "Ana Beltrán", rating: 2, language: "es", hoursAgo: 0.3,
     comment: "Pedí un presupuesto por teléfono y en la tienda me dijeron otro precio distinto. Poco serio." },
   { id: "gen-12", author: "James Walker", rating: 5, language: "en", hoursAgo: 0.2,

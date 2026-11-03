@@ -9,3 +9,17 @@ alter table public.restaurants
 comment on table public.restaurants is 'Un negocio por cuenta (restaurante, tienda, peluquería…). El nombre de la tabla es histórico.';
 
 grant update (business_type) on public.restaurants to authenticated;
+
+-- ════════════════════════════════════════════════════════════════════
+--  Aprender del estilo del dueño
+--  - restaurants.learn_from_past: usar respuestas anteriores como ejemplo de estilo.
+--  - replies.source: 'reseki' (generada aquí) o 'google' (el dueño ya había
+--    respondido en Google antes de usar Reseki; se importa al sincronizar).
+-- ════════════════════════════════════════════════════════════════════
+alter table public.restaurants
+  add column if not exists learn_from_past boolean not null default true;
+grant update (learn_from_past) on public.restaurants to authenticated;
+
+alter table public.replies
+  add column if not exists source text not null default 'reseki'
+  check (source in ('reseki', 'google'));

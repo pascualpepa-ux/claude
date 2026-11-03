@@ -9,6 +9,7 @@ export interface Restaurant {
   owner_name: string;
   name: string;
   business_type: string;
+  learn_from_past: boolean;
   tone: ReplyTone;
   use_tu: boolean;
   signature: string;

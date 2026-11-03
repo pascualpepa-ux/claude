@@ -15,7 +15,7 @@ import { isDemoMode } from "@/lib/env";
 import { publishReplyToGoogle } from "@/lib/google";
 import { requireRestaurant } from "@/lib/session";
 import { createServiceClient } from "@/lib/supabase/server";
-import { generateMissingReplies, receiveDemoReviews, toneSettings } from "@/lib/sync";
+import { generateMissingReplies, loadStyleExamples, receiveDemoReviews, toneSettings } from "@/lib/sync";
 
 export type Result = { ok?: boolean; error?: string; message?: string };
 
@@ -97,7 +97,7 @@ export async function regenerateReply(replyId: string): Promise<Result> {
     const out = await generateReply(
       { authorName: own.review.author_name, rating: own.review.rating, comment: own.review.comment },
       toneSettings(own.restaurant),
-      { previousReply: own.reply.suggested_text || undefined },
+      { previousReply: own.reply.suggested_text || undefined, examples: await loadStyleExamples(own.restaurant) },
     );
     const db = createServiceClient();
     const { error } = await db
@@ -177,6 +177,7 @@ export async function saveNotifications(_: Result, formData: FormData): Promise<
       auto_publish_positive: formData.get("auto_publish_positive") === "on",
       weekly_summary_email: formData.get("weekly_summary_email") === "on",
       negative_alert_email: formData.get("negative_alert_email") === "on",
+      learn_from_past: formData.get("learn_from_past") === "on",
     })
     .eq("id", restaurant.id);
   if (error) return { error: "No hemos podido guardar los ajustes." };

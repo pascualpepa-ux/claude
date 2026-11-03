@@ -17,7 +17,7 @@ pre{margin-top:20px;background:var(--surface);border:1px solid var(--border);bor
 </style>
 <div class="wrap">
 <h1>Actualizar la base de datos</h1>
-<p style="color:var(--muted);margin:8px 0 0">Paso 2 · tipos de negocio. El paso 1 (crear las tablas) ya está hecho.</p>
+<p style="color:var(--muted);margin:8px 0 0">Paso 2 · tipos de negocio y aprendizaje del estilo del dueño. El paso 1 (crear las tablas) ya está hecho.</p>
 <ol>
 <li>Toca <b>Copiar todo</b>.</li>
 <li>En Supabase, en el SQL Editor, abre una consulta nueva con el <b>+</b> de arriba.</li>
@@ -39,6 +39,20 @@ alter table public.restaurants
 comment on table public.restaurants is &#x27;Un negocio por cuenta (restaurante, tienda, peluquería…). El nombre de la tabla es histórico.&#x27;;
 
 grant update (business_type) on public.restaurants to authenticated;
+
+-- ════════════════════════════════════════════════════════════════════
+--  Aprender del estilo del dueño
+--  - restaurants.learn_from_past: usar respuestas anteriores como ejemplo de estilo.
+--  - replies.source: &#x27;reseki&#x27; (generada aquí) o &#x27;google&#x27; (el dueño ya había
+--    respondido en Google antes de usar Reseki; se importa al sincronizar).
+-- ════════════════════════════════════════════════════════════════════
+alter table public.restaurants
+  add column if not exists learn_from_past boolean not null default true;
+grant update (learn_from_past) on public.restaurants to authenticated;
+
+alter table public.replies
+  add column if not exists source text not null default &#x27;reseki&#x27;
+  check (source in (&#x27;reseki&#x27;, &#x27;google&#x27;));
 </pre>
 </div>
 <script>

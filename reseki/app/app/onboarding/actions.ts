@@ -16,7 +16,7 @@ import { demoLocation, sampleReviewFor } from "@/lib/demo";
 import { isDemoMode } from "@/lib/env";
 import { requireRestaurant } from "@/lib/session";
 import { createServiceClient } from "@/lib/supabase/server";
-import { generateMissingReplies, seedDemoReviews } from "@/lib/sync";
+import { generateMissingReplies, loadStyleExamples, seedDemoReviews } from "@/lib/sync";
 
 export type ActionState = { error?: string; ok?: boolean };
 
@@ -101,7 +101,7 @@ export async function previewTone(input: {
       useTu: parsed.data.use_tu,
       signature: parsed.data.signature,
       extraInstructions: parsed.data.extra_instructions,
-    });
+    }, { examples: await loadStyleExamples(restaurant) });
     return { text: out.text };
   } catch (e) {
     return { error: e instanceof AIError ? e.message : "No hemos podido generar el ejemplo." };

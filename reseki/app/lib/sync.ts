@@ -1,5 +1,5 @@
 import "server-only";
-import { AIError, generateReply, type ToneSettings } from "@/lib/ai";
+import { AIError, generateReply, type StyleExample, type ToneSettings } from "@/lib/ai";
 import { businessLabel } from "@/lib/business";
 import { demoReviewsFor, INITIAL_COUNT } from "@/lib/demo";
 import { publishReplyToGoogle } from "@/lib/google";
@@ -23,6 +23,35 @@ export function toneSettings(r: Restaurant): ToneSettings {
   };
 }
 
+/* ─────────────── Estilo del dueño ─────────────── */
+
+/**
+ * Ejemplos de estilo: respuestas que el dueño escribió él mismo, ya sea en Google antes de
+ * usar Reseki (source = 'google') o corrigiendo a mano una sugerencia (edited_by_owner).
+ * Las respuestas de la IA publicadas sin cambios NO cuentan, para no reforzar su propio estilo.
+ */
+export async function loadStyleExamples(restaurant: Restaurant, limit = 6): Promise<StyleExample[]> {
+  if (!restaurant.learn_from_past) return [];
+  const db = createServiceClient();
+  const { data, error } = await db
+    .from("replies")
+    .select("final_text, reviews!inner(rating, comment)")
+    .eq("restaurant_id", restaurant.id)
+    .eq("status", "publicada")
+    .or("source.eq.google,edited_by_owner.eq.true")
+    .not("final_text", "is", null)
+    .order("published_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    console.error("[style] ejemplos", error);
+    return [];
+  }
+  return (data ?? []).map((r) => {
+    const rev = (Array.isArray(r.reviews) ? r.reviews[0] : r.reviews) as { rating: number; comment: string };
+    return { rating: rev.rating, review: rev.comment, reply: r.final_text as string };
+  });
+}
+
 /* ─────────────── Modo demo ─────────────── */
 
 /** Carga las primeras reseñas de ejemplo al conectar la ficha (idempotente). */
@@ -41,6 +70,36 @@ export async function seedDemoReviews(restaurantId: string, businessType: string
   }));
   const { error } = await db.from("reviews").upsert(rows, { onConflict: "restaurant_id,google_review_id", ignoreDuplicates: true });
   if (error) throw error;
+
+  // Algunas reseñas antiguas ya tenían respuesta del dueño en Google: se importan como publicadas.
+  // Son la base del "estilo del dueño" que la IA imita.
+  const { data: restaurant } = await db.from("restaurants").select("google_location_title, name").eq("id", restaurantId).single();
+  const name = restaurant?.google_location_title || restaurant?.name || "la casa";
+  const answered = demoReviewsFor(businessType).slice(0, INITIAL_COUNT).filter((d) => d.ownerReply);
+  if (!answered.length) return;
+  const { data: saved } = await db
+    .from("reviews")
+    .select("id, google_review_id, reviewed_at, replies(id)")
+    .eq("restaurant_id", restaurantId)
+    .in("google_review_id", answered.map((d) => d.id));
+  const replies = (saved ?? [])
+    .filter((r) => !r.replies || (Array.isArray(r.replies) && !r.replies.length))
+    .map((r) => {
+      const text = answered.find((d) => d.id === r.google_review_id)!.ownerReply!.replace("{name}", name);
+      return {
+        review_id: r.id,
+        restaurant_id: restaurantId,
+        suggested_text: text,
+        final_text: text,
+        status: "publicada",
+        source: "google",
+        published_at: new Date(Date.parse(r.reviewed_at) + 5 * 3600e3).toISOString(),
+      };
+    });
+  if (replies.length) {
+    const { error: repErr } = await db.from("replies").insert(replies);
+    if (repErr) throw repErr;
+  }
 }
 
 /** Simula la llegada de reseñas nuevas. Devuelve cuántas llegaron. */
@@ -100,12 +159,14 @@ export async function generateMissingReplies(restaurantId: string) {
 
   const missing = (reviews ?? []).filter((r) => !r.replies || (Array.isArray(r.replies) && r.replies.length === 0));
   const settings = toneSettings(restaurant);
+  const examples = missing.length ? await loadStyleExamples(restaurant) : [];
 
   await pool(missing, 3, async (review) => {
     try {
       const out = await generateReply(
         { authorName: review.author_name, rating: review.rating, comment: review.comment },
         settings,
+        { examples },
       );
       const auto = restaurant.auto_publish_positive && review.rating >= 4;
       if (auto) await publishReplyToGoogle(restaurant, review.google_review_id, out.text);

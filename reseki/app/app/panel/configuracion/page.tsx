@@ -3,12 +3,14 @@ import { NotificationsForm } from "@/components/settings/notifications-form";
 import { ToneForm } from "@/components/settings/tone-form";
 import { sampleReviewFor } from "@/lib/demo";
 import { requireRestaurant } from "@/lib/session";
+import { loadStyleExamples } from "@/lib/sync";
 
 export const metadata: Metadata = { title: "Configuración" };
 
 /** Configuración: tono de las respuestas, respuesta automática y emails. */
 export default async function SettingsPage() {
   const { user, restaurant } = await requireRestaurant();
+  const examples = (await loadStyleExamples({ ...restaurant, learn_from_past: true })).length;
   return (
     <>
       <div className="border-b border-border pb-6 pt-8">
@@ -25,10 +27,10 @@ export default async function SettingsPage() {
       </section>
 
       <section className="mt-12 max-w-[620px]">
-        <h2 className="text-base font-semibold">Publicación y emails</h2>
+        <h2 className="text-base font-semibold">Aprendizaje, publicación y emails</h2>
         <div className="mt-4">
-          <NotificationsForm email={user.email ?? ""}
-            initial={{ auto_publish_positive: restaurant.auto_publish_positive, weekly_summary_email: restaurant.weekly_summary_email, negative_alert_email: restaurant.negative_alert_email }} />
+          <NotificationsForm email={user.email ?? ""} examples={examples}
+            initial={{ learn_from_past: restaurant.learn_from_past, auto_publish_positive: restaurant.auto_publish_positive, weekly_summary_email: restaurant.weekly_summary_email, negative_alert_email: restaurant.negative_alert_email }} />
         </div>
       </section>
     </>

@@ -22,7 +22,7 @@ interface Row {
   reviewed_at: string;
   replies: {
     id: string; status: ReplyStatus; suggested_text: string; final_text: string | null;
-    published_automatically: boolean; edited_by_owner: boolean; published_at: string | null; error_message: string | null;
+    published_automatically: boolean; edited_by_owner: boolean; published_at: string | null; error_message: string | null; source: string;
   } | null;
 }
 
@@ -36,7 +36,7 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
   // RLS: solo devuelve las reseñas de este restaurante.
   const { data, error } = await supabase
     .from("reviews")
-    .select("id, author_name, rating, comment, language, reviewed_at, replies(id, status, suggested_text, final_text, published_automatically, edited_by_owner, published_at, error_message)")
+    .select("id, author_name, rating, comment, language, reviewed_at, replies(id, status, suggested_text, final_text, published_automatically, edited_by_owner, published_at, error_message, source)")
     .order("reviewed_at", { ascending: false })
     .limit(500)
     .returns<Row[]>();
@@ -89,6 +89,7 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
       edited: r.replies.edited_by_owner,
       publishedAgo: r.replies.published_at ? timeAgo(r.replies.published_at, now) : null,
       error: r.replies.error_message,
+      fromGoogle: r.replies.source === "google",
     },
   }));
 
