@@ -162,6 +162,13 @@ returns setof uuid language sql stable security definer set search_path = '' as 
   select id from public.restaurants where owner_id = (select auth.uid())
 $$;
 
+-- Permisos explícitos (necesarios si "Automatically expose new tables" está desactivado).
+-- El rol anónimo no recibe nada; el servidor usa service_role.
+grant usage on schema public to authenticated, service_role;
+grant select on public.restaurants, public.reviews, public.replies, public.subscriptions to authenticated;
+grant all on public.restaurants, public.google_connections, public.reviews, public.replies, public.subscriptions to service_role;
+grant execute on function public.my_restaurant_ids() to authenticated;
+
 -- restaurants: el dueño lee y edita SOLO los ajustes; los campos de Google los escribe el servidor.
 create policy "dueño lee su restaurante" on public.restaurants
   for select to authenticated using (owner_id = (select auth.uid()));
