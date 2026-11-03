@@ -1,0 +1,328 @@
+<title>Candidatos Reseki</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: lista de trabajo tipo bandeja — resumen arriba, filtros, una fila por restaurante con su verificación. Tokens de Reseki. */
+:root{
+  --bg:#ffffff; --bg-subtle:#fafaf9; --surface:#ffffff; --surface-2:#f5f5f4;
+  --border:#e7e5e4; --border-strong:#d6d3d1;
+  --fg:#0c0a09; --fg-muted:#57534e; --fg-subtle:#a8a29e;
+  --accent:#e8590c; --accent-soft:#fff1e6; --accent-line:#fdd5b8;
+  --warn:#a16207; --warn-soft:#fef9c3;
+  --ok:#15803d; --ok-soft:#ecfdf3;
+  --ring:0 0 0 3px rgba(232,89,12,.22);
+  --font:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c0a09; --bg-subtle:#110f0e; --surface:#161413; --surface-2:#1c1a18;
+  --border:#292524; --border-strong:#3a3532;
+  --fg:#fafaf9; --fg-muted:#a8a29e; --fg-subtle:#6b645f;
+  --accent:#fb7c3c; --accent-soft:rgba(251,124,60,.12); --accent-line:rgba(251,124,60,.35);
+  --warn:#facc15; --warn-soft:rgba(250,204,21,.1);
+  --ok:#4ade80; --ok-soft:rgba(74,222,128,.1);
+  --ring:0 0 0 3px rgba(251,124,60,.3); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0c0a09; --bg-subtle:#110f0e; --surface:#161413; --surface-2:#1c1a18;
+  --border:#292524; --border-strong:#3a3532;
+  --fg:#fafaf9; --fg-muted:#a8a29e; --fg-subtle:#6b645f;
+  --accent:#fb7c3c; --accent-soft:rgba(251,124,60,.12); --accent-line:rgba(251,124,60,.35);
+  --warn:#facc15; --warn-soft:rgba(250,204,21,.1);
+  --ok:#4ade80; --ok-soft:rgba(74,222,128,.1);
+  --ring:0 0 0 3px rgba(251,124,60,.3); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+button,select,textarea,input{font:inherit;color:inherit}
+:focus-visible{outline:none;box-shadow:var(--ring);border-radius:6px}
+.wrap{max-width:980px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted)}
+.muted{color:var(--fg-muted)}
+.num{font-variant-numeric:tabular-nums}
+
+header h1{font-size:26px;margin-top:8px}
+header p{color:var(--fg-muted);margin-top:8px;max-width:62ch}
+.how{margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.how div{padding:14px 16px;font-size:13.5px;color:var(--fg-muted);min-width:0}
+.how div + div{border-left:1px solid var(--border)}
+.how b{display:block;color:var(--fg);font-weight:500;font-size:14px;margin-bottom:2px}
+.how .n{font-family:var(--mono);font-size:11px;color:var(--fg-subtle)}
+@media (max-width:640px){.how{grid-template-columns:1fr}.how div + div{border-left:0;border-top:1px solid var(--border)}}
+.legal{margin-top:12px;font-size:13px;color:var(--fg-muted);border:1px dashed var(--border-strong);border-radius:8px;padding:10px 12px}
+
+.stats{margin-top:28px;display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.stat{padding:14px 16px;min-width:0}
+.stat + .stat{border-left:1px solid var(--border)}
+.stat .k{font-size:12.5px;color:var(--fg-muted);display:flex;align-items:center;gap:6px}
+.stat .v{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-top:4px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(3){border-left:0}.stat:nth-child(n+3){border-top:1px solid var(--border)}}
+
+.bar{margin-top:24px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{height:30px;padding:0 11px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--fg-muted);cursor:pointer}
+.chip:hover{border-color:var(--border-strong);color:var(--fg)}
+.chip[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.sync{font-size:12.5px;color:var(--fg-subtle)}
+
+.list{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.row{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 20px}
+.row.help{border-color:var(--accent-line)}
+.who h3{font-size:15.5px;font-weight:600}
+.meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--fg-muted);margin-top:3px}
+.tag{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:999px;border:1px solid var(--border);font-size:11.5px;color:var(--fg-muted)}
+.contact{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.cbtn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-size:13px;text-decoration:none;color:var(--fg);cursor:pointer;max-width:100%}
+.cbtn:hover{border-color:var(--border-strong);background:var(--bg-subtle)}
+.cbtn.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.cbtn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;user-select:all}
+.cbtn svg{width:14px;height:14px;flex:none}
+.check{display:flex;flex-direction:column;gap:8px;align-items:flex-end;min-width:220px}
+.verdict{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:999px;font-size:12.5px;font-weight:500;white-space:nowrap}
+.v-help{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line)}
+.v-some{background:var(--warn-soft);color:var(--warn)}
+.v-ok{background:var(--ok-soft);color:var(--ok)}
+.v-none{border:1px dashed var(--border-strong);color:var(--fg-muted)}
+label.sel{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--fg-muted)}
+select{height:32px;border-radius:6px;border:1px solid var(--border);background:var(--surface);padding:0 8px;font-size:13.5px}
+label.cb{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-muted);cursor:pointer}
+label.cb input{width:16px;height:16px;accent-color:var(--accent)}
+.note{grid-column:1 / -1}
+.note textarea{width:100%;min-height:38px;resize:vertical;border:1px solid var(--border);border-radius:6px;background:var(--bg-subtle);padding:8px 10px;font-size:13.5px}
+.note textarea:focus{outline:none;border-color:var(--accent);box-shadow:var(--ring)}
+@media (max-width:640px){.row{grid-template-columns:1fr}.check{align-items:flex-start;min-width:0}}
+.empty{text-align:center;padding:40px 16px;color:var(--fg-muted);border:1px dashed var(--border-strong);border-radius:12px;margin-top:16px}
+footer{margin-top:40px;font-size:12.5px;color:var(--fg-subtle);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Reseki · prospección</p>
+    <h1>Restaurantes candidatos</h1>
+    <p>Restaurantes de España con muchas reseñas en Google. Comprueba cuántas responde el dueño y la lista se ordena sola: arriba, los que más necesitan ayuda.</p>
+    <div class="how">
+      <div><span class="n">1</span><b>Abre la ficha</b>Pulsa «Ver en Google Maps».</div>
+      <div><span class="n">2</span><b>Ordena por recientes</b>En «Reseñas», elige «Más recientes».</div>
+      <div><span class="n">3</span><b>Cuenta y anota</b>De las últimas 10, ¿cuántas tienen «Respuesta del propietario»?</div>
+    </div>
+    <p class="legal">Antes de escribirles: en España no se puede enviar publicidad por email sin permiso previo, tampoco a empresas (LSSI, art. 21). Lo más seguro es el teléfono, el formulario de su web o ir en persona.</p>
+  </header>
+
+  <section class="stats" aria-label="Resumen">
+    <div class="stat"><span class="k"><i class="dot" style="background:var(--accent)"></i>Necesitan ayuda</span><span class="v num" id="s-help">0</span></div>
+    <div class="stat"><span class="k"><i class="dot" style="background:var(--warn)"></i>Responden poco</span><span class="v num" id="s-some">0</span></div>
+    <div class="stat"><span class="k"><i class="dot" style="background:var(--ok)"></i>Ya responden</span><span class="v num" id="s-ok">0</span></div>
+    <div class="stat"><span class="k"><i class="dot" style="border:1px dashed var(--fg-subtle)"></i>Sin revisar</span><span class="v num" id="s-none">0</span></div>
+  </section>
+
+  <div class="bar">
+    <div class="chips" id="chips" role="group" aria-label="Filtrar por ciudad"></div>
+    <span class="sync" id="sync">Conectando…</span>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <footer><span>Datos de reseñas: Google vía Wanderlog y Gastroranking, 3 nov 2026. Aproximados.</span><span>Un proyecto de Pascual Pepa</span></footer>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   Lista de candidatos (resultado de la investigación).
+   rating/reviews: null = no verificado (se mira en la ficha).
+   ───────────────────────────────────────────────────────────── */
+const R = [
+  // Madrid — los más conocidos de cada zona; cifras a comprobar en la ficha
+  {id:"casa-labra", name:"Casa Labra", city:"Madrid", area:"Sol"},
+  {id:"la-campana", name:"La Campana", city:"Madrid", area:"Plaza Mayor"},
+  {id:"casa-toni", name:"Casa Toni", city:"Madrid", area:"Sol"},
+  {id:"casa-del-abuelo", name:"La Casa del Abuelo", city:"Madrid", area:"Sol"},
+  {id:"el-brillante", name:"El Brillante", city:"Madrid", area:"Atocha"},
+  {id:"casa-lucio", name:"Casa Lucio", city:"Madrid", area:"La Latina"},
+  {id:"casa-revuelta", name:"Casa Revuelta", city:"Madrid", area:"La Latina"},
+  {id:"botin", name:"Sobrino de Botín", city:"Madrid", area:"Plaza Mayor"},
+  {id:"antonio-sanchez", name:"Taberna Antonio Sánchez", city:"Madrid", area:"Lavapiés"},
+  {id:"casa-alberto", name:"Casa Alberto", city:"Madrid", area:"Huertas"},
+  {id:"la-ardosa", name:"Bodega de la Ardosa", city:"Madrid", area:"Malasaña"},
+  {id:"el-tigre", name:"Sidrería El Tigre", city:"Madrid", area:"Chueca"},
+  {id:"docamar", name:"Bar Docamar", city:"Madrid", area:"Quintana"},
+  {id:"casa-dani", name:"Casa Dani", city:"Madrid", area:"Salamanca"},
+  {id:"casa-mingo", name:"Casa Mingo", city:"Madrid", area:"Príncipe Pío"},
+  {id:"el-doble", name:"El Doble", city:"Madrid", area:"Chamberí"},
+
+  // Barcelona
+  {id:"bar-canete", name:"Bar Cañete", city:"Barcelona", area:"Raval", rating:4.6, reviews:8470, web:"https://barcanete.com", email:"reservas@barcanete.com", phone:"+34 932 70 34 58"},
+  {id:"can-paixano", name:"Can Paixano", city:"Barcelona", area:"Barceloneta", rating:4.6, reviews:10107},
+  {id:"bar-tomas", name:"Bar Tomás", city:"Barcelona", area:"Sarrià", rating:4.3, reviews:7397, phone:"+34 932 03 10 77"},
+  {id:"quimet", name:"Quimet & Quimet", city:"Barcelona", area:"Poble-sec", rating:4.6, reviews:5640, phone:"+34 934 42 31 42"},
+  {id:"cerveceria-catalana", name:"Cervecería Catalana", city:"Barcelona", area:"Eixample", rating:4.5, reviews:25195, phone:"+34 932 16 03 68", group:"Grupo La Flauta"},
+  {id:"ciudad-condal", name:"Ciudad Condal", city:"Barcelona", area:"Eixample", rating:4.4, reviews:23735, phone:"+34 933 18 19 97", group:"Grupo La Flauta"},
+
+  // Valencia
+  {id:"casa-montana", name:"Casa Montaña", city:"Valencia", area:"Cabanyal", rating:4.6, reviews:6236, web:"https://emilianobodega.com", email:"info@emilianobodega.com", phone:"+34 963 67 23 14"},
+  {id:"la-pepica", name:"La Pepica", city:"Valencia", area:"Malvarrosa", rating:3.9, reviews:14969, phone:"+34 963 71 03 66"},
+  {id:"santa-catalina", name:"Horchatería Santa Catalina", city:"Valencia", area:"Ciutat Vella", rating:4.2, reviews:12582, email:"info@horchateriasantacatalina.com"},
+  {id:"la-riua", name:"La Riuà", city:"Valencia", area:"Ciutat Vella", rating:4.2, reviews:3463},
+  {id:"central-bar", name:"Central Bar", city:"Valencia", area:"Mercado Central", rating:4.5, reviews:2341, phone:"+34 963 82 92 23", group:"Grupo Ricard Camarena"},
+  {id:"la-pilareta", name:"La Pilareta", city:"Valencia", area:"El Carmen", phone:"+34 963 91 04 97"},
+
+  // Otras ciudades turísticas
+  {id:"bar-bosch", name:"Bar Bosch", city:"Palma", area:"Centro", rating:3.9, reviews:4984, web:"https://barbosch.com", phone:"+34 971 71 22 28"},
+  {id:"casa-guardia", name:"Antigua Casa de Guardia", city:"Málaga", area:"Centro", rating:4.6, reviews:11166, web:"https://antiguacasadeguardia.com", phone:"+34 952 21 46 80"},
+  {id:"el-rinconcillo", name:"El Rinconcillo", city:"Sevilla", area:"Centro", rating:4.3, reviews:13750, web:"https://elrinconcillo.es", phone:"+34 954 22 31 83"},
+  {id:"santa-cruz", name:"Bodega Santa Cruz «Las Columnas»", city:"Sevilla", area:"Santa Cruz", rating:4.4, reviews:null},
+  {id:"bar-nestor", name:"Bar Néstor", city:"San Sebastián", area:"Parte Vieja", rating:4.5, reviews:2502, web:"https://instagram.com/barnestor1980", phone:"+34 943 42 48 73"},
+  {id:"diamantes-plaza-nueva", name:"Los Diamantes · Plaza Nueva", city:"Granada", area:"Centro", rating:4.3, reviews:14033, web:"https://losdiamantes.es", group:"Grupo Los Diamantes"},
+  {id:"diamantes-navas", name:"Los Diamantes · Navas", city:"Granada", area:"Centro", rating:4.5, reviews:5486, web:"https://losdiamantes.es", group:"Grupo Los Diamantes"},
+  {id:"sento", name:"Cervecería Sento", city:"Alicante", area:"Centro", group:"Cadena · 6 locales"},
+];
+
+/* ─────────────── Estado: lo que anota el usuario ─────────────── */
+// checks[id] = { replied: 0..10 | null, negatives: bool, note: string, updatedAt }
+const checks = {};
+let city = "Todas";
+let store = null;          // db de la página (o null → almacenamiento del navegador)
+const queues = {};         // una escritura a la vez por documento
+
+const $ = s => document.querySelector(s);
+const fmt = n => n == null ? null : n.toLocaleString("es-ES");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mapsUrl = r => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(r.name.replace(/[«»]/g,"") + ", " + r.city);
+
+function verdict(c) {
+  if (!c || c.replied == null) return { k:"none", rank:2, label:"Sin revisar" };
+  if (c.replied <= 2) return { k:"help", rank:0, label:"Necesita ayuda" };
+  if (c.replied <= 6) return { k:"some", rank:1, label:"Responde poco" };
+  return { k:"ok", rank:3, label:"Ya responde" };
+}
+
+const ICON = {
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  web:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/></svg>',
+  mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>',
+};
+
+/* ─────────────── Pintar ─────────────── */
+function render() {
+  const counts = { help:0, some:0, ok:0, none:0 };
+  R.forEach(r => counts[verdict(checks[r.id]).k]++);
+  for (const k in counts) $("#s-" + k).textContent = counts[k];
+
+  const cities = ["Todas", ...new Set(R.map(r => r.city))];
+  $("#chips").innerHTML = cities.map(c => `<button class="chip" data-c="${esc(c)}" aria-pressed="${c===city}">${esc(c)}</button>`).join("");
+
+  const rows = R.filter(r => city === "Todas" || r.city === city)
+    .map(r => ({ r, c: checks[r.id], v: verdict(checks[r.id]) }))
+    .sort((a, b) => a.v.rank - b.v.rank || (a.c?.replied ?? 99) - (b.c?.replied ?? 99) || (b.r.reviews ?? 0) - (a.r.reviews ?? 0));
+
+  const focused = document.activeElement && document.activeElement.id;
+  $("#list").innerHTML = rows.length ? rows.map(({ r, c, v }) => `
+    <article class="row ${v.k === "help" ? "help" : ""}" data-id="${r.id}">
+      <div class="who">
+        <h3>${esc(r.name)}</h3>
+        <div class="meta">
+          <span>${esc(r.area)}, ${esc(r.city)}</span>
+          <span class="num">${r.rating ? r.rating.toLocaleString("es-ES",{minimumFractionDigits:1}) + " ★" : "★ sin dato"} · ${r.reviews ? fmt(r.reviews) + " reseñas" : "nº de reseñas: mira la ficha"}</span>
+          ${r.group ? `<span class="tag">${esc(r.group)}</span>` : ""}
+        </div>
+        <div class="contact">
+          <a class="cbtn primary" href="${mapsUrl(r)}" target="_blank" rel="noopener">${ICON.map}Ver en Google Maps</a>
+          ${r.web ? `<a class="cbtn" href="${r.web}" target="_blank" rel="noopener">${ICON.web}<span>${esc(r.web.replace(/^https?:\/\//,""))}</span></a>` : ""}
+          ${r.phone ? `<button class="cbtn" data-copy="${esc(r.phone)}" title="Copiar teléfono">${ICON.phone}<span>${esc(r.phone)}</span></button>` : ""}
+          ${r.email ? `<button class="cbtn" data-copy="${esc(r.email)}" title="Copiar email">${ICON.mail}<span>${esc(r.email)}</span></button>` : ""}
+        </div>
+      </div>
+      <div class="check">
+        <span class="verdict v-${v.k}">${v.label}</span>
+        <label class="sel" for="r-${r.id}">Respondidas de las últimas 10
+          <select id="r-${r.id}" data-field="replied">
+            <option value="">—</option>
+            ${Array.from({length:11}, (_, i) => `<option value="${i}" ${c?.replied === i ? "selected" : ""}>${i}</option>`).join("")}
+          </select>
+        </label>
+        <label class="cb"><input type="checkbox" id="n-${r.id}" data-field="negatives" ${c?.negatives ? "checked" : ""}>Tiene quejas sin responder</label>
+      </div>
+      <div class="note"><textarea id="t-${r.id}" data-field="note" rows="1" placeholder="Notas (ej: llamé el martes, hablar con el encargado)">${esc(c?.note ?? "")}</textarea></div>
+    </article>`).join("")
+    : `<p class="empty">No hay restaurantes en esta ciudad.</p>`;
+  if (focused) { const el = document.getElementById(focused); if (el) el.focus(); }
+}
+
+/* ─────────────── Guardar ─────────────── */
+function save(id) {
+  const body = { ...checks[id], updatedAt: new Date().toISOString() };
+  if (!store) {
+    try { localStorage.setItem("reseki-candidatos", JSON.stringify(checks)); } catch (e) {}
+    return;
+  }
+  // Una escritura a la vez por restaurante.
+  queues[id] = (queues[id] || Promise.resolve()).then(() => store.doc(id).set(body)).catch(e => {
+    console.error(e);
+    $("#sync").textContent = "No se pudo guardar el último cambio. Revisa la conexión.";
+  });
+}
+
+const noteTimers = {};
+document.addEventListener("change", e => {
+  const el = e.target, row = el.closest(".row"); if (!row) return;
+  const id = row.dataset.id, f = el.dataset.field;
+  checks[id] = checks[id] || { replied:null, negatives:false, note:"" };
+  if (f === "replied") checks[id].replied = el.value === "" ? null : Number(el.value);
+  if (f === "negatives") checks[id].negatives = el.checked;
+  if (f === "replied" || f === "negatives") { save(id); render(); }
+});
+document.addEventListener("input", e => {
+  const el = e.target; if (el.dataset.field !== "note") return;
+  const id = el.closest(".row").dataset.id;
+  checks[id] = checks[id] || { replied:null, negatives:false, note:"" };
+  checks[id].note = el.value;
+  clearTimeout(noteTimers[id]); noteTimers[id] = setTimeout(() => save(id), 800);
+});
+document.addEventListener("click", async e => {
+  const chip = e.target.closest("[data-c]");
+  if (chip) { city = chip.dataset.c; render(); return; }
+  const cp = e.target.closest("[data-copy]");
+  if (cp) {
+    const span = cp.querySelector("span"), txt = cp.dataset.copy;
+    try { await navigator.clipboard.writeText(txt); span.textContent = "Copiado"; setTimeout(() => span.textContent = txt, 1400); }
+    catch { const r = document.createRange(); r.selectNodeContents(span); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+  }
+});
+
+let pendingRender = false;
+document.addEventListener("focusout", e => {
+  if (pendingRender && e.target.dataset?.field === "note") { pendingRender = false; setTimeout(render, 0); }
+});
+
+/* ─────────────── Arranque ─────────────── */
+render();
+(async () => {
+  const db = window.claude?.use ? await window.claude.use("db") : null;
+  if (!db) {
+    try { Object.assign(checks, JSON.parse(localStorage.getItem("reseki-candidatos") || "{}")); } catch (e) {}
+    $("#sync").textContent = "Guardado solo en este dispositivo";
+    render(); return;
+  }
+  store = db.collection("checks");
+  const timer = setTimeout(() => { $("#sync").textContent = "No se puede conectar todavía. Lo que anotes se guardará al volver la conexión."; }, 10000);
+  store.onSnapshot(snap => {
+    if (!snap.metadata.fromCache) { clearTimeout(timer); $("#sync").textContent = "Guardado automático"; }
+    snap.docs.forEach(d => {
+      const v = d.data();
+      // No pisar una nota que el usuario está escribiendo ahora mismo.
+      const typing = document.activeElement?.id === "t-" + d.id;
+      checks[d.id] = typing ? { ...v, note: checks[d.id]?.note ?? v.note } : v;
+    });
+    // Mientras se escribe una nota no redibujamos (perdería el cursor); se hace al salir del campo.
+    if (document.activeElement?.dataset?.field === "note") pendingRender = true; else render();
+  }, err => { clearTimeout(timer); $("#sync").textContent = "Sin conexión con el guardado: " + (err.message || err.code); });
+})();
+</script>
