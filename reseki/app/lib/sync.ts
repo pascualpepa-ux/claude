@@ -1,6 +1,7 @@
 import "server-only";
 import { AIError, generateReply, type ToneSettings } from "@/lib/ai";
-import { DEMO_REVIEWS, INITIAL_COUNT } from "@/lib/demo";
+import { businessLabel } from "@/lib/business";
+import { demoReviewsFor, INITIAL_COUNT } from "@/lib/demo";
 import { publishReplyToGoogle } from "@/lib/google";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { Restaurant } from "@/lib/types";
@@ -14,6 +15,7 @@ import type { Restaurant } from "@/lib/types";
 export function toneSettings(r: Restaurant): ToneSettings {
   return {
     restaurantName: r.google_location_title || r.name,
+    businessType: businessLabel(r.business_type),
     tone: r.tone,
     useTu: r.use_tu,
     signature: r.signature,
@@ -24,10 +26,10 @@ export function toneSettings(r: Restaurant): ToneSettings {
 /* ─────────────── Modo demo ─────────────── */
 
 /** Carga las primeras reseñas de ejemplo al conectar la ficha (idempotente). */
-export async function seedDemoReviews(restaurantId: string) {
+export async function seedDemoReviews(restaurantId: string, businessType: string) {
   const db = createServiceClient();
   const now = Date.now();
-  const rows = DEMO_REVIEWS.slice(0, INITIAL_COUNT).map((d) => ({
+  const rows = demoReviewsFor(businessType).slice(0, INITIAL_COUNT).map((d) => ({
     restaurant_id: restaurantId,
     google_review_id: d.id,
     author_name: d.author,
@@ -42,12 +44,12 @@ export async function seedDemoReviews(restaurantId: string) {
 }
 
 /** Simula la llegada de reseñas nuevas. Devuelve cuántas llegaron. */
-export async function receiveDemoReviews(restaurantId: string, max = 2): Promise<number> {
+export async function receiveDemoReviews(restaurantId: string, businessType: string, max = 2): Promise<number> {
   const db = createServiceClient();
   const { data: existing, error } = await db.from("reviews").select("google_review_id").eq("restaurant_id", restaurantId);
   if (error) throw error;
   const have = new Set((existing ?? []).map((r) => r.google_review_id));
-  const next = DEMO_REVIEWS.filter((d) => !have.has(d.id)).slice(0, max);
+  const next = demoReviewsFor(businessType).filter((d) => !have.has(d.id)).slice(0, max);
   if (!next.length) return 0;
 
   const now = Date.now();
@@ -87,7 +89,7 @@ async function pool<T>(items: T[], size: number, fn: (item: T) => Promise<void>)
 export async function generateMissingReplies(restaurantId: string) {
   const db = createServiceClient();
   const { data: restaurant, error } = await db.from("restaurants").select("*").eq("id", restaurantId).single<Restaurant>();
-  if (error || !restaurant) throw error ?? new Error("Restaurante no encontrado");
+  if (error || !restaurant) throw error ?? new Error("Negocio no encontrado");
 
   const { data: reviews, error: revErr } = await db
     .from("reviews")

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { NotificationsForm } from "@/components/settings/notifications-form";
 import { ToneForm } from "@/components/settings/tone-form";
-import { SAMPLE_REVIEW } from "@/lib/demo";
+import { sampleReviewFor } from "@/lib/demo";
 import { requireRestaurant } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Configuración" };
@@ -19,7 +19,7 @@ export default async function SettingsPage() {
       <section className="mt-8">
         <h2 className="text-base font-semibold">Tono de las respuestas</h2>
         <div className="mt-4">
-          <ToneForm mode="settings" sample={SAMPLE_REVIEW}
+          <ToneForm mode="settings" sample={sampleReviewFor(restaurant.business_type)}
             initial={{ tone: restaurant.tone, use_tu: restaurant.use_tu, signature: restaurant.signature, extra_instructions: restaurant.extra_instructions }} />
         </div>
       </section>

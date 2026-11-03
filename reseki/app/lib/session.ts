@@ -26,7 +26,7 @@ export async function requireRestaurant() {
   if (error || !restaurant) {
     // No debería ocurrir: el trigger handle_new_user crea el restaurante al registrarse.
     console.error("[session] restaurante no encontrado", error);
-    throw new Error("No encontramos tu restaurante. Escríbenos y lo resolvemos.");
+    throw new Error("No encontramos tu negocio. Escríbenos y lo resolvemos.");
   }
   return { supabase, user, restaurant };
 }

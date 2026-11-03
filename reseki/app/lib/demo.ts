@@ -17,7 +17,8 @@ export interface DemoReview {
 
 export const INITIAL_COUNT = 10;
 
-export const DEMO_REVIEWS: DemoReview[] = [
+/** Catálogo de hostelería (restaurantes, bares, cafeterías). */
+export const FOOD_REVIEWS: DemoReview[] = [
   { id: "demo-01", author: "Lucía Fernández", rating: 5, language: "es", hoursAgo: 2,
     comment: "Cenamos el sábado y todo de diez. El arroz meloso, espectacular, y el servicio muy atento sin agobiar. Volveremos seguro." },
   { id: "demo-02", author: "Andrés Gómez", rating: 2, language: "es", hoursAgo: 5,
@@ -51,6 +52,44 @@ export const DEMO_REVIEWS: DemoReview[] = [
     comment: "Celebramos el cumpleaños de mi madre y nos sacaron una vela en el postre sin pedirlo. Detallazo." },
 ];
 
+/** Catálogo genérico (tiendas, peluquerías, clínicas, talleres, hoteles…). */
+export const GENERAL_REVIEWS: DemoReview[] = [
+  { id: "gen-01", author: "Lucía Fernández", rating: 5, language: "es", hoursAgo: 2,
+    comment: "Atención de diez. Me asesoraron sin prisas y me fui con exactamente lo que necesitaba. Volveré seguro." },
+  { id: "gen-02", author: "Andrés Gómez", rating: 2, language: "es", hoursAgo: 5,
+    comment: "Tenía cita a las 11 y me atendieron a las 11:45. Nadie me avisó del retraso ni me pidió disculpas." },
+  { id: "gen-03", author: "Tom Becker", rating: 4, language: "en", hoursAgo: 26,
+    comment: "Friendly staff and good quality. A bit pricey compared to other places, but the service makes up for it." },
+  { id: "gen-04", author: "Jordi Puig", rating: 3, language: "ca", hoursAgo: 50,
+    comment: "Bon servei, però els preus han pujat molt aquest any. El personal, molt amable." },
+  { id: "gen-05", author: "Valentina Ruiz", rating: 1, language: "es", hoursAgo: 75,
+    comment: "Me cobraron de más y cuando lo reclamé me trataron fatal. Una pena, porque el local es lindo." },
+  { id: "gen-06", author: "Sophie Martin", rating: 5, language: "fr", hoursAgo: 98,
+    comment: "Service impeccable et équipe très professionnelle. Je recommande vivement !" },
+  { id: "gen-07", author: "Carmen López", rating: 5, language: "es", hoursAgo: 140,
+    comment: "Llevo años viniendo y nunca falla. Trato cercano y resultado perfecto." },
+  { id: "gen-08", author: "Diego Herrera", rating: 4, language: "es", hoursAgo: 210,
+    comment: "Buena relación calidad-precio. Los sábados hay mucha gente y toca esperar." },
+  { id: "gen-09", author: "Giulia Romano", rating: 4, language: "it", hoursAgo: 300,
+    comment: "Personale gentile e molto competente. Unico difetto: difficile trovare parcheggio vicino." },
+  { id: "gen-10", author: "Mateo", rating: 5, language: "es", hoursAgo: 420, comment: "" },
+  { id: "gen-11", author: "Ana Beltrán", rating: 2, language: "es", hoursAgo: 0.3,
+    comment: "Pedí un presupuesto por teléfono y en la tienda me dijeron otro precio distinto. Poco serio." },
+  { id: "gen-12", author: "James Walker", rating: 5, language: "en", hoursAgo: 0.2,
+    comment: "Best service we found during our trip. They even helped us in English!" },
+  { id: "gen-13", author: "Rafael Sousa", rating: 4, language: "pt", hoursAgo: 0.2,
+    comment: "Atendimento excelente e ambiente acolhedor. Voltarei com certeza." },
+  { id: "gen-14", author: "Paula Méndez", rating: 3, language: "es", hoursAgo: 0.1,
+    comment: "El resultado bien, pero el horario de atención es muy corto y es difícil venir después del trabajo." },
+  { id: "gen-15", author: "Marta Iglesias", rating: 5, language: "es", hoursAgo: 0.1,
+    comment: "Me ayudaron con un problema que nadie sabía resolver. Profesionales de verdad." },
+];
+
+/** Catálogo demo adecuado al tipo de negocio. */
+export function demoReviewsFor(businessType: string): DemoReview[] {
+  return businessType === "restaurante" || businessType === "cafeteria" ? FOOD_REVIEWS : GENERAL_REVIEWS;
+}
+
 /** Ficha de Google simulada a partir de lo que escribe el dueño en el onboarding. */
 export function demoLocation(name: string, city: string) {
   return {
@@ -60,9 +99,9 @@ export function demoLocation(name: string, city: string) {
   };
 }
 
-/** Datos de ejemplo para la vista previa del tono en onboarding y configuración. */
-export const SAMPLE_REVIEW = {
-  authorName: "Pablo Martín",
-  rating: 4,
-  comment: "Muy buena la carne y el vino, aunque el postre tardó bastante. Volveremos.",
-};
+/** Reseña de ejemplo para la vista previa del tono (onboarding y configuración). */
+export function sampleReviewFor(businessType: string) {
+  if (businessType === "restaurante" || businessType === "cafeteria")
+    return { authorName: "Pablo Martín", rating: 4, comment: "Muy buena la carne y el vino, aunque el postre tardó bastante. Volveremos." };
+  return { authorName: "Pablo Martín", rating: 4, comment: "Muy buena atención y buen precio, aunque tuve que esperar bastante para que me atendieran. Volveré." };
+}

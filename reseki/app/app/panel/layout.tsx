@@ -22,7 +22,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     .select("id", { count: "exact", head: true })
     .in("status", ["pendiente", "error", "rechazada"]);
   const pending = count ?? 0;
-  const title = restaurant.google_location_title || restaurant.name || "Tu restaurante";
+  const title = restaurant.google_location_title || restaurant.name || "Tu negocio";
   const initials = title.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
   return (

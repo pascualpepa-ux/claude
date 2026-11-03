@@ -9,7 +9,7 @@ export default function BillingPage() {
     <>
       <div className="border-b border-border pb-6 pt-8">
         <h1 className="text-[22px] font-semibold">Facturación</h1>
-        <p className="mt-1 text-[13px] text-fg-muted">Plan único · 39 € al mes por restaurante, IVA no incluido.</p>
+        <p className="mt-1 text-[13px] text-fg-muted">Plan único · 39 € al mes por negocio, IVA no incluido.</p>
       </div>
       <Alert tone="info" className="mt-6 max-w-[620px]">El pago con Stripe se conecta en la fase 5.</Alert>
     </>

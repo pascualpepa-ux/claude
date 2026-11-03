@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "Reseki — Respuestas a reseñas de Google con IA", template: "%s · Reseki" },
-  description: "Reseki responde las reseñas de Google de tu restaurante en tu tono y en el idioma del cliente.",
+  description: "Reseki responde las reseñas de Google de tu negocio en tu tono y en el idioma del cliente.",
 };
 
 export const viewport: Viewport = {

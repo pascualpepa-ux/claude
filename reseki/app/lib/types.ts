@@ -8,6 +8,7 @@ export interface Restaurant {
   owner_id: string;
   owner_name: string;
   name: string;
+  business_type: string;
   tone: ReplyTone;
   use_tu: boolean;
   signature: string;

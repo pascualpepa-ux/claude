@@ -19,7 +19,7 @@ export default function Home() {
         </div>
       </header>
       <main className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-20 sm:px-8">
-        <p className="font-mono text-[12px] uppercase tracking-[0.06em] text-fg-muted">Para restaurantes en España y Latinoamérica</p>
+        <p className="font-mono text-[12px] uppercase tracking-[0.06em] text-fg-muted">Para restaurantes, tiendas y negocios locales</p>
         <h1 className="mt-4 max-w-[18ch] text-[clamp(36px,5vw,56px)] font-semibold leading-[1.05] tracking-[-0.035em]">
           Cada reseña de Google, respondida.
         </h1>

@@ -16,7 +16,7 @@ export function LoginForm({ next }: { next?: string }) {
       {state.error && <Alert tone="error">{state.error}</Alert>}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" placeholder="tu@restaurante.com" defaultValue={state.fields?.email} required />
+        <Input id="email" name="email" type="email" autoComplete="email" placeholder="tu@negocio.com" defaultValue={state.fields?.email} required />
       </div>
       <div className="flex flex-col gap-1.5">
         <div className="flex items-baseline justify-between">

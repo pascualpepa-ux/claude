@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 const TONES: { value: ReplyTone; label: string; hint: string }[] = [
   { value: "cercano", label: "Cercano", hint: "Cálido y natural, como en la barra." },
-  { value: "formal", label: "Formal", hint: "Cortés y cuidado. Para alta cocina." },
+  { value: "formal", label: "Formal", hint: "Cortés y cuidado. Para negocios elegantes." },
   { value: "divertido", label: "Divertido", hint: "Con chispa y algo de humor." },
 ];
 
@@ -111,7 +111,7 @@ export function ToneForm({
           </Label>
           <Textarea id="extra_instructions" name="extra_instructions" value={values.extra_instructions} maxLength={1000}
             onChange={(e) => set("extra_instructions", e.target.value)}
-            placeholder="Ej: Invita siempre a volver. Para quejas, ofrece escribir a hola@turestaurante.com." />
+            placeholder="Ej: Invita siempre a volver. Para quejas, ofrece escribir a hola@tunegocio.com." />
           <span className="text-[13px] text-fg-muted">La IA nunca inventará descuentos ni datos que no pongas aquí.</span>
         </div>
 

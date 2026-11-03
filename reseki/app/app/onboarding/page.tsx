@@ -11,7 +11,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { Alert } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { SAMPLE_REVIEW } from "@/lib/demo";
+import { sampleReviewFor } from "@/lib/demo";
 import { isDemoMode } from "@/lib/env";
 import { requireRestaurant } from "@/lib/session";
 
@@ -87,7 +87,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
             <div className="mt-8">
               <ToneForm
                 mode="onboarding"
-                sample={SAMPLE_REVIEW}
+                sample={sampleReviewFor(restaurant.business_type)}
                 initial={{
                   tone: restaurant.tone,
                   use_tu: restaurant.use_tu,

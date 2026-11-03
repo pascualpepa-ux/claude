@@ -157,7 +157,7 @@ export async function setAutoPublish(enabled: boolean): Promise<Result> {
 export async function syncNow(): Promise<Result> {
   const { restaurant } = await requireRestaurant();
   try {
-    const received = isDemoMode ? await receiveDemoReviews(restaurant.id) : 0;
+    const received = isDemoMode ? await receiveDemoReviews(restaurant.id, restaurant.business_type) : 0;
     // Las respuestas se generan en segundo plano; el panel se refresca solo.
     after(() => generateMissingReplies(restaurant.id).catch((e) => console.error("[panel] sync", e)));
     revalidatePath("/panel");

@@ -11,7 +11,8 @@ import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { z } from "zod";
 import { AIError, generateReply } from "@/lib/ai";
-import { demoLocation, SAMPLE_REVIEW } from "@/lib/demo";
+import { BUSINESS_TYPES, businessLabel } from "@/lib/business";
+import { demoLocation, sampleReviewFor } from "@/lib/demo";
 import { isDemoMode } from "@/lib/env";
 import { requireRestaurant } from "@/lib/session";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -30,10 +31,11 @@ export async function connectBusiness(_: ActionState, formData: FormData): Promi
 
   const parsed = z
     .object({
-      name: z.string().trim().min(2, "Escribe el nombre del restaurante.").max(100),
+      name: z.string().trim().min(2, "Escribe el nombre de tu negocio.").max(100),
       city: z.string().trim().max(80).default(""),
+      business_type: z.enum(BUSINESS_TYPES.map((b) => b.value) as [string, ...string[]], { message: "Elige el tipo de negocio." }),
     })
-    .safeParse({ name: formData.get("name"), city: formData.get("city") ?? "" });
+    .safeParse({ name: formData.get("name"), city: formData.get("city") ?? "", business_type: formData.get("business_type") });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   try {
@@ -42,6 +44,7 @@ export async function connectBusiness(_: ActionState, formData: FormData): Promi
       .from("restaurants")
       .update({
         name: parsed.data.name,
+        business_type: parsed.data.business_type,
         ...demoLocation(parsed.data.name, parsed.data.city),
         google_connected_at: new Date().toISOString(),
         // Firma por defecto razonable; el dueño la cambia en el paso 2.
@@ -49,7 +52,7 @@ export async function connectBusiness(_: ActionState, formData: FormData): Promi
       })
       .eq("id", restaurant.id);
     if (error) throw error;
-    await seedDemoReviews(restaurant.id);
+    await seedDemoReviews(restaurant.id, parsed.data.business_type);
   } catch (e) {
     console.error("[onboarding] conectar", e);
     return { error: "No hemos podido conectar la ficha. Vuelve a intentarlo." };
@@ -91,8 +94,9 @@ export async function previewTone(input: {
   const parsed = toneSchema.safeParse({ ...input, use_tu: String(input.use_tu) });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   try {
-    const out = await generateReply(SAMPLE_REVIEW, {
+    const out = await generateReply(sampleReviewFor(restaurant.business_type), {
       restaurantName: restaurant.google_location_title || restaurant.name,
+      businessType: businessLabel(restaurant.business_type),
       tone: parsed.data.tone,
       useTu: parsed.data.use_tu,
       signature: parsed.data.signature,
