@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/* Modo oscuro controlado por la clase .dark que pone next-themes en <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─────────────────────────────────────────────────────────────
+   Tokens de diseño (mismos que el preview aprobado).
+   Neutros cálidos + un único acento naranja brasa.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #fafaf9;
+  --surface: #ffffff;
+  --surface-2: #f5f5f4;
+  --border: #e7e5e4;
+  --border-strong: #d6d3d1;
+  --fg: #0c0a09;
+  --fg-muted: #57534e;
+  --fg-subtle: #a8a29e;
+  --accent: #e8590c;
+  --accent-soft: #fff1e6;
+  --accent-line: #fdd5b8;
+  --success: #15803d;
+  --success-soft: #ecfdf3;
+  --danger: #b91c1c;
+  --danger-soft: #fef2f2;
+  --star: #f59e0b;
+  --ring: rgba(232, 89, 12, 0.22);
+}
+
+.dark {
+  --bg: #0c0a09;
+  --bg-subtle: #110f0e;
+  --surface: #161413;
+  --surface-2: #1c1a18;
+  --border: #292524;
+  --border-strong: #3a3532;
+  --fg: #fafaf9;
+  --fg-muted: #a8a29e;
+  --fg-subtle: #6b645f;
+  --accent: #fb7c3c;
+  --accent-soft: rgba(251, 124, 60, 0.12);
+  --accent-line: rgba(251, 124, 60, 0.35);
+  --success: #4ade80;
+  --success-soft: rgba(74, 222, 128, 0.1);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.1);
+  --star: #fbbf24;
+  --ring: rgba(251, 124, 60, 0.3);
+  color-scheme: dark;
+}
+
+/* Exponemos los tokens como utilidades de Tailwind: bg-surface, text-fg-muted, border-border… */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-star: var(--star);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --shadow-xs: 0 1px 2px rgb(12 10 9 / 0.04);
+  --shadow-card: 0 1px 2px rgb(12 10 9 / 0.04), 0 8px 24px -8px rgb(12 10 9 / 0.1);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+  letter-spacing: -0.02em;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
