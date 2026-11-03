@@ -29,9 +29,9 @@ middleware.ts        refresca la sesión y protege /panel y /onboarding
 | # | Fase | Estado |
 |---|------|--------|
 | 1 | Base del proyecto y login | Hecha |
-| 2 | Onboarding y tono | Pendiente |
-| 3 | Panel con modo demo | Pendiente |
-| 4 | Respuestas con IA | Pendiente |
+| 2 | Onboarding y tono | Hecha |
+| 3 | Panel con modo demo | Hecha |
+| 4 | Respuestas con IA | Hecha |
 | 5 | Pagos con Stripe | Pendiente |
 | 6 | Emails | Pendiente |
 | 7 | Landing y páginas legales | Pendiente |
@@ -59,6 +59,21 @@ Supabase → Authentication → Providers → Google: necesita un Client ID y Se
 3. Cierra sesión y vuelve a entrar en `/login`.
 4. `/recuperar`: pide un enlace, ábrelo y elige una contraseña nueva.
 5. En Supabase → Table Editor → `restaurants` aparece una fila nueva con tu nombre (la crea el trigger al registrarte).
+
+## Cómo probar las fases 2–4
+
+1. Añade `ANTHROPIC_API_KEY` (console.anthropic.com → API Keys) y `RESEKI_DEMO_MODE=true`. Sin clave, las respuestas salen de una plantilla de demostración.
+2. Crea una cuenta: el onboarding pide el nombre del restaurante y crea una ficha de ejemplo con 10 reseñas en varios idiomas.
+3. Paso 2: elige el tono y pulsa «Probar» para ver una respuesta real de la IA.
+4. Paso 3: «Ir al panel». Las respuestas se generan en segundo plano y aparecen solas.
+5. En el panel: aprueba, edita, rechaza, «Generar otra», filtros por estrellas y fecha, y «Buscar nuevas» (simula reseñas nuevas).
+6. Activa «Publicar automáticamente 4 y 5 estrellas»: las pendientes de 4–5★ pasan a Respondidas.
+
+## IA
+
+- `lib/ai.ts`: Claude Opus 5.5 (`RESEKI_AI_MODEL` para cambiarlo), salida estructurada `{ language, reply }`, reintentos automáticos y modelo de reserva si un filtro de seguridad rechaza la petición.
+- La reseña se pasa como datos entre etiquetas: las instrucciones escondidas dentro de una reseña se ignoran.
+- Coste orientativo: alrededor de 1–2 céntimos por respuesta.
 
 ## Seguridad
 
