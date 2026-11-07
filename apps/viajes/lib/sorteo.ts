@@ -102,6 +102,6 @@ export async function sorteosHechos(): Promise<ResultadoSorteo[]> {
 
 /** Borra una sugerencia o elección anotada (por si se tocó sin querer). No avisa a nadie: nunca se avisó. */
 export async function borrarSorteo(creado: string): Promise<boolean> {
-  const filas = await sql<{ ganador: string }>(`delete from sorteos where creado = $1::timestamptz returning ganador`, [creado]);
+  const filas = await sql<{ ganador: string }>(`delete from sorteos where date_trunc('milliseconds', creado) = date_trunc('milliseconds', $1::timestamptz) returning ganador`, [creado]);
   return filas.length > 0;
 }
