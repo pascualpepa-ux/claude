@@ -2,7 +2,7 @@ import { Gift } from "@phosphor-icons/react/dist/ssr";
 import type { Idioma } from "@/lib/idioma";
 import { LOCALE } from "@/lib/idioma";
 import type { Participante, ResultadoSorteo } from "@/lib/sorteo";
-import { BotonElegir, BotonSortear } from "./BotonSortear";
+import { BotonBorrarSorteo, BotonElegir, BotonSortear } from "./BotonSortear";
 
 /** Admin: quién participa del concurso y cuántas personas invitó cada uno. El ganador lo elige el dueño; el botón al azar es solo una ayuda. */
 export function PanelSorteo({ idioma, lista, hechos }: { idioma: Idioma; lista: Participante[]; hechos: ResultadoSorteo[] }) {
@@ -26,7 +26,8 @@ export function PanelSorteo({ idioma, lista, hechos }: { idioma: Idioma; lista: 
       {hechos.length > 0 && (
         <ul className="mt-4 grid gap-2">
           {hechos.map((h) => (
-            <li key={h.creado} className="rounded-xl bg-oliva-50 px-4 py-3 text-sm dark:bg-oliva-900/30">
+            <li key={h.creado} className="flex items-center justify-between gap-3 rounded-xl bg-oliva-50 px-4 py-3 text-sm dark:bg-oliva-900/30">
+              <span>
               <strong>{h.ganador}</strong> —{" "}
               {h.modo === "elegido"
                 ? es
@@ -35,6 +36,8 @@ export function PanelSorteo({ idioma, lista, hechos }: { idioma: Idioma; lista: 
                 : es
                   ? `sugerencia al azar (${h.chances} de ${h.totalChances} chances), ${cuando(h.creado)}`
                   : `random suggestion (${h.chances} of ${h.totalChances} chances), ${cuando(h.creado)}`}
+              </span>
+              <BotonBorrarSorteo creado={new Date(h.creado).toISOString()} idioma={idioma} />
             </li>
           ))}
         </ul>

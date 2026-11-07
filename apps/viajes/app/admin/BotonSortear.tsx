@@ -51,3 +51,26 @@ export function BotonElegir({ email, idioma }: { email: string; idioma: Idioma }
     </button>
   );
 }
+
+/** Borra una sugerencia o elección anotada (si se tocó sin querer). */
+export function BotonBorrarSorteo({ creado, idioma }: { creado: string; idioma: Idioma }) {
+  const router = useRouter();
+  const [ocupado, setOcupado] = useState(false);
+  const es = idioma === "es";
+  return (
+    <button
+      type="button"
+      disabled={ocupado}
+      onClick={async () => {
+        if (!confirm(es ? "¿Borrar esta anotación? No se le avisa a nadie." : "Delete this entry? Nobody is notified.")) return;
+        setOcupado(true);
+        await fetch("/api/admin/sorteo", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ creado }) }).catch(() => null);
+        setOcupado(false);
+        router.refresh();
+      }}
+      className="shrink-0 rounded-lg border border-arena-300 px-2.5 py-1 text-xs font-medium text-arena-700 transition hover:bg-white disabled:opacity-60 dark:border-arena-700 dark:text-arena-300"
+    >
+      {ocupado ? "…" : es ? "Borrar" : "Delete"}
+    </button>
+  );
+}

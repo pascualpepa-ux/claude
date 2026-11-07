@@ -99,3 +99,9 @@ export async function sorteosHechos(): Promise<ResultadoSorteo[]> {
     `select ganador, modo, chances, participantes, total_chances as "totalChances", creado from sorteos order by creado desc limit 20`,
   );
 }
+
+/** Borra una sugerencia o elección anotada (por si se tocó sin querer). No avisa a nadie: nunca se avisó. */
+export async function borrarSorteo(creado: string): Promise<boolean> {
+  const filas = await sql<{ ganador: string }>(`delete from sorteos where creado = $1::timestamptz returning ganador`, [creado]);
+  return filas.length > 0;
+}
