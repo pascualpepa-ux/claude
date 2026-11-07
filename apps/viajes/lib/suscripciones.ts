@@ -175,3 +175,14 @@ export async function suscribirComprador(emailCrudo: string, idioma: Idioma = "e
     [email, idioma, token()],
   );
 }
+
+/** Para el admin: vuelve a mandar el email de confirmación a quienes se suscribieron y todavía no confirmaron. */
+export async function reenviarConfirmaciones(): Promise<{ enviados: number; fallidos: number }> {
+  const pendientes = await sql<{ email: string; idioma: Idioma }>(`select email, idioma from suscriptores where estado = 'pendiente' order by creado`);
+  let enviados = 0;
+  for (const p of pendientes) {
+    // Es el mismo pedido que hizo la persona: mismo límite de 3 por hora y su propio link para confirmar.
+    if ((await suscribir(p.email, p.idioma, null)) === "ok") enviados++;
+  }
+  return { enviados, fallidos: pendientes.length - enviados };
+}

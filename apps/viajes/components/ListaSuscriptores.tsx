@@ -1,4 +1,5 @@
 import { UsersThree } from "@phosphor-icons/react/dist/ssr";
+import { BotonReenviar } from "@/app/admin/BotonReenviar";
 import { formatoCorto } from "@/lib/fechas";
 import type { Idioma } from "@/lib/idioma";
 import type { FilaSuscriptor } from "@/lib/suscripciones";
@@ -52,6 +53,7 @@ export function ListaSuscriptores({
               </div>
             ))}
           </dl>
+          {cuenta("pendiente") > 0 && <BotonReenviar idioma={idioma} cantidad={cuenta("pendiente")} />}
           {filas.length === 0 ? (
             <p className="mt-4 text-sm text-arena-600 dark:text-arena-400">{T.vacio}</p>
           ) : (
