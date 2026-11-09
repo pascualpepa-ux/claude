@@ -476,6 +476,80 @@
   }
   .chat-form button:disabled { opacity: .5; }
   #lair .chat-card h2 { margin-bottom: 10px; }
+
+  [hidden] { display: none !important; }
+  /* ====== GUARIDA: PESTAÑAS Y LISTAS ====== */
+  .tabs { width: 100%; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button {
+    flex: none; font: inherit; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+    padding: 10px 12px; border-radius: 10px; color: var(--muted); background: rgba(5, 15, 28, .8);
+    border: 1px solid rgba(34, 211, 255, .3);
+  }
+  .tabs button[aria-selected="true"] { color: var(--bg); background: var(--blue); border-color: var(--blue); box-shadow: var(--glow-b); }
+  .tabs button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  .small.net { margin: -6px 0 0; font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em; color: var(--muted); font-size: .78rem; }
+  .tab-panel.card h2 { margin-bottom: 8px; }
+  .sub-h { font-size: .75rem; letter-spacing: .16em; text-transform: uppercase; color: var(--blue); margin: 18px 0 10px; }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .item {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 10px;
+    padding: 10px 12px; border-radius: 10px; background: rgba(34, 211, 255, .05); border-left: 3px solid var(--blue);
+    font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .01em;
+  }
+  .item.done { border-left-color: var(--green); opacity: .7; }
+  .item.done b { text-decoration: line-through; }
+  .item.flash { box-shadow: 0 0 0 2px var(--green), var(--glow-g); }
+  .item-main { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 180px; flex-wrap: wrap; }
+  .item-main b { color: var(--text); }
+  .item-main small { display: block; color: var(--muted); font-size: .8rem; margin-top: 2px; }
+  .item-main small.by { font-size: .7rem; }
+  .item-main.mission { cursor: pointer; flex-wrap: nowrap; align-items: flex-start; }
+  .item-main.mission input { width: 22px; height: 22px; accent-color: #39ff88; flex: none; margin-top: 1px; }
+  .item-main.person { flex-wrap: nowrap; }
+  .item-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .avatar {
+    width: 34px; height: 34px; flex: none; border-radius: 50%;
+    display: grid; place-items: center; font-family: var(--font); font-size: .9rem; color: var(--green);
+    background: rgba(57, 255, 136, .1); border: 1px solid var(--green);
+  }
+  .eq { color: var(--muted); font-weight: 700; }
+  .meaning { color: var(--text); }
+  .meaning.muted { color: var(--muted); font-size: .85rem; }
+  .confirm { width: 100%; display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--red); }
+  .add-form { display: grid; gap: 8px; margin-bottom: 14px; }
+  .add-form input {
+    min-width: 0; font: 1rem "Segoe UI", Roboto, system-ui, sans-serif; color: var(--text);
+    background: #061322; border: 1px solid rgba(34, 211, 255, .45); border-radius: 10px; padding: 12px 14px;
+  }
+  .add-form input:focus { outline: none; border-color: var(--green); }
+  .code-picker .small { margin: 0 0 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font: .9rem "Segoe UI", Roboto, system-ui, sans-serif; text-align: left; cursor: pointer;
+    color: var(--text); background: rgba(57, 255, 136, .08); border: 1px solid rgba(57, 255, 136, .5); border-radius: 10px; padding: 9px 12px;
+  }
+  .chip b { color: var(--green); font-family: ui-monospace, "Roboto Mono", monospace; letter-spacing: .08em; }
+  .chip.add { color: var(--blue); background: transparent; border: 1px dashed rgba(34, 211, 255, .6); }
+  .mini.play { color: var(--green); border-color: rgba(57, 255, 136, .5); font-size: .75rem; }
+  .ptt-wrap { display: grid; place-items: center; padding: 10px 0 14px; }
+  .ptt {
+    width: min(60vw, 220px); aspect-ratio: 1; border-radius: 50%; cursor: pointer; touch-action: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    color: var(--green); background: radial-gradient(circle at 50% 35%, #0f3326, #04110c 70%);
+    border: 4px solid var(--green); box-shadow: 0 0 25px rgba(57, 255, 136, .45), inset 0 0 25px rgba(57, 255, 136, .2);
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  .ptt-ic { font-size: clamp(2.6rem, 14vw, 3.6rem); }
+  .ptt-label { font: .62rem var(--font); letter-spacing: .12em; text-transform: uppercase; max-width: 80%; }
+  .ptt.rec { color: var(--red); border-color: var(--red); box-shadow: 0 0 45px rgba(255, 51, 85, .7), inset 0 0 30px rgba(255, 51, 85, .3); transform: scale(.97); }
+  .ptt:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+  #tab-walkie .progress { width: 100%; }
+  .switch { display: flex; align-items: center; gap: 10px; font: .85rem "Segoe UI", Roboto, system-ui, sans-serif; color: var(--text); margin-top: 6px; cursor: pointer; }
+  .switch input { width: 20px; height: 20px; accent-color: #39ff88; }
+  #lair .grid.tab-panel { margin: 0; }
+  .tab-panel.card, .tab-panel .card { opacity: 1; transform: none; animation: tabIn .25s ease; }
+  @keyframes tabIn { from { opacity: .4; } to { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -604,22 +678,84 @@
     <div class="welcome">Bienvenido a la Guarida</div>
     <div class="welcome-sub" id="welcomeSub">Mano ✓ · Voz ✓ · Código ✓</div>
 
-    <article class="card wide chat-card">
-      <h2><span class="ic">💬</span>Chat de la guarida</h2>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Secciones de la guarida">
+      <button role="tab" data-tab="chat" aria-selected="true">💬 Chat</button>
+      <button role="tab" data-tab="walkie" aria-selected="false">📻 Walkie</button>
+      <button role="tab" data-tab="codes" aria-selected="false">🔐 Códigos</button>
+      <button role="tab" data-tab="missions" aria-selected="false">🎯 Misiones</button>
+      <button role="tab" data-tab="people" aria-selected="false">👥 Personas</button>
+      <button role="tab" data-tab="more" aria-selected="false">⚙ Más</button>
+    </nav>
+    <p class="small net" id="chatStatus">Conectando…</p>
+
+    <!-- CHAT -->
+    <article class="card wide tab-panel" id="tab-chat">
       <div class="chat-list" id="chatList" aria-live="polite"></div>
       <div class="chat-kind" role="group" aria-label="Tipo de mensaje">
         <button type="button" id="kText" aria-pressed="true">Mensaje</button>
-        <button type="button" id="kCode" class="code-k" aria-pressed="false">Código</button>
-        <button type="button" id="kLoc" class="loc-k">📍 Mandar ubicación</button>
+        <button type="button" id="kCode" class="code-k" aria-pressed="false">🔐 Código</button>
+        <button type="button" id="kLoc" class="loc-k">📍 Ubicación</button>
       </div>
       <form id="chatForm" class="chat-form" autocomplete="off">
         <input id="chatInput" maxlength="500" placeholder="Escribí un mensaje…" aria-label="Mensaje">
         <button id="chatSend" type="submit">Enviar</button>
       </form>
-      <p class="small" id="chatStatus">Conectando…</p>
+      <div class="code-picker" id="codePicker" hidden></div>
     </article>
 
-    <div class="grid">
+    <!-- WALKIE-TALKIE -->
+    <article class="card wide tab-panel" id="tab-walkie" hidden>
+      <h2><span class="ic">📻</span>Walkie-talkie</h2>
+      <p>Mantené apretado el botón, hablá y soltalo para mandar. Los mensajes de voz que llegan suenan solos.</p>
+      <div class="ptt-wrap">
+        <button class="ptt" id="pttBtn" aria-label="Mantené apretado para hablar">
+          <span class="ptt-ic">🎙</span>
+          <span class="ptt-label" id="pttLabel">Mantené para hablar</span>
+        </button>
+      </div>
+      <div class="progress"><div class="progress-bar" id="pttBar"></div></div>
+      <p class="small" id="pttStatus">Máximo 15 segundos por mensaje.</p>
+      <label class="switch"><input type="checkbox" id="autoPlay" checked> Reproducir solos los mensajes que llegan</label>
+      <h3 class="sub-h">Últimos mensajes de voz</h3>
+      <div class="list" id="walkieList"></div>
+    </article>
+
+    <!-- CÓDIGOS -->
+    <article class="card wide tab-panel" id="tab-codes" hidden>
+      <h2><span class="ic">🔐</span>Libro de códigos</h2>
+      <p>Acá inventan sus códigos y qué significa cada uno. En el chat solo se pueden mandar los códigos que están en esta lista.</p>
+      <form class="add-form" id="codeForm" autocomplete="off">
+        <input id="codeName" maxlength="24" placeholder="Nombre (ej: Código 1)" aria-label="Nombre del código" required>
+        <input id="codeMeaning" maxlength="120" placeholder="Qué significa (ej: Vengan a la guarida)" aria-label="Significado" required>
+        <button class="big-btn" type="submit" id="codeSubmit">+ Agregar código</button>
+      </form>
+      <div class="list" id="codeList"></div>
+    </article>
+
+    <!-- MISIONES -->
+    <article class="card wide tab-panel" id="tab-missions" hidden>
+      <h2><span class="ic">🎯</span>Misiones secretas</h2>
+      <form class="add-form" id="missionForm" autocomplete="off">
+        <input id="missionTitle" maxlength="60" placeholder="Nombre de la misión" aria-label="Nombre de la misión" required>
+        <input id="missionDetail" maxlength="200" placeholder="Detalles (opcional)" aria-label="Detalles">
+        <button class="big-btn" type="submit">+ Agregar misión</button>
+      </form>
+      <div class="list" id="missionList"></div>
+    </article>
+
+    <!-- PERSONAS -->
+    <article class="card wide tab-panel" id="tab-people" hidden>
+      <h2><span class="ic">👥</span>Personas de la guarida</h2>
+      <form class="add-form" id="personForm" autocomplete="off">
+        <input id="personName" maxlength="30" placeholder="Nombre" aria-label="Nombre" required>
+        <input id="personRole" maxlength="60" placeholder="Rol o apodo (ej: Espía, Inventora)" aria-label="Rol o apodo">
+        <button class="big-btn" type="submit">+ Agregar persona</button>
+      </form>
+      <div class="list" id="personList"></div>
+    </article>
+
+    <!-- MÁS -->
+    <div class="grid tab-panel" id="tab-more" hidden>
       <article class="card">
         <h2><span class="ic">📲</span>Otro celular</h2>
         <p>Copiá el link y mandáselo a quien también usa la guarida para que su celular quede configurado.</p>
@@ -632,6 +768,7 @@
         <button class="big-btn alt" id="reVoiceBtn">Volver a grabar mi voz</button>
       </article>
     </div>
+
     <button class="btn" id="logoutBtn">⏻ Cerrar sesión</button>
   </section>
 </main>
@@ -665,7 +802,7 @@
   ];
   const VOICE_MODEL = "Xenova/wavlm-base-plus-sv"; // modelo de reconocimiento de hablante
   const TRANSFORMERS_URL = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2";
-  const CHAT_SERVER = "https://ntfy.sh";  // retransmite los mensajes (cifrados) entre celulares
+  const CHAT_SERVER = window.__chatServer || "https://ntfy.sh";  // retransmite los mensajes (cifrados) entre celulares
   const MAX_PASSWORD = 40;
   const MAX_PEOPLE = 5;
   const SCAN_DURATION = 3000;      // milisegundos que hay que mantener la mano
@@ -1619,46 +1756,276 @@
   }
   requestAnimationFrame(drawWave);
 
-  /* ================== CHAT (cifrado de punta a punta) ================== */
+  /* ================== RED: CHAT, WALKIE Y DATOS COMPARTIDOS ==================
+     Todo viaja cifrado (AES-GCM) con la llave de la guarida, a través de un
+     servidor gratis (ntfy.sh) que solo ve texto ilegible. */
   const chatList = $("chatList"), chatForm = $("chatForm"), chatInput = $("chatInput"),
-        chatSend = $("chatSend"), chatStatus = $("chatStatus");
+        chatSend = $("chatSend"), chatStatus = $("chatStatus"), codePicker = $("codePicker");
   let chatKind = "text";
   let chatKey = null;
   let chatSource = null;
   let chatMsgs = [];
+  const seenIds = new Set();
   const chatStoreKey = () => "guarida-chat-" + config.room;
-
-  function setChatKind(k) {
-    chatKind = k;
-    $("kText").setAttribute("aria-pressed", k === "text");
-    $("kCode").setAttribute("aria-pressed", k === "code");
-    chatInput.classList.toggle("codemode", k === "code");
-    chatInput.placeholder = k === "code" ? "Escribí el código a compartir…" : "Escribí un mensaje…";
-  }
-  $("kText").onclick = () => setChatKind("text");
-  $("kCode").onclick = () => setChatKind("code");
+  const dataStoreKey = () => "guarida-data-" + config.room;
+  const myName = () => currentPerson >= 0 ? config.people[currentPerson].name : "";
+  const newId = () => Date.now().toString(36) + randomId(5);
 
   async function getChatKey() {
     if (chatKey) return chatKey;
     chatKey = await crypto.subtle.importKey("raw", fromB64(config.key), "AES-GCM", false, ["encrypt", "decrypt"]);
     return chatKey;
   }
-  async function encryptMsg(obj) {
+  async function encryptBytes(bytes) {
     const key = await getChatKey();
     const iv = new Uint8Array(12); crypto.getRandomValues(iv);
-    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(JSON.stringify(obj))));
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, bytes));
     const all = new Uint8Array(12 + ct.length); all.set(iv); all.set(ct, 12);
-    return "g1:" + toB64(all);
+    return all;
   }
+  async function decryptBytes(all) {
+    const key = await getChatKey();
+    return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(0, 12) }, key, all.slice(12)));
+  }
+  const encryptMsg = async obj => "g1:" + toB64(await encryptBytes(new TextEncoder().encode(JSON.stringify(obj))));
   async function decryptMsg(text) {
     if (!text || !text.startsWith("g1:")) return null;
-    try {
-      const all = fromB64(text.slice(3));
-      const key = await getChatKey();
-      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(0, 12) }, key, all.slice(12));
-      return JSON.parse(new TextDecoder().decode(pt));
-    } catch (_) { return null; }
+    try { return JSON.parse(new TextDecoder().decode(await decryptBytes(fromB64(text.slice(3))))); }
+    catch (_) { return null; }
   }
+
+  async function publish(obj, attachment) {
+    const body = await encryptMsg({ ...obj, n: myName(), at: Date.now() });
+    let r;
+    if (attachment) {
+      r = await fetch(`${CHAT_SERVER}/${config.room}`, {
+        method: "PUT", body: attachment, headers: { "X-Message": body, "X-Filename": "v.bin" }
+      });
+    } else {
+      r = await fetch(`${CHAT_SERVER}/${config.room}`, { method: "POST", body });
+    }
+    if (r.status === 429) throw new Error("limit");
+    if (!r.ok) throw new Error("http " + r.status);
+  }
+  const netError = err => err && err.message === "limit"
+    ? "Se llegó al límite de mensajes de hoy (unos 250 por día por casa). Mañana se reinicia."
+    : "No se pudo enviar. Revisá tu conexión y probá de nuevo.";
+
+  /* ---------- Datos compartidos: códigos, misiones, personas ----------
+     Cada cosa tiene id y fecha de cambio; gana el cambio más nuevo. */
+  let data = { codes: {}, missions: {}, people: {} };
+  function loadData() {
+    try {
+      const d = JSON.parse(localStorage.getItem(dataStoreKey()));
+      if (d && d.codes) return { codes: d.codes || {}, missions: d.missions || {}, people: d.people || {} };
+    } catch (_) {}
+    return { codes: {}, missions: {}, people: {} };
+  }
+  function saveData() { try { localStorage.setItem(dataStoreKey(), JSON.stringify(data)); } catch (_) {} }
+  const live = col => Object.entries(data[col]).filter(([, v]) => !v.del).map(([id, v]) => ({ id, ...v }));
+
+  function mergeItems(col, items) {
+    if (!data[col] || !Array.isArray(items)) return false;
+    let changed = false;
+    for (const it of items) {
+      if (!it || typeof it.id !== "string" || typeof it.upd !== "number") continue;
+      const cur = data[col][it.id];
+      if (!cur || it.upd > cur.upd) {
+        const { id, ...rest } = it;
+        data[col][id] = rest; changed = true;
+      }
+    }
+    if (changed) { saveData(); renderData(); }
+    return changed;
+  }
+  async function changeItem(col, id, fields) {
+    const item = { ...(data[col][id] || {}), ...fields, upd: Date.now() };
+    data[col][id] = item;
+    saveData(); renderData();
+    try { await publish({ k: "sync", c: col, items: [{ id, ...item }] }); }
+    catch (err) { chatStatus.textContent = netError(err); }
+  }
+  // Al entrar, cada celular manda todo lo que tiene, para que el otro se ponga al día
+  async function publishSnapshot() {
+    const last = +(sessionStorage.getItem("guarida-snap") || 0);
+    if (Date.now() - last < 10 * 60 * 1000) return;
+    try { sessionStorage.setItem("guarida-snap", Date.now()); } catch (_) {}
+    for (const col of ["codes", "missions", "people"]) {
+      const all = Object.entries(data[col]).map(([id, v]) => ({ id, ...v }));
+      let batch = [], size = 0;
+      for (const it of all) {
+        const s = JSON.stringify(it).length;
+        if (size + s > 2200 && batch.length) { await publish({ k: "sync", c: col, items: batch }).catch(() => {}); batch = []; size = 0; }
+        batch.push(it); size += s;
+      }
+      if (batch.length) await publish({ k: "sync", c: col, items: batch }).catch(() => {});
+    }
+  }
+
+  /* ---------- Pestañas ---------- */
+  let currentTab = "chat";
+  function showTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll("#tabs [role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === tab));
+    document.querySelectorAll(".tab-panel").forEach(p => (p.hidden = p.id !== "tab-" + tab));
+    if (tab === "chat") chatList.scrollTop = chatList.scrollHeight;
+  }
+  $("tabs").addEventListener("click", e => {
+    const b = e.target.closest("[role=tab]");
+    if (b) { sfx.key(); showTab(b.dataset.tab); }
+  });
+
+  /* ---------- Libro de códigos ---------- */
+  const codeForm = $("codeForm"), codeName = $("codeName"), codeMeaning = $("codeMeaning");
+  let editingCode = null;
+  function suggestCodeName() {
+    const names = new Set(live("codes").map(c => c.name.toLowerCase()));
+    let n = 1; while (names.has("código " + n)) n++;
+    return "Código " + n;
+  }
+  codeForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const name = codeName.value.trim(), meaning = codeMeaning.value.trim();
+    if (!name || !meaning) return;
+    const dup = live("codes").find(c => c.name.toLowerCase() === name.toLowerCase() && c.id !== editingCode);
+    if (dup) { chatStatus.textContent = `Ya existe un código llamado “${dup.name}”.`; sfx.fail(); return; }
+    changeItem("codes", editingCode || newId(), { name, meaning, by: myName() });
+    editingCode = null;
+    $("codeSubmit").textContent = "+ Agregar código";
+    codeName.value = suggestCodeName(); codeMeaning.value = "";
+    sfx.success();
+  });
+  function renderCodes() {
+    const list = $("codeList"); list.textContent = "";
+    const codes = live("codes").sort((a, b) => a.name.localeCompare(b.name, "es", { numeric: true }));
+    if (!codes.length) { list.append(emptyNote("Todavía no hay códigos. Inventen el primero arriba.")); }
+    for (const c of codes) {
+      const row = document.createElement("div"); row.className = "item code-item"; row.id = "code-" + c.id;
+      const left = document.createElement("div"); left.className = "item-main";
+      const nm = document.createElement("span"); nm.className = "cval"; nm.textContent = c.name;
+      const eq = document.createElement("span"); eq.className = "eq"; eq.textContent = "=";
+      const mn = document.createElement("span"); mn.className = "meaning"; mn.textContent = c.meaning;
+      left.append(nm, eq, mn);
+      const acts = document.createElement("div"); acts.className = "item-acts";
+      acts.append(miniBtn("Mandar", () => { showTab("chat"); sendCode(c.id); }),
+                  miniBtn("Editar", () => { editingCode = c.id; codeName.value = c.name; codeMeaning.value = c.meaning; $("codeSubmit").textContent = "Guardar cambios"; codeMeaning.focus(); }),
+                  miniBtn("Borrar", () => confirmThen(row, `¿Borrar ${c.name}?`, () => changeItem("codes", c.id, { del: true }))));
+      row.append(left, acts); list.append(row);
+    }
+    if (!codeName.value && !editingCode) codeName.value = suggestCodeName();
+    renderCodePicker();
+  }
+  function renderCodePicker() {
+    codePicker.textContent = "";
+    const codes = live("codes").sort((a, b) => a.name.localeCompare(b.name, "es", { numeric: true }));
+    const head = document.createElement("p"); head.className = "small";
+    head.textContent = codes.length ? "Tocá un código para mandarlo:" : "No hay códigos todavía.";
+    codePicker.append(head);
+    const wrap = document.createElement("div"); wrap.className = "chips";
+    for (const c of codes) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip";
+      const nm = document.createElement("b"); nm.textContent = c.name;
+      const mn = document.createElement("span"); mn.textContent = " = " + c.meaning;
+      b.append(nm, mn);
+      b.onclick = () => sendCode(c.id);
+      wrap.append(b);
+    }
+    const add = document.createElement("button"); add.type = "button"; add.className = "chip add";
+    add.textContent = "+ Crear código nuevo";
+    add.onclick = () => { showTab("codes"); codeMeaning.focus(); };
+    wrap.append(add);
+    codePicker.append(wrap);
+  }
+  async function sendCode(id) {
+    const c = data.codes[id]; if (!c || c.del) return;
+    try { await publish({ k: "code", code: id, cn: c.name }); sfx.key(); }
+    catch (err) { chatStatus.textContent = netError(err); }
+  }
+
+  /* ---------- Misiones ---------- */
+  $("missionForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const title = $("missionTitle").value.trim(), detail = $("missionDetail").value.trim();
+    if (!title) return;
+    changeItem("missions", newId(), { title, detail, done: false, by: myName(), created: Date.now() });
+    $("missionTitle").value = ""; $("missionDetail").value = "";
+    sfx.success();
+  });
+  function renderMissions() {
+    const list = $("missionList"); list.textContent = "";
+    const ms = live("missions").sort((a, b) => (a.done - b.done) || ((b.created || 0) - (a.created || 0)));
+    if (!ms.length) list.append(emptyNote("No hay misiones. Agreguen la primera."));
+    for (const m of ms) {
+      const row = document.createElement("div"); row.className = "item" + (m.done ? " done" : "");
+      const left = document.createElement("label"); left.className = "item-main mission";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!m.done;
+      cb.onchange = () => { changeItem("missions", m.id, { done: cb.checked }); if (cb.checked) sfx.success(); };
+      const txt = document.createElement("span");
+      const t = document.createElement("b"); t.textContent = m.title;
+      txt.append(t);
+      if (m.detail) { const d = document.createElement("small"); d.textContent = m.detail; txt.append(d); }
+      const by = document.createElement("small"); by.className = "by";
+      by.textContent = (m.done ? "✔ Completa" : "Pendiente") + (m.by ? ` · agregó ${m.by}` : "");
+      txt.append(by);
+      left.append(cb, txt);
+      const acts = document.createElement("div"); acts.className = "item-acts";
+      acts.append(miniBtn("Borrar", () => confirmThen(row, `¿Borrar la misión?`, () => changeItem("missions", m.id, { del: true }))));
+      row.append(left, acts); list.append(row);
+    }
+  }
+
+  /* ---------- Personas ---------- */
+  $("personForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const name = $("personName").value.trim(), role = $("personRole").value.trim();
+    if (!name) return;
+    changeItem("people", newId(), { name, role, by: myName() });
+    $("personName").value = ""; $("personRole").value = "";
+    sfx.success();
+  });
+  function renderPeople() {
+    const list = $("personList"); list.textContent = "";
+    const ps = live("people").sort((a, b) => a.name.localeCompare(b.name, "es"));
+    if (!ps.length) list.append(emptyNote("Todavía no agregaron personas."));
+    for (const p of ps) {
+      const row = document.createElement("div"); row.className = "item";
+      const left = document.createElement("div"); left.className = "item-main person";
+      const av = document.createElement("span"); av.className = "avatar"; av.textContent = p.name.slice(0, 1).toUpperCase();
+      const txt = document.createElement("span");
+      const n = document.createElement("b"); n.textContent = p.name; txt.append(n);
+      if (p.role) { const r = document.createElement("small"); r.textContent = p.role; txt.append(r); }
+      left.append(av, txt);
+      const acts = document.createElement("div"); acts.className = "item-acts";
+      acts.append(miniBtn("Borrar", () => confirmThen(row, `¿Borrar a ${p.name}?`, () => changeItem("people", p.id, { del: true }))));
+      row.append(left, acts); list.append(row);
+    }
+  }
+
+  function miniBtn(label, fn) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "mini"; b.textContent = label;
+    b.onclick = fn; return b;
+  }
+  function emptyNote(text) { const p = document.createElement("p"); p.className = "chat-empty"; p.textContent = text; return p; }
+  // Confirmación dentro de la página (sin ventanas emergentes)
+  function confirmThen(row, question, fn) {
+    if (row.querySelector(".confirm")) return;
+    const box = document.createElement("div"); box.className = "confirm";
+    const q = document.createElement("span"); q.textContent = question;
+    box.append(q, miniBtn("Sí", () => { box.remove(); fn(); }), miniBtn("No", () => box.remove()));
+    row.append(box);
+  }
+  function renderData() { renderCodes(); renderMissions(); renderPeople(); renderChat(); }
+
+  /* ---------- Chat ---------- */
+  function setChatKind(k) {
+    chatKind = k;
+    $("kText").setAttribute("aria-pressed", k === "text");
+    $("kCode").setAttribute("aria-pressed", k === "code");
+    chatForm.hidden = k === "code";
+    codePicker.hidden = k !== "code";
+  }
+  $("kText").onclick = () => setChatKind("text");
+  $("kCode").onclick = () => setChatKind("code");
 
   function loadChatHistory() {
     try { const a = JSON.parse(localStorage.getItem(chatStoreKey())); return Array.isArray(a) ? a : []; } catch (_) { return []; }
@@ -1666,7 +2033,6 @@
   function saveChatHistory() {
     try { localStorage.setItem(chatStoreKey(), JSON.stringify(chatMsgs.slice(-500))); } catch (_) {}
   }
-
   const fmtTime = t => {
     const d = new Date(t), now = new Date();
     const hm = d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
@@ -1676,12 +2042,8 @@
   function renderChat() {
     const nearBottom = chatList.scrollHeight - chatList.scrollTop - chatList.clientHeight < 80;
     chatList.textContent = "";
-    if (!chatMsgs.length) {
-      const n = document.createElement("p"); n.className = "chat-empty";
-      n.textContent = "Todavía no hay mensajes. Escribí el primero.";
-      chatList.appendChild(n); return;
-    }
-    const me = currentPerson >= 0 ? config.people[currentPerson].name : "";
+    if (!chatMsgs.length) { chatList.appendChild(emptyNote("Todavía no hay mensajes. Escribí el primero.")); return; }
+    const me = myName();
     for (const m of chatMsgs) {
       const mine = m.n === me;
       const row = document.createElement("div"); row.className = "cmsg" + (mine ? " mine" : "");
@@ -1691,20 +2053,30 @@
       meta.append(who, when);
       const body = document.createElement("div"); body.className = "cbody";
       if (m.k === "code") {
+        const c = m.code && data.codes[m.code];
         const lab = document.createElement("span"); lab.className = "clabel"; lab.textContent = "CÓDIGO";
-        const val = document.createElement("span"); val.className = "cval"; val.textContent = m.t;
-        const copy = document.createElement("button"); copy.className = "mini"; copy.textContent = "Copiar";
-        copy.onclick = async () => {
-          try { await navigator.clipboard.writeText(m.t); copy.textContent = "Copiado ✓"; } catch (_) { copy.textContent = "No se pudo"; }
-          setTimeout(() => (copy.textContent = "Copiar"), 1500);
-        };
-        body.append(lab, val, copy);
+        const val = document.createElement("span"); val.className = "cval"; val.textContent = c ? c.name : (m.cn || m.t || "?");
+        body.append(lab, val);
+        if (c && !c.del) {
+          const eq = document.createElement("span"); eq.className = "eq"; eq.textContent = "=";
+          const mn = document.createElement("span"); mn.className = "meaning"; mn.textContent = c.meaning;
+          const go = miniBtn("📖 Ver códigos", () => { showTab("codes"); const el = $("code-" + m.code); if (el) { el.scrollIntoView({ block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1500); } });
+          body.append(eq, mn, go);
+        } else if (m.code) {
+          const mn = document.createElement("span"); mn.className = "meaning muted";
+          mn.textContent = c && c.del ? "(este código se borró)" : "(todavía no está en tu libro de códigos)";
+          body.append(mn);
+        }
       } else if (m.k === "loc") {
         const a = document.createElement("a");
         a.href = `https://maps.google.com/?q=${Number(m.lat).toFixed(5)},${Number(m.lng).toFixed(5)}`;
         a.target = "_blank"; a.rel = "noopener";
         a.textContent = `📍 Ubicación de ${mine ? "vos" : m.n} — ver en el mapa`;
         body.append(a);
+      } else if (m.k === "voice") {
+        const b = miniBtn(`▶ Mensaje de voz (${Math.max(1, Math.round(m.dur || 0))} s)`, () => playVoice(m));
+        b.classList.add("play");
+        body.append("📻", b);
       } else {
         body.textContent = m.t;
       }
@@ -1712,20 +2084,32 @@
       chatList.appendChild(row);
     }
     if (nearBottom) chatList.scrollTop = chatList.scrollHeight;
+    renderWalkieList();
   }
 
-  async function addIncoming(id, text, time) {
-    if (chatMsgs.some(m => m.id === id)) return;
-    const obj = await decryptMsg(text);
+  async function handleIncoming(ev) {
+    if (seenIds.has(ev.id)) return;
+    seenIds.add(ev.id);
+    const obj = await decryptMsg(ev.message);
     if (!obj || typeof obj.n !== "string") return;
-    if (chatMsgs.some(m => m.id === id)) return;
-    const msg = { id, n: obj.n.slice(0, 20), k: obj.k, t: String(obj.t || "").slice(0, 500), lat: obj.lat, lng: obj.lng, at: obj.at || time * 1000 };
+    if (obj.k === "sync") { mergeItems(obj.c, obj.items); return; }
+    if (chatMsgs.some(m => m.id === ev.id)) return;
+    const msg = { id: ev.id, n: obj.n.slice(0, 20), k: obj.k, t: String(obj.t || "").slice(0, 500), at: obj.at || ev.time * 1000 };
+    if (obj.k === "code") { msg.code = String(obj.code || ""); msg.cn = String(obj.cn || "").slice(0, 24); }
+    if (obj.k === "loc") { msg.lat = +obj.lat; msg.lng = +obj.lng; }
+    if (obj.k === "voice") {
+      if (!ev.attachment || !/^https:\/\//.test(ev.attachment.url) && !/^http:\/\/localhost/.test(ev.attachment.url)) return;
+      msg.url = ev.attachment.url; msg.dur = +obj.dur || 0; msg.sr = +obj.sr || 12000;
+    }
     chatMsgs.push(msg);
     chatMsgs.sort((a, b) => a.at - b.at);
     saveChatHistory();
     renderChat();
-    const me = currentPerson >= 0 ? config.people[currentPerson].name : "";
-    if (msg.n !== me && Date.now() - msg.at < 15000) sfx.msg();
+    const fresh = Date.now() - msg.at < 60000;
+    if (msg.n !== myName() && fresh) {
+      if (msg.k === "voice" && $("autoPlay").checked) playVoice(msg);
+      else sfx.msg();
+    }
   }
 
   function openChat() {
@@ -1733,44 +2117,39 @@
     chatKey = null;
     if (!window.crypto || !crypto.subtle) {
       chatStatus.textContent = "El chat necesita que la página se abra con https://";
-      chatSend.disabled = true; return;
+      return;
     }
+    data = loadData();
     chatMsgs = loadChatHistory();
-    renderChat();
-    chatList.scrollTop = chatList.scrollHeight;
+    chatMsgs.forEach(m => seenIds.add(m.id));
+    codeName.value = "";
+    setChatKind("text");
+    renderData();
+    showTab("chat");
     chatStatus.textContent = "Conectando…";
     chatSource = new EventSource(`${CHAT_SERVER}/${config.room}/sse?since=all`);
-    chatSource.onopen = () => { chatStatus.textContent = "🔒 Conectado. Los mensajes viajan cifrados: solo los pueden leer los celulares de la guarida."; };
+    chatSource.onopen = () => {
+      chatStatus.textContent = "🔒 Conectado · todo viaja cifrado";
+      publishSnapshot();
+    };
     chatSource.onmessage = e => {
       try {
         const ev = JSON.parse(e.data);
-        if (ev.event === "message") addIncoming(ev.id, ev.message, ev.time);
+        if (ev.event === "message") handleIncoming(ev);
       } catch (_) {}
     };
-    chatSource.onerror = () => { chatStatus.textContent = "Sin conexión con el chat. Reintentando…"; };
+    chatSource.onerror = () => { chatStatus.textContent = "Sin conexión. Reintentando…"; };
   }
   function closeChat() { if (chatSource) { chatSource.close(); chatSource = null; } }
-
-  async function sendChat(obj) {
-    const body = await encryptMsg({ ...obj, n: config.people[currentPerson].name, at: Date.now() });
-    const r = await fetch(`${CHAT_SERVER}/${config.room}`, { method: "POST", body });
-    if (r.status === 429) throw new Error("limit");
-    if (!r.ok) throw new Error("http " + r.status);
-  }
 
   chatForm.addEventListener("submit", async e => {
     e.preventDefault();
     const t = chatInput.value.trim();
     if (!t || currentPerson < 0) return;
     chatSend.disabled = true;
-    try {
-      await sendChat({ k: chatKind, t });
-      chatInput.value = "";
-    } catch (err) {
-      chatStatus.textContent = err.message === "limit"
-        ? "Se llegó al límite de mensajes de hoy (unos 250 por día por casa). Mañana se reinicia."
-        : "No se pudo enviar. Revisá tu conexión y probá de nuevo.";
-    } finally { chatSend.disabled = false; chatInput.focus(); }
+    try { await publish({ k: "text", t }); chatInput.value = ""; }
+    catch (err) { chatStatus.textContent = netError(err); }
+    finally { chatSend.disabled = false; chatInput.focus(); }
   });
 
   $("kLoc").addEventListener("click", () => {
@@ -1778,13 +2157,169 @@
     chatStatus.textContent = "Buscando tu ubicación…";
     navigator.geolocation.getCurrentPosition(async pos => {
       try {
-        await sendChat({ k: "loc", lat: +pos.coords.latitude.toFixed(5), lng: +pos.coords.longitude.toFixed(5) });
+        await publish({ k: "loc", lat: +pos.coords.latitude.toFixed(5), lng: +pos.coords.longitude.toFixed(5) });
         chatStatus.textContent = "📍 Ubicación enviada.";
-      } catch (err) { chatStatus.textContent = err.message === "limit" ? "Se llegó al límite de mensajes de hoy. Mañana se reinicia." : "No se pudo enviar la ubicación."; }
+      } catch (err) { chatStatus.textContent = netError(err); }
     }, err => {
       chatStatus.textContent = err.code === 1 ? "Tenés que permitir la ubicación en el navegador." : "No se pudo obtener tu ubicación. Probá de nuevo.";
     }, { enableHighAccuracy: true, timeout: 15000 });
   });
+
+  /* ---------- Walkie-talkie ---------- */
+  const WALKIE_MAX = 15, WALKIE_RATE = 12000;
+  const pttBtn = $("pttBtn"), pttLabel = $("pttLabel"), pttStatus = $("pttStatus"), pttBar = $("pttBar");
+  let ptt = null;   // grabación en curso
+
+  // mu-law: comprime la voz a 1 byte por muestra
+  function muEncode(x) {
+    const out = new Uint8Array(x.length);
+    for (let i = 0; i < x.length; i++) {
+      const s = Math.max(-1, Math.min(1, x[i]));
+      const y = Math.sign(s) * Math.log1p(255 * Math.abs(s)) / Math.log1p(255);
+      out[i] = Math.round((y + 1) * 127.5);
+    }
+    return out;
+  }
+  function muDecode(b) {
+    const out = new Float32Array(b.length);
+    for (let i = 0; i < b.length; i++) {
+      const y = b[i] / 127.5 - 1;
+      out[i] = Math.sign(y) * (Math.pow(256, Math.abs(y)) - 1) / 255;
+    }
+    return out;
+  }
+  function resampleLinear(x, from, to) {
+    if (from === to) return x;
+    const n = Math.floor(x.length * to / from), out = new Float32Array(n), r = from / to;
+    for (let i = 0; i < n; i++) {
+      const p = i * r, a = Math.floor(p), f = p - a;
+      out[i] = (x[a] || 0) * (1 - f) + (x[a + 1] || 0) * f;
+    }
+    return out;
+  }
+  function downsample(x, from, to) {      // promedia para no meter ruido al bajar la calidad
+    const r = from / to, out = new Float32Array(Math.floor(x.length / r));
+    for (let i = 0; i < out.length; i++) {
+      const a = Math.floor(i * r), b = Math.min(x.length, Math.floor((i + 1) * r));
+      let s = 0; for (let j = a; j < b; j++) s += x[j];
+      out[i] = s / Math.max(1, b - a);
+    }
+    return out;
+  }
+  function radioClick() { tone(1800, .04, "square", .05); noise(.12, .05, .03, 3000); }
+
+  async function pttStart(e) {
+    e.preventDefault();
+    if (ptt || currentPerson < 0) return;
+    if (e.pointerId !== undefined) { try { pttBtn.setPointerCapture(e.pointerId); } catch (_) {} }
+    const ac = audio();
+    ptt = { chunks: [], start: performance.now(), stop: false };
+    pttBtn.classList.add("rec");
+    pttLabel.textContent = "Hablá… soltá para mandar";
+    radioClick();
+    try {
+      const stream = await getMic();
+      if (!ptt || ptt.stop) { stopMic(); return; }
+      const src = ac.createMediaStreamSource(stream);
+      const proc = ac.createScriptProcessor(4096, 1, 1);
+      const mute = ac.createGain(); mute.gain.value = 0;
+      proc.onaudioprocess = ev => { if (ptt) ptt.chunks.push(new Float32Array(ev.inputBuffer.getChannelData(0))); };
+      src.connect(proc); proc.connect(mute); mute.connect(ac.destination);
+      Object.assign(ptt, { src, proc, mute, rate: ac.sampleRate, recStart: performance.now() });
+      const step = () => {
+        if (!ptt || ptt.stop) return;
+        const s = (performance.now() - ptt.recStart) / 1000;
+        pttBar.style.width = Math.min(100, s / WALKIE_MAX * 100) + "%";
+        pttStatus.textContent = `Grabando… ${s.toFixed(1)} s`;
+        if (s >= WALKIE_MAX) return pttEnd();
+        requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    } catch (err) {
+      ptt = null;
+      pttBtn.classList.remove("rec");
+      pttLabel.textContent = "Mantené para hablar";
+      pttStatus.textContent = micError(err);
+    }
+  }
+  async function pttEnd() {
+    if (!ptt || ptt.stop) return;
+    const rec = ptt; rec.stop = true; ptt = null;
+    pttBtn.classList.remove("rec");
+    pttLabel.textContent = "Mantené para hablar";
+    pttBar.style.width = "0%";
+    if (!rec.proc) { pttStatus.textContent = "Mantené apretado mientras hablás."; return; }
+    rec.proc.onaudioprocess = null;
+    try { rec.src.disconnect(); rec.proc.disconnect(); rec.mute.disconnect(); } catch (_) {}
+    stopMic();
+    radioClick();
+    let n = 0; for (const c of rec.chunks) n += c.length;
+    const all = new Float32Array(n); let o = 0;
+    for (const c of rec.chunks) { all.set(c, o); o += c.length; }
+    const dur = n / rec.rate;
+    if (dur < 0.6) { pttStatus.textContent = "Muy corto. Mantené apretado mientras hablás."; return; }
+    // normaliza el volumen
+    let peak = 0; for (const v of all) peak = Math.max(peak, Math.abs(v));
+    if (peak < 0.01) { pttStatus.textContent = "No se escuchó nada. Hablá más cerca del micrófono."; return; }
+    const g = Math.min(4, 0.9 / peak);
+    for (let i = 0; i < all.length; i++) all[i] *= g;
+    pttStatus.textContent = "Mandando…";
+    try {
+      const enc = await encryptBytes(muEncode(downsample(all, rec.rate, WALKIE_RATE)));
+      await publish({ k: "voice", dur: +dur.toFixed(1), sr: WALKIE_RATE }, enc);
+      pttStatus.textContent = `✔ Mensaje de voz enviado (${dur.toFixed(1)} s)`;
+    } catch (err) { pttStatus.textContent = netError(err); }
+  }
+  pttBtn.addEventListener("pointerdown", pttStart);
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => pttBtn.addEventListener(ev, pttEnd));
+  pttBtn.addEventListener("contextmenu", e => e.preventDefault());
+  pttBtn.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) pttStart(e); });
+  pttBtn.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") pttEnd(); });
+
+  const voiceCache = new Map();
+  let playing = Promise.resolve();
+  function playVoice(m) {
+    playing = playing.then(async () => {
+      try {
+        let buf = voiceCache.get(m.id);
+        if (!buf) {
+          const r = await fetch(m.url);
+          if (!r.ok) throw new Error("gone");
+          const bytes = await decryptBytes(new Uint8Array(await r.arrayBuffer()));
+          const ac = audio();
+          const pcm = resampleLinear(muDecode(bytes), m.sr || WALKIE_RATE, ac.sampleRate);
+          buf = ac.createBuffer(1, pcm.length, ac.sampleRate);
+          buf.copyToChannel(pcm, 0);
+          voiceCache.set(m.id, buf);
+        }
+        const ac = audio();
+        radioClick();
+        const src = ac.createBufferSource(); src.buffer = buf;
+        const hp = ac.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 250;
+        src.connect(hp).connect(ac.destination);
+        await new Promise(res => { src.onended = res; src.start(ac.currentTime + 0.15); });
+        radioClick();
+      } catch (_) {
+        chatStatus.textContent = "Ese mensaje de voz ya no está disponible (duran unas 3 horas).";
+      }
+    });
+    return playing;
+  }
+  function renderWalkieList() {
+    const list = $("walkieList"); list.textContent = "";
+    const vs = chatMsgs.filter(m => m.k === "voice").slice(-10).reverse();
+    if (!vs.length) list.append(emptyNote("Todavía no hay mensajes de voz."));
+    for (const m of vs) {
+      const row = document.createElement("div"); row.className = "item";
+      const left = document.createElement("div"); left.className = "item-main";
+      const t = document.createElement("span");
+      t.textContent = `${m.n === myName() ? "Vos" : m.n} · ${fmtTime(m.at)} · ${Math.max(1, Math.round(m.dur || 0))} s`;
+      left.append(t);
+      const acts = document.createElement("div"); acts.className = "item-acts";
+      acts.append(miniBtn("▶ Escuchar", () => playVoice(m)));
+      row.append(left, acts); list.append(row);
+    }
+  }
 
   /* ================== LA GUARIDA ================== */
   const doors = $("doors");
@@ -1797,7 +2332,7 @@
     doors.classList.remove("open");
     doors.classList.add("show");
     approvedOverlay.classList.remove("show");
-    const name = currentPerson >= 0 ? config.people[currentPerson].name : "";
+    const name = myName();
     $("welcomeSub").textContent = (name ? `Hola, ${name} · ` : "") + "Mano ✓ · Voz ✓ · Código ✓";
     updateVoiceInfo();
     show("lair");
