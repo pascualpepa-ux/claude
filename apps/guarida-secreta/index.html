@@ -228,7 +228,41 @@
   }
   @keyframes ring { from { transform: scale(.2); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
 
-  /* ====== PANTALLA 3: PUERTAS + GUARIDA ====== */
+  /* ====== PANTALLA 2: VOZ ====== */
+  #screenVoice.active { max-width: 520px; }
+  .voice-box {
+    position: relative; width: min(86vw, 340px); aspect-ratio: 1; max-width: 100%;
+    display: grid; place-items: center;
+  }
+  .voice-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mic {
+    position: relative; z-index: 1;
+    width: 46%; aspect-ratio: 1; border-radius: 50%;
+    font-size: clamp(2.4rem, 12vw, 3.6rem);
+    background: radial-gradient(circle at 50% 40%, #0d2a3d, #050d18 70%);
+    border: 3px solid var(--blue); color: var(--blue);
+    box-shadow: 0 0 25px rgba(34, 211, 255, .5), inset 0 0 25px rgba(34, 211, 255, .25);
+    cursor: pointer; touch-action: manipulation;
+    transition: border-color .2s, box-shadow .2s, transform .1s;
+  }
+  .mic:active { transform: scale(.96); }
+  .mic:disabled { opacity: .35; cursor: default; }
+  .mic.rec { border-color: var(--green); color: var(--green); box-shadow: 0 0 35px rgba(57, 255, 136, .7), inset 0 0 30px rgba(57, 255, 136, .3); animation: recPulse 1s ease-in-out infinite; }
+  .mic.bad { border-color: var(--red); color: var(--red); box-shadow: 0 0 35px rgba(255, 51, 85, .6); animation: shake .4s; }
+  .mic:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  @keyframes recPulse { 50% { box-shadow: 0 0 55px rgba(57, 255, 136, .9), inset 0 0 40px rgba(57, 255, 136, .4); } }
+  .phrase {
+    font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em;
+    font-size: clamp(1rem, 4.4vw, 1.2rem); line-height: 1.4; color: var(--text);
+    padding: 10px 14px; border: 1px dashed rgba(34, 211, 255, .45); border-radius: 12px; background: rgba(34, 211, 255, .05);
+  }
+  .phrase b { color: var(--green); text-shadow: 0 0 6px rgba(57, 255, 136, .6); }
+  .enroll-dots { display: flex; gap: 10px; justify-content: center; min-height: 14px; }
+  .enroll-dots span { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--blue); }
+  .enroll-dots span.ok { background: var(--green); border-color: var(--green); box-shadow: var(--glow-g); }
+  .voice-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+  /* ====== PANTALLA 4: PUERTAS + GUARIDA ====== */
   .doors { position: fixed; inset: 0; z-index: 40; display: none; pointer-events: none; }
   .doors.show { display: block; }
   .door {
@@ -294,6 +328,16 @@
     margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
   }
   .card h2 .ic { font-size: 1.2rem; filter: drop-shadow(0 0 6px var(--blue)); }
+  .card p { font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em; line-height: 1.45; color: var(--text); opacity: .85; margin-bottom: 14px; font-size: .92rem; }
+  .card .small { font-size: .78rem; color: var(--muted); opacity: 1; margin: 10px 0 0; }
+  .big-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    font: inherit; font-size: .85rem; letter-spacing: .14em; text-transform: uppercase; text-decoration: none;
+    color: var(--bg); background: var(--green); border: 0; border-radius: 12px; padding: 14px 16px; cursor: pointer;
+    box-shadow: 0 0 20px rgba(57, 255, 136, .45);
+  }
+  .big-btn.alt { background: transparent; color: var(--blue); border: 1px solid var(--blue); box-shadow: none; }
+  .big-btn:focus-visible, .btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
   .card ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
   .card li {
     font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em;
@@ -364,7 +408,7 @@
 <main>
   <!-- ========== PANTALLA 1 ========== -->
   <section class="screen active" id="screenScan">
-    <div class="step">Nivel de seguridad 1/2</div>
+    <div class="step">Nivel de seguridad 1/3</div>
     <h1>Escáner biométrico</h1>
 
     <div class="scanner" id="scanner" role="button" aria-label="Mantené presionado para escanear tu mano">
@@ -404,9 +448,29 @@
     <div class="status" id="scanStatus">Apoyá tu mano para escanear</div>
   </section>
 
-  <!-- ========== PANTALLA 2 ========== -->
+  <!-- ========== PANTALLA 2: VOZ ========== -->
+  <section class="screen" id="screenVoice">
+    <div class="step">Nivel de seguridad 2/3</div>
+    <h1 id="voiceTitle">Reconocimiento de voz</h1>
+    <div class="phrase" id="phrase">Tocá el micrófono y decí en voz alta:<br><b>“Abrite guarida, soy yo”</b></div>
+    <div class="voice-box">
+      <canvas id="wave" width="680" height="680" aria-hidden="true"></canvas>
+      <button class="mic" id="micBtn" aria-label="Grabar voz" disabled>🎙</button>
+    </div>
+    <div class="enroll-dots" id="enrollDots"></div>
+    <div class="progress"><div class="progress-bar" id="voiceBar"></div></div>
+    <div class="pct" id="voicePct"></div>
+    <div class="status" id="voiceStatus">Preparando el reconocedor de voz…</div>
+    <div class="voice-actions">
+      <button class="btn" id="voiceRetryLoad" hidden>↻ Reintentar descarga</button>
+      <button class="btn" id="voiceEnrollBtn" hidden>🎙 Registrar mi voz</button>
+      <button class="btn change-btn cancel" id="voiceCancel" hidden>✕ Cancelar</button>
+    </div>
+  </section>
+
+  <!-- ========== PANTALLA 3: CÓDIGO ========== -->
   <section class="screen" id="screenPass">
-    <div class="step">Nivel de seguridad 2/2</div>
+    <div class="step">Nivel de seguridad 3/3</div>
     <h1 id="passTitle">Ingresá la contraseña</h1>
     <div class="security-panel" id="panel">
       <div class="display" id="display"><span class="ph">— — — —</span></div>
@@ -423,33 +487,23 @@
   <!-- ========== PANTALLA 3 ========== -->
   <section class="screen" id="lair">
     <div class="welcome">Bienvenido a la Guarida</div>
-    <div class="welcome-sub">Conexión segura establecida · Agente verificado</div>
+    <div class="welcome-sub">Mano ✓ · Voz ✓ · Código ✓</div>
     <div class="grid">
       <article class="card">
-        <h2><span class="ic">👥</span>Miembros</h2>
-        <ul>
-          <li><span class="member"><span class="avatar">🦊</span><span>Agente Zorro<small>Líder de operaciones</small></span></span><span class="tag on">EN LÍNEA</span></li>
-          <li><span class="member"><span class="avatar">🦉</span><span>Agente Búho<small>Hacker nocturno</small></span></span><span class="tag on">EN LÍNEA</span></li>
-          <li><span class="member"><span class="avatar">🐺</span><span>Agente Lobo<small>Explorador</small></span></span><span class="tag off">AUSENTE</span></li>
-          <li><span class="member"><span class="avatar">🐙</span><span>Agente Pulpo<small>Inventor de gadgets</small></span></span><span class="tag on">EN LÍNEA</span></li>
-        </ul>
+        <h2><span class="ic">💬</span>Chat de la guarida</h2>
+        <p>Mandate mensajes y códigos con la gente que invitaste al chat.</p>
+        <a class="big-btn" id="chatLink" href="https://claude.ai/artifact/Q75tn5DMGR3YWTDJpD4pMs" target="_blank" rel="noopener">Abrir el chat</a>
       </article>
       <article class="card">
-        <h2><span class="ic">🎯</span>Misiones secretas</h2>
-        <ul>
-          <li><span>Operación Galletita<small>Recuperar el frasco de la cocina</small></span><span class="tag urgent">URGENTE</span></li>
-          <li><span>Proyecto Cohete<small>Construir prototipo con cartón</small></span><span class="tag prog">EN CURSO</span></li>
-          <li><span>Código Arcoíris<small>Descifrar el mapa del jardín</small></span><span class="tag prog">EN CURSO</span></li>
-          <li><span>Misión Silencio<small>Patrulla nocturna del pasillo</small></span><span class="tag on">COMPLETA</span></li>
-        </ul>
+        <h2><span class="ic">📍</span>Mi ubicación</h2>
+        <p>Copia un link con tu ubicación en el mapa. Después pegalo en el chat.</p>
+        <button class="big-btn alt" id="locBtn">Copiar mi ubicación</button>
+        <p class="small" id="locStatus">Mandala solo a gente que conocés en persona.</p>
       </article>
       <article class="card">
-        <h2><span class="ic">✉️</span>Mensajes</h2>
-        <ul>
-          <li class="msg unread"><span>Agente Búho<small>“El paquete llegó. Nos vemos a las 17:00.”</small></span><span class="tag on">NUEVO</span></li>
-          <li class="msg unread"><span>Central<small>“Cambio de contraseña la semana próxima.”</small></span><span class="tag on">NUEVO</span></li>
-          <li class="msg"><span>Agente Zorro<small>“Buen trabajo con la misión de ayer.”</small></span><span class="tag off">LEÍDO</span></li>
-        </ul>
+        <h2><span class="ic">🎙</span>Mi voz</h2>
+        <p id="voiceInfo">Tu voz está registrada en este aparato.</p>
+        <button class="big-btn alt" id="reVoiceBtn">Volver a grabar mi voz</button>
       </article>
     </div>
     <button class="btn" id="logoutBtn">⏻ Cerrar sesión</button>
@@ -476,7 +530,11 @@
 <script>
   /* ================== CONFIGURACIÓN ================== */
   const DEFAULT_PASSWORD = "1234"; // contraseña inicial (se puede cambiar desde la app)
-  const ADMIN_CODE = "2016";       // código para poder cambiar la contraseña
+  const ADMIN_CODE = "2016";       // código para cambiar la contraseña o registrar la voz
+  const VOICE_THRESHOLD = 0.72;    // qué tan parecida tiene que ser la voz (0 a 1). Más alto = más estricto
+  const VOICE_SECONDS = 4;         // segundos que graba cada vez
+  const VOICE_MODEL = "Xenova/wavlm-base-plus-sv"; // modelo de reconocimiento de hablante
+  const TRANSFORMERS_URL = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2";
   const MIN_LENGTH = 4;            // largo mínimo de una contraseña nueva
   const SCAN_DURATION = 3000;     // milisegundos que hay que mantener la mano
   const MAX_DIGITS = 12;
@@ -617,7 +675,7 @@
   }
 
   function tick(now) {
-    const p = Math.min((now - scanStart) / SCAN_DURATION, 1);
+    const p = Math.max(0, Math.min((now - scanStart) / SCAN_DURATION, 1));
     setProgress(p);
     if (p >= 1) return completeScan();
     rafId = requestAnimationFrame(tick);
@@ -647,7 +705,7 @@
     scanner.classList.add("done");
     pct.textContent = "100% — Identidad confirmada";
     setStatus(scanStatus, "HUELLA RECONOCIDA", "ok");
-    setTimeout(() => { show("screenPass"); }, 1800);
+    setTimeout(() => { enterVoice(); }, 1800);
   }
 
   scanner.addEventListener("pointerdown", startScan);
@@ -725,6 +783,7 @@
       admin: "Código de administrador",
       new: "Escribí la contraseña nueva",
       confirm: "Repetí la contraseña nueva",
+      voiceAdmin: "Código para registrar la voz",
     };
     passTitle.textContent = titles[m];
     const changing = m !== "login";
@@ -738,6 +797,7 @@
     if (locked) return;
     audio();
     tone(700, .08, "square", .06);
+    if (mode === "voiceAdmin") { setMode("login", "Código de acceso requerido"); enterVoice(); return; }
     if (mode === "login") setMode("admin", "Ingresá el código para cambiar la contraseña");
     else setMode("login", "Cambio cancelado. Código de acceso requerido");
   });
@@ -798,6 +858,15 @@
         denied("Código de administrador incorrecto.", () =>
           setMode("admin", "Código incorrecto. Probá de nuevo o tocá Cancelar", "err"));
       }
+    } else if (mode === "voiceAdmin") {
+      if (entry === ADMIN_CODE) {
+        sfx.success();
+        setMode("login", "Código de acceso requerido");
+        startEnroll("pass");
+      } else {
+        denied("Código de administrador incorrecto.", () =>
+          setMode("voiceAdmin", "Código incorrecto. Probá de nuevo o tocá Cancelar", "err"));
+      }
     } else if (mode === "new") {
       if (entry.length < MIN_LENGTH) {
         sfx.fail();
@@ -831,7 +900,367 @@
     else if (e.key === "Enter") { e.preventDefault(); press("OK"); }
   });
 
-  /* ================== PANTALLA 3: LA GUARIDA ================== */
+  /* ================== PANTALLA 2: VOZ ================== */
+  // Huella de voz "promedio" de otras personas. Se resta para que el
+  // parecido mida lo que es propio de TU voz y no lo que tienen todas.
+  const VOICE_COHORT = [-0.01536,-0.01422,-0.01641,-0.01488,-0.01066,-0.01693,-0.02171,-0.01168,-0.0175,-0.0136,-0.0154,-0.02188,-0.01536,-0.01905,-0.05056,-0.01976,-0.01539,-0.01391,-0.01457,-0.03143,-0.01577,-0.01825,-0.01675,-0.0137,-0.01373,-0.01499,-0.01314,-0.02088,-0.0142,-0.06111,-0.0193,-0.01604,-0.01164,-0.02592,-0.01553,-0.03105,-0.02755,-0.0348,-0.07307,-0.01643,-0.02089,-0.02152,-0.01832,-0.01508,-0.03987,-0.01922,-0.01552,-0.01002,-0.07452,-0.01563,-0.01718,-0.01999,-0.01364,-0.01294,-0.04201,-0.01537,-0.08373,-0.01464,-0.018,-0.01949,-0.01208,-0.01545,-0.0679,-0.0158,-0.03093,-0.01557,-0.06334,-0.01518,-0.01641,-0.10488,-0.01839,-0.0825,-0.01593,-0.01756,-0.02616,-0.10814,-0.04857,-0.01551,-0.01498,-0.01781,-0.01423,-0.01255,-0.02841,-0.07115,-0.01773,-0.12538,-0.02066,-0.01521,0.00204,-0.01613,-0.01978,-0.02725,-0.09095,-0.01208,-0.01718,-0.01046,-0.01031,-0.02038,-0.04749,-0.0751,-0.01952,-0.04004,-0.01491,-0.03435,-0.02335,-0.06757,-0.02251,-0.02549,-0.03257,-0.02809,-0.02433,-0.0172,-0.01492,-0.01884,-0.01892,-0.02023,-0.0139,-0.02775,-0.01853,-0.06347,-0.01178,-0.02314,-0.01558,-0.01869,-0.01537,-0.01204,-0.01846,-0.02193,-0.02159,-0.02171,-0.01642,-0.02181,-0.01375,-0.00988,-0.0457,-0.01782,-0.0145,-0.01288,-0.01446,-0.01615,-0.01488,-0.01093,-0.00431,-0.0217,-0.01452,0.01247,-0.04002,-0.01743,-0.01531,-0.01439,-0.01786,-0.09049,-0.0162,-0.02149,-0.01117,-0.01496,-0.01132,-0.02133,-0.01617,-0.01742,-0.01241,-0.01817,-0.01521,-0.01621,-0.01151,-0.06946,-0.05352,-0.01072,-0.00875,-0.03337,-0.01822,-0.03664,-0.00397,-0.01921,-0.01661,-0.00463,-0.01226,-0.00632,-0.06737,-0.01911,-0.04361,-0.01838,-0.01419,-0.00998,-0.01883,-0.03896,-0.06245,-0.01386,-0.01795,-0.01646,-0.01548,-0.0907,-0.03291,-0.01374,-0.07906,-0.0182,-0.02467,-0.01075,-0.0132,-0.01346,-0.01719,-0.01727,-0.03022,-0.01129,-0.01424,-0.01714,-0.02114,-0.04641,-0.01062,-0.04727,-0.04766,-0.01473,-0.01851,-0.01502,-0.01686,-0.00494,-0.01142,-0.01218,-0.01114,-0.04752,-0.01178,-0.0067,-0.01742,-0.01232,-0.02549,-0.00265,-0.01533,-0.02013,-0.02733,0.01266,-0.01975,-0.0224,-0.02139,-0.0141,-0.0163,-0.01947,-0.01076,-0.01666,-0.07287,-0.0128,-0.00912,-0.01713,-0.01302,-0.01093,-0.02002,-0.02829,-0.02069,-0.13228,-0.01003,-0.0105,-0.01254,-0.02005,-0.01743,-0.01324,0.01614,-0.01825,-0.02406,-0.01575,-0.10531,-0.05148,-0.05147,-0.02232,-0.01302,-0.01218,-0.04011,-0.02635,-0.01139,-0.01655,-0.02175,-0.0176,-0.05473,-0.01563,-0.04999,-0.01834,-0.01699,-0.01436,-0.02514,-0.12169,-0.01734,-0.0207,-0.01578,-0.01167,-0.04013,-0.02053,-0.05237,-0.01558,-0.02967,-0.01307,-0.02013,-0.01787,-0.01715,-0.01347,-0.0129,-0.04061,-0.02537,-0.01506,-0.0225,-0.01947,-0.004,-0.01533,-0.02229,-0.02358,-0.01707,-0.05238,-0.00886,-0.02629,-0.01405,-0.013,-0.01766,-0.01726,-0.01077,-0.01966,-0.02216,-0.01084,-0.05627,-0.13868,-0.00798,-0.03156,-0.01683,-0.015,-0.03239,-0.02281,-0.07298,-0.01897,-0.0172,-0.02015,-0.01541,-0.01575,-0.01522,-0.01374,-0.01204,-0.01568,-0.02451,-0.03396,-0.02451,-0.01708,-0.01546,-0.05102,-0.01932,-0.01208,-0.06354,-0.04316,-0.01485,-0.01924,-0.02924,-0.01321,-0.10789,-0.01761,-0.03044,-0.02912,0.00017,-0.01783,-0.03351,-0.01509,-0.03218,-0.02376,-0.01705,-0.01636,-0.01349,-0.01613,-0.01221,-0.02977,-0.0135,-0.02042,-0.01028,-0.01285,-0.03722,0.00996,-0.01705,-0.04339,-0.01363,-0.05081,-0.01209,-0.0915,-0.0655,-0.03008,-0.02557,-0.00083,-0.0188,-0.02113,-0.01745,-0.02332,-0.01743,-0.01311,-0.01476,-0.01403,-0.02095,-0.02167,-0.0151,-0.05853,-0.05466,-0.06265,-0.01352,-0.02047,-0.0193,-0.03922,-0.03263,-0.01353,-0.0234,-0.02204,-0.01241,-0.01875,-0.02094,-0.01556,-0.01932,-0.02815,-0.01649,-0.01977,-0.10168,-0.03068,-0.00074,-0.01221,-0.01499,-0.01606,-0.01646,-0.01132,-0.01501,-0.02351,-0.11456,-0.06534,-0.0128,-0.02145,-0.03224,-0.03481,-0.018,-0.016,-0.01551,-0.01875,-0.08733,-0.01216,-0.07983,-0.07354,-0.1043,-0.01106,-0.01846,-0.08581,-0.0153,-0.01176,-0.09223,-0.0182,0.01372,-0.01281,-0.03986,-0.02267,-0.01587,-0.01496,-0.01423,-0.02113,0.00896,-0.0556,-0.09959,-0.0882,-0.02666,-0.01626,-0.01628,-0.0154,-0.01078,-0.01494,-0.01706,-0.01869,-0.01263,-0.09794,-0.03268,-0.0126,-0.0655,-0.03531,-0.01189,-0.01656,-0.01838,-0.01604,-0.06114,-0.01647,-0.01472,-0.03355,-0.02263,-0.01675,-0.00367,-0.01064,-0.0858,-0.02685,-0.02778,-0.01673,-0.01846,-0.03828,-0.01849,-0.02806,-0.01276,-0.01876,-0.03611,-0.01852,-0.01704,-0.01839,-0.01481,-0.02162,-0.04385,-0.01792,-0.014,-0.02052,0.00606,-0.0225,-0.01742,-0.02768,-0.0102,-0.06973,-0.0113,-0.01641,-0.01571,-0.02583,-0.07535,-0.02063,-0.01222,-0.01581];
+  const VOICE_KEY = "guarida-voz";
+  const voiceTitle = document.getElementById("voiceTitle");
+  const phraseEl = document.getElementById("phrase");
+  const micBtn = document.getElementById("micBtn");
+  const voiceBar = document.getElementById("voiceBar");
+  const voicePct = document.getElementById("voicePct");
+  const voiceStatus = document.getElementById("voiceStatus");
+  const enrollDots = document.getElementById("enrollDots");
+  const retryLoadBtn = document.getElementById("voiceRetryLoad");
+  const enrollBtn = document.getElementById("voiceEnrollBtn");
+  const voiceCancel = document.getElementById("voiceCancel");
+  const wave = document.getElementById("wave");
+  const wctx = wave.getContext("2d");
+
+  let voiceMode = "verify";     // verify | enroll
+  let enrollReturn = "pass";    // a dónde ir al terminar de registrar
+  let enrollSamples = [];
+  let recording = false;
+  let modelReady = false;
+  let modelPromise = null;
+  let micStream = null;
+  let level = 0;
+
+  function loadVoiceprint() {
+    try { const v = JSON.parse(localStorage.getItem(VOICE_KEY)); return v && Array.isArray(v.template) ? v : null; }
+    catch (_) { return null; }
+  }
+  function saveVoiceprint(v) { try { localStorage.setItem(VOICE_KEY, JSON.stringify(v)); return true; } catch (_) { return false; } }
+
+  // ---- Modelo de reconocimiento de hablante (se descarga una sola vez) ----
+  function loadVoiceModel() {
+    if (modelPromise) return modelPromise;
+    const files = {};
+    const onProgress = e => {
+      if (e.status === "progress" && e.total) {
+        files[e.file] = [e.loaded, e.total];
+        let l = 0, t = 0;
+        for (const [a, b] of Object.values(files)) { l += a; t += b; }
+        if (!modelReady && voiceStatusIsLoading()) {
+          const mb = (t / 1048576).toFixed(0);
+          setStatus(voiceStatus, `Descargando el reconocedor de voz… ${Math.floor(l / t * 100)}% (${mb} MB, solo la primera vez)`);
+        }
+      }
+    };
+    modelPromise = (async () => {
+      const tf = await import(TRANSFORMERS_URL);
+      tf.env.allowLocalModels = false;
+      const processor = await tf.AutoProcessor.from_pretrained(VOICE_MODEL, { progress_callback: onProgress });
+      const model = await tf.AutoModel.from_pretrained(VOICE_MODEL, { dtype: "q8", progress_callback: onProgress });
+      // Calentamiento: la primera pasada es la más lenta
+      await model(await processor(new Float32Array(16000)));
+      modelReady = true;
+      return { processor, model };
+    })();
+    modelPromise.catch(() => { modelPromise = null; });
+    return modelPromise;
+  }
+  let loadingMsg = true;
+  function voiceStatusIsLoading() { return loadingMsg; }
+
+  async function prepareVoice() {
+    retryLoadBtn.hidden = true;
+    micBtn.disabled = true;
+    loadingMsg = true;
+    if (!modelReady) setStatus(voiceStatus, "Preparando el reconocedor de voz…");
+    try {
+      await loadVoiceModel();
+      loadingMsg = false;
+      refreshVoiceUI();
+    } catch (err) {
+      loadingMsg = false;
+      setStatus(voiceStatus, "No se pudo descargar el reconocedor de voz. Revisá tu conexión a internet.", "err");
+      retryLoadBtn.hidden = false;
+    }
+  }
+  retryLoadBtn.addEventListener("click", prepareVoice);
+
+  function renderDots(n) {
+    enrollDots.innerHTML = "";
+    if (voiceMode !== "enroll") return;
+    for (let i = 0; i < 3; i++) {
+      const d = document.createElement("span");
+      if (i < n) d.className = "ok";
+      enrollDots.appendChild(d);
+    }
+  }
+
+  function refreshVoiceUI(msg, cls) {
+    const vp = loadVoiceprint();
+    enrollBtn.hidden = true;
+    voiceCancel.hidden = voiceMode !== "enroll" || enrollReturn !== "lair";
+    voiceBar.style.width = "0%";
+    voicePct.textContent = "";
+    renderDots(enrollSamples.length);
+    if (voiceMode === "enroll") {
+      voiceTitle.textContent = "Registrar tu voz";
+      phraseEl.innerHTML = `Grabación <b>${enrollSamples.length + 1} de 3</b>. Tocá el micrófono y decí:<br><b>“Abrite guarida, soy yo”</b>`;
+    } else {
+      voiceTitle.textContent = "Reconocimiento de voz";
+      phraseEl.innerHTML = "Tocá el micrófono y decí en voz alta:<br><b>“Abrite guarida, soy yo”</b>";
+      if (!vp) {
+        micBtn.disabled = true;
+        enrollBtn.hidden = false;
+        setStatus(voiceStatus, "Todavía no hay ninguna voz registrada en este aparato.", "err");
+        return;
+      }
+    }
+    micBtn.disabled = !modelReady;
+    if (!modelReady) return;
+    setStatus(voiceStatus, msg || (voiceMode === "enroll"
+      ? "Hablá normal, cerca del celu y sin ruido de fondo."
+      : "Tocá el micrófono para hablar."), cls || "");
+  }
+
+  enrollBtn.addEventListener("click", () => {
+    audio(); tone(700, .08, "square", .06);
+    show("screenPass");
+    setMode("voiceAdmin", "Para registrar una voz nueva ingresá el código de administrador");
+  });
+  voiceCancel.addEventListener("click", () => {
+    voiceMode = "verify"; enrollSamples = [];
+    show("lair");
+  });
+
+  function enterVoice() {
+    voiceMode = "verify";
+    enrollSamples = [];
+    show("screenVoice");
+    refreshVoiceUI();
+    prepareVoice();
+  }
+
+  function startEnroll(returnTo) {
+    voiceMode = "enroll";
+    enrollReturn = returnTo;
+    enrollSamples = [];
+    show("screenVoice");
+    refreshVoiceUI();
+    prepareVoice();
+  }
+
+  // ---- Micrófono ----
+  async function getMic() {
+    if (micStream && micStream.getAudioTracks().some(t => t.readyState === "live")) return micStream;
+    micStream = await navigator.mediaDevices.getUserMedia({
+      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+    });
+    return micStream;
+  }
+  function stopMic() {
+    if (micStream) micStream.getTracks().forEach(t => t.stop());
+    micStream = null;
+  }
+
+  async function recordVoice(seconds) {
+    const ac = audio();
+    if (!ac) throw new Error("noaudio");
+    const stream = await getMic();
+    const src = ac.createMediaStreamSource(stream);
+    const proc = ac.createScriptProcessor(4096, 1, 1);
+    const mute = ac.createGain(); mute.gain.value = 0;
+    const chunks = [];
+    proc.onaudioprocess = e => {
+      const d = e.inputBuffer.getChannelData(0);
+      chunks.push(new Float32Array(d));
+      let sum = 0; for (let i = 0; i < d.length; i++) sum += d[i] * d[i];
+      level = Math.sqrt(sum / d.length);
+    };
+    src.connect(proc); proc.connect(mute); mute.connect(ac.destination);
+    const t0 = performance.now();
+    await new Promise(resolve => {
+      const step = () => {
+        const p = Math.min((performance.now() - t0) / (seconds * 1000), 1);
+        voiceBar.style.width = (p * 100) + "%";
+        voicePct.textContent = `Escuchando… ${Math.ceil(seconds - p * seconds)} s`;
+        if (p >= 1) return resolve();
+        requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+    proc.onaudioprocess = null;
+    try { src.disconnect(); proc.disconnect(); mute.disconnect(); } catch (_) {}
+    level = 0;
+    let n = 0; for (const c of chunks) n += c.length;
+    const all = new Float32Array(n); let o = 0;
+    for (const c of chunks) { all.set(c, o); o += c.length; }
+    return resampleTo16k(all, ac.sampleRate);
+  }
+
+  function resampleTo16k(data, rate) {
+    if (rate === 16000) return data;
+    const ratio = rate / 16000, out = new Float32Array(Math.floor(data.length / ratio));
+    for (let i = 0; i < out.length; i++) {
+      const a = Math.floor(i * ratio), b = Math.min(data.length, Math.floor((i + 1) * ratio));
+      let s = 0; for (let j = a; j < b; j++) s += data[j];
+      out[i] = s / Math.max(1, b - a);
+    }
+    return out;
+  }
+
+  // Recorta silencios y mide cuánto se habló de verdad
+  function trimSilence(x) {
+    const F = 320, frames = Math.floor(x.length / F), rms = [];
+    let max = 0;
+    for (let f = 0; f < frames; f++) {
+      let s = 0; for (let i = f * F; i < (f + 1) * F; i++) s += x[i] * x[i];
+      const r = Math.sqrt(s / F); rms.push(r); if (r > max) max = r;
+    }
+    const thr = Math.max(0.006, max * 0.12);
+    let first = -1, last = -1, voiced = 0;
+    rms.forEach((r, i) => { if (r > thr) { if (first < 0) first = i; last = i; voiced++; } });
+    if (first < 0) return { audio: x, voicedSec: 0, peak: max };
+    const a = Math.max(0, (first - 5) * F), b = Math.min(x.length, (last + 6) * F);
+    return { audio: x.slice(a, b), voicedSec: voiced * F / 16000, peak: max };
+  }
+
+  const normalize = v => { const n = Math.hypot(...v) || 1; return v.map(x => x / n); };
+  const cosine = (a, b) => { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i]; return s; };
+
+  async function voiceEmbedding(samples) {
+    const { processor, model } = await loadVoiceModel();
+    const inputs = await processor(samples);
+    const { embeddings } = await model(inputs);
+    const v = normalize(Array.from(embeddings.data));
+    return normalize(v.map((x, i) => x - (VOICE_COHORT[i] || 0)));
+  }
+
+  function micError(err) {
+    const name = err && err.name;
+    if (!window.isSecureContext) return "El micrófono solo funciona si abrís la página con https://";
+    if (name === "NotAllowedError" || name === "SecurityError") return "Tenés que permitir el micrófono. Tocá el candado de la barra de direcciones y activalo.";
+    if (name === "NotFoundError") return "No se encontró ningún micrófono en este aparato.";
+    return "No se pudo usar el micrófono. Probá de nuevo.";
+  }
+
+  micBtn.addEventListener("click", async () => {
+    if (recording || !modelReady) return;
+    audio();
+    recording = true;
+    micBtn.classList.remove("bad");
+    micBtn.classList.add("rec");
+    enrollBtn.hidden = true;
+    setStatus(voiceStatus, voiceMode === "enroll" ? "Grabando… decí la frase" : "Escuchando… decí la frase");
+    tone(880, .08, "sine", .1);
+    let take;
+    try {
+      const raw = await recordVoice(VOICE_SECONDS);
+      take = trimSilence(raw);
+    } catch (err) {
+      recording = false;
+      micBtn.classList.remove("rec");
+      setStatus(voiceStatus, micError(err), "err");
+      return;
+    }
+    micBtn.classList.remove("rec");
+    voicePct.textContent = "Analizando la voz…";
+    if (take.voicedSec < 0.8 || take.peak < 0.01) {
+      recording = false;
+      micBtn.classList.add("bad");
+      sfx.fail();
+      refreshVoiceUI("No te escuché bien. Hablá más fuerte y más cerca del micrófono.", "err");
+      return;
+    }
+    let emb;
+    try { emb = await voiceEmbedding(take.audio); }
+    catch (err) {
+      recording = false;
+      refreshVoiceUI("Hubo un error al analizar la voz. Probá de nuevo.", "err");
+      return;
+    }
+    recording = false;
+    if (voiceMode === "enroll") handleEnrollSample(emb);
+    else handleVerify(emb);
+  });
+
+  function handleEnrollSample(emb) {
+    enrollSamples.push(emb);
+    sfx.key();
+    if (enrollSamples.length < 3) { refreshVoiceUI("✔ Grabación guardada. Ahora otra vez.", "ok-small"); return; }
+    // Las 3 grabaciones tienen que parecerse entre sí
+    let minSim = 1;
+    for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) minSim = Math.min(minSim, cosine(enrollSamples[i], enrollSamples[j]));
+    if (minSim < 0.55) {
+      enrollSamples = [];
+      sfx.error();
+      refreshVoiceUI("Las 3 grabaciones salieron muy distintas (¿ruido? ¿otra persona?). Empecemos de nuevo.", "err");
+      return;
+    }
+    const mean = enrollSamples[0].map((_, i) => (enrollSamples[0][i] + enrollSamples[1][i] + enrollSamples[2][i]) / 3);
+    const ok = saveVoiceprint({ template: normalize(mean).map(x => +x.toFixed(5)), at: Date.now() });
+    enrollSamples = [];
+    if (!ok) { refreshVoiceUI("No se pudo guardar la voz en este navegador (¿modo incógnito?).", "err"); return; }
+    sfx.success();
+    vibrate([80, 50, 120]);
+    voiceMode = "verify";
+    renderDots(0);
+    setStatus(voiceStatus, "VOZ REGISTRADA", "ok");
+    phraseEl.innerHTML = "Listo. Desde ahora la guarida reconoce tu voz.";
+    micBtn.disabled = true;
+    updateVoiceInfo();
+    setTimeout(() => {
+      if (enrollReturn === "lair") show("lair");
+      else { show("screenPass"); setMode("login", "Código de acceso requerido"); }
+    }, 1800);
+  }
+
+  function handleVerify(emb) {
+    const vp = loadVoiceprint();
+    if (!vp) { refreshVoiceUI(); return; }
+    const score = cosine(emb, vp.template);
+    const pct = Math.max(0, Math.round(score * 100));
+    if (score >= VOICE_THRESHOLD) {
+      sfx.success();
+      vibrate([80, 50, 120]);
+      micBtn.disabled = true;
+      voicePct.textContent = `Parecido con tu voz: ${pct}%`;
+      setStatus(voiceStatus, "VOZ RECONOCIDA", "ok");
+      setTimeout(() => { show("screenPass"); setMode("login", "Código de acceso requerido"); stopMic(); }, 1800);
+    } else {
+      sfx.error();
+      vibrate([300, 100, 300]);
+      micBtn.classList.add("bad");
+      refreshVoiceUI("VOZ NO RECONOCIDA. Probá de nuevo, cerca del micrófono y sin ruido.", "err");
+      voicePct.textContent = `Parecido con la voz registrada: ${pct}% (necesita ${Math.round(VOICE_THRESHOLD * 100)}%)`;
+    }
+  }
+
+  // Animación de ondas alrededor del micrófono
+  let phase = 0, smooth = 0;
+  function drawWave() {
+    const w = wave.width, h = wave.height, cx = w / 2, cy = h / 2;
+    wctx.clearRect(0, 0, w, h);
+    smooth += (Math.min(level * 12, 1) - smooth) * 0.25;
+    phase += 0.04;
+    const base = w * 0.27;
+    for (let ring = 0; ring < 3; ring++) {
+      wctx.beginPath();
+      for (let a = 0; a <= Math.PI * 2 + 0.01; a += Math.PI / 90) {
+        const amp = (recording ? 6 + smooth * 70 : 3) * (1 - ring * 0.25);
+        const r = base + ring * 26 + Math.sin(a * (5 + ring * 2) + phase * (1 + ring)) * amp;
+        const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+        a === 0 ? wctx.moveTo(x, y) : wctx.lineTo(x, y);
+      }
+      wctx.strokeStyle = recording ? `rgba(57,255,136,${0.8 - ring * 0.22})` : `rgba(34,211,255,${0.5 - ring * 0.13})`;
+      wctx.lineWidth = 4 - ring;
+      wctx.shadowColor = recording ? "#39ff88" : "#22d3ff";
+      wctx.shadowBlur = 14;
+      wctx.stroke();
+    }
+    requestAnimationFrame(drawWave);
+  }
+  requestAnimationFrame(drawWave);
+
+  // Empieza a descargar el modelo apenas abre la página
+  loadVoiceModel().catch(() => {});
+
+  /* ================== PANTALLA 4: LA GUARIDA ================== */
   const doors = document.getElementById("doors");
   function openLair() {
     doors.classList.remove("open");
@@ -845,6 +1274,39 @@
     setTimeout(() => { doors.classList.remove("show", "open"); }, 3200);
   }
 
+  function updateVoiceInfo() {
+    const vp = loadVoiceprint();
+    const info = document.getElementById("voiceInfo");
+    info.textContent = vp
+      ? "Tu voz está registrada en este aparato desde el " + new Date(vp.at).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" }) + "."
+      : "No hay ninguna voz registrada en este aparato.";
+  }
+  updateVoiceInfo();
+  document.getElementById("reVoiceBtn").addEventListener("click", () => { audio(); startEnroll("lair"); });
+
+  // Ubicación: copia un link de mapa para pegar en el chat
+  const locBtn = document.getElementById("locBtn");
+  const locStatus = document.getElementById("locStatus");
+  locBtn.addEventListener("click", () => {
+    if (!navigator.geolocation) { locStatus.textContent = "Este navegador no puede ver tu ubicación."; return; }
+    locStatus.textContent = "Buscando tu ubicación…";
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const { latitude, longitude, accuracy } = pos.coords;
+      const link = `https://maps.google.com/?q=${latitude.toFixed(5)},${longitude.toFixed(5)}`;
+      try {
+        await navigator.clipboard.writeText(link);
+        locStatus.textContent = `✔ Ubicación copiada (precisión ~${Math.round(accuracy)} m). Abrí el chat y pegala.`;
+      } catch (_) {
+        locStatus.textContent = "Copiá este link y pegalo en el chat: " + link;
+      }
+      sfx.key();
+    }, err => {
+      locStatus.textContent = err.code === 1
+        ? "Tenés que permitir la ubicación en el navegador."
+        : "No se pudo obtener tu ubicación. Probá de nuevo.";
+    }, { enableHighAccuracy: true, timeout: 15000 });
+  });
+
   document.getElementById("logoutBtn").addEventListener("click", () => {
     // Reinicia todo
     locked = false; scanDone = false;
@@ -853,6 +1315,7 @@
     scanner.classList.remove("done", "fail", "scanning");
     setStatus(scanStatus, "Apoyá tu mano para escanear");
     tone(300, .3, "sine", .1, 0, 100);
+    stopMic();
     show("screenScan");
   });
 </script>
