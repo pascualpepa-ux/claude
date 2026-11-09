@@ -565,6 +565,34 @@
   .small.net.err { color: var(--red); }
   .mini.del { border: 0; padding: 0 4px; }
   #lair .card.wide p b { color: var(--green); }
+
+  /* ====== LECTOR DE TARJETA ====== */
+  .card-reader {
+    position: relative; width: min(88vw, 420px); max-width: 100%; aspect-ratio: 1.586;
+    border-radius: 18px; overflow: hidden; display: grid; place-items: center;
+    border: 2px dashed rgba(34, 211, 255, .6); background: rgba(5, 15, 28, .75);
+    box-shadow: inset 0 0 40px rgba(34, 211, 255, .15), 0 0 25px rgba(34, 211, 255, .2);
+  }
+  .card-reader img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .85; }
+  .card-reader img:not([src]) { display: none; }
+  .card-hint { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 3rem; filter: drop-shadow(0 0 10px var(--blue)); }
+  .card-hint span { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); filter: none; }
+  .card-reader img[src] ~ .card-hint { display: none; }
+  .card-laser { opacity: 0; }
+  .card-reader.reading .card-laser { opacity: 1; animation: sweep 1.2s ease-in-out infinite alternate; }
+  @keyframes sweep { from { top: 4%; } to { top: 94%; } }
+  .card-reader.ok { border: 3px solid var(--green); box-shadow: 0 0 35px rgba(57, 255, 136, .6); }
+  .card-reader.bad { border: 3px solid var(--red); box-shadow: 0 0 35px rgba(255, 51, 85, .6); animation: shake .4s; }
+  .cam-btn { position: relative; width: auto; padding: 16px 26px; font-size: .9rem; }
+  .vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+  .who-pick, .time-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .count-btn.name-btn, .count-btn.time-btn { width: auto; min-width: 120px; padding: 0 18px; font-size: .95rem; }
+  .count-btn.time-btn { height: 64px; }
+  .chips.quick { margin-bottom: 12px; }
+  .log-day { margin: 10px 0 2px; font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); }
+  .log-time { font-family: ui-monospace, "Roboto Mono", monospace; color: var(--muted); font-size: .8rem; }
+  .item.log-in { border-left-color: var(--green); }
+  .item.log-out { border-left-color: var(--red); }
 </style>
 <div class="bg"></div>
 <div class="corner-left">
@@ -578,7 +606,7 @@
 <main>
   <!-- ========== ESCÁNER DE MANO ========== -->
   <section class="screen active" id="screenScan">
-    <div class="step" id="scanStep">Nivel de seguridad 1/3</div>
+    <div class="step" id="scanStep">Nivel de seguridad 1/4</div>
     <h1 id="scanTitle">Escáner biométrico</h1>
     <div class="scanner" id="scanner" role="button" aria-label="Mantené presionado para escanear tu mano">
       <svg viewBox="-14 0 214 262" aria-hidden="true">
@@ -614,9 +642,31 @@
     <button class="btn change-btn cancel" id="scanCancel" hidden>✕ Cancelar configuración</button>
   </section>
 
+  <!-- ========== LECTOR DE TARJETA ========== -->
+  <section class="screen" id="screenCard">
+    <div class="step" id="cardStep">Nivel de seguridad 2/4</div>
+    <h1 id="cardTitle">Lector de tarjeta</h1>
+    <div class="card-reader" id="cardReader">
+      <img id="cardImg" alt="">
+      <div class="card-hint" id="cardHint">💳<span>Acercá tu tarjeta a la cámara</span></div>
+      <div class="laser card-laser"></div>
+    </div>
+    <label class="big-btn cam-btn" id="cardBtn">
+      <input type="file" id="cardFile" accept="image/*" capture="environment" class="vh">
+      📷 <span id="cardBtnText">Escanear tarjeta</span>
+    </label>
+    <div class="status" id="cardStatus">Tocá el botón y sacale una foto a tu tarjeta</div>
+    <div class="who-pick" id="whoPick" hidden></div>
+    <div class="voice-actions">
+      <button class="btn" id="cardSkip" hidden>Saltar el dorso →</button>
+      <button class="btn" id="cardNoCard">No tengo la tarjeta</button>
+      <button class="btn change-btn cancel" id="cardCancel">✕ Cancelar</button>
+    </div>
+  </section>
+
   <!-- ========== IDENTIDAD (cuenta de Claude) ========== -->
   <section class="screen" id="screenId">
-    <div class="step">Nivel de seguridad 2/3</div>
+    <div class="step">Nivel de seguridad 3/4</div>
     <h1>Verificando identidad</h1>
     <div class="id-ring" id="idRing"><img id="idAvatar" alt=""></div>
     <div class="status" id="idStatus">Leyendo tu credencial…</div>
@@ -625,7 +675,7 @@
 
   <!-- ========== CONTRASEÑA ========== -->
   <section class="screen" id="screenPass">
-    <div class="step" id="passStep">Nivel de seguridad 3/3</div>
+    <div class="step" id="passStep">Nivel de seguridad 4/4</div>
     <h1 id="passTitle">Ingresá la contraseña</h1>
     <div class="security-panel" id="panel">
       <div class="display" id="display"><span class="ph">Escribí la contraseña</span></div>
@@ -646,9 +696,16 @@
     <h1>¿Cuántas personas van a usar la guarida?</h1>
     <div class="count-row" id="countRow" role="group" aria-label="Cantidad de personas"></div>
     <div class="names" id="names"></div>
-    <div class="status" id="setupStatus">Después cada una escanea su mano y eligen la contraseña.</div>
+    <div class="status" id="setupStatus">Después cada una escanea su mano y su tarjeta, y eligen la contraseña.</div>
     <button class="big-btn" id="setupNext">Siguiente →</button>
     <button class="btn change-btn cancel" id="setupCancel">✕ Cancelar</button>
+  </section>
+
+  <section class="screen" id="screenTime">
+    <div class="step">Acceso concedido</div>
+    <h1 id="timeTitle">¿Cuánto tiempo te vas a quedar en la guarida?</h1>
+    <div class="time-row" id="timeRow"></div>
+    <div class="status">Queda anotado en el registro de la guarida.</div>
   </section>
 
   <section class="screen" id="screenSetupDone">
@@ -668,6 +725,7 @@
       <button role="tab" data-tab="codes" aria-selected="false">🔐 Códigos</button>
       <button role="tab" data-tab="missions" aria-selected="false">🎯 Misiones</button>
       <button role="tab" data-tab="people" aria-selected="false">👥 Personas</button>
+      <button role="tab" data-tab="log" aria-selected="false">📋 Registro</button>
       <button role="tab" data-tab="more" aria-selected="false">⚙ Más</button>
     </nav>
     <p class="small net" id="netStatus">Conectando…</p>
@@ -716,13 +774,25 @@
       <div class="list" id="personList"></div>
     </article>
 
+    <article class="card wide tab-panel" id="tab-log" hidden>
+      <h2><span class="ic">📋</span>Registro de la guarida</h2>
+      <p id="logIntro">Cada vez que agarrás o usás algo, anotalo acá.</p>
+      <div class="chips quick" id="logQuick"></div>
+      <form class="chat-form" id="logForm" autocomplete="off">
+        <input id="logInput" maxlength="80" placeholder="¿Qué agarraste o hiciste? (ej: usé el libro de dinosaurios)" aria-label="Qué agarraste o hiciste">
+        <button type="submit">Anotar</button>
+      </form>
+      <h3 class="sub-h" id="logListTitle">Lo último</h3>
+      <div class="list" id="logList"></div>
+    </article>
+
     <article class="card wide tab-panel" id="tab-more" hidden>
       <h2><span class="ic">📲</span>Invitar a tu hermana</h2>
       <p>Tocá <b>Compartir</b> arriba en Claude, poné el email de su cuenta de Claude y elegí <b>Editor</b>. Así puede entrar, leer y escribir en el chat. Si la invitás solo para ver, puede leer pero no escribir.</p>
       <p class="small">Todo lo que escriben acá queda guardado: aunque cierren la guarida, el chat, los códigos y las misiones siguen ahí cuando vuelven.</p>
     </article>
 
-    <button class="btn" id="logoutBtn">⏻ Cerrar sesión</button>
+    <button class="btn" id="logoutBtn">⏻ Salir de la guarida</button>
   </section>
 </main>
 
@@ -757,6 +827,8 @@
   let cfgLoaded = false;
   let codes = {}, missions = {}, people = {}, msgsByUser = {};
   let profileMap = {};
+  let sample = null, canSeeImages = false;
+  let registro = {};                    // uid -> items
   const ready = (async () => {
     [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
     if (!db) return;
@@ -771,6 +843,12 @@
     sub("codes", o => codes = o);
     sub("missions", o => missions = o);
     sub("people", o => people = o);
+    db.collection("registro").onSnapshot(snap => {
+      const o = {}; for (const d of snap.docs) { const x = d.data(); o[d.id] = Array.isArray(x && x.items) ? x.items : []; }
+      registro = o; renderLog();
+    }, () => {});
+    sample = await claude.use("sample");
+    if (sample) { const lim = await sample.limits().catch(() => null); canSeeImages = !!(lim && lim.images); }
     let first = true;
     db.collection("mensajes").onSnapshot(snap => {
       const before = countMsgs();
@@ -935,11 +1013,11 @@
     if (setup) {
       pct.textContent = "100% — Mano guardada";
       setStatus(scanStatus, `MANO DE ${setup.names[setup.scanIndex].toUpperCase()} REGISTRADA`, "ok");
-      setTimeout(setupNextScan, 1500);
+      setTimeout(() => startCard("setup", setup.scanIndex), 1500);
     } else {
       pct.textContent = "100% — Identidad confirmada";
       setStatus(scanStatus, "HUELLA RECONOCIDA", "ok");
-      setTimeout(checkIdentity, 1600);
+      setTimeout(() => startCard("login"), 1600);
     }
   }
   scanner.addEventListener("pointerdown", startScan);
@@ -951,12 +1029,14 @@
 
   function goToEntrance() {
     setup = null;
-    resetScanner("Nivel de seguridad 1/3", "Escáner biométrico", "Apoyá tu mano para escanear");
+    resetScanner("Nivel de seguridad 1/4", "Escáner biométrico", "Apoyá tu mano para escanear");
+    personIdx = -1; personName = "";
     show("screenScan");
   }
 
   /* ================== IDENTIDAD ================== */
-  let myName = "";
+  let myName = "";          // nombre de la cuenta de Claude
+  let personIdx = -1, personName = "";   // quién es, según la tarjeta
   async function checkIdentity() {
     show("screenId");
     $("idBack").hidden = true;
@@ -983,6 +1063,240 @@
     setTimeout(() => { show("screenPass"); setMode("login", "Código de acceso requerido"); }, 1700);
   }
   $("idBack").addEventListener("click", goToEntrance);
+
+
+  /* ================== LECTOR DE TARJETA ==================
+     El artifact no puede usar la cámara en vivo: el botón abre la cámara
+     del aparato, se saca una foto y Claude la compara con las tarjetas
+     registradas. Solo se guarda una descripción, nunca la foto. */
+  let cardCtx = null;   // { mode: "login" | "setup", person, side, parts }
+  const cardImg = $("cardImg"), cardStatus = $("cardStatus"), cardReader = $("cardReader");
+  function startCard(mode, person = 0) {
+    cardCtx = { mode, person, side: "front", parts: [] };
+    cardImg.removeAttribute("src");
+    cardReader.className = "card-reader";
+    $("whoPick").hidden = true;
+    $("cardFile").value = "";
+    if (mode === "setup") {
+      const name = setup.names[person];
+      $("cardStep").textContent = `Configuración · paso 2 de 3 · tarjeta ${person + 1} de ${setup.count}`;
+      $("cardTitle").textContent = `Tarjeta de ${name}`;
+      $("cardBtnText").textContent = "Foto del frente";
+      $("cardNoCard").hidden = true;
+      $("cardSkip").hidden = true;
+      setStatus(cardStatus, `${name}: sacale una foto al FRENTE de tu tarjeta`);
+    } else {
+      $("cardStep").textContent = "Nivel de seguridad 2/4";
+      $("cardTitle").textContent = "Lector de tarjeta";
+      $("cardBtnText").textContent = "Escanear tarjeta";
+      $("cardNoCard").hidden = false;
+      $("cardSkip").hidden = true;
+      setStatus(cardStatus, "Tocá el botón y sacale una foto a tu tarjeta (de cualquier lado)");
+    }
+    show("screenCard");
+  }
+  $("cardCancel").addEventListener("click", goToEntrance);
+  $("cardNoCard").addEventListener("click", () => {
+    audio(); show("screenPass");
+    setMode("cardAdmin", "Sin tarjeta solo se puede entrar con el código de administrador");
+  });
+  $("cardSkip").addEventListener("click", () => { audio(); finishSetupCard(); });
+
+  // Achica la foto antes de mandarla
+  function shrinkImage(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const max = 1280, k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+        const c = document.createElement("canvas");
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(b => b ? resolve({ blob: b, preview: c.toDataURL("image/jpeg", .7) }) : reject(new Error("blob")), "image/jpeg", .85);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("img")); };
+      img.src = url;
+    });
+  }
+  function sampleError(e) {
+    const c = e && e.code;
+    if (c === "not_granted") return "Tenés que permitir que la guarida use Claude para leer tarjetas.";
+    if (c === "rate_limited") return "Claude está ocupado. Esperá un minuto y probá de nuevo.";
+    if (c === "images_unavailable") return "Acá no se pueden mandar fotos a Claude.";
+    return "No pude leer la foto. Probá de nuevo con más luz.";
+  }
+
+  $("cardFile").addEventListener("change", async e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file || !cardCtx) return;
+    audio();
+    await ready;
+    if (!sample) { setStatus(cardStatus, "La lectura de tarjetas no está disponible en esta vista. Usá “No tengo la tarjeta”.", "err"); return; }
+    let shot;
+    try { shot = await shrinkImage(file); } catch (_) { setStatus(cardStatus, "No pude abrir la foto. Probá de nuevo.", "err"); return; }
+    cardImg.src = shot.preview;
+    cardReader.className = "card-reader reading";
+    setStatus(cardStatus, "Leyendo tarjeta…");
+    humStart();
+    try {
+      if (cardCtx.mode === "setup") await describeCard(shot.blob);
+      else await identifyCard(shot.blob);
+    } catch (err) {
+      humStop();
+      cardReader.className = "card-reader bad"; sfx.error();
+      setStatus(cardStatus, sampleError(err), "err");
+    } finally { $("cardFile").value = ""; }
+  });
+
+  async function describeCard(blob) {
+    const side = cardCtx.side === "front" ? "frente" : "dorso";
+    const r = await sample.json(
+      `La foto muestra el ${side} de una tarjeta de plástico que un chico usa como llave para entrar a su guarida. ` +
+      `Describí cómo se ve para poder reconocerla después en otra foto: colores, logos, dibujos, palabras grandes impresas y distribución. ` +
+      `NO incluyas nombres de personas, números, códigos, PIN ni teléfonos. ` +
+      `Respondé solo JSON: {"ok": true o false (false si no se ve una tarjeta), "desc": "una o dos frases en español"}`,
+      { images: [blob], cache: false });
+    humStop();
+    if (!r || !r.ok || !r.desc) {
+      cardReader.className = "card-reader bad"; sfx.fail();
+      setStatus(cardStatus, "No se ve bien la tarjeta. Sacá otra foto, más cerca y con luz.", "err");
+      return;
+    }
+    cardCtx.parts.push(`${side === "frente" ? "Frente" : "Dorso"}: ${String(r.desc).slice(0, 300)}`);
+    cardReader.className = "card-reader ok"; pip();
+    if (cardCtx.side === "front") {
+      cardCtx.side = "back";
+      $("cardBtnText").textContent = "Foto del dorso";
+      $("cardSkip").hidden = false;
+      setStatus(cardStatus, "✔ Frente guardado. Ahora dale vuelta y sacale una foto al DORSO", "ok-small");
+    } else finishSetupCard();
+  }
+  function finishSetupCard() {
+    if (!cardCtx.parts.length) { setStatus(cardStatus, "Primero sacale una foto al frente.", "err"); return; }
+    setup.cards[cardCtx.person] = cardCtx.parts.join(" ");
+    setStatus(cardStatus, `TARJETA DE ${setup.names[cardCtx.person].toUpperCase()} REGISTRADA`, "ok");
+    $("cardSkip").hidden = true;
+    sfx.success();
+    setTimeout(setupNextScan, 1400);
+  }
+
+  async function identifyCard(blob) {
+    const c = await waitConfig();
+    const cards = (c && c.cards) || [];
+    if (!c || !cards.some(Boolean)) {
+      humStop();
+      setStatus(cardStatus, "Todavía no hay tarjetas registradas. Volvé al inicio y tocá ⚙ Configurar.", "err");
+      return;
+    }
+    const list = c.names.map((n, i) => cards[i] ? `${i + 1}. ${cards[i]}` : null).filter(Boolean).join("\n");
+    const r = await sample.json(
+      `Esta foto es de una tarjeta que alguien acerca a un lector para entrar a una guarida. Puede ser del frente o del dorso. ` +
+      `Estas son las tarjetas registradas:\n${list}\n\n` +
+      `¿A cuál de esas tarjetas corresponde la foto? Si no se parece claramente a ninguna, o no se ve una tarjeta, respondé 0. ` +
+      `Respondé solo JSON: {"match": número de la tarjeta o 0, "seguro": "alto" | "medio" | "bajo"}`,
+      { images: [blob], cache: false });
+    humStop();
+    const i = Number(r && r.match) - 1;
+    if (!(i >= 0 && i < c.names.length && cards[i]) || r.seguro === "bajo") {
+      cardReader.className = "card-reader bad"; sfx.error(); vibrate([300, 100, 300]);
+      setStatus(cardStatus, "TARJETA NO RECONOCIDA. Probá de nuevo, con más luz y la tarjeta entera en la foto.", "err");
+      return;
+    }
+    cardReader.className = "card-reader ok"; pip(); vibrate([60, 40, 120]);
+    personIdx = i; personName = c.names[i];
+    setStatus(cardStatus, `TARJETA RECONOCIDA: ${personName.toUpperCase()}`, "ok");
+    setTimeout(checkIdentity, 1600);
+  }
+
+  function showWhoPick() {
+    show("screenCard");
+    const box = $("whoPick"); box.innerHTML = ""; box.hidden = false;
+    setStatus(cardStatus, "Código correcto. ¿Quién sos?", "ok-small");
+    (cfg ? cfg.names : []).forEach((n, i) => {
+      const b = document.createElement("button"); b.className = "count-btn name-btn"; b.textContent = n;
+      b.onclick = () => { personIdx = i; personName = n; box.hidden = true; sfx.success(); checkIdentity(); };
+      box.append(b);
+    });
+  }
+  // El "pip" del lector
+  function pip() { tone(2200, .09, "square", .12); tone(2200, .12, "square", .12, .14); }
+
+  /* ================== TIEMPO EN LA GUARIDA ================== */
+  const STAYS = [["15 minutos", 15], ["30 minutos", 30], ["1 hora", 60], ["2 horas", 120], ["Toda la tarde", 240], ["No sé", 0]];
+  let stayUntil = 0;
+  function showTime() {
+    approvedOverlay.classList.remove("show");
+    locked = false;
+    $("timeTitle").textContent = `${personName || "Agente"}, ¿cuánto tiempo te vas a quedar en la guarida?`;
+    const row = $("timeRow"); row.innerHTML = "";
+    for (const [label, min] of STAYS) {
+      const b = document.createElement("button"); b.className = "count-btn time-btn"; b.textContent = label;
+      b.onclick = () => {
+        sfx.key();
+        stayUntil = min ? Date.now() + min * 60000 : 0;
+        addLog("in", min ? `Entró a la guarida · se queda ${label}` : "Entró a la guarida");
+        openLair();
+      };
+      row.append(b);
+    }
+    show("screenTime");
+  }
+  const hhmm = t => new Date(t).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+
+  /* ================== REGISTRO ================== */
+  const QUICK = [["🍬", "Agarré un chuche"], ["📚", "Usé un libro"], ["🎮", "Usé un juego"], ["🖍️", "Usé materiales"], ["🧸", "Agarré un juguete"]];
+  let logWriting = Promise.resolve();
+  function addLog(kind, what) {
+    if (!db || !myId) return;
+    const item = { id: newId(), at: Date.now(), kind, what: String(what).slice(0, 100), who: personName || myName || "Alguien" };
+    logWriting = logWriting.then(async () => {
+      try {
+        const items = [...(registro[myId] || []), item].slice(-500);
+        await db.doc("registro/" + myId).set({ items });
+      } catch (_) { writeErr(); }
+    });
+    return logWriting;
+  }
+  (function renderQuick() {
+    const box = $("logQuick");
+    for (const [ic, label] of QUICK) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip";
+      b.textContent = `${ic} ${label}`;
+      b.onclick = async () => { await addLog("item", `${ic} ${label}`); sfx.success(); };
+      box.append(b);
+    }
+  })();
+  $("logForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const t = $("logInput").value.trim();
+    if (!t) return;
+    await addLog("item", "✏️ " + t);
+    $("logInput").value = ""; sfx.success();
+  });
+  function renderLog() {
+    const all = [];
+    for (const [uid, items] of Object.entries(registro)) for (const it of items) if (it && it.id) all.push({ ...it, uid });
+    all.sort((a, b) => b.at - a.at);
+    const everyone = isOwner;
+    $("logIntro").textContent = everyone
+      ? "Cada vez que agarran o usan algo, lo anotan acá. Como esta guarida es tuya, ves lo que anotan todos."
+      : "Cada vez que agarrás o usás algo, anotalo acá. Ves lo tuyo; el dueño de la guarida ve lo de todos.";
+    $("logListTitle").textContent = everyone ? "Registro de todos" : "Lo que anotaste";
+    const list = $("logList"); list.textContent = "";
+    if (!all.length) list.append(emptyNote("Todavía no hay nada anotado."));
+    let lastDay = "";
+    for (const it of all.slice(0, 200)) {
+      const day = new Date(it.at).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" });
+      if (day !== lastDay) { const h = document.createElement("p"); h.className = "log-day"; h.textContent = day; list.append(h); lastDay = day; }
+      const row = document.createElement("div"); row.className = "item log-" + it.kind;
+      const left = document.createElement("div"); left.className = "item-main";
+      const t = document.createElement("span"); t.className = "log-time"; t.textContent = hhmm(it.at);
+      const w = document.createElement("b"); w.textContent = it.who;
+      const d = document.createElement("span"); d.textContent = it.what;
+      left.append(t, w, d); row.append(left); list.append(row);
+    }
+  }
 
   /* ================== TECLADO / CONTRASEÑA ================== */
   const keysEl = $("keys"), display = $("display"), panel = $("panel"), passStatus = $("passStatus"),
@@ -1027,10 +1341,10 @@
   function setMode(m, msg, cls = "") {
     mode = m; entry = "";
     const titles = { login: "Ingresá la contraseña", admin: "Código de administrador", new: "Escribí la contraseña nueva",
-      confirm: "Repetí la contraseña nueva", setupAdmin: "Código de administrador", setupNew: "Elijan la contraseña", setupConfirm: "Repitan la contraseña" };
+      confirm: "Repetí la contraseña nueva", setupAdmin: "Código de administrador", cardAdmin: "Código de administrador", setupNew: "Elijan la contraseña", setupConfirm: "Repitan la contraseña" };
     passTitle.textContent = titles[m];
     $("passStep").textContent = (m === "setupNew" || m === "setupConfirm") ? "Configuración · paso 3 de 3"
-      : m === "setupAdmin" ? "Configuración" : m === "login" ? "Nivel de seguridad 3/3" : "Cambiar contraseña";
+      : m === "setupAdmin" ? "Configuración" : m === "login" ? "Nivel de seguridad 4/4" : m === "cardAdmin" ? "Entrar sin tarjeta" : "Cambiar contraseña";
     const changing = m !== "login";
     changeBtn.textContent = changing ? "✕ Cancelar" : "🔑 Cambiar contraseña";
     changeBtn.classList.toggle("cancel", changing);
@@ -1040,7 +1354,7 @@
   changeBtn.addEventListener("click", () => {
     if (locked) return;
     audio(); tone(700, .08, "square", .06);
-    if (mode.startsWith("setup")) { goToEntrance(); return; }
+    if (mode.startsWith("setup") || mode === "cardAdmin") { goToEntrance(); return; }
     if (mode === "login") setMode("admin", "Ingresá el código para cambiar la contraseña");
     else setMode("login", "Cambio cancelado. Código de acceso requerido");
   });
@@ -1085,11 +1399,12 @@
       if (ok) {
         locked = true;
         approvedOverlay.classList.add("show"); sfx.approved(); vibrate([100, 60, 100, 60, 200]);
-        setTimeout(openLair, 2300);
+        setTimeout(showTime, 2300);
       } else denied("Contraseña incorrecta. Intentá de nuevo.", () => setMode("login", "Acceso denegado. Volvé a ingresar la contraseña", "err"));
-    } else if (mode === "admin" || mode === "setupAdmin") {
+    } else if (mode === "admin" || mode === "setupAdmin" || mode === "cardAdmin") {
       if (value === ADMIN_CODE) {
         sfx.success();
+        if (mode === "cardAdmin") { setMode("login", "Código de acceso requerido"); showWhoPick(); return; }
         if (mode === "admin") setMode("new", "Podés usar números, letras, mayúsculas, símbolos y espacios.");
         else startSetup();
       } else { const m = mode; denied("Código de administrador incorrecto.", () => setMode(m, "Código incorrecto. Probá de nuevo o tocá Cancelar", "err")); }
@@ -1106,10 +1421,10 @@
       const pw = { salt, hash: await hashPassword(value, salt) };
       pendingPassword = "";
       if (mode === "setupConfirm") {
-        const ok = await writeConfig({ names: setup.names, pw, upd: Date.now() });
+        const ok = await writeConfig({ names: setup.names, cards: setup.cards, pw, upd: Date.now() });
         if (!ok) { sfx.error(); setStatus(passStatus, "No se pudo guardar. ¿Tenés permiso de Editor en esta guarida?", "err"); return; }
         sfx.approved();
-        $("doneText").textContent = `Listo. La guarida es de ${listNames(setup.names)}. Para entrar hace falta la mano, la cuenta de Claude de cada uno y la contraseña.`;
+        $("doneText").textContent = `Listo. La guarida es de ${listNames(setup.names)}. Para entrar hace falta la mano, la tarjeta de cada uno, la cuenta de Claude y la contraseña.`;
         setup = null;
         setMode("login", "Código de acceso requerido");
         show("screenSetupDone");
@@ -1140,7 +1455,7 @@
   });
   function startSetup() {
     const prev = cfg ? cfg.names || [] : [];
-    setup = { count: Math.max(2, prev.length || 2), names: prev.slice(), scanIndex: 0 };
+    setup = { count: Math.max(2, prev.length || 2), names: prev.slice(), scanIndex: 0, cards: [] };
     renderSetup(); show("screenSetup"); $("setupBtn").hidden = true;
   }
   function renderSetup() {
@@ -1168,6 +1483,7 @@
     setup.names = setup.names.slice(0, setup.count).map((n, i) => n || `Persona ${i + 1}`);
     const lower = setup.names.map(n => n.toLowerCase());
     if (new Set(lower).size !== lower.length) { setStatus($("setupStatus"), "Cada persona tiene que tener un nombre distinto.", "err"); sfx.fail(); return; }
+    if (!canSeeImages) { setStatus($("setupStatus"), "Para registrar las tarjetas, permití que la guarida le muestre fotos a Claude (te lo pregunta al escanear).", ""); }
     sfx.success(); setup.scanIndex = -1; setupNextScan();
   });
   $("setupCancel").addEventListener("click", goToEntrance);
@@ -1282,7 +1598,7 @@
     e.preventDefault();
     const title = $("missionTitle").value.trim(), detail = $("missionDetail").value.trim();
     if (!title) return;
-    if (await save("missions", newId(), { title, detail, done: false, by: myId, created: Date.now() })) {
+    if (await save("missions", newId(), { title, detail, done: false, by: myId, byName: personName || "", created: Date.now() })) {
       $("missionTitle").value = ""; $("missionDetail").value = ""; sfx.success();
     }
   });
@@ -1300,7 +1616,7 @@
       const t = document.createElement("b"); t.textContent = m.title; txt.append(t);
       if (m.detail) { const d = document.createElement("small"); d.textContent = m.detail; txt.append(d); }
       const by = document.createElement("small"); by.className = "by";
-      by.textContent = (m.done ? "✔ Completa" : "Pendiente") + (m.by ? ` · agregó ${nm(m.by)}` : "");
+      by.textContent = (m.done ? "✔ Completa" : "Pendiente") + (m.byName ? ` · agregó ${m.byName}` : m.by ? ` · agregó ${nm(m.by)}` : "");
       txt.append(by); left.append(cb, txt);
       const acts = document.createElement("div"); acts.className = "item-acts";
       acts.append(miniBtn("Borrar", () => confirmThen(row, "¿Borrar la misión?", () => remove("missions", m.id))));
@@ -1353,7 +1669,7 @@
   let writing = Promise.resolve();
   function sendMsg(fields) {
     if (!db || !myId) return;
-    const item = { id: newId(), at: Date.now(), ...fields };
+    const item = { id: newId(), at: Date.now(), who: personName || undefined, ...fields };
     writing = writing.then(async () => {
       try {
         const items = [...(msgsByUser[myId] || []), item].slice(-400);
@@ -1389,13 +1705,13 @@
     chatList.textContent = "";
     if (!all.length) chatList.append(emptyNote("Todavía no hay mensajes. Escribí el primero."));
     for (const m of all) {
-      const mine = m.uid === myId;
+      const mine = m.who && personName ? m.who === personName : m.uid === myId;
       const row = document.createElement("div"); row.className = "cmsg" + (mine ? " mine" : "");
       const meta = document.createElement("div"); meta.className = "cmeta";
-      const who = document.createElement("span"); who.className = "who"; who.textContent = nm(m.uid);
+      const who = document.createElement("span"); who.className = "who"; who.textContent = mine ? "Vos" : (m.who || nm(m.uid));
       const when = document.createElement("span"); when.textContent = fmtTime(m.at);
       meta.append(who, when);
-      if (mine || isOwner) { const d = miniBtn("✕", () => deleteMsg(m.uid, m.id)); d.classList.add("del"); d.title = "Borrar"; d.setAttribute("aria-label", "Borrar mensaje"); meta.append(d); }
+      if (m.uid === myId || isOwner) { const d = miniBtn("✕", () => deleteMsg(m.uid, m.id)); d.classList.add("del"); d.title = "Borrar"; d.setAttribute("aria-label", "Borrar mensaje"); meta.append(d); }
       const body = document.createElement("div"); body.className = "cbody";
       if (m.k === "code") {
         const c = codes[m.code];
@@ -1417,14 +1733,14 @@
     renderingChat = false;
     if (chatAgain) { chatAgain = false; renderChat(); }
   }
-  function renderData() { renderCodes(); renderMissions(); renderPeople(); renderChat(); }
+  function renderData() { renderCodes(); renderMissions(); renderPeople(); renderChat(); renderLog(); }
 
   const doors = $("doors");
   function openLair() {
     locked = false;
     doors.classList.remove("open"); doors.classList.add("show");
     approvedOverlay.classList.remove("show");
-    $("welcomeSub").textContent = `Hola, ${myName} · Mano ✓ · Identidad ✓ · Código ✓`;
+    $("welcomeSub").textContent = `Hola, ${personName || myName}` + (stayUntil ? ` · te quedás hasta las ${hhmm(stayUntil)}` : "") + " · Mano ✓ · Tarjeta ✓ · Identidad ✓ · Código ✓";
     setChatKind("text"); showTab("chat");
     setNet(canWrite ? "🔒 Conectado · todo queda guardado en la guarida" : "Solo podés mirar: pedile al dueño que te invite como Editor.", !canWrite);
     if (!canWrite) { chatInput.disabled = true; chatSend.disabled = true; }
@@ -1434,6 +1750,7 @@
     setTimeout(() => { doors.classList.remove("show", "open"); chatList.scrollTop = chatList.scrollHeight; }, 3200);
   }
   $("logoutBtn").addEventListener("click", () => {
+    if (personName) addLog("out", "Salió de la guarida");
     locked = false; setMode("login", "Código de acceso requerido");
     tone(300, .3, "sine", .1, 0, 100); goToEntrance();
   });
