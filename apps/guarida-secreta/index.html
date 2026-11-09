@@ -189,10 +189,15 @@
   .key:active, .key.pressed { transform: scale(.94); background: rgba(34, 211, 255, .3); box-shadow: var(--glow-b); }
   .key.clear { color: var(--red); border-color: rgba(255, 51, 85, .6); text-shadow: 0 0 8px var(--red); font-size: 1rem; }
   .key.enter { color: var(--green); border-color: rgba(57, 255, 136, .6); text-shadow: 0 0 8px var(--green); font-size: 1rem; }
-  .keys.letters { grid-template-columns: repeat(7, 1fr); gap: 6px; }
-  .keys.letters .key { height: 50px; font-size: 1.05rem; padding: 0; }
+  .keys.abc, .keys.sym { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .keys.abc .key, .keys.sym .key { height: 48px; font-size: 1.05rem; padding: 0; }
+  .keys.sym .key[data-k="␣"] { font-size: .7rem; }
+  .key.on { background: rgba(57, 255, 136, .25); }
   .key.mode { color: var(--green); border-color: rgba(57, 255, 136, .6); font-size: .85rem; }
-  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .actions { display: grid; grid-template-columns: 1fr 1.3fr 1.3fr; gap: 12px; margin-top: 12px; }
+  .display { flex-wrap: wrap; min-height: 64px; height: auto; padding: 8px 10px; }
+  .display.many { gap: 6px; }
+  .display.many .dot { width: 10px; height: 10px; }
   .display .chars { font-size: 1.5rem; color: var(--green); text-shadow: var(--glow-g); letter-spacing: .25em; word-break: break-all; }
   .change-btn { margin-top: 6px; }
   .change-btn.cancel { color: var(--red); border-color: rgba(255, 51, 85, .6); }
@@ -396,20 +401,98 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   }
+
+  /* ====== CONFIGURACIÓN ====== */
+  .corner-left {
+    position: fixed; z-index: 60;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    left: calc(12px + env(safe-area-inset-left, 0px));
+  }
+  .pill-btn {
+    font: inherit; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+    height: 44px; padding: 0 14px; border-radius: 22px; cursor: pointer;
+    border: 1px solid rgba(57, 255, 136, .55); background: rgba(5, 15, 28, .85); color: var(--green);
+  }
+  .pill-btn:hover { box-shadow: var(--glow-g); }
+  .pill-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  #screenSetup h1 { line-height: 1.3; }
+  .count-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .count-btn {
+    font: inherit; font-size: 1.4rem; width: 56px; height: 56px; border-radius: 14px; cursor: pointer;
+    color: var(--blue); background: rgba(34, 211, 255, .06); border: 1px solid rgba(34, 211, 255, .5);
+  }
+  .count-btn[aria-pressed="true"] { color: var(--bg); background: var(--green); border-color: var(--green); box-shadow: var(--glow-g); }
+  .names { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+  .name-field { display: flex; align-items: center; gap: 12px; text-align: left; }
+  .name-field span { flex: none; width: 96px; font-size: .7rem; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+  .name-field input {
+    flex: 1; min-width: 0; font: 1.05rem "Segoe UI", Roboto, system-ui, sans-serif; color: var(--text);
+    background: #061322; border: 1px solid rgba(34, 211, 255, .45); border-radius: 10px; padding: 12px 14px;
+  }
+  .name-field input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 2px rgba(57, 255, 136, .25); }
+  .done-text { font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em; line-height: 1.5; max-width: 42ch; }
+  .card.wide { width: 100%; text-align: left; }
+  #screenSetupDone.active, #screenLink.active { max-width: 520px; }
+
+  /* ====== CHAT ====== */
+  .chat-card { padding: 16px; }
+  .chat-list {
+    height: min(46vh, 420px); overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+    padding: 10px; border-radius: 12px; background: rgba(0, 0, 0, .3); border: 1px solid rgba(34, 211, 255, .2);
+    margin-bottom: 10px;
+  }
+  .chat-empty { color: var(--muted); text-align: center; margin: auto; font-size: .85rem; }
+  .cmsg { max-width: 85%; align-self: flex-start; padding: 8px 12px; border-radius: 12px; background: #0b1c2e; border: 1px solid #17405a; }
+  .cmsg.mine { align-self: flex-end; background: #0a2a20; border-color: #1d6b47; }
+  .cmeta { display: flex; gap: 8px; font-size: .68rem; color: var(--muted); margin-bottom: 3px; }
+  .cmeta .who { color: var(--blue); font-weight: 700; }
+  .mine .cmeta .who { color: var(--green); }
+  .cbody {
+    font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .01em; font-size: .95rem; line-height: 1.4;
+    white-space: pre-wrap; overflow-wrap: anywhere; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  }
+  .cbody a { color: var(--blue); font-weight: 600; }
+  .clabel { font-family: var(--font); font-size: .55rem; letter-spacing: .2em; color: var(--green); border: 1px solid var(--green); border-radius: 5px; padding: 2px 6px; }
+  .cval { font-family: ui-monospace, "Roboto Mono", monospace; font-size: 1.15rem; letter-spacing: .15em; color: var(--green); text-shadow: 0 0 8px rgba(57, 255, 136, .6); }
+  .mini { font: inherit; font-size: .65rem; color: var(--muted); background: none; border: 1px solid #17405a; border-radius: 7px; padding: 3px 8px; cursor: pointer; }
+  .chat-kind { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .chat-kind button {
+    font: inherit; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+    background: none; color: var(--muted); border: 1px solid rgba(34, 211, 255, .35); border-radius: 8px; padding: 7px 10px;
+  }
+  .chat-kind button[aria-pressed="true"] { color: var(--bg); background: var(--blue); border-color: var(--blue); }
+  .chat-kind .code-k[aria-pressed="true"] { background: var(--green); border-color: var(--green); }
+  .chat-kind .loc-k { margin-left: auto; color: var(--green); border-color: rgba(57, 255, 136, .5); }
+  .chat-form { display: flex; gap: 8px; }
+  .chat-form input {
+    flex: 1; min-width: 0; font: 1rem "Segoe UI", Roboto, system-ui, sans-serif; color: var(--text);
+    background: #061322; border: 1px solid rgba(34, 211, 255, .45); border-radius: 12px; padding: 12px 14px;
+  }
+  .chat-form input.codemode { font-family: ui-monospace, "Roboto Mono", monospace; letter-spacing: .12em; color: var(--green); }
+  .chat-form input:focus { outline: none; border-color: var(--green); }
+  .chat-form button {
+    font: inherit; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+    color: var(--bg); background: var(--green); border: 0; border-radius: 12px; padding: 0 16px;
+  }
+  .chat-form button:disabled { opacity: .5; }
+  #lair .chat-card h2 { margin-bottom: 10px; }
 </style>
 </head>
 <body>
 <div class="bg"></div>
+<div class="corner-left">
+  <button class="pill-btn" id="setupBtn" title="Configurar la guarida">⚙ Configurar</button>
+</div>
 <div class="corner-btns">
   <button class="sound-toggle" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa">⛶</button>
   <button class="sound-toggle" id="soundBtn" aria-label="Activar o desactivar sonido" title="Sonido">🔊</button>
 </div>
 
 <main>
-  <!-- ========== PANTALLA 1 ========== -->
+  <!-- ========== ESCÁNER DE MANO (entrada y configuración) ========== -->
   <section class="screen active" id="screenScan">
-    <div class="step">Nivel de seguridad 1/3</div>
-    <h1>Escáner biométrico</h1>
+    <div class="step" id="scanStep">Nivel de seguridad 1/3</div>
+    <h1 id="scanTitle">Escáner biométrico</h1>
 
     <div class="scanner" id="scanner" role="button" aria-label="Mantené presionado para escanear tu mano">
       <svg viewBox="-14 0 214 262" aria-hidden="true">
@@ -428,12 +511,9 @@
             <stop offset="1" stop-color="#22d3ff" stop-opacity=".25"/>
           </linearGradient>
         </defs>
-        <!-- contorno (unión de formas) -->
         <use href="#handShape" class="hand-outline hand-glow"/>
         <use href="#handShape" class="hand-fill"/>
-        <!-- relleno escaneado -->
         <rect id="scanFill" x="-20" y="0" width="240" height="0" fill="url(#scanGrad)" clip-path="url(#handClip)"/>
-        <!-- líneas de la palma -->
         <g clip-path="url(#handClip)" fill="none" stroke="#22d3ff" stroke-opacity=".35" stroke-width="2">
           <path d="M60 170 Q105 150 155 162"/>
           <path d="M62 195 Q100 180 140 200"/>
@@ -446,11 +526,12 @@
     <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
     <div class="pct" id="pct"></div>
     <div class="status" id="scanStatus">Apoyá tu mano para escanear</div>
+    <button class="btn change-btn cancel" id="scanCancel" hidden>✕ Cancelar configuración</button>
   </section>
 
-  <!-- ========== PANTALLA 2: VOZ ========== -->
+  <!-- ========== VOZ ========== -->
   <section class="screen" id="screenVoice">
-    <div class="step">Nivel de seguridad 2/3</div>
+    <div class="step" id="voiceStep">Nivel de seguridad 2/3</div>
     <h1 id="voiceTitle">Reconocimiento de voz</h1>
     <div class="phrase" id="phrase">Tocá el micrófono y decí en voz alta:<br><b>“Abrite guarida, soy yo”</b></div>
     <div class="voice-box">
@@ -463,19 +544,19 @@
     <div class="status" id="voiceStatus">Preparando el reconocedor de voz…</div>
     <div class="voice-actions">
       <button class="btn" id="voiceRetryLoad" hidden>↻ Reintentar descarga</button>
-      <button class="btn" id="voiceEnrollBtn" hidden>🎙 Registrar mi voz</button>
       <button class="btn change-btn cancel" id="voiceCancel" hidden>✕ Cancelar</button>
     </div>
   </section>
 
-  <!-- ========== PANTALLA 3: CÓDIGO ========== -->
+  <!-- ========== CONTRASEÑA ========== -->
   <section class="screen" id="screenPass">
-    <div class="step">Nivel de seguridad 3/3</div>
+    <div class="step" id="passStep">Nivel de seguridad 3/3</div>
     <h1 id="passTitle">Ingresá la contraseña</h1>
     <div class="security-panel" id="panel">
-      <div class="display" id="display"><span class="ph">— — — —</span></div>
+      <div class="display" id="display"><span class="ph">Escribí la contraseña</span></div>
       <div class="keys" id="keys"></div>
       <div class="actions">
+        <button class="key clear" data-k="DEL" aria-label="Borrar el último">⌫</button>
         <button class="key clear" data-k="C">BORRAR</button>
         <button class="key enter" data-k="OK">ENTRAR</button>
       </div>
@@ -484,25 +565,70 @@
     <button class="btn change-btn" id="changeBtn">🔑 Cambiar contraseña</button>
   </section>
 
-  <!-- ========== PANTALLA 3 ========== -->
+  <!-- ========== CONFIGURACIÓN: PERSONAS ========== -->
+  <section class="screen" id="screenSetup">
+    <div class="step">Configuración · paso 1 de 4</div>
+    <h1>¿Cuántas personas van a usar la guarida?</h1>
+    <div class="count-row" id="countRow" role="group" aria-label="Cantidad de personas"></div>
+    <div class="names" id="names"></div>
+    <div class="status" id="setupStatus">Después cada una escanea su mano y graba su voz.</div>
+    <div class="voice-actions">
+      <button class="big-btn" id="setupNext">Siguiente →</button>
+    </div>
+    <button class="btn change-btn cancel" id="setupCancel">✕ Cancelar</button>
+  </section>
+
+  <!-- ========== CONFIGURACIÓN: LISTO ========== -->
+  <section class="screen" id="screenSetupDone">
+    <div class="welcome">Guarida configurada</div>
+    <p class="done-text" id="doneText"></p>
+    <div class="card wide">
+      <h2><span class="ic">📲</span>Pasar a otro celular</h2>
+      <p>Si tu hermana (o alguien más) va a entrar desde su propio celular, mandale este link. Al abrirlo, su celular queda configurado igual que este.</p>
+      <button class="big-btn alt" id="doneLinkBtn">Copiar link para otro celular</button>
+      <p class="small" id="doneLinkStatus">Este link es como una llave: pasalo solo a quien vive en la guarida.</p>
+    </div>
+    <button class="big-btn" id="doneStart">Ir a la entrada</button>
+  </section>
+
+  <!-- ========== VINCULAR (abrir link de otro celular) ========== -->
+  <section class="screen" id="screenLink">
+    <div class="welcome">Unirse a la guarida</div>
+    <p class="done-text" id="linkText"></p>
+    <button class="big-btn" id="linkYes">Sí, usar en este celular</button>
+    <button class="btn" id="linkNo">No, cancelar</button>
+  </section>
+
+  <!-- ========== LA GUARIDA ========== -->
   <section class="screen" id="lair">
     <div class="welcome">Bienvenido a la Guarida</div>
-    <div class="welcome-sub">Mano ✓ · Voz ✓ · Código ✓</div>
+    <div class="welcome-sub" id="welcomeSub">Mano ✓ · Voz ✓ · Código ✓</div>
+
+    <article class="card wide chat-card">
+      <h2><span class="ic">💬</span>Chat de la guarida</h2>
+      <div class="chat-list" id="chatList" aria-live="polite"></div>
+      <div class="chat-kind" role="group" aria-label="Tipo de mensaje">
+        <button type="button" id="kText" aria-pressed="true">Mensaje</button>
+        <button type="button" id="kCode" class="code-k" aria-pressed="false">Código</button>
+        <button type="button" id="kLoc" class="loc-k">📍 Mandar ubicación</button>
+      </div>
+      <form id="chatForm" class="chat-form" autocomplete="off">
+        <input id="chatInput" maxlength="500" placeholder="Escribí un mensaje…" aria-label="Mensaje">
+        <button id="chatSend" type="submit">Enviar</button>
+      </form>
+      <p class="small" id="chatStatus">Conectando…</p>
+    </article>
+
     <div class="grid">
       <article class="card">
-        <h2><span class="ic">💬</span>Chat de la guarida</h2>
-        <p>Mandate mensajes y códigos con la gente que invitaste al chat.</p>
-        <a class="big-btn" id="chatLink" href="https://claude.ai/artifact/Q75tn5DMGR3YWTDJpD4pMs" target="_blank" rel="noopener">Abrir el chat</a>
-      </article>
-      <article class="card">
-        <h2><span class="ic">📍</span>Mi ubicación</h2>
-        <p>Copia un link con tu ubicación en el mapa. Después pegalo en el chat.</p>
-        <button class="big-btn alt" id="locBtn">Copiar mi ubicación</button>
-        <p class="small" id="locStatus">Mandala solo a gente que conocés en persona.</p>
+        <h2><span class="ic">📲</span>Otro celular</h2>
+        <p>Copiá el link y mandáselo a quien también usa la guarida para que su celular quede configurado.</p>
+        <button class="big-btn alt" id="linkBtn">Copiar link</button>
+        <p class="small" id="linkStatus">Este link es como una llave: pasalo solo a quien vive en la guarida.</p>
       </article>
       <article class="card">
         <h2><span class="ic">🎙</span>Mi voz</h2>
-        <p id="voiceInfo">Tu voz está registrada en este aparato.</p>
+        <p id="voiceInfo">Tu voz está registrada.</p>
         <button class="big-btn alt" id="reVoiceBtn">Volver a grabar mi voz</button>
       </article>
     </div>
@@ -529,15 +655,57 @@
 
 <script>
   /* ================== CONFIGURACIÓN ================== */
-  const DEFAULT_PASSWORD = "1234"; // contraseña inicial (se puede cambiar desde la app)
-  const ADMIN_CODE = "2016";       // código para cambiar la contraseña o registrar la voz
-  const VOICE_THRESHOLD = 0.72;    // qué tan parecida tiene que ser la voz (0 a 1). Más alto = más estricto
+  const ADMIN_CODE = "2016";       // código para configurar la guarida o cambiar la contraseña
+  const VOICE_THRESHOLD = 0.65;    // qué tan parecida tiene que ser la voz (0 a 1). Más alto = más estricto
   const VOICE_SECONDS = 4;         // segundos que graba cada vez
+  const VOICE_VARIANTS = [         // las 3 formas de grabar cada voz
+    "con tu voz <b>normal</b>",
+    "un poco <b>más fuerte</b>",
+    "un poco <b>más bajito</b>, tranquilo",
+  ];
   const VOICE_MODEL = "Xenova/wavlm-base-plus-sv"; // modelo de reconocimiento de hablante
   const TRANSFORMERS_URL = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2";
-  const MIN_LENGTH = 4;            // largo mínimo de una contraseña nueva
-  const SCAN_DURATION = 3000;     // milisegundos que hay que mantener la mano
-  const MAX_DIGITS = 12;
+  const CHAT_SERVER = "https://ntfy.sh";  // retransmite los mensajes (cifrados) entre celulares
+  const MAX_PASSWORD = 40;
+  const MAX_PEOPLE = 5;
+  const SCAN_DURATION = 3000;      // milisegundos que hay que mantener la mano
+  const CONFIG_KEY = "guarida-config";
+
+  const $ = id => document.getElementById(id);
+
+  /* ================== GUARDADO ================== */
+  function loadConfig() {
+    try {
+      const c = JSON.parse(localStorage.getItem(CONFIG_KEY));
+      return c && c.v === 2 && Array.isArray(c.people) && c.people.length ? c : null;
+    } catch (_) { return null; }
+  }
+  function saveConfig(c) {
+    try { localStorage.setItem(CONFIG_KEY, JSON.stringify(c)); return true; } catch (_) { return false; }
+  }
+  let config = loadConfig();
+
+  function randomId(n) {
+    const abc = "abcdefghijkmnpqrstuvwxyz23456789", b = new Uint8Array(n);
+    crypto.getRandomValues(b);
+    return Array.from(b, x => abc[x % abc.length]).join("");
+  }
+  const toB64 = bytes => btoa(String.fromCharCode(...bytes));
+  const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const b64url = s => s.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const unb64url = s => { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; return s; };
+
+  async function hashPassword(pw, salt) {
+    const data = new TextEncoder().encode(salt + "|" + pw);
+    if (crypto.subtle) {
+      const h = new Uint8Array(await crypto.subtle.digest("SHA-256", data));
+      return Array.from(h, x => x.toString(16).padStart(2, "0")).join("");
+    }
+    // Sin https no hay crypto.subtle: hash simple para que igual funcione
+    let a = 0x811c9dc5, b = 0x12345;
+    for (const x of data) { a = Math.imul(a ^ x, 16777619) >>> 0; b = Math.imul(b + x, 2654435761) >>> 0; }
+    return a.toString(16) + b.toString(16);
+  }
 
   /* ================== SONIDO (Web Audio) ================== */
   let ctx = null;
@@ -579,7 +747,6 @@
     src.connect(f).connect(g).connect(ctx.destination);
     src.start(t); src.stop(t + dur);
   }
-  // Zumbido continuo del escáner
   let hum = null;
   function humStart() {
     if (!soundOn || !audio()) return;
@@ -610,19 +777,18 @@
     fail: () => tone(400, .3, "square", .1, 0, 120),
     approved: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .45, "triangle", .16, i * .13)),
     doors: () => { tone(90, .4, "square", .12); noise(2.3, .25, .35, 300); tone(70, 2, "sawtooth", .05, .35, 40); tone(1500, .1, "sine", .1, 2.6); },
+    msg: () => { tone(988, .08, "sine", .1); tone(1319, .12, "sine", .1, .09); },
   };
-  const soundBtn = document.getElementById("soundBtn");
+  const soundBtn = $("soundBtn");
   soundBtn.addEventListener("click", () => {
     soundOn = !soundOn;
     soundBtn.textContent = soundOn ? "🔊" : "🔇";
     if (soundOn) { audio(); sfx.key(); } else humStop();
   });
 
-  /* Pantalla completa (si el navegador lo permite) */
-  const fsBtn = document.getElementById("fsBtn");
+  const fsBtn = $("fsBtn");
   const root = document.documentElement;
-  const canFs = root.requestFullscreen || root.webkitRequestFullscreen;
-  if (!canFs) fsBtn.hidden = true;
+  if (!(root.requestFullscreen || root.webkitRequestFullscreen)) fsBtn.hidden = true;
   fsBtn.addEventListener("click", async () => {
     try {
       if (document.fullscreenElement || document.webkitFullscreenElement) {
@@ -636,19 +802,20 @@
   /* ================== NAVEGACIÓN ================== */
   function show(id) {
     document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+    $("setupBtn").hidden = !(id === "screenScan" && !setup);
+    window.scrollTo(0, 0);
   }
-  const vibrate = p => { if (navigator.vibrate) navigator.vibrate(p); };
-
-  /* ================== PANTALLA 1: ESCÁNER ================== */
-  const scanner = document.getElementById("scanner");
-  const laser = document.getElementById("laser");
-  const bar = document.getElementById("progressBar");
-  const pct = document.getElementById("pct");
-  const scanStatus = document.getElementById("scanStatus");
-  const scanFill = document.getElementById("scanFill");
-  let scanStart = 0, rafId = null, scanning = false, scanDone = false;
-
+  const vibrate = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (_) {} };
   function setStatus(el, text, cls = "") { el.textContent = text; el.className = "status " + cls; }
+
+  // Estado general
+  let setup = null;          // configuración en curso: {count, names, scanIndex, password, voices, voiceIndex}
+  let currentPerson = -1;    // quién entró (según la voz)
+
+  /* ================== ESCÁNER DE MANO ================== */
+  const scanner = $("scanner"), laser = $("laser"), bar = $("progressBar"), pct = $("pct"),
+        scanStatus = $("scanStatus"), scanFill = $("scanFill");
+  let scanStart = 0, rafId = null, scanning = false, scanDone = false;
 
   function setProgress(p) {
     bar.style.width = (p * 100) + "%";
@@ -656,7 +823,15 @@
     scanFill.setAttribute("height", (p * 260).toFixed(1));
     pct.textContent = p > 0 ? `Analizando… ${Math.floor(p * 100)}%` : "";
   }
-
+  function resetScanner(step, title, msg) {
+    scanDone = false; scanning = false;
+    setProgress(0);
+    scanner.classList.remove("done", "fail", "scanning");
+    $("scanStep").textContent = step;
+    $("scanTitle").textContent = title;
+    setStatus(scanStatus, msg);
+    $("scanCancel").hidden = !setup;
+  }
   function startScan(e) {
     if (scanDone || scanning) return;
     e.preventDefault();
@@ -673,14 +848,12 @@
     vibrate(30);
     rafId = requestAnimationFrame(tick);
   }
-
   function tick(now) {
     const p = Math.max(0, Math.min((now - scanStart) / SCAN_DURATION, 1));
     setProgress(p);
     if (p >= 1) return completeScan();
     rafId = requestAnimationFrame(tick);
   }
-
   function cancelScan() {
     if (!scanning) return;
     scanning = false;
@@ -689,12 +862,11 @@
     sfx.fail();
     vibrate([60, 40, 60]);
     scanner.classList.remove("scanning");
-    void scanner.offsetWidth; // reinicia animación
+    void scanner.offsetWidth;
     scanner.classList.add("fail");
     setStatus(scanStatus, "Escaneo interrumpido, intentá de nuevo", "err");
     setProgress(0);
   }
-
   function completeScan() {
     scanning = false;
     scanDone = true;
@@ -703,59 +875,61 @@
     vibrate([80, 50, 120]);
     scanner.classList.remove("scanning");
     scanner.classList.add("done");
-    pct.textContent = "100% — Identidad confirmada";
-    setStatus(scanStatus, "HUELLA RECONOCIDA", "ok");
-    setTimeout(() => { enterVoice(); }, 1800);
+    if (setup) {
+      pct.textContent = "100% — Mano guardada";
+      setStatus(scanStatus, `MANO DE ${setup.names[setup.scanIndex].toUpperCase()} REGISTRADA`, "ok");
+      setTimeout(setupNextScan, 1500);
+    } else {
+      pct.textContent = "100% — Identidad confirmada";
+      setStatus(scanStatus, "HUELLA RECONOCIDA", "ok");
+      setTimeout(enterVoice, 1800);
+    }
   }
-
   scanner.addEventListener("pointerdown", startScan);
   ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => scanner.addEventListener(ev, cancelScan));
   scanner.addEventListener("contextmenu", e => e.preventDefault());
-  // Accesibilidad: mantener barra espaciadora o Enter
   scanner.tabIndex = 0;
   scanner.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) startScan(e); });
   scanner.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") cancelScan(); });
 
-  /* ================== PANTALLA 2: CONTRASEÑA ================== */
-  const keysEl = document.getElementById("keys");
-  const display = document.getElementById("display");
-  const panel = document.getElementById("panel");
-  const passStatus = document.getElementById("passStatus");
-  const deniedOverlay = document.getElementById("deniedOverlay");
-  const approvedOverlay = document.getElementById("approvedOverlay");
-  const passTitle = document.getElementById("passTitle");
-  const deniedSub = document.getElementById("deniedSub");
-  const changeBtn = document.getElementById("changeBtn");
-  const STORE_KEY = "guarida-password";
+  function goToEntrance() {
+    setup = null;
+    currentPerson = -1;
+    resetScanner("Nivel de seguridad 1/3", "Escáner biométrico", "Apoyá tu mano para escanear");
+    show("screenScan");
+  }
+
+  /* ================== TECLADO / CONTRASEÑA ================== */
+  const keysEl = $("keys"), display = $("display"), panel = $("panel"), passStatus = $("passStatus"),
+        deniedOverlay = $("deniedOverlay"), approvedOverlay = $("approvedOverlay"),
+        passTitle = $("passTitle"), deniedSub = $("deniedSub"), changeBtn = $("changeBtn");
   let entry = "";
   let locked = false;
-  let letters = false;      // teclado de letras o de números
-  let mode = "login";       // login | admin | new | confirm
+  let layout = "num";      // num | abc | sym
+  let upper = true;
+  let mode = "login";      // login | admin | new | confirm | setupAdmin | setupNew | setupConfirm
   let pendingPassword = "";
 
-  // La contraseña se guarda en este navegador (si se puede)
-  function loadPassword() {
-    try { return localStorage.getItem(STORE_KEY) || DEFAULT_PASSWORD; } catch (_) { return DEFAULT_PASSWORD; }
-  }
-  function savePassword(p) {
-    try { localStorage.setItem(STORE_KEY, p); } catch (_) {}
-  }
-  let password = loadPassword();
-
-  const DIGIT_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "ABC", "0", "DEL"];
-  const LETTER_KEYS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").concat(["123", "DEL"]);
+  const LAYOUTS = {
+    num: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "ABC", "0", "#+="],
+    abc: "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("").concat(["⇧", "123", "#+="]),
+    sym: ["!", "@", "#", "$", "%", "&", "*", "(", ")", "-", "_", "+", "=", "?", "¿", "¡", ".", ",", ":", ";", "/", "␣", "ABC", "123"],
+  };
+  const MODE_KEYS = { "ABC": "abc", "123": "num", "#+=": "sym" };
 
   function renderKeys() {
     keysEl.innerHTML = "";
-    keysEl.classList.toggle("letters", letters);
-    (letters ? LETTER_KEYS : DIGIT_KEYS).forEach(k => {
+    keysEl.className = "keys " + layout;
+    for (const k of LAYOUTS[layout]) {
       const b = document.createElement("button");
-      b.className = "key" + (k === "ABC" || k === "123" ? " mode" : k === "DEL" ? " clear" : "");
-      b.textContent = k === "DEL" ? "⌫" : k;
+      let label = k;
+      if (layout === "abc" && k.length === 1 && k !== "⇧") label = upper ? k : k.toLowerCase();
+      b.className = "key" + (MODE_KEYS[k] || k === "⇧" ? " mode" : "") + (k === "⇧" && upper ? " on" : "");
+      b.textContent = k === "␣" ? "espacio" : label;
       b.dataset.k = k;
-      b.setAttribute("aria-label", k === "DEL" ? "Borrar último" : k === "ABC" ? "Teclado de letras" : k === "123" ? "Teclado de números" : k);
+      b.setAttribute("aria-label", k === "⇧" ? "Mayúsculas" : k === "␣" ? "Espacio" : MODE_KEYS[k] ? "Cambiar teclado" : label);
       keysEl.appendChild(b);
-    });
+    }
   }
   panel.addEventListener("click", e => {
     const b = e.target.closest(".key");
@@ -763,15 +937,21 @@
   });
   renderKeys();
 
+  const showsText = () => mode === "new" || mode === "confirm" || mode === "setupNew" || mode === "setupConfirm";
   function renderDisplay() {
-    if (!entry.length) { display.innerHTML = "<span class='ph'>— — — —</span>"; return; }
-    if (mode === "new" || mode === "confirm") {
-      display.innerHTML = "";
+    display.innerHTML = "";
+    if (!entry.length) {
+      const ph = document.createElement("span"); ph.className = "ph";
+      ph.textContent = showsText() ? "Escribí la contraseña nueva" : "Escribí la contraseña";
+      display.appendChild(ph); return;
+    }
+    if (showsText()) {
       const sp = document.createElement("span");
       sp.className = "chars"; sp.textContent = entry;
       display.appendChild(sp);
     } else {
-      display.innerHTML = "<span class='dot'></span>".repeat(entry.length);
+      display.classList.toggle("many", entry.length > 14);
+      for (let i = 0; i < entry.length; i++) { const d = document.createElement("span"); d.className = "dot"; display.appendChild(d); }
     }
   }
 
@@ -783,9 +963,13 @@
       admin: "Código de administrador",
       new: "Escribí la contraseña nueva",
       confirm: "Repetí la contraseña nueva",
-      voiceAdmin: "Código para registrar la voz",
+      setupAdmin: "Código de administrador",
+      setupNew: "Elijan la contraseña",
+      setupConfirm: "Repitan la contraseña",
     };
     passTitle.textContent = titles[m];
+    $("passStep").textContent = m.startsWith("setup") && m !== "setupAdmin" ? "Configuración · paso 3 de 4"
+      : m === "setupAdmin" ? "Configuración" : m === "login" ? "Nivel de seguridad 3/3" : "Cambiar contraseña";
     const changing = m !== "login";
     changeBtn.textContent = changing ? "✕ Cancelar" : "🔑 Cambiar contraseña";
     changeBtn.classList.toggle("cancel", changing);
@@ -795,27 +979,39 @@
 
   changeBtn.addEventListener("click", () => {
     if (locked) return;
-    audio();
-    tone(700, .08, "square", .06);
-    if (mode === "voiceAdmin") { setMode("login", "Código de acceso requerido"); enterVoice(); return; }
-    if (mode === "login") setMode("admin", "Ingresá el código para cambiar la contraseña");
-    else setMode("login", "Cambio cancelado. Código de acceso requerido");
+    audio(); tone(700, .08, "square", .06);
+    if (mode.startsWith("setup")) { goToEntrance(); return; }
+    if (mode === "login") {
+      if (!config) { setStatus(passStatus, "Primero configurá la guarida (⚙ arriba a la izquierda).", "err"); return; }
+      setMode("admin", "Ingresá el código para cambiar la contraseña");
+    } else setMode("login", "Cambio cancelado. Código de acceso requerido");
   });
 
   function press(k) {
     if (locked || !k) return;
     audio();
     flashKey(k);
-    if (k === "ABC" || k === "123") { letters = !letters; renderKeys(); tone(900, .05, "square", .05); return; }
+    if (MODE_KEYS[k]) { layout = MODE_KEYS[k]; renderKeys(); tone(900, .05, "square", .05); return; }
+    if (k === "⇧") { upper = !upper; renderKeys(); tone(900, .05, "square", .05); return; }
     if (k === "C") { entry = ""; tone(500, .08, "square", .06); }
     else if (k === "DEL") { entry = entry.slice(0, -1); tone(600, .05, "square", .05); }
     else if (k === "OK") { return check(); }
-    else if (entry.length < MAX_DIGITS) { entry += k; sfx.key(); vibrate(15); }
+    else if (entry.length < MAX_PASSWORD) {
+      let ch = k === "␣" ? " " : k;
+      if (layout === "abc" && ch.length === 1 && !upper) ch = ch.toLowerCase();
+      entry += ch; sfx.key(); vibrate(15);
+    } else { sfx.fail(); setStatus(passStatus, `Máximo ${MAX_PASSWORD} caracteres`, "err"); }
     renderDisplay();
+  }
+  function typeChar(ch) {   // teclado físico
+    if (locked) return;
+    audio();
+    if (entry.length >= MAX_PASSWORD) return;
+    entry += ch; sfx.key(); renderDisplay();
   }
 
   function flashKey(k) {
-    const b = panel.querySelector(`[data-k="${k}"]`);
+    const b = panel.querySelector(`[data-k="${CSS.escape(k)}"]`);
     if (!b) return;
     b.classList.add("pressed");
     setTimeout(() => b.classList.remove("pressed"), 120);
@@ -836,104 +1032,257 @@
     }, 1800);
   }
 
-  function check() {
+  async function check() {
     if (!entry.length) { setStatus(passStatus, "Escribí algo primero", "err"); sfx.fail(); return; }
+    const value = entry;
 
     if (mode === "login") {
-      if (entry === password) {
-        locked = true;
+      if (!config) { setStatus(passStatus, "Primero configurá la guarida (⚙ arriba a la izquierda).", "err"); return; }
+      locked = true;
+      const ok = (await hashPassword(value, config.pw.salt)) === config.pw.hash;
+      if (ok) {
         approvedOverlay.classList.add("show");
         sfx.approved();
         vibrate([100, 60, 100, 60, 200]);
         setTimeout(openLair, 2300);
       } else {
+        locked = false;
         denied("Contraseña incorrecta. Intentá de nuevo.", () =>
           setMode("login", "Acceso denegado. Volvé a ingresar la contraseña", "err"));
       }
-    } else if (mode === "admin") {
-      if (entry === ADMIN_CODE) {
+    } else if (mode === "admin" || mode === "setupAdmin") {
+      if (value === ADMIN_CODE) {
         sfx.success();
-        setMode("new", `Usá números y/o letras (mínimo ${MIN_LENGTH}). Tocá ABC para letras.`);
+        if (mode === "admin") setMode("new", "Podés usar números, letras, mayúsculas, símbolos y espacios.");
+        else startSetup();
       } else {
+        const m = mode;
         denied("Código de administrador incorrecto.", () =>
-          setMode("admin", "Código incorrecto. Probá de nuevo o tocá Cancelar", "err"));
+          setMode(m, "Código incorrecto. Probá de nuevo o tocá Cancelar", "err"));
       }
-    } else if (mode === "voiceAdmin") {
-      if (entry === ADMIN_CODE) {
-        sfx.success();
-        setMode("login", "Código de acceso requerido");
-        startEnroll("pass");
-      } else {
-        denied("Código de administrador incorrecto.", () =>
-          setMode("voiceAdmin", "Código incorrecto. Probá de nuevo o tocá Cancelar", "err"));
-      }
-    } else if (mode === "new") {
-      if (entry.length < MIN_LENGTH) {
-        sfx.fail();
-        setStatus(passStatus, `Muy corta: tiene que tener al menos ${MIN_LENGTH} caracteres`, "err");
+    } else if (mode === "new" || mode === "setupNew") {
+      pendingPassword = value;
+      sfx.key();
+      setMode(mode === "new" ? "confirm" : "setupConfirm", "Escribila otra vez para confirmar");
+    } else if (mode === "confirm" || mode === "setupConfirm") {
+      if (value !== pendingPassword) {
+        sfx.error();
+        setMode(mode === "confirm" ? "new" : "setupNew", "No coinciden. Escribí la contraseña otra vez", "err");
         return;
       }
-      pendingPassword = entry;
-      sfx.key();
-      setMode("confirm", "Escribila otra vez para confirmar");
-    } else if (mode === "confirm") {
-      if (entry === pendingPassword) {
-        password = pendingPassword;
-        savePassword(password);
-        pendingPassword = "";
-        sfx.success();
-        setMode("login", "✔ Contraseña cambiada. Ahora ingresala para entrar", "ok-small");
+      const salt = randomId(12);
+      const pw = { salt, hash: await hashPassword(value, salt) };
+      pendingPassword = "";
+      sfx.success();
+      if (mode === "setupConfirm") {
+        setup.pw = pw;
+        setMode("login", "Código de acceso requerido");
+        setupStartVoices();
       } else {
-        sfx.error();
-        setMode("new", "No coinciden. Escribí la contraseña nueva otra vez", "err");
+        config.pw = pw;
+        saveConfig(config);
+        setMode("login", "✔ Contraseña cambiada. Ahora ingresala para entrar", "ok-small");
       }
     }
   }
 
-  // Soporte para teclado físico (números y letras)
   document.addEventListener("keydown", e => {
-    if (!document.getElementById("screenPass").classList.contains("active")) return;
+    if (!$("screenPass").classList.contains("active")) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
-    if (/^[0-9a-zA-ZñÑ]$/.test(e.key) && e.key.length === 1 && /^[0-9A-Z]$/.test(e.key.toUpperCase())) press(e.key.toUpperCase());
-    else if (e.key === "Backspace") press("DEL");
-    else if (e.key === "Escape" || e.key === "Delete") press("C");
-    else if (e.key === "Enter") { e.preventDefault(); press("OK"); }
+    if (e.key === "Enter") { e.preventDefault(); press("OK"); }
+    else if (e.key === "Backspace") { e.preventDefault(); press("DEL"); }
+    else if (e.key === "Escape") press("C");
+    else if (e.key.length === 1) { e.preventDefault(); typeChar(e.key); }
   });
 
-  /* ================== PANTALLA 2: VOZ ================== */
+  /* ================== CONFIGURACIÓN ================== */
+  $("setupBtn").addEventListener("click", () => {
+    audio(); tone(700, .08, "square", .06);
+    if (config) {
+      show("screenPass");
+      setMode("setupAdmin", "La guarida ya está configurada. Para configurarla de nuevo ingresá el código de administrador.");
+    } else startSetup();
+  });
+
+  function startSetup() {
+    const prev = config ? config.people.map(p => p.name) : [];
+    setup = { count: Math.max(2, prev.length || 2), names: prev, scanIndex: 0, voices: [], voiceIndex: 0 };
+    renderSetup();
+    show("screenSetup");
+    loadVoiceModel().catch(() => {});
+    $("setupBtn").hidden = true;
+  }
+  function renderSetup() {
+    const row = $("countRow"); row.innerHTML = "";
+    for (let n = 1; n <= MAX_PEOPLE; n++) {
+      const b = document.createElement("button");
+      b.className = "count-btn"; b.textContent = n;
+      b.setAttribute("aria-pressed", n === setup.count);
+      b.onclick = () => { readNames(); setup.count = n; sfx.key(); renderSetup(); };
+      row.appendChild(b);
+    }
+    const names = $("names"); names.innerHTML = "";
+    for (let i = 0; i < setup.count; i++) {
+      const lab = document.createElement("label");
+      lab.className = "name-field";
+      const sp = document.createElement("span"); sp.textContent = `Persona ${i + 1}`;
+      const inp = document.createElement("input");
+      inp.id = "name" + i; inp.maxLength = 20; inp.autocomplete = "off";
+      inp.placeholder = i === 0 ? "Tu nombre" : "Nombre";
+      inp.value = setup.names[i] || "";
+      lab.append(sp, inp); names.appendChild(lab);
+    }
+  }
+  function readNames() {
+    for (let i = 0; i < setup.count; i++) { const el = $("name" + i); if (el) setup.names[i] = el.value.trim(); }
+  }
+  $("setupNext").addEventListener("click", () => {
+    audio();
+    readNames();
+    setup.names = setup.names.slice(0, setup.count).map((n, i) => n || `Persona ${i + 1}`);
+    const lower = setup.names.map(n => n.toLowerCase());
+    if (new Set(lower).size !== lower.length) { setStatus($("setupStatus"), "Cada persona tiene que tener un nombre distinto.", "err"); sfx.fail(); return; }
+    sfx.success();
+    setup.scanIndex = -1;
+    setupNextScan();
+  });
+  $("setupCancel").addEventListener("click", goToEntrance);
+  $("scanCancel").addEventListener("click", goToEntrance);
+
+  function setupNextScan() {
+    setup.scanIndex++;
+    if (setup.scanIndex < setup.count) {
+      const name = setup.names[setup.scanIndex];
+      resetScanner(`Configuración · paso 2 de 4 · mano ${setup.scanIndex + 1} de ${setup.count}`, `Mano de ${name}`, `${name}: mantené tu mano apoyada 3 segundos`);
+      show("screenScan");
+    } else {
+      show("screenPass");
+      setMode("setupNew", setup.count > 1
+        ? "Decidan juntos una contraseña. Puede tener números, letras, mayúsculas, símbolos y espacios."
+        : "Elegí una contraseña. Puede tener números, letras, mayúsculas, símbolos y espacios.");
+    }
+  }
+
+  function setupStartVoices() {
+    setup.voiceIndex = 0;
+    startEnroll("setup");
+  }
+
+  function finishSetup() {
+    const people = setup.names.map((name, i) => ({ name, voice: setup.voices[i] }));
+    const keyBytes = new Uint8Array(32); crypto.getRandomValues(keyBytes);
+    const keepChat = config && config.room && config.key;
+    config = {
+      v: 2,
+      people,
+      pw: setup.pw,
+      room: keepChat ? config.room : "guarida-" + randomId(22),
+      key: keepChat ? config.key : toB64(keyBytes),
+      at: Date.now(),
+    };
+    const ok = saveConfig(config);
+    setup = null;
+    $("doneText").textContent = ok
+      ? `Listo. La guarida reconoce a ${listNames(config.people.map(p => p.name))}. Desde ahora para entrar hace falta la mano, la voz de alguno de ustedes y la contraseña.`
+      : "No se pudo guardar la configuración en este navegador (¿modo incógnito?).";
+    $("doneLinkStatus").textContent = "Este link es como una llave: pasalo solo a quien vive en la guarida.";
+    show("screenSetupDone");
+    $("setupBtn").hidden = true;
+    sfx.approved();
+  }
+  const listNames = ns => ns.length === 1 ? ns[0] : ns.slice(0, -1).join(", ") + " y " + ns[ns.length - 1];
+  $("doneStart").addEventListener("click", goToEntrance);
+
+  /* ================== LINK PARA OTRO CELULAR ================== */
+  function quantize(v) {                       // vector de voz → 512 bytes
+    const q = new Int8Array(v.length);
+    for (let i = 0; i < v.length; i++) q[i] = Math.max(-127, Math.min(127, Math.round(v[i] * 400)));
+    return toB64(new Uint8Array(q.buffer));
+  }
+  function dequantize(s) {
+    const q = new Int8Array(fromB64(s).buffer);
+    return normalize(Array.from(q, x => x / 400));
+  }
+  function buildLink() {
+    const pack = {
+      v: 2,
+      people: config.people.map(p => ({ n: p.name, q: p.voice.map(quantize) })),
+      pw: config.pw, room: config.room, key: config.key,
+    };
+    const json = new TextEncoder().encode(JSON.stringify(pack));
+    let bin = ""; for (const b of json) bin += String.fromCharCode(b);
+    return location.origin + location.pathname + "#vincular=" + b64url(btoa(bin));
+  }
+  async function copyLink(statusEl) {
+    if (!config) return;
+    const link = buildLink();
+    try {
+      await navigator.clipboard.writeText(link);
+      statusEl.textContent = "✔ Link copiado. Mandáselo por WhatsApp (o como quieras) y que lo abra en su celular.";
+    } catch (_) {
+      statusEl.textContent = "Copiá este link y mandáselo: " + link;
+    }
+    sfx.key();
+  }
+  $("doneLinkBtn").addEventListener("click", () => copyLink($("doneLinkStatus")));
+  $("linkBtn").addEventListener("click", () => copyLink($("linkStatus")));
+
+  let incoming = null;
+  function checkIncomingLink() {
+    const m = location.hash.match(/^#vincular=([A-Za-z0-9_-]+)$/);
+    if (!m) return false;
+    try {
+      const bin = atob(unb64url(m[1]));
+      const pack = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+      if (pack.v !== 2 || !Array.isArray(pack.people)) throw new Error("bad");
+      incoming = {
+        v: 2,
+        people: pack.people.map(p => ({ name: String(p.n).slice(0, 20), voice: p.q.map(dequantize) })),
+        pw: pack.pw, room: pack.room, key: pack.key, at: Date.now(),
+      };
+      $("linkText").textContent = `Este link configura la guarida de ${listNames(incoming.people.map(p => p.name))} en este celular. Vas a poder entrar con tu mano, tu voz y la contraseña, y usar el chat.` +
+        (config ? " Ojo: reemplaza la configuración que ya tiene este celular." : "");
+      show("screenLink");
+      $("setupBtn").hidden = true;
+      return true;
+    } catch (_) {
+      history.replaceState(null, "", location.pathname);
+      return false;
+    }
+  }
+  $("linkYes").addEventListener("click", () => {
+    config = incoming; saveConfig(config); incoming = null;
+    history.replaceState(null, "", location.pathname);
+    sfx.success();
+    goToEntrance();
+    setStatus(scanStatus, "✔ Guarida configurada. Apoyá tu mano para entrar", "ok-small");
+  });
+  $("linkNo").addEventListener("click", () => {
+    incoming = null;
+    history.replaceState(null, "", location.pathname);
+    goToEntrance();
+  });
+
+  /* ================== VOZ ================== */
   // Huella de voz "promedio" de otras personas. Se resta para que el
-  // parecido mida lo que es propio de TU voz y no lo que tienen todas.
+  // parecido mida lo que es propio de cada voz y no lo que tienen todas.
   const VOICE_COHORT = [-0.01536,-0.01422,-0.01641,-0.01488,-0.01066,-0.01693,-0.02171,-0.01168,-0.0175,-0.0136,-0.0154,-0.02188,-0.01536,-0.01905,-0.05056,-0.01976,-0.01539,-0.01391,-0.01457,-0.03143,-0.01577,-0.01825,-0.01675,-0.0137,-0.01373,-0.01499,-0.01314,-0.02088,-0.0142,-0.06111,-0.0193,-0.01604,-0.01164,-0.02592,-0.01553,-0.03105,-0.02755,-0.0348,-0.07307,-0.01643,-0.02089,-0.02152,-0.01832,-0.01508,-0.03987,-0.01922,-0.01552,-0.01002,-0.07452,-0.01563,-0.01718,-0.01999,-0.01364,-0.01294,-0.04201,-0.01537,-0.08373,-0.01464,-0.018,-0.01949,-0.01208,-0.01545,-0.0679,-0.0158,-0.03093,-0.01557,-0.06334,-0.01518,-0.01641,-0.10488,-0.01839,-0.0825,-0.01593,-0.01756,-0.02616,-0.10814,-0.04857,-0.01551,-0.01498,-0.01781,-0.01423,-0.01255,-0.02841,-0.07115,-0.01773,-0.12538,-0.02066,-0.01521,0.00204,-0.01613,-0.01978,-0.02725,-0.09095,-0.01208,-0.01718,-0.01046,-0.01031,-0.02038,-0.04749,-0.0751,-0.01952,-0.04004,-0.01491,-0.03435,-0.02335,-0.06757,-0.02251,-0.02549,-0.03257,-0.02809,-0.02433,-0.0172,-0.01492,-0.01884,-0.01892,-0.02023,-0.0139,-0.02775,-0.01853,-0.06347,-0.01178,-0.02314,-0.01558,-0.01869,-0.01537,-0.01204,-0.01846,-0.02193,-0.02159,-0.02171,-0.01642,-0.02181,-0.01375,-0.00988,-0.0457,-0.01782,-0.0145,-0.01288,-0.01446,-0.01615,-0.01488,-0.01093,-0.00431,-0.0217,-0.01452,0.01247,-0.04002,-0.01743,-0.01531,-0.01439,-0.01786,-0.09049,-0.0162,-0.02149,-0.01117,-0.01496,-0.01132,-0.02133,-0.01617,-0.01742,-0.01241,-0.01817,-0.01521,-0.01621,-0.01151,-0.06946,-0.05352,-0.01072,-0.00875,-0.03337,-0.01822,-0.03664,-0.00397,-0.01921,-0.01661,-0.00463,-0.01226,-0.00632,-0.06737,-0.01911,-0.04361,-0.01838,-0.01419,-0.00998,-0.01883,-0.03896,-0.06245,-0.01386,-0.01795,-0.01646,-0.01548,-0.0907,-0.03291,-0.01374,-0.07906,-0.0182,-0.02467,-0.01075,-0.0132,-0.01346,-0.01719,-0.01727,-0.03022,-0.01129,-0.01424,-0.01714,-0.02114,-0.04641,-0.01062,-0.04727,-0.04766,-0.01473,-0.01851,-0.01502,-0.01686,-0.00494,-0.01142,-0.01218,-0.01114,-0.04752,-0.01178,-0.0067,-0.01742,-0.01232,-0.02549,-0.00265,-0.01533,-0.02013,-0.02733,0.01266,-0.01975,-0.0224,-0.02139,-0.0141,-0.0163,-0.01947,-0.01076,-0.01666,-0.07287,-0.0128,-0.00912,-0.01713,-0.01302,-0.01093,-0.02002,-0.02829,-0.02069,-0.13228,-0.01003,-0.0105,-0.01254,-0.02005,-0.01743,-0.01324,0.01614,-0.01825,-0.02406,-0.01575,-0.10531,-0.05148,-0.05147,-0.02232,-0.01302,-0.01218,-0.04011,-0.02635,-0.01139,-0.01655,-0.02175,-0.0176,-0.05473,-0.01563,-0.04999,-0.01834,-0.01699,-0.01436,-0.02514,-0.12169,-0.01734,-0.0207,-0.01578,-0.01167,-0.04013,-0.02053,-0.05237,-0.01558,-0.02967,-0.01307,-0.02013,-0.01787,-0.01715,-0.01347,-0.0129,-0.04061,-0.02537,-0.01506,-0.0225,-0.01947,-0.004,-0.01533,-0.02229,-0.02358,-0.01707,-0.05238,-0.00886,-0.02629,-0.01405,-0.013,-0.01766,-0.01726,-0.01077,-0.01966,-0.02216,-0.01084,-0.05627,-0.13868,-0.00798,-0.03156,-0.01683,-0.015,-0.03239,-0.02281,-0.07298,-0.01897,-0.0172,-0.02015,-0.01541,-0.01575,-0.01522,-0.01374,-0.01204,-0.01568,-0.02451,-0.03396,-0.02451,-0.01708,-0.01546,-0.05102,-0.01932,-0.01208,-0.06354,-0.04316,-0.01485,-0.01924,-0.02924,-0.01321,-0.10789,-0.01761,-0.03044,-0.02912,0.00017,-0.01783,-0.03351,-0.01509,-0.03218,-0.02376,-0.01705,-0.01636,-0.01349,-0.01613,-0.01221,-0.02977,-0.0135,-0.02042,-0.01028,-0.01285,-0.03722,0.00996,-0.01705,-0.04339,-0.01363,-0.05081,-0.01209,-0.0915,-0.0655,-0.03008,-0.02557,-0.00083,-0.0188,-0.02113,-0.01745,-0.02332,-0.01743,-0.01311,-0.01476,-0.01403,-0.02095,-0.02167,-0.0151,-0.05853,-0.05466,-0.06265,-0.01352,-0.02047,-0.0193,-0.03922,-0.03263,-0.01353,-0.0234,-0.02204,-0.01241,-0.01875,-0.02094,-0.01556,-0.01932,-0.02815,-0.01649,-0.01977,-0.10168,-0.03068,-0.00074,-0.01221,-0.01499,-0.01606,-0.01646,-0.01132,-0.01501,-0.02351,-0.11456,-0.06534,-0.0128,-0.02145,-0.03224,-0.03481,-0.018,-0.016,-0.01551,-0.01875,-0.08733,-0.01216,-0.07983,-0.07354,-0.1043,-0.01106,-0.01846,-0.08581,-0.0153,-0.01176,-0.09223,-0.0182,0.01372,-0.01281,-0.03986,-0.02267,-0.01587,-0.01496,-0.01423,-0.02113,0.00896,-0.0556,-0.09959,-0.0882,-0.02666,-0.01626,-0.01628,-0.0154,-0.01078,-0.01494,-0.01706,-0.01869,-0.01263,-0.09794,-0.03268,-0.0126,-0.0655,-0.03531,-0.01189,-0.01656,-0.01838,-0.01604,-0.06114,-0.01647,-0.01472,-0.03355,-0.02263,-0.01675,-0.00367,-0.01064,-0.0858,-0.02685,-0.02778,-0.01673,-0.01846,-0.03828,-0.01849,-0.02806,-0.01276,-0.01876,-0.03611,-0.01852,-0.01704,-0.01839,-0.01481,-0.02162,-0.04385,-0.01792,-0.014,-0.02052,0.00606,-0.0225,-0.01742,-0.02768,-0.0102,-0.06973,-0.0113,-0.01641,-0.01571,-0.02583,-0.07535,-0.02063,-0.01222,-0.01581];
-  const VOICE_KEY = "guarida-voz";
-  const voiceTitle = document.getElementById("voiceTitle");
-  const phraseEl = document.getElementById("phrase");
-  const micBtn = document.getElementById("micBtn");
-  const voiceBar = document.getElementById("voiceBar");
-  const voicePct = document.getElementById("voicePct");
-  const voiceStatus = document.getElementById("voiceStatus");
-  const enrollDots = document.getElementById("enrollDots");
-  const retryLoadBtn = document.getElementById("voiceRetryLoad");
-  const enrollBtn = document.getElementById("voiceEnrollBtn");
-  const voiceCancel = document.getElementById("voiceCancel");
-  const wave = document.getElementById("wave");
+  const voiceTitle = $("voiceTitle"), phraseEl = $("phrase"), micBtn = $("micBtn"), voiceBar = $("voiceBar"),
+        voicePct = $("voicePct"), voiceStatus = $("voiceStatus"), enrollDots = $("enrollDots"),
+        retryLoadBtn = $("voiceRetryLoad"), voiceCancel = $("voiceCancel"), wave = $("wave");
   const wctx = wave.getContext("2d");
 
   let voiceMode = "verify";     // verify | enroll
-  let enrollReturn = "pass";    // a dónde ir al terminar de registrar
+  let enrollReturn = "setup";   // setup | lair
+  let enrollPerson = 0;
   let enrollSamples = [];
   let recording = false;
   let modelReady = false;
   let modelPromise = null;
+  let loadingMsg = true;
   let micStream = null;
   let level = 0;
 
-  function loadVoiceprint() {
-    try { const v = JSON.parse(localStorage.getItem(VOICE_KEY)); return v && Array.isArray(v.template) ? v : null; }
-    catch (_) { return null; }
-  }
-  function saveVoiceprint(v) { try { localStorage.setItem(VOICE_KEY, JSON.stringify(v)); return true; } catch (_) { return false; } }
-
-  // ---- Modelo de reconocimiento de hablante (se descarga una sola vez) ----
   function loadVoiceModel() {
     if (modelPromise) return modelPromise;
     const files = {};
@@ -942,10 +1291,8 @@
         files[e.file] = [e.loaded, e.total];
         let l = 0, t = 0;
         for (const [a, b] of Object.values(files)) { l += a; t += b; }
-        if (!modelReady && voiceStatusIsLoading()) {
-          const mb = (t / 1048576).toFixed(0);
-          setStatus(voiceStatus, `Descargando el reconocedor de voz… ${Math.floor(l / t * 100)}% (${mb} MB, solo la primera vez)`);
-        }
+        if (!modelReady && loadingMsg && $("screenVoice").classList.contains("active"))
+          setStatus(voiceStatus, `Descargando el reconocedor de voz… ${Math.floor(l / t * 100)}% (${(t / 1048576).toFixed(0)} MB, solo la primera vez)`);
       }
     };
     modelPromise = (async () => {
@@ -953,7 +1300,6 @@
       tf.env.allowLocalModels = false;
       const processor = await tf.AutoProcessor.from_pretrained(VOICE_MODEL, { progress_callback: onProgress });
       const model = await tf.AutoModel.from_pretrained(VOICE_MODEL, { dtype: "q8", progress_callback: onProgress });
-      // Calentamiento: la primera pasada es la más lenta
       await model(await processor(new Float32Array(16000)));
       modelReady = true;
       return { processor, model };
@@ -961,8 +1307,6 @@
     modelPromise.catch(() => { modelPromise = null; });
     return modelPromise;
   }
-  let loadingMsg = true;
-  function voiceStatusIsLoading() { return loadingMsg; }
 
   async function prepareVoice() {
     retryLoadBtn.hidden = true;
@@ -984,48 +1328,53 @@
   function renderDots(n) {
     enrollDots.innerHTML = "";
     if (voiceMode !== "enroll") return;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < VOICE_VARIANTS.length; i++) {
       const d = document.createElement("span");
       if (i < n) d.className = "ok";
       enrollDots.appendChild(d);
     }
   }
+  function enrollName() {
+    return enrollReturn === "setup" ? setup.names[enrollPerson] : config.people[enrollPerson].name;
+  }
 
   function refreshVoiceUI(msg, cls) {
-    const vp = loadVoiceprint();
-    enrollBtn.hidden = true;
-    voiceCancel.hidden = voiceMode !== "enroll" || enrollReturn !== "lair";
+    voiceCancel.hidden = voiceMode !== "enroll";
     voiceBar.style.width = "0%";
     voicePct.textContent = "";
     renderDots(enrollSamples.length);
     if (voiceMode === "enroll") {
-      voiceTitle.textContent = "Registrar tu voz";
-      phraseEl.innerHTML = `Grabación <b>${enrollSamples.length + 1} de 3</b>. Tocá el micrófono y decí:<br><b>“Abrite guarida, soy yo”</b>`;
+      const name = enrollName();
+      const n = enrollSamples.length;
+      voiceTitle.textContent = `Voz de ${name}`;
+      $("voiceStep").textContent = enrollReturn === "setup"
+        ? `Configuración · paso 4 de 4 · voz ${enrollPerson + 1} de ${setup.count}` : "Volver a grabar mi voz";
+      phraseEl.innerHTML = `<b>${escapeHtml(name)}</b>, grabación ${n + 1} de ${VOICE_VARIANTS.length}: tocá el micrófono y decí ${VOICE_VARIANTS[n]}:<br><b>“Abrite guarida, soy yo”</b>`;
     } else {
       voiceTitle.textContent = "Reconocimiento de voz";
+      $("voiceStep").textContent = "Nivel de seguridad 2/3";
       phraseEl.innerHTML = "Tocá el micrófono y decí en voz alta:<br><b>“Abrite guarida, soy yo”</b>";
-      if (!vp) {
+      if (!config) {
         micBtn.disabled = true;
-        enrollBtn.hidden = false;
-        setStatus(voiceStatus, "Todavía no hay ninguna voz registrada en este aparato.", "err");
+        setStatus(voiceStatus, "La guarida todavía no está configurada. Volvé al inicio y tocá ⚙ Configurar (arriba a la izquierda).", "err");
+        voiceCancel.hidden = false; voiceCancel.textContent = "← Volver al inicio";
         return;
       }
     }
+    voiceCancel.textContent = voiceMode === "enroll" ? "✕ Cancelar" : "← Volver al inicio";
     micBtn.disabled = !modelReady;
     if (!modelReady) return;
     setStatus(voiceStatus, msg || (voiceMode === "enroll"
-      ? "Hablá normal, cerca del celu y sin ruido de fondo."
+      ? "Hablá cerca del celu y sin ruido de fondo."
       : "Tocá el micrófono para hablar."), cls || "");
   }
+  const escapeHtml = s => s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  enrollBtn.addEventListener("click", () => {
-    audio(); tone(700, .08, "square", .06);
-    show("screenPass");
-    setMode("voiceAdmin", "Para registrar una voz nueva ingresá el código de administrador");
-  });
   voiceCancel.addEventListener("click", () => {
+    stopMic();
+    const wasLair = voiceMode === "enroll" && enrollReturn === "lair";
     voiceMode = "verify"; enrollSamples = [];
-    show("lair");
+    if (wasLair) show("lair"); else goToEntrance();
   });
 
   function enterVoice() {
@@ -1033,19 +1382,18 @@
     enrollSamples = [];
     show("screenVoice");
     refreshVoiceUI();
-    prepareVoice();
+    if (config) prepareVoice();
   }
-
-  function startEnroll(returnTo) {
+  function startEnroll(returnTo, person = 0) {
     voiceMode = "enroll";
     enrollReturn = returnTo;
+    enrollPerson = returnTo === "setup" ? setup.voiceIndex : person;
     enrollSamples = [];
     show("screenVoice");
     refreshVoiceUI();
     prepareVoice();
   }
 
-  // ---- Micrófono ----
   async function getMic() {
     if (micStream && micStream.getAudioTracks().some(t => t.readyState === "live")) return micStream;
     micStream = await navigator.mediaDevices.getUserMedia({
@@ -1092,7 +1440,6 @@
     for (const c of chunks) { all.set(c, o); o += c.length; }
     return resampleTo16k(all, ac.sampleRate);
   }
-
   function resampleTo16k(data, rate) {
     if (rate === 16000) return data;
     const ratio = rate / 16000, out = new Float32Array(Math.floor(data.length / ratio));
@@ -1103,8 +1450,6 @@
     }
     return out;
   }
-
-  // Recorta silencios y mide cuánto se habló de verdad
   function trimSilence(x) {
     const F = 320, frames = Math.floor(x.length / F), rms = [];
     let max = 0;
@@ -1112,7 +1457,7 @@
       let s = 0; for (let i = f * F; i < (f + 1) * F; i++) s += x[i] * x[i];
       const r = Math.sqrt(s / F); rms.push(r); if (r > max) max = r;
     }
-    const thr = Math.max(0.006, max * 0.12);
+    const thr = Math.max(0.004, max * 0.1);
     let first = -1, last = -1, voiced = 0;
     rms.forEach((r, i) => { if (r > thr) { if (first < 0) first = i; last = i; voiced++; } });
     if (first < 0) return { audio: x, voicedSec: 0, peak: max };
@@ -1120,8 +1465,9 @@
     return { audio: x.slice(a, b), voicedSec: voiced * F / 16000, peak: max };
   }
 
-  const normalize = v => { const n = Math.hypot(...v) || 1; return v.map(x => x / n); };
+  const normalize = v => { let n = 0; for (const x of v) n += x * x; n = Math.sqrt(n) || 1; return v.map(x => x / n); };
   const cosine = (a, b) => { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i]; return s; };
+  const meanVec = vs => normalize(vs[0].map((_, i) => vs.reduce((s, v) => s + v[i], 0) / vs.length));
 
   async function voiceEmbedding(samples) {
     const { processor, model } = await loadVoiceModel();
@@ -1145,13 +1491,11 @@
     recording = true;
     micBtn.classList.remove("bad");
     micBtn.classList.add("rec");
-    enrollBtn.hidden = true;
-    setStatus(voiceStatus, voiceMode === "enroll" ? "Grabando… decí la frase" : "Escuchando… decí la frase");
+    setStatus(voiceStatus, "Escuchando… decí la frase");
     tone(880, .08, "sine", .1);
     let take;
     try {
-      const raw = await recordVoice(VOICE_SECONDS);
-      take = trimSilence(raw);
+      take = trimSilence(await recordVoice(VOICE_SECONDS));
     } catch (err) {
       recording = false;
       micBtn.classList.remove("rec");
@@ -1160,11 +1504,11 @@
     }
     micBtn.classList.remove("rec");
     voicePct.textContent = "Analizando la voz…";
-    if (take.voicedSec < 0.8 || take.peak < 0.01) {
+    if (take.voicedSec < 0.6 || take.peak < 0.006) {
       recording = false;
       micBtn.classList.add("bad");
       sfx.fail();
-      refreshVoiceUI("No te escuché bien. Hablá más fuerte y más cerca del micrófono.", "err");
+      refreshVoiceUI("No te escuché bien. Hablá un poco más fuerte y más cerca del micrófono.", "err");
       return;
     }
     let emb;
@@ -1182,142 +1526,300 @@
   function handleEnrollSample(emb) {
     enrollSamples.push(emb);
     sfx.key();
-    if (enrollSamples.length < 3) { refreshVoiceUI("✔ Grabación guardada. Ahora otra vez.", "ok-small"); return; }
-    // Las 3 grabaciones tienen que parecerse entre sí
+    if (enrollSamples.length < VOICE_VARIANTS.length) { refreshVoiceUI("✔ Grabación guardada. Ahora la siguiente.", "ok-small"); return; }
+    // Las grabaciones de una misma persona tienen que parecerse un mínimo
     let minSim = 1;
-    for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) minSim = Math.min(minSim, cosine(enrollSamples[i], enrollSamples[j]));
-    if (minSim < 0.55) {
+    for (let i = 0; i < enrollSamples.length; i++)
+      for (let j = i + 1; j < enrollSamples.length; j++) minSim = Math.min(minSim, cosine(enrollSamples[i], enrollSamples[j]));
+    if (minSim < 0.3) {
       enrollSamples = [];
       sfx.error();
-      refreshVoiceUI("Las 3 grabaciones salieron muy distintas (¿ruido? ¿otra persona?). Empecemos de nuevo.", "err");
+      refreshVoiceUI("Las grabaciones salieron muy distintas entre sí (¿mucho ruido? ¿habló otra persona?). Empecemos de nuevo.", "err");
       return;
     }
-    const mean = enrollSamples[0].map((_, i) => (enrollSamples[0][i] + enrollSamples[1][i] + enrollSamples[2][i]) / 3);
-    const ok = saveVoiceprint({ template: normalize(mean).map(x => +x.toFixed(5)), at: Date.now() });
+    const samples = enrollSamples.map(v => v.map(x => +x.toFixed(5)));
+    const name = enrollName();
     enrollSamples = [];
-    if (!ok) { refreshVoiceUI("No se pudo guardar la voz en este navegador (¿modo incógnito?).", "err"); return; }
     sfx.success();
     vibrate([80, 50, 120]);
-    voiceMode = "verify";
     renderDots(0);
-    setStatus(voiceStatus, "VOZ REGISTRADA", "ok");
-    phraseEl.innerHTML = "Listo. Desde ahora la guarida reconoce tu voz.";
     micBtn.disabled = true;
-    updateVoiceInfo();
-    setTimeout(() => {
-      if (enrollReturn === "lair") show("lair");
-      else { show("screenPass"); setMode("login", "Código de acceso requerido"); }
-    }, 1800);
+    setStatus(voiceStatus, `VOZ DE ${name.toUpperCase()} REGISTRADA`, "ok");
+    if (enrollReturn === "setup") {
+      setup.voices[enrollPerson] = samples;
+      setup.voiceIndex++;
+      setTimeout(() => {
+        if (setup.voiceIndex < setup.count) { phraseEl.textContent = ""; startEnroll("setup"); }
+        else { stopMic(); finishSetup(); }
+      }, 1500);
+    } else {
+      config.people[enrollPerson].voice = samples;
+      saveConfig(config);
+      voiceMode = "verify";
+      updateVoiceInfo();
+      setTimeout(() => { stopMic(); show("lair"); }, 1500);
+    }
+  }
+
+  function voiceScore(emb, person) {
+    const vs = person.voice || [];
+    if (!vs.length) return -1;
+    let best = cosine(emb, meanVec(vs));
+    for (const v of vs) best = Math.max(best, cosine(emb, v));
+    return best;
   }
 
   function handleVerify(emb) {
-    const vp = loadVoiceprint();
-    if (!vp) { refreshVoiceUI(); return; }
-    const score = cosine(emb, vp.template);
-    const pct = Math.max(0, Math.round(score * 100));
-    if (score >= VOICE_THRESHOLD) {
+    if (!config) { refreshVoiceUI(); return; }
+    let best = -1, who = -1;
+    config.people.forEach((p, i) => { const s = voiceScore(emb, p); if (s > best) { best = s; who = i; } });
+    const pctTxt = Math.max(0, Math.round(best * 100));
+    if (best >= VOICE_THRESHOLD) {
+      currentPerson = who;
       sfx.success();
       vibrate([80, 50, 120]);
       micBtn.disabled = true;
-      voicePct.textContent = `Parecido con tu voz: ${pct}%`;
-      setStatus(voiceStatus, "VOZ RECONOCIDA", "ok");
-      setTimeout(() => { show("screenPass"); setMode("login", "Código de acceso requerido"); stopMic(); }, 1800);
+      voicePct.textContent = `Parecido: ${pctTxt}%`;
+      setStatus(voiceStatus, `HOLA, ${config.people[who].name.toUpperCase()}`, "ok");
+      setTimeout(() => { stopMic(); show("screenPass"); setMode("login", "Código de acceso requerido"); }, 1800);
     } else {
       sfx.error();
       vibrate([300, 100, 300]);
       micBtn.classList.add("bad");
       refreshVoiceUI("VOZ NO RECONOCIDA. Probá de nuevo, cerca del micrófono y sin ruido.", "err");
-      voicePct.textContent = `Parecido con la voz registrada: ${pct}% (necesita ${Math.round(VOICE_THRESHOLD * 100)}%)`;
+      voicePct.textContent = `Parecido con las voces registradas: ${pctTxt}% (necesita ${Math.round(VOICE_THRESHOLD * 100)}%)`;
     }
   }
 
-  // Animación de ondas alrededor del micrófono
+  // Ondas alrededor del micrófono
   let phase = 0, smooth = 0;
   function drawWave() {
-    const w = wave.width, h = wave.height, cx = w / 2, cy = h / 2;
-    wctx.clearRect(0, 0, w, h);
-    smooth += (Math.min(level * 12, 1) - smooth) * 0.25;
-    phase += 0.04;
-    const base = w * 0.27;
-    for (let ring = 0; ring < 3; ring++) {
-      wctx.beginPath();
-      for (let a = 0; a <= Math.PI * 2 + 0.01; a += Math.PI / 90) {
-        const amp = (recording ? 6 + smooth * 70 : 3) * (1 - ring * 0.25);
-        const r = base + ring * 26 + Math.sin(a * (5 + ring * 2) + phase * (1 + ring)) * amp;
-        const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
-        a === 0 ? wctx.moveTo(x, y) : wctx.lineTo(x, y);
+    if ($("screenVoice").classList.contains("active")) {
+      const w = wave.width, h = wave.height, cx = w / 2, cy = h / 2;
+      wctx.clearRect(0, 0, w, h);
+      smooth += (Math.min(level * 12, 1) - smooth) * 0.25;
+      phase += 0.04;
+      const base = w * 0.27;
+      for (let ring = 0; ring < 3; ring++) {
+        wctx.beginPath();
+        for (let a = 0; a <= Math.PI * 2 + 0.01; a += Math.PI / 90) {
+          const amp = (recording ? 6 + smooth * 70 : 3) * (1 - ring * 0.25);
+          const r = base + ring * 26 + Math.sin(a * (5 + ring * 2) + phase * (1 + ring)) * amp;
+          const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+          a === 0 ? wctx.moveTo(x, y) : wctx.lineTo(x, y);
+        }
+        wctx.strokeStyle = recording ? `rgba(57,255,136,${0.8 - ring * 0.22})` : `rgba(34,211,255,${0.5 - ring * 0.13})`;
+        wctx.lineWidth = 4 - ring;
+        wctx.shadowColor = recording ? "#39ff88" : "#22d3ff";
+        wctx.shadowBlur = 14;
+        wctx.stroke();
       }
-      wctx.strokeStyle = recording ? `rgba(57,255,136,${0.8 - ring * 0.22})` : `rgba(34,211,255,${0.5 - ring * 0.13})`;
-      wctx.lineWidth = 4 - ring;
-      wctx.shadowColor = recording ? "#39ff88" : "#22d3ff";
-      wctx.shadowBlur = 14;
-      wctx.stroke();
     }
     requestAnimationFrame(drawWave);
   }
   requestAnimationFrame(drawWave);
 
-  // Empieza a descargar el modelo apenas abre la página
-  loadVoiceModel().catch(() => {});
+  /* ================== CHAT (cifrado de punta a punta) ================== */
+  const chatList = $("chatList"), chatForm = $("chatForm"), chatInput = $("chatInput"),
+        chatSend = $("chatSend"), chatStatus = $("chatStatus");
+  let chatKind = "text";
+  let chatKey = null;
+  let chatSource = null;
+  let chatMsgs = [];
+  const chatStoreKey = () => "guarida-chat-" + config.room;
 
-  /* ================== PANTALLA 4: LA GUARIDA ================== */
-  const doors = document.getElementById("doors");
-  function openLair() {
-    doors.classList.remove("open");
-    doors.classList.add("show");
-    approvedOverlay.classList.remove("show");
-    show("lair");
-    setTimeout(() => {
-      sfx.doors();
-      doors.classList.add("open");
-    }, 500);
-    setTimeout(() => { doors.classList.remove("show", "open"); }, 3200);
+  function setChatKind(k) {
+    chatKind = k;
+    $("kText").setAttribute("aria-pressed", k === "text");
+    $("kCode").setAttribute("aria-pressed", k === "code");
+    chatInput.classList.toggle("codemode", k === "code");
+    chatInput.placeholder = k === "code" ? "Escribí el código a compartir…" : "Escribí un mensaje…";
+  }
+  $("kText").onclick = () => setChatKind("text");
+  $("kCode").onclick = () => setChatKind("code");
+
+  async function getChatKey() {
+    if (chatKey) return chatKey;
+    chatKey = await crypto.subtle.importKey("raw", fromB64(config.key), "AES-GCM", false, ["encrypt", "decrypt"]);
+    return chatKey;
+  }
+  async function encryptMsg(obj) {
+    const key = await getChatKey();
+    const iv = new Uint8Array(12); crypto.getRandomValues(iv);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(JSON.stringify(obj))));
+    const all = new Uint8Array(12 + ct.length); all.set(iv); all.set(ct, 12);
+    return "g1:" + toB64(all);
+  }
+  async function decryptMsg(text) {
+    if (!text || !text.startsWith("g1:")) return null;
+    try {
+      const all = fromB64(text.slice(3));
+      const key = await getChatKey();
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(0, 12) }, key, all.slice(12));
+      return JSON.parse(new TextDecoder().decode(pt));
+    } catch (_) { return null; }
   }
 
-  function updateVoiceInfo() {
-    const vp = loadVoiceprint();
-    const info = document.getElementById("voiceInfo");
-    info.textContent = vp
-      ? "Tu voz está registrada en este aparato desde el " + new Date(vp.at).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" }) + "."
-      : "No hay ninguna voz registrada en este aparato.";
+  function loadChatHistory() {
+    try { const a = JSON.parse(localStorage.getItem(chatStoreKey())); return Array.isArray(a) ? a : []; } catch (_) { return []; }
   }
-  updateVoiceInfo();
-  document.getElementById("reVoiceBtn").addEventListener("click", () => { audio(); startEnroll("lair"); });
+  function saveChatHistory() {
+    try { localStorage.setItem(chatStoreKey(), JSON.stringify(chatMsgs.slice(-500))); } catch (_) {}
+  }
 
-  // Ubicación: copia un link de mapa para pegar en el chat
-  const locBtn = document.getElementById("locBtn");
-  const locStatus = document.getElementById("locStatus");
-  locBtn.addEventListener("click", () => {
-    if (!navigator.geolocation) { locStatus.textContent = "Este navegador no puede ver tu ubicación."; return; }
-    locStatus.textContent = "Buscando tu ubicación…";
-    navigator.geolocation.getCurrentPosition(async pos => {
-      const { latitude, longitude, accuracy } = pos.coords;
-      const link = `https://maps.google.com/?q=${latitude.toFixed(5)},${longitude.toFixed(5)}`;
-      try {
-        await navigator.clipboard.writeText(link);
-        locStatus.textContent = `✔ Ubicación copiada (precisión ~${Math.round(accuracy)} m). Abrí el chat y pegala.`;
-      } catch (_) {
-        locStatus.textContent = "Copiá este link y pegalo en el chat: " + link;
+  const fmtTime = t => {
+    const d = new Date(t), now = new Date();
+    const hm = d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+    return d.toDateString() === now.toDateString() ? hm : d.toLocaleDateString("es-AR", { day: "numeric", month: "short" }) + " " + hm;
+  };
+
+  function renderChat() {
+    const nearBottom = chatList.scrollHeight - chatList.scrollTop - chatList.clientHeight < 80;
+    chatList.textContent = "";
+    if (!chatMsgs.length) {
+      const n = document.createElement("p"); n.className = "chat-empty";
+      n.textContent = "Todavía no hay mensajes. Escribí el primero.";
+      chatList.appendChild(n); return;
+    }
+    const me = currentPerson >= 0 ? config.people[currentPerson].name : "";
+    for (const m of chatMsgs) {
+      const mine = m.n === me;
+      const row = document.createElement("div"); row.className = "cmsg" + (mine ? " mine" : "");
+      const meta = document.createElement("div"); meta.className = "cmeta";
+      const who = document.createElement("span"); who.className = "who"; who.textContent = mine ? "Vos" : m.n;
+      const when = document.createElement("span"); when.textContent = fmtTime(m.at);
+      meta.append(who, when);
+      const body = document.createElement("div"); body.className = "cbody";
+      if (m.k === "code") {
+        const lab = document.createElement("span"); lab.className = "clabel"; lab.textContent = "CÓDIGO";
+        const val = document.createElement("span"); val.className = "cval"; val.textContent = m.t;
+        const copy = document.createElement("button"); copy.className = "mini"; copy.textContent = "Copiar";
+        copy.onclick = async () => {
+          try { await navigator.clipboard.writeText(m.t); copy.textContent = "Copiado ✓"; } catch (_) { copy.textContent = "No se pudo"; }
+          setTimeout(() => (copy.textContent = "Copiar"), 1500);
+        };
+        body.append(lab, val, copy);
+      } else if (m.k === "loc") {
+        const a = document.createElement("a");
+        a.href = `https://maps.google.com/?q=${Number(m.lat).toFixed(5)},${Number(m.lng).toFixed(5)}`;
+        a.target = "_blank"; a.rel = "noopener";
+        a.textContent = `📍 Ubicación de ${mine ? "vos" : m.n} — ver en el mapa`;
+        body.append(a);
+      } else {
+        body.textContent = m.t;
       }
-      sfx.key();
+      row.append(meta, body);
+      chatList.appendChild(row);
+    }
+    if (nearBottom) chatList.scrollTop = chatList.scrollHeight;
+  }
+
+  async function addIncoming(id, text, time) {
+    if (chatMsgs.some(m => m.id === id)) return;
+    const obj = await decryptMsg(text);
+    if (!obj || typeof obj.n !== "string") return;
+    if (chatMsgs.some(m => m.id === id)) return;
+    const msg = { id, n: obj.n.slice(0, 20), k: obj.k, t: String(obj.t || "").slice(0, 500), lat: obj.lat, lng: obj.lng, at: obj.at || time * 1000 };
+    chatMsgs.push(msg);
+    chatMsgs.sort((a, b) => a.at - b.at);
+    saveChatHistory();
+    renderChat();
+    const me = currentPerson >= 0 ? config.people[currentPerson].name : "";
+    if (msg.n !== me && Date.now() - msg.at < 15000) sfx.msg();
+  }
+
+  function openChat() {
+    closeChat();
+    chatKey = null;
+    if (!window.crypto || !crypto.subtle) {
+      chatStatus.textContent = "El chat necesita que la página se abra con https://";
+      chatSend.disabled = true; return;
+    }
+    chatMsgs = loadChatHistory();
+    renderChat();
+    chatList.scrollTop = chatList.scrollHeight;
+    chatStatus.textContent = "Conectando…";
+    chatSource = new EventSource(`${CHAT_SERVER}/${config.room}/sse?since=all`);
+    chatSource.onopen = () => { chatStatus.textContent = "🔒 Conectado. Los mensajes viajan cifrados: solo los pueden leer los celulares de la guarida."; };
+    chatSource.onmessage = e => {
+      try {
+        const ev = JSON.parse(e.data);
+        if (ev.event === "message") addIncoming(ev.id, ev.message, ev.time);
+      } catch (_) {}
+    };
+    chatSource.onerror = () => { chatStatus.textContent = "Sin conexión con el chat. Reintentando…"; };
+  }
+  function closeChat() { if (chatSource) { chatSource.close(); chatSource = null; } }
+
+  async function sendChat(obj) {
+    const body = await encryptMsg({ ...obj, n: config.people[currentPerson].name, at: Date.now() });
+    const r = await fetch(`${CHAT_SERVER}/${config.room}`, { method: "POST", body });
+    if (r.status === 429) throw new Error("limit");
+    if (!r.ok) throw new Error("http " + r.status);
+  }
+
+  chatForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const t = chatInput.value.trim();
+    if (!t || currentPerson < 0) return;
+    chatSend.disabled = true;
+    try {
+      await sendChat({ k: chatKind, t });
+      chatInput.value = "";
+    } catch (err) {
+      chatStatus.textContent = err.message === "limit"
+        ? "Se llegó al límite de mensajes de hoy (unos 250 por día por casa). Mañana se reinicia."
+        : "No se pudo enviar. Revisá tu conexión y probá de nuevo.";
+    } finally { chatSend.disabled = false; chatInput.focus(); }
+  });
+
+  $("kLoc").addEventListener("click", () => {
+    if (!navigator.geolocation) { chatStatus.textContent = "Este navegador no puede ver tu ubicación."; return; }
+    chatStatus.textContent = "Buscando tu ubicación…";
+    navigator.geolocation.getCurrentPosition(async pos => {
+      try {
+        await sendChat({ k: "loc", lat: +pos.coords.latitude.toFixed(5), lng: +pos.coords.longitude.toFixed(5) });
+        chatStatus.textContent = "📍 Ubicación enviada.";
+      } catch (err) { chatStatus.textContent = err.message === "limit" ? "Se llegó al límite de mensajes de hoy. Mañana se reinicia." : "No se pudo enviar la ubicación."; }
     }, err => {
-      locStatus.textContent = err.code === 1
-        ? "Tenés que permitir la ubicación en el navegador."
-        : "No se pudo obtener tu ubicación. Probá de nuevo.";
+      chatStatus.textContent = err.code === 1 ? "Tenés que permitir la ubicación en el navegador." : "No se pudo obtener tu ubicación. Probá de nuevo.";
     }, { enableHighAccuracy: true, timeout: 15000 });
   });
 
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    // Reinicia todo
-    locked = false; scanDone = false;
-    setMode("login", "Código de acceso requerido");
-    setProgress(0);
-    scanner.classList.remove("done", "fail", "scanning");
-    setStatus(scanStatus, "Apoyá tu mano para escanear");
-    tone(300, .3, "sine", .1, 0, 100);
+  /* ================== LA GUARIDA ================== */
+  const doors = $("doors");
+  function updateVoiceInfo() {
+    if (!config || currentPerson < 0) return;
+    $("voiceInfo").textContent = `${config.people[currentPerson].name}, tu voz está registrada con ${config.people[currentPerson].voice.length} grabaciones. Si no te reconoce bien, grabala de nuevo.`;
+  }
+  function openLair() {
+    locked = false;
+    doors.classList.remove("open");
+    doors.classList.add("show");
+    approvedOverlay.classList.remove("show");
+    const name = currentPerson >= 0 ? config.people[currentPerson].name : "";
+    $("welcomeSub").textContent = (name ? `Hola, ${name} · ` : "") + "Mano ✓ · Voz ✓ · Código ✓";
+    updateVoiceInfo();
+    show("lair");
+    openChat();
+    setTimeout(() => { sfx.doors(); doors.classList.add("open"); }, 500);
+    setTimeout(() => { doors.classList.remove("show", "open"); }, 3200);
+  }
+  $("reVoiceBtn").addEventListener("click", () => { audio(); startEnroll("lair", currentPerson); });
+
+  $("logoutBtn").addEventListener("click", () => {
+    locked = false;
+    closeChat();
     stopMic();
-    show("screenScan");
+    setMode("login", "Código de acceso requerido");
+    tone(300, .3, "sine", .1, 0, 100);
+    goToEntrance();
   });
+
+  /* ================== INICIO ================== */
+  if (!checkIncomingLink()) goToEntrance();
+  // Empieza a descargar el reconocedor de voz apenas abre la página
+  if (config || location.hash) loadVoiceModel().catch(() => {});
 </script>
 </body>
 </html>
