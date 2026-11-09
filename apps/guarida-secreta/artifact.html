@@ -1,0 +1,1443 @@
+<title>Acceso a la Guarida</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* ====== CONFIGURACIÓN VISUAL ====== */
+  :root {
+    --bg: #03060d;
+    --panel: rgba(8, 20, 34, 0.78);
+    --green: #39ff88;
+    --blue: #22d3ff;
+    --red: #ff3355;
+    --text: #d8f6ff;
+    --muted: #6f8ea0;
+    --glow-g: 0 0 8px var(--green), 0 0 22px rgba(57, 255, 136, .55);
+    --glow-b: 0 0 8px var(--blue), 0 0 22px rgba(34, 211, 255, .55);
+    --glow-r: 0 0 8px var(--red), 0 0 26px rgba(255, 51, 85, .6);
+    --font: "Orbitron", "Segoe UI", "Roboto Mono", ui-monospace, monospace;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    letter-spacing: .06em;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Fondo: grilla + resplandores */
+  .bg {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(34, 211, 255, .14), transparent 55%),
+      radial-gradient(ellipse at 85% 90%, rgba(57, 255, 136, .12), transparent 55%),
+      linear-gradient(rgba(34, 211, 255, .06) 1px, transparent 1px) 0 0 / 40px 40px,
+      linear-gradient(90deg, rgba(34, 211, 255, .06) 1px, transparent 1px) 0 0 / 40px 40px,
+      var(--bg);
+  }
+  .bg::after { /* líneas de barrido tipo monitor */
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(transparent 0 3px, rgba(0, 0, 0, .25) 3px 4px);
+    opacity: .5;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: 64px 20px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    width: 100%;
+  }
+
+  .screen { display: none; width: 100%; max-width: 460px; text-align: center; animation: fadeIn .5s ease; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  #lair.active { max-width: 1000px; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  .step {
+    font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .3em;
+  }
+  h1 {
+    font-size: clamp(1.1rem, 4.5vw, 1.5rem);
+    color: var(--blue); text-shadow: var(--glow-b);
+    text-transform: uppercase; letter-spacing: .14em;
+  }
+
+  /* ====== PANTALLA 1: ESCÁNER ====== */
+  .scanner {
+    position: relative;
+    width: min(94vw, 540px);
+    height: max(360px, calc(100vh - 215px));
+    height: max(360px, calc(100dvh - 215px));
+    max-height: 820px;
+    border: 2px solid rgba(34, 211, 255, .5);
+    border-radius: 22px;
+    background: rgba(5, 15, 28, .75);
+    box-shadow: inset 0 0 40px rgba(34, 211, 255, .15), 0 0 25px rgba(34, 211, 255, .2);
+    cursor: pointer;
+    touch-action: none;
+    overflow: hidden;
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .scanner::before, .scanner::after { /* esquinas */
+    content: ""; position: absolute; width: 28px; height: 28px; border: 3px solid var(--green);
+    filter: drop-shadow(0 0 5px var(--green));
+  }
+  .scanner::before { top: 8px; left: 8px; border-right: 0; border-bottom: 0; border-radius: 10px 0 0 0; }
+  .scanner::after { bottom: 8px; right: 8px; border-left: 0; border-top: 0; border-radius: 0 0 10px 0; }
+  .scanner.scanning { border-color: var(--green); box-shadow: inset 0 0 50px rgba(57, 255, 136, .2), 0 0 35px rgba(57, 255, 136, .45); }
+  .scanner.done { border-color: var(--green); box-shadow: inset 0 0 70px rgba(57, 255, 136, .35), 0 0 45px rgba(57, 255, 136, .6); }
+  .scanner.fail { border-color: var(--red); box-shadow: inset 0 0 50px rgba(255, 51, 85, .25), 0 0 35px rgba(255, 51, 85, .5); animation: shake .4s; }
+
+  .scanner svg { position: absolute; inset: 3% 4%; width: 92%; height: 94%; }
+  .hand-outline { fill: none; stroke: var(--blue); stroke-width: 7; filter: drop-shadow(0 0 6px var(--blue)); transition: stroke .3s; }
+  .hand-fill { fill: #061322; }
+  .hand-glow { animation: breathe 2.2s ease-in-out infinite; }
+  .scanning .hand-outline, .done .hand-outline { stroke: var(--green); filter: drop-shadow(0 0 7px var(--green)); }
+  .fail .hand-outline { stroke: var(--red); }
+  @keyframes breathe { 50% { opacity: .55; } }
+
+  .laser {
+    position: absolute; left: 4%; right: 4%; top: 0; height: 3px;
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green), 0 0 25px var(--green), 0 0 50px rgba(57, 255, 136, .7);
+    border-radius: 3px;
+    opacity: 0;
+  }
+  .laser::after { /* estela del láser */
+    content: ""; position: absolute; left: 0; right: 0; bottom: 3px; height: 50px;
+    background: linear-gradient(transparent, rgba(57, 255, 136, .22));
+  }
+  .scanning .laser { opacity: 1; }
+
+  #screenScan.active { max-width: 560px; gap: 12px; }
+  .progress {
+    width: min(94vw, 540px); height: 10px;
+    border: 1px solid rgba(34, 211, 255, .5); border-radius: 10px;
+    overflow: hidden; background: rgba(5, 15, 28, .8);
+  }
+  .progress-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    box-shadow: var(--glow-g);
+  }
+  .pct { font-size: .75rem; color: var(--muted); min-height: 1em; }
+
+  .status {
+    min-height: 2.6em; font-size: clamp(.85rem, 3.6vw, 1rem);
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 8px;
+  }
+  .status.ok { color: var(--green); text-shadow: var(--glow-g); font-size: clamp(1.2rem, 5.5vw, 1.6rem); font-weight: 700; animation: pop .5s ease; }
+  .status.err { color: var(--red); text-shadow: var(--glow-r); }
+  .status.ok-small { color: var(--green); text-shadow: var(--glow-g); }
+  @keyframes pop { 0% { transform: scale(.6); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+
+  /* ====== PANTALLA 2: TECLADO ====== */
+  .security-panel {
+    width: 100%;
+    padding: 20px;
+    border: 1px solid rgba(34, 211, 255, .4);
+    border-radius: 18px;
+    background: var(--panel);
+    box-shadow: 0 0 30px rgba(34, 211, 255, .15), inset 0 0 30px rgba(34, 211, 255, .06);
+    backdrop-filter: blur(4px);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .security-panel.denied { border-color: var(--red); box-shadow: 0 0 40px rgba(255, 51, 85, .5); animation: shake .45s; }
+  .display {
+    height: 64px; margin-bottom: 18px;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    border: 1px solid rgba(57, 255, 136, .45); border-radius: 10px;
+    background: #020a08;
+    box-shadow: inset 0 0 18px rgba(57, 255, 136, .15);
+  }
+  .display .ph { color: var(--muted); font-size: .8rem; }
+  .dot {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--green); box-shadow: var(--glow-g);
+    animation: pop .25s ease;
+  }
+  .keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .key {
+    font: inherit; font-size: 1.4rem; color: var(--blue);
+    height: 64px; border-radius: 12px;
+    border: 1px solid rgba(34, 211, 255, .5);
+    background: linear-gradient(180deg, rgba(34, 211, 255, .1), rgba(34, 211, 255, .02));
+    text-shadow: 0 0 8px var(--blue);
+    cursor: pointer; touch-action: manipulation;
+    transition: transform .08s, background .15s, box-shadow .15s;
+  }
+  .key:hover { box-shadow: 0 0 14px rgba(34, 211, 255, .45); }
+  .key:active, .key.pressed { transform: scale(.94); background: rgba(34, 211, 255, .3); box-shadow: var(--glow-b); }
+  .key.clear { color: var(--red); border-color: rgba(255, 51, 85, .6); text-shadow: 0 0 8px var(--red); font-size: 1rem; }
+  .key.enter { color: var(--green); border-color: rgba(57, 255, 136, .6); text-shadow: 0 0 8px var(--green); font-size: 1rem; }
+  .keys.abc, .keys.sym { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .keys.abc .key, .keys.sym .key { height: 48px; font-size: 1.05rem; padding: 0; }
+  .keys.sym .key[data-k="␣"] { font-size: .7rem; }
+  .key.on { background: rgba(57, 255, 136, .25); }
+  .key.mode { color: var(--green); border-color: rgba(57, 255, 136, .6); font-size: .85rem; }
+  .actions { display: grid; grid-template-columns: 1fr 1.3fr 1.3fr; gap: 12px; margin-top: 12px; }
+  .display { flex-wrap: wrap; min-height: 64px; height: auto; padding: 8px 10px; }
+  .display.many { gap: 6px; }
+  .display.many .dot { width: 10px; height: 10px; }
+  .display .chars { font-size: 1.5rem; color: var(--green); text-shadow: var(--glow-g); letter-spacing: .25em; word-break: break-all; }
+  .change-btn { margin-top: 6px; }
+  .change-btn.cancel { color: var(--red); border-color: rgba(255, 51, 85, .6); }
+  .key:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+  /* Overlays de resultado */
+  .overlay {
+    position: fixed; inset: 0; z-index: 50;
+    display: none; align-items: center; justify-content: center; flex-direction: column; gap: 10px;
+    text-align: center; padding: 16px;
+  }
+  .overlay.show { display: flex; }
+  .overlay.denied { background: rgba(120, 0, 20, .82); animation: redFlash .3s steps(2) 3; }
+  .overlay.denied .big { color: #fff; text-shadow: 0 0 12px var(--red), 0 0 40px var(--red), 0 0 80px var(--red); }
+  @keyframes redFlash { 50% { background: rgba(255, 30, 60, .9); } }
+  .overlay.approved { background: rgba(0, 25, 12, .9); }
+  .overlay.approved .big {
+    color: var(--green);
+    text-shadow: 0 0 10px var(--green), 0 0 40px var(--green), 0 0 90px rgba(57, 255, 136, .8);
+    animation: approved 1.4s cubic-bezier(.2, 1.4, .4, 1) both;
+  }
+  .overlay.approved .ring {
+    position: absolute; width: 60vmin; height: 60vmin; border-radius: 50%;
+    border: 3px solid var(--green); box-shadow: var(--glow-g);
+    animation: ring 1.6s ease-out infinite;
+  }
+  .big { font-size: clamp(2.4rem, 13vw, 6rem); font-weight: 900; letter-spacing: .12em; }
+  .sub { font-size: clamp(.8rem, 3.5vw, 1rem); color: var(--text); opacity: .85; }
+  @keyframes approved {
+    0% { transform: scale(3); opacity: 0; filter: blur(12px); }
+    60% { transform: scale(.92); opacity: 1; filter: blur(0); }
+    100% { transform: scale(1); }
+  }
+  @keyframes ring { from { transform: scale(.2); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+
+  /* ====== PANTALLA 2: VOZ ====== */
+  #screenVoice.active { max-width: 520px; }
+  .voice-box {
+    position: relative; width: min(86vw, 340px); aspect-ratio: 1; max-width: 100%;
+    display: grid; place-items: center;
+  }
+  .voice-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mic {
+    position: relative; z-index: 1;
+    width: 46%; aspect-ratio: 1; border-radius: 50%;
+    font-size: clamp(2.4rem, 12vw, 3.6rem);
+    background: radial-gradient(circle at 50% 40%, #0d2a3d, #050d18 70%);
+    border: 3px solid var(--blue); color: var(--blue);
+    box-shadow: 0 0 25px rgba(34, 211, 255, .5), inset 0 0 25px rgba(34, 211, 255, .25);
+    cursor: pointer; touch-action: manipulation;
+    transition: border-color .2s, box-shadow .2s, transform .1s;
+  }
+  .mic:active { transform: scale(.96); }
+  .mic:disabled { opacity: .35; cursor: default; }
+  .mic.rec { border-color: var(--green); color: var(--green); box-shadow: 0 0 35px rgba(57, 255, 136, .7), inset 0 0 30px rgba(57, 255, 136, .3); animation: recPulse 1s ease-in-out infinite; }
+  .mic.bad { border-color: var(--red); color: var(--red); box-shadow: 0 0 35px rgba(255, 51, 85, .6); animation: shake .4s; }
+  .mic:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  @keyframes recPulse { 50% { box-shadow: 0 0 55px rgba(57, 255, 136, .9), inset 0 0 40px rgba(57, 255, 136, .4); } }
+  .phrase {
+    font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em;
+    font-size: clamp(1rem, 4.4vw, 1.2rem); line-height: 1.4; color: var(--text);
+    padding: 10px 14px; border: 1px dashed rgba(34, 211, 255, .45); border-radius: 12px; background: rgba(34, 211, 255, .05);
+  }
+  .phrase b { color: var(--green); text-shadow: 0 0 6px rgba(57, 255, 136, .6); }
+  .enroll-dots { display: flex; gap: 10px; justify-content: center; min-height: 14px; }
+  .enroll-dots span { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--blue); }
+  .enroll-dots span.ok { background: var(--green); border-color: var(--green); box-shadow: var(--glow-g); }
+  .voice-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+  /* ====== PANTALLA 4: PUERTAS + GUARIDA ====== */
+  .doors { position: fixed; inset: 0; z-index: 40; display: none; pointer-events: none; }
+  .doors.show { display: block; }
+  .door {
+    position: absolute; top: 0; bottom: 0; width: 50.5%;
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, .04) 0 2px, transparent 2px 60px),
+      linear-gradient(90deg, #1b2530, #3b4a58 45%, #222d38);
+    box-shadow: inset 0 0 60px rgba(0, 0, 0, .8);
+    transition: transform 2.2s cubic-bezier(.7, 0, .3, 1);
+  }
+  .door.left { left: 0; border-right: 3px solid var(--blue); box-shadow: inset 0 0 60px #000, 6px 0 25px rgba(34, 211, 255, .6); }
+  .door.right { right: 0; border-left: 3px solid var(--blue); box-shadow: inset 0 0 60px #000, -6px 0 25px rgba(34, 211, 255, .6); }
+  .door::before { /* franjas de peligro */
+    content: ""; position: absolute; left: 0; right: 0; top: 46%; height: 8%;
+    background: repeating-linear-gradient(45deg, #f5c400 0 18px, #111 18px 36px);
+    opacity: .75;
+  }
+  .door::after { /* remaches */
+    content: ""; position: absolute; inset: 20px;
+    background: radial-gradient(circle, #6d7f90 2px, transparent 3px) 0 0 / 50px 50px;
+    opacity: .5;
+  }
+  .door .lock {
+    position: absolute; top: 50%; width: 70px; height: 70px; margin-top: -35px; z-index: 2;
+    border-radius: 50%; border: 4px solid var(--green); background: #0b1118;
+    box-shadow: var(--glow-g);
+  }
+  .door.left .lock { right: -35px; }
+  .door.right .lock { left: -35px; }
+  .doors.open .door.left { transform: translateX(-102%); }
+  .doors.open .door.right { transform: translateX(102%); }
+  .doors.open .lock { opacity: 0; transition: opacity .3s; }
+
+  .sound-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  .welcome {
+    font-size: clamp(1.5rem, 7vw, 2.6rem); font-weight: 900;
+    color: var(--green); text-shadow: var(--glow-g);
+    text-transform: uppercase; letter-spacing: .1em;
+    padding: 0 44px;
+  }
+  .welcome-sub { color: var(--muted); font-size: .8rem; }
+  .grid {
+    width: 100%;
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    text-align: left;
+  }
+  .card {
+    border: 1px solid rgba(34, 211, 255, .35);
+    border-radius: 16px;
+    background: var(--panel);
+    padding: 18px;
+    box-shadow: 0 0 22px rgba(34, 211, 255, .1);
+    opacity: 0; transform: translateY(20px);
+    animation: cardIn .6s ease forwards;
+  }
+  .card:nth-child(2) { animation-delay: .15s; }
+  .card:nth-child(3) { animation-delay: .3s; }
+  @keyframes cardIn { to { opacity: 1; transform: none; } }
+  .card h2 {
+    font-size: .95rem; text-transform: uppercase; letter-spacing: .16em;
+    color: var(--blue); text-shadow: var(--glow-b);
+    margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .card h2 .ic { font-size: 1.2rem; filter: drop-shadow(0 0 6px var(--blue)); }
+  .card p { font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em; line-height: 1.45; color: var(--text); opacity: .85; margin-bottom: 14px; font-size: .92rem; }
+  .card .small { font-size: .78rem; color: var(--muted); opacity: 1; margin: 10px 0 0; }
+  .big-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    font: inherit; font-size: .85rem; letter-spacing: .14em; text-transform: uppercase; text-decoration: none;
+    color: var(--bg); background: var(--green); border: 0; border-radius: 12px; padding: 14px 16px; cursor: pointer;
+    box-shadow: 0 0 20px rgba(57, 255, 136, .45);
+  }
+  .big-btn.alt { background: transparent; color: var(--blue); border: 1px solid var(--blue); box-shadow: none; }
+  .big-btn:focus-visible, .btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+  .card ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .card li {
+    font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em;
+    font-size: .92rem; line-height: 1.35;
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(34, 211, 255, .05);
+    border-left: 3px solid var(--blue);
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .card li small { color: var(--muted); display: block; font-size: .75rem; }
+  .tag {
+    font-family: var(--font); font-size: .6rem; padding: 4px 8px; border-radius: 6px;
+    white-space: nowrap; letter-spacing: .08em; border: 1px solid currentColor;
+  }
+  .tag.on { color: var(--green); }
+  .tag.off { color: var(--muted); }
+  .tag.urgent { color: var(--red); }
+  .tag.prog { color: var(--blue); }
+  .avatar {
+    width: 34px; height: 34px; flex: none; border-radius: 50%;
+    display: grid; place-items: center; font-size: 1.1rem;
+    background: rgba(57, 255, 136, .1); border: 1px solid var(--green);
+  }
+  .member { display: flex; align-items: center; gap: 10px; }
+  .msg.unread { border-left-color: var(--green); background: rgba(57, 255, 136, .07); }
+
+  .btn {
+    font: inherit; font-size: .75rem; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--blue); background: transparent; cursor: pointer;
+    border: 1px solid rgba(34, 211, 255, .5); border-radius: 10px; padding: 10px 18px;
+  }
+  .btn:hover { box-shadow: var(--glow-b); }
+
+  /* Botón de sonido */
+  .corner-btns {
+    position: fixed; z-index: 60; display: flex; gap: 8px;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    right: calc(12px + env(safe-area-inset-right, 0px));
+  }
+  .sound-toggle {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1px solid rgba(34, 211, 255, .5); background: rgba(5, 15, 28, .85);
+    color: var(--blue); font-size: 1.1rem; cursor: pointer;
+  }
+
+  footer {
+    text-align: center; padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    font-size: .72rem; color: var(--muted); letter-spacing: .18em;
+    border-top: 1px solid rgba(34, 211, 255, .15);
+  }
+  footer span { color: var(--green); text-shadow: 0 0 6px rgba(57, 255, 136, .6); }
+
+  @media (max-height: 640px) {
+    .key { height: 52px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+
+  /* ====== CONFIGURACIÓN ====== */
+  .corner-left {
+    position: fixed; z-index: 60;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    left: calc(12px + env(safe-area-inset-left, 0px));
+  }
+  .pill-btn {
+    font: inherit; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+    height: 44px; padding: 0 14px; border-radius: 22px; cursor: pointer;
+    border: 1px solid rgba(57, 255, 136, .55); background: rgba(5, 15, 28, .85); color: var(--green);
+  }
+  .pill-btn:hover { box-shadow: var(--glow-g); }
+  .pill-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  #screenSetup h1 { line-height: 1.3; }
+  .count-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .count-btn {
+    font: inherit; font-size: 1.4rem; width: 56px; height: 56px; border-radius: 14px; cursor: pointer;
+    color: var(--blue); background: rgba(34, 211, 255, .06); border: 1px solid rgba(34, 211, 255, .5);
+  }
+  .count-btn[aria-pressed="true"] { color: var(--bg); background: var(--green); border-color: var(--green); box-shadow: var(--glow-g); }
+  .names { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+  .name-field { display: flex; align-items: center; gap: 12px; text-align: left; }
+  .name-field span { flex: none; width: 96px; font-size: .7rem; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+  .name-field input {
+    flex: 1; min-width: 0; font: 1.05rem "Segoe UI", Roboto, system-ui, sans-serif; color: var(--text);
+    background: #061322; border: 1px solid rgba(34, 211, 255, .45); border-radius: 10px; padding: 12px 14px;
+  }
+  .name-field input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 2px rgba(57, 255, 136, .25); }
+  .done-text { font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em; line-height: 1.5; max-width: 42ch; }
+  .card.wide { width: 100%; text-align: left; }
+  #screenSetupDone.active, #screenLink.active { max-width: 520px; }
+
+  /* ====== CHAT ====== */
+  .chat-card { padding: 16px; }
+  .chat-list {
+    height: min(46vh, 420px); overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+    padding: 10px; border-radius: 12px; background: rgba(0, 0, 0, .3); border: 1px solid rgba(34, 211, 255, .2);
+    margin-bottom: 10px;
+  }
+  .chat-empty { color: var(--muted); text-align: center; margin: auto; font-size: .85rem; }
+  .cmsg { max-width: 85%; align-self: flex-start; padding: 8px 12px; border-radius: 12px; background: #0b1c2e; border: 1px solid #17405a; }
+  .cmsg.mine { align-self: flex-end; background: #0a2a20; border-color: #1d6b47; }
+  .cmeta { display: flex; gap: 8px; font-size: .68rem; color: var(--muted); margin-bottom: 3px; }
+  .cmeta .who { color: var(--blue); font-weight: 700; }
+  .mine .cmeta .who { color: var(--green); }
+  .cbody {
+    font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .01em; font-size: .95rem; line-height: 1.4;
+    white-space: pre-wrap; overflow-wrap: anywhere; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  }
+  .cbody a { color: var(--blue); font-weight: 600; }
+  .clabel { font-family: var(--font); font-size: .55rem; letter-spacing: .2em; color: var(--green); border: 1px solid var(--green); border-radius: 5px; padding: 2px 6px; }
+  .cval { font-family: ui-monospace, "Roboto Mono", monospace; font-size: 1.15rem; letter-spacing: .15em; color: var(--green); text-shadow: 0 0 8px rgba(57, 255, 136, .6); }
+  .mini { font: inherit; font-size: .65rem; color: var(--muted); background: none; border: 1px solid #17405a; border-radius: 7px; padding: 3px 8px; cursor: pointer; }
+  .chat-kind { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .chat-kind button {
+    font: inherit; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+    background: none; color: var(--muted); border: 1px solid rgba(34, 211, 255, .35); border-radius: 8px; padding: 7px 10px;
+  }
+  .chat-kind button[aria-pressed="true"] { color: var(--bg); background: var(--blue); border-color: var(--blue); }
+  .chat-kind .code-k[aria-pressed="true"] { background: var(--green); border-color: var(--green); }
+  .chat-kind .loc-k { margin-left: auto; color: var(--green); border-color: rgba(57, 255, 136, .5); }
+  .chat-form { display: flex; gap: 8px; }
+  .chat-form input {
+    flex: 1; min-width: 0; font: 1rem "Segoe UI", Roboto, system-ui, sans-serif; color: var(--text);
+    background: #061322; border: 1px solid rgba(34, 211, 255, .45); border-radius: 12px; padding: 12px 14px;
+  }
+  .chat-form input.codemode { font-family: ui-monospace, "Roboto Mono", monospace; letter-spacing: .12em; color: var(--green); }
+  .chat-form input:focus { outline: none; border-color: var(--green); }
+  .chat-form button {
+    font: inherit; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+    color: var(--bg); background: var(--green); border: 0; border-radius: 12px; padding: 0 16px;
+  }
+  .chat-form button:disabled { opacity: .5; }
+  #lair .chat-card h2 { margin-bottom: 10px; }
+
+  [hidden] { display: none !important; }
+  /* ====== GUARIDA: PESTAÑAS Y LISTAS ====== */
+  .tabs { width: 100%; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button {
+    flex: none; font: inherit; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+    padding: 10px 12px; border-radius: 10px; color: var(--muted); background: rgba(5, 15, 28, .8);
+    border: 1px solid rgba(34, 211, 255, .3);
+  }
+  .tabs button[aria-selected="true"] { color: var(--bg); background: var(--blue); border-color: var(--blue); box-shadow: var(--glow-b); }
+  .tabs button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  .small.net { margin: -6px 0 0; font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em; color: var(--muted); font-size: .78rem; }
+  .tab-panel.card h2 { margin-bottom: 8px; }
+  .sub-h { font-size: .75rem; letter-spacing: .16em; text-transform: uppercase; color: var(--blue); margin: 18px 0 10px; }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .item {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 10px;
+    padding: 10px 12px; border-radius: 10px; background: rgba(34, 211, 255, .05); border-left: 3px solid var(--blue);
+    font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .01em;
+  }
+  .item.done { border-left-color: var(--green); opacity: .7; }
+  .item.done b { text-decoration: line-through; }
+  .item.flash { box-shadow: 0 0 0 2px var(--green), var(--glow-g); }
+  .item-main { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 180px; flex-wrap: wrap; }
+  .item-main b { color: var(--text); }
+  .item-main small { display: block; color: var(--muted); font-size: .8rem; margin-top: 2px; }
+  .item-main small.by { font-size: .7rem; }
+  .item-main.mission { cursor: pointer; flex-wrap: nowrap; align-items: flex-start; }
+  .item-main.mission input { width: 22px; height: 22px; accent-color: #39ff88; flex: none; margin-top: 1px; }
+  .item-main.person { flex-wrap: nowrap; }
+  .item-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .avatar {
+    width: 34px; height: 34px; flex: none; border-radius: 50%;
+    display: grid; place-items: center; font-family: var(--font); font-size: .9rem; color: var(--green);
+    background: rgba(57, 255, 136, .1); border: 1px solid var(--green);
+  }
+  .eq { color: var(--muted); font-weight: 700; }
+  .meaning { color: var(--text); }
+  .meaning.muted { color: var(--muted); font-size: .85rem; }
+  .confirm { width: 100%; display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--red); }
+  .add-form { display: grid; gap: 8px; margin-bottom: 14px; }
+  .add-form input {
+    min-width: 0; font: 1rem "Segoe UI", Roboto, system-ui, sans-serif; color: var(--text);
+    background: #061322; border: 1px solid rgba(34, 211, 255, .45); border-radius: 10px; padding: 12px 14px;
+  }
+  .add-form input:focus { outline: none; border-color: var(--green); }
+  .code-picker .small { margin: 0 0 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font: .9rem "Segoe UI", Roboto, system-ui, sans-serif; text-align: left; cursor: pointer;
+    color: var(--text); background: rgba(57, 255, 136, .08); border: 1px solid rgba(57, 255, 136, .5); border-radius: 10px; padding: 9px 12px;
+  }
+  .chip b { color: var(--green); font-family: ui-monospace, "Roboto Mono", monospace; letter-spacing: .08em; }
+  .chip.add { color: var(--blue); background: transparent; border: 1px dashed rgba(34, 211, 255, .6); }
+  .mini.play { color: var(--green); border-color: rgba(57, 255, 136, .5); font-size: .75rem; }
+  .ptt-wrap { display: grid; place-items: center; padding: 10px 0 14px; }
+  .ptt {
+    width: min(60vw, 220px); aspect-ratio: 1; border-radius: 50%; cursor: pointer; touch-action: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    color: var(--green); background: radial-gradient(circle at 50% 35%, #0f3326, #04110c 70%);
+    border: 4px solid var(--green); box-shadow: 0 0 25px rgba(57, 255, 136, .45), inset 0 0 25px rgba(57, 255, 136, .2);
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  .ptt-ic { font-size: clamp(2.6rem, 14vw, 3.6rem); }
+  .ptt-label { font: .62rem var(--font); letter-spacing: .12em; text-transform: uppercase; max-width: 80%; }
+  .ptt.rec { color: var(--red); border-color: var(--red); box-shadow: 0 0 45px rgba(255, 51, 85, .7), inset 0 0 30px rgba(255, 51, 85, .3); transform: scale(.97); }
+  .ptt:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+  #tab-walkie .progress { width: 100%; }
+  .switch { display: flex; align-items: center; gap: 10px; font: .85rem "Segoe UI", Roboto, system-ui, sans-serif; color: var(--text); margin-top: 6px; cursor: pointer; }
+  .switch input { width: 20px; height: 20px; accent-color: #39ff88; }
+  #lair .grid.tab-panel { margin: 0; }
+  .tab-panel.card, .tab-panel .card { opacity: 1; transform: none; animation: tabIn .25s ease; }
+  @keyframes tabIn { from { opacity: .4; } to { opacity: 1; } }
+
+  /* ====== IDENTIDAD ====== */
+  .id-ring {
+    width: min(56vw, 200px); aspect-ratio: 1; max-width: 100%; border-radius: 50%; position: relative;
+    display: grid; place-items: center; border: 3px solid var(--blue); box-shadow: var(--glow-b);
+  }
+  .id-ring img { width: 62%; height: 62%; border-radius: 50%; object-fit: cover; opacity: .9; }
+  .id-ring img:not([src]) { visibility: hidden; }
+  .id-ring::after { content: ""; position: absolute; inset: -10px; border-radius: 50%; border: 2px dashed rgba(34, 211, 255, .5); }
+  .id-ring.scan::after { animation: spin 2s linear infinite; }
+  .id-ring.ok { border-color: var(--green); box-shadow: var(--glow-g); }
+  .id-ring.ok::after { border-color: rgba(57, 255, 136, .7); }
+  .id-ring.bad { border-color: var(--red); box-shadow: var(--glow-r); animation: shake .4s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .online { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; font-size: .72rem; color: var(--muted); min-height: 1px; }
+  .chip-on { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 3px; border-radius: 99px; border: 1px solid rgba(57, 255, 136, .5); color: var(--text); font-family: "Segoe UI", Roboto, system-ui, sans-serif; letter-spacing: .02em; }
+  .chip-on img { width: 22px; height: 22px; border-radius: 50%; }
+  .small.net.err { color: var(--red); }
+  .mini.del { border: 0; padding: 0 4px; }
+  #lair .card.wide p b { color: var(--green); }
+</style>
+<div class="bg"></div>
+<div class="corner-left">
+  <button class="pill-btn" id="setupBtn" title="Configurar la guarida">⚙ Configurar</button>
+</div>
+<div class="corner-btns">
+  <button class="sound-toggle" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa">⛶</button>
+  <button class="sound-toggle" id="soundBtn" aria-label="Activar o desactivar sonido" title="Sonido">🔊</button>
+</div>
+
+<main>
+  <!-- ========== ESCÁNER DE MANO ========== -->
+  <section class="screen active" id="screenScan">
+    <div class="step" id="scanStep">Nivel de seguridad 1/3</div>
+    <h1 id="scanTitle">Escáner biométrico</h1>
+    <div class="scanner" id="scanner" role="button" aria-label="Mantené presionado para escanear tu mano">
+      <svg viewBox="-14 0 214 262" aria-hidden="true">
+        <defs>
+          <g id="handShape">
+            <rect x="48" y="112" width="112" height="125" rx="42"/>
+            <rect x="50" y="48" width="25" height="100" rx="12.5"/>
+            <rect x="79" y="22" width="25" height="120" rx="12.5"/>
+            <rect x="108" y="30" width="25" height="115" rx="12.5"/>
+            <rect x="137" y="56" width="22" height="92" rx="11"/>
+            <rect x="18" y="128" width="24" height="82" rx="12" transform="rotate(-38 30 169)"/>
+          </g>
+          <clipPath id="handClip"><use href="#handShape"/></clipPath>
+          <linearGradient id="scanGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#39ff88" stop-opacity=".55"/>
+            <stop offset="1" stop-color="#22d3ff" stop-opacity=".25"/>
+          </linearGradient>
+        </defs>
+        <use href="#handShape" class="hand-outline hand-glow"/>
+        <use href="#handShape" class="hand-fill"/>
+        <rect id="scanFill" x="-20" y="0" width="240" height="0" fill="url(#scanGrad)" clip-path="url(#handClip)"/>
+        <g clip-path="url(#handClip)" fill="none" stroke="#22d3ff" stroke-opacity=".35" stroke-width="2">
+          <path d="M60 170 Q105 150 155 162"/>
+          <path d="M62 195 Q100 180 140 200"/>
+          <path d="M110 230 Q100 190 125 150"/>
+        </g>
+      </svg>
+      <div class="laser" id="laser"></div>
+    </div>
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="pct" id="pct"></div>
+    <div class="status" id="scanStatus">Apoyá tu mano para escanear</div>
+    <button class="btn change-btn cancel" id="scanCancel" hidden>✕ Cancelar configuración</button>
+  </section>
+
+  <!-- ========== IDENTIDAD (cuenta de Claude) ========== -->
+  <section class="screen" id="screenId">
+    <div class="step">Nivel de seguridad 2/3</div>
+    <h1>Verificando identidad</h1>
+    <div class="id-ring" id="idRing"><img id="idAvatar" alt=""></div>
+    <div class="status" id="idStatus">Leyendo tu credencial…</div>
+    <button class="btn" id="idBack" hidden>← Volver al inicio</button>
+  </section>
+
+  <!-- ========== CONTRASEÑA ========== -->
+  <section class="screen" id="screenPass">
+    <div class="step" id="passStep">Nivel de seguridad 3/3</div>
+    <h1 id="passTitle">Ingresá la contraseña</h1>
+    <div class="security-panel" id="panel">
+      <div class="display" id="display"><span class="ph">Escribí la contraseña</span></div>
+      <div class="keys" id="keys"></div>
+      <div class="actions">
+        <button class="key clear" data-k="DEL" aria-label="Borrar el último">⌫</button>
+        <button class="key clear" data-k="C">BORRAR</button>
+        <button class="key enter" data-k="OK">ENTRAR</button>
+      </div>
+    </div>
+    <div class="status" id="passStatus">Código de acceso requerido</div>
+    <button class="btn change-btn" id="changeBtn">🔑 Cambiar contraseña</button>
+  </section>
+
+  <!-- ========== CONFIGURACIÓN ========== -->
+  <section class="screen" id="screenSetup">
+    <div class="step">Configuración · paso 1 de 3</div>
+    <h1>¿Cuántas personas van a usar la guarida?</h1>
+    <div class="count-row" id="countRow" role="group" aria-label="Cantidad de personas"></div>
+    <div class="names" id="names"></div>
+    <div class="status" id="setupStatus">Después cada una escanea su mano y eligen la contraseña.</div>
+    <button class="big-btn" id="setupNext">Siguiente →</button>
+    <button class="btn change-btn cancel" id="setupCancel">✕ Cancelar</button>
+  </section>
+
+  <section class="screen" id="screenSetupDone">
+    <div class="welcome">Guarida configurada</div>
+    <p class="done-text" id="doneText"></p>
+    <button class="big-btn" id="doneStart">Ir a la entrada</button>
+  </section>
+
+  <!-- ========== LA GUARIDA ========== -->
+  <section class="screen" id="lair">
+    <div class="welcome">Bienvenido a la Guarida</div>
+    <div class="welcome-sub" id="welcomeSub">Mano ✓ · Identidad ✓ · Código ✓</div>
+    <div class="online" id="online"></div>
+
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Secciones de la guarida">
+      <button role="tab" data-tab="chat" aria-selected="true">💬 Chat</button>
+      <button role="tab" data-tab="codes" aria-selected="false">🔐 Códigos</button>
+      <button role="tab" data-tab="missions" aria-selected="false">🎯 Misiones</button>
+      <button role="tab" data-tab="people" aria-selected="false">👥 Personas</button>
+      <button role="tab" data-tab="more" aria-selected="false">⚙ Más</button>
+    </nav>
+    <p class="small net" id="netStatus">Conectando…</p>
+
+    <article class="card wide tab-panel" id="tab-chat">
+      <div class="chat-list" id="chatList" aria-live="polite"></div>
+      <div class="chat-kind" role="group" aria-label="Tipo de mensaje">
+        <button type="button" id="kText" aria-pressed="true">Mensaje</button>
+        <button type="button" id="kCode" class="code-k" aria-pressed="false">🔐 Código</button>
+      </div>
+      <form id="chatForm" class="chat-form" autocomplete="off">
+        <input id="chatInput" maxlength="500" placeholder="Escribí un mensaje…" aria-label="Mensaje">
+        <button id="chatSend" type="submit">Enviar</button>
+      </form>
+      <div class="code-picker" id="codePicker" hidden></div>
+    </article>
+
+    <article class="card wide tab-panel" id="tab-codes" hidden>
+      <h2><span class="ic">🔐</span>Libro de códigos</h2>
+      <p>Acá inventan sus códigos y qué significa cada uno. En el chat solo se pueden mandar los códigos de esta lista.</p>
+      <form class="add-form" id="codeForm" autocomplete="off">
+        <input id="codeName" maxlength="24" placeholder="Nombre (ej: Código 1)" aria-label="Nombre del código" required>
+        <input id="codeMeaning" maxlength="120" placeholder="Qué significa (ej: Vengan a la guarida)" aria-label="Significado" required>
+        <button class="big-btn" type="submit" id="codeSubmit">+ Agregar código</button>
+      </form>
+      <div class="list" id="codeList"></div>
+    </article>
+
+    <article class="card wide tab-panel" id="tab-missions" hidden>
+      <h2><span class="ic">🎯</span>Misiones secretas</h2>
+      <form class="add-form" id="missionForm" autocomplete="off">
+        <input id="missionTitle" maxlength="60" placeholder="Nombre de la misión" aria-label="Nombre de la misión" required>
+        <input id="missionDetail" maxlength="200" placeholder="Detalles (opcional)" aria-label="Detalles">
+        <button class="big-btn" type="submit">+ Agregar misión</button>
+      </form>
+      <div class="list" id="missionList"></div>
+    </article>
+
+    <article class="card wide tab-panel" id="tab-people" hidden>
+      <h2><span class="ic">👥</span>Personas de la guarida</h2>
+      <form class="add-form" id="personForm" autocomplete="off">
+        <input id="personName" maxlength="30" placeholder="Nombre" aria-label="Nombre" required>
+        <input id="personRole" maxlength="60" placeholder="Rol o apodo (ej: Espía, Inventora)" aria-label="Rol o apodo">
+        <button class="big-btn" type="submit">+ Agregar persona</button>
+      </form>
+      <div class="list" id="personList"></div>
+    </article>
+
+    <article class="card wide tab-panel" id="tab-more" hidden>
+      <h2><span class="ic">📲</span>Invitar a tu hermana</h2>
+      <p>Tocá <b>Compartir</b> arriba en Claude, poné el email de su cuenta de Claude y elegí <b>Editor</b>. Así puede entrar, leer y escribir en el chat. Si la invitás solo para ver, puede leer pero no escribir.</p>
+      <p class="small">Todo lo que escriben acá queda guardado: aunque cierren la guarida, el chat, los códigos y las misiones siguen ahí cuando vuelven.</p>
+    </article>
+
+    <button class="btn" id="logoutBtn">⏻ Cerrar sesión</button>
+  </section>
+</main>
+
+<div class="overlay denied" id="deniedOverlay">
+  <div class="big">ACCESO DENEGADO</div>
+  <div class="sub" id="deniedSub">Contraseña incorrecta. Intentá de nuevo.</div>
+</div>
+<div class="overlay approved" id="approvedOverlay">
+  <div class="ring"></div>
+  <div class="big">APPROVED</div>
+  <div class="sub">Abriendo compuertas…</div>
+</div>
+<div class="doors" id="doors">
+  <div class="door left"><div class="lock"></div></div>
+  <div class="door right"><div class="lock"></div></div>
+</div>
+
+<footer>Un proyecto de <span>Pascual Pepa</span></footer>
+
+<script>
+(() => {
+  /* ================== CONFIGURACIÓN ================== */
+  const ADMIN_CODE = "2016";   // código para configurar la guarida o cambiar la contraseña
+  const MAX_PASSWORD = 40;
+  const MAX_PEOPLE = 5;
+  const SCAN_DURATION = 3000;
+  const $ = id => document.getElementById(id);
+
+  /* ================== BASE DE DATOS DEL ARTIFACT ================== */
+  let db = null, user = null, myId = null, isOwner = false, canWrite = true;
+  let cfg = null;                       // config/main
+  let cfgLoaded = false;
+  let codes = {}, missions = {}, people = {}, msgsByUser = {};
+  let profileMap = {};
+  const ready = (async () => {
+    [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if (!db) return;
+    myId = user ? await user.id() : null;
+    isOwner = user ? await user.isOwner() : false;
+    const w = user ? await user.can("data.write") : null;
+    if (w === false || !myId) canWrite = false;
+    db.doc("config/main").onSnapshot(s => { cfg = s.exists ? s.data() : null; cfgLoaded = true; }, () => { cfgLoaded = true; });
+    const sub = (col, set) => db.collection(col).onSnapshot(snap => {
+      const o = {}; for (const d of snap.docs) o[d.id] = d.data(); set(o); renderData();
+    }, () => setNet("Se cortó la conexión. Recargá la página.", true));
+    sub("codes", o => codes = o);
+    sub("missions", o => missions = o);
+    sub("people", o => people = o);
+    let first = true;
+    db.collection("mensajes").onSnapshot(snap => {
+      const before = countMsgs();
+      const o = {}; for (const d of snap.docs) { const x = d.data(); o[d.id] = Array.isArray(x && x.items) ? x.items : []; }
+      msgsByUser = o;
+      if (!first && countMsgs() > before && lastSender() !== myId) sfx.msg();
+      first = false;
+      renderChat();
+    }, () => setNet("Se cortó la conexión. Recargá la página.", true));
+    const room = await claude.use("room");
+    if (room && user) {
+      try { room.presence({ here: true }); } catch (_) {}
+      room.onPeers(async ({ peers }) => {
+        const ids = [...new Set(peers.filter(p => p.by && p.kind === "viewer").map(p => p.by))];
+        const ps = await user.profiles(ids);
+        const el = $("online"); el.textContent = "";
+        if (!ids.length) return;
+        const lab = document.createElement("span"); lab.textContent = "En la guarida ahora:"; el.append(lab);
+        for (const id of ids) {
+          const c = document.createElement("span"); c.className = "chip-on";
+          const im = document.createElement("img"); im.alt = ""; im.src = ps[id].avatarUrl;
+          const n = document.createElement("span"); n.textContent = id === myId ? "Vos" : (ps[id].name || "Alguien");
+          c.append(im, n); el.append(c);
+        }
+      });
+    }
+  })();
+  const countMsgs = () => Object.values(msgsByUser).reduce((s, a) => s + a.length, 0);
+  function lastSender() {
+    let best = null, t = 0;
+    for (const [uid, a] of Object.entries(msgsByUser)) for (const m of a) if (m.at > t) { t = m.at; best = uid; }
+    return best;
+  }
+  async function waitConfig() {
+    await ready;
+    for (let i = 0; i < 100 && db && !cfgLoaded; i++) await new Promise(r => setTimeout(r, 100));
+    return cfg;
+  }
+  function setNet(t, err) { const n = $("netStatus"); n.textContent = t; n.classList.toggle("err", !!err); }
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  async function hashPassword(pw, salt) {
+    const h = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(salt + "|" + pw)));
+    return Array.from(h, x => x.toString(16).padStart(2, "0")).join("");
+  }
+
+  /* ================== SONIDO ================== */
+  let ctx = null, soundOn = true;
+  function audio() {
+    if (!ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) ctx = new AC(); }
+    if (ctx && ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+  function tone(freq, dur = 0.12, type = "sine", vol = 0.15, delay = 0, slideTo = null) {
+    if (!soundOn || !audio()) return;
+    const t = ctx.currentTime + delay, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function noise(dur = 1, vol = 0.2, delay = 0, freq = 400) {
+    if (!soundOn || !audio()) return;
+    const t = ctx.currentTime + delay, buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = freq;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.15); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f).connect(g).connect(ctx.destination); src.start(t); src.stop(t + dur);
+  }
+  let hum = null;
+  function humStart() {
+    if (!soundOn || !audio()) return;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sawtooth"; o.frequency.setValueAtTime(180, ctx.currentTime);
+    o.frequency.linearRampToValueAtTime(620, ctx.currentTime + SCAN_DURATION / 1000);
+    const f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 900;
+    g.gain.setValueAtTime(0.0001, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.05, ctx.currentTime + 0.1);
+    o.connect(f).connect(g).connect(ctx.destination); o.start(); hum = { o, g };
+  }
+  function humStop() {
+    if (!hum) return;
+    const t = ctx.currentTime;
+    hum.g.gain.cancelScheduledValues(t); hum.g.gain.setValueAtTime(hum.g.gain.value, t);
+    hum.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.08); hum.o.stop(t + 0.1); hum = null;
+  }
+  const sfx = {
+    key: () => tone(1200, 0.06, "square", 0.06),
+    success: () => { tone(660, .12, "sine", .18); tone(880, .12, "sine", .18, .12); tone(1320, .3, "sine", .18, .24); },
+    error: () => { tone(160, .25, "sawtooth", .2); tone(120, .35, "sawtooth", .2, .28); },
+    fail: () => tone(400, .3, "square", .1, 0, 120),
+    approved: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .45, "triangle", .16, i * .13)),
+    doors: () => { tone(90, .4, "square", .12); noise(2.3, .25, .35, 300); tone(70, 2, "sawtooth", .05, .35, 40); tone(1500, .1, "sine", .1, 2.6); },
+    msg: () => { tone(988, .08, "sine", .1); tone(1319, .12, "sine", .1, .09); },
+  };
+  const soundBtn = $("soundBtn");
+  soundBtn.addEventListener("click", () => {
+    soundOn = !soundOn; soundBtn.textContent = soundOn ? "🔊" : "🔇";
+    if (soundOn) { audio(); sfx.key(); } else humStop();
+  });
+  const fsBtn = $("fsBtn"), root = document.documentElement;
+  if (!(root.requestFullscreen || root.webkitRequestFullscreen)) fsBtn.hidden = true;
+  fsBtn.addEventListener("click", async () => {
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement) await (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      else await (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+    } catch (_) { fsBtn.hidden = true; }
+  });
+
+  /* ================== NAVEGACIÓN ================== */
+  let setup = null;
+  function show(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+    $("setupBtn").hidden = !(id === "screenScan" && !setup);
+    window.scrollTo(0, 0);
+  }
+  const vibrate = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (_) {} };
+  function setStatus(el, text, cls = "") { el.textContent = text; el.className = "status " + cls; }
+
+  /* ================== ESCÁNER DE MANO ================== */
+  const scanner = $("scanner"), laser = $("laser"), bar = $("progressBar"), pct = $("pct"), scanStatus = $("scanStatus"), scanFill = $("scanFill");
+  let scanStart = 0, rafId = null, scanning = false, scanDone = false;
+  function setProgress(p) {
+    bar.style.width = (p * 100) + "%";
+    laser.style.top = `calc(${p * 100}% - ${p * 3}px)`;
+    scanFill.setAttribute("height", (p * 260).toFixed(1));
+    pct.textContent = p > 0 ? `Analizando… ${Math.floor(p * 100)}%` : "";
+  }
+  function resetScanner(step, title, msg) {
+    scanDone = false; scanning = false; setProgress(0);
+    scanner.classList.remove("done", "fail", "scanning");
+    $("scanStep").textContent = step; $("scanTitle").textContent = title;
+    setStatus(scanStatus, msg);
+    $("scanCancel").hidden = !setup;
+  }
+  function startScan(e) {
+    if (scanDone || scanning) return;
+    e.preventDefault();
+    if (e.pointerId !== undefined && scanner.setPointerCapture) { try { scanner.setPointerCapture(e.pointerId); } catch (_) {} }
+    audio(); scanning = true; scanStart = performance.now();
+    scanner.classList.remove("fail"); scanner.classList.add("scanning");
+    setStatus(scanStatus, "Escaneando… no retires la mano");
+    humStart(); vibrate(30);
+    rafId = requestAnimationFrame(tick);
+  }
+  function tick(now) {
+    const p = Math.max(0, Math.min((now - scanStart) / SCAN_DURATION, 1));
+    setProgress(p);
+    if (p >= 1) return completeScan();
+    rafId = requestAnimationFrame(tick);
+  }
+  function cancelScan() {
+    if (!scanning) return;
+    scanning = false; cancelAnimationFrame(rafId); humStop(); sfx.fail(); vibrate([60, 40, 60]);
+    scanner.classList.remove("scanning"); void scanner.offsetWidth; scanner.classList.add("fail");
+    setStatus(scanStatus, "Escaneo interrumpido, intentá de nuevo", "err");
+    setProgress(0);
+  }
+  function completeScan() {
+    scanning = false; scanDone = true; humStop(); sfx.success(); vibrate([80, 50, 120]);
+    scanner.classList.remove("scanning"); scanner.classList.add("done");
+    if (setup) {
+      pct.textContent = "100% — Mano guardada";
+      setStatus(scanStatus, `MANO DE ${setup.names[setup.scanIndex].toUpperCase()} REGISTRADA`, "ok");
+      setTimeout(setupNextScan, 1500);
+    } else {
+      pct.textContent = "100% — Identidad confirmada";
+      setStatus(scanStatus, "HUELLA RECONOCIDA", "ok");
+      setTimeout(checkIdentity, 1600);
+    }
+  }
+  scanner.addEventListener("pointerdown", startScan);
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => scanner.addEventListener(ev, cancelScan));
+  scanner.addEventListener("contextmenu", e => e.preventDefault());
+  scanner.tabIndex = 0;
+  scanner.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) startScan(e); });
+  scanner.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") cancelScan(); });
+
+  function goToEntrance() {
+    setup = null;
+    resetScanner("Nivel de seguridad 1/3", "Escáner biométrico", "Apoyá tu mano para escanear");
+    show("screenScan");
+  }
+
+  /* ================== IDENTIDAD ================== */
+  let myName = "";
+  async function checkIdentity() {
+    show("screenId");
+    $("idBack").hidden = true;
+    $("idRing").className = "id-ring scan";
+    setStatus($("idStatus"), "Leyendo tu credencial…");
+    await ready;
+    const c = await waitConfig();
+    await new Promise(r => setTimeout(r, 900));
+    if (!db || !myId) {
+      $("idRing").className = "id-ring bad"; sfx.error();
+      setStatus($("idStatus"), "No te pude identificar. Abrí la guarida desde claude.ai con tu cuenta.", "err");
+      $("idBack").hidden = false; return;
+    }
+    const me = await user.me();
+    $("idAvatar").src = me.avatarUrl;
+    myName = me.name || "Agente";
+    if (!c) {
+      $("idRing").className = "id-ring bad"; sfx.fail();
+      setStatus($("idStatus"), "La guarida todavía no está configurada. Volvé al inicio y tocá ⚙ Configurar.", "err");
+      $("idBack").hidden = false; return;
+    }
+    $("idRing").className = "id-ring ok"; sfx.success();
+    setStatus($("idStatus"), `IDENTIDAD VERIFICADA: ${myName.toUpperCase()}`, "ok");
+    setTimeout(() => { show("screenPass"); setMode("login", "Código de acceso requerido"); }, 1700);
+  }
+  $("idBack").addEventListener("click", goToEntrance);
+
+  /* ================== TECLADO / CONTRASEÑA ================== */
+  const keysEl = $("keys"), display = $("display"), panel = $("panel"), passStatus = $("passStatus"),
+        deniedOverlay = $("deniedOverlay"), approvedOverlay = $("approvedOverlay"),
+        passTitle = $("passTitle"), deniedSub = $("deniedSub"), changeBtn = $("changeBtn");
+  let entry = "", locked = false, layout = "num", upper = true, mode = "login", pendingPassword = "";
+  const LAYOUTS = {
+    num: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "ABC", "0", "#+="],
+    abc: "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("").concat(["⇧", "123", "#+="]),
+    sym: ["!", "@", "#", "$", "%", "&", "*", "(", ")", "-", "_", "+", "=", "?", "¿", "¡", ".", ",", ":", ";", "/", "␣", "ABC", "123"],
+  };
+  const MODE_KEYS = { "ABC": "abc", "123": "num", "#+=": "sym" };
+  function renderKeys() {
+    keysEl.innerHTML = ""; keysEl.className = "keys " + layout;
+    for (const k of LAYOUTS[layout]) {
+      const b = document.createElement("button");
+      let label = k;
+      if (layout === "abc" && k.length === 1 && k !== "⇧") label = upper ? k : k.toLowerCase();
+      b.className = "key" + (MODE_KEYS[k] || k === "⇧" ? " mode" : "") + (k === "⇧" && upper ? " on" : "");
+      b.textContent = k === "␣" ? "espacio" : label;
+      b.dataset.k = k;
+      b.setAttribute("aria-label", k === "⇧" ? "Mayúsculas" : k === "␣" ? "Espacio" : MODE_KEYS[k] ? "Cambiar teclado" : label);
+      keysEl.appendChild(b);
+    }
+  }
+  panel.addEventListener("click", e => { const b = e.target.closest(".key"); if (b) press(b.dataset.k); });
+  renderKeys();
+  const showsText = () => ["new", "confirm", "setupNew", "setupConfirm"].includes(mode);
+  function renderDisplay() {
+    display.innerHTML = "";
+    if (!entry.length) {
+      const ph = document.createElement("span"); ph.className = "ph";
+      ph.textContent = showsText() ? "Escribí la contraseña nueva" : "Escribí la contraseña";
+      display.appendChild(ph); return;
+    }
+    if (showsText()) { const sp = document.createElement("span"); sp.className = "chars"; sp.textContent = entry; display.appendChild(sp); }
+    else {
+      display.classList.toggle("many", entry.length > 14);
+      for (let i = 0; i < entry.length; i++) { const d = document.createElement("span"); d.className = "dot"; display.appendChild(d); }
+    }
+  }
+  function setMode(m, msg, cls = "") {
+    mode = m; entry = "";
+    const titles = { login: "Ingresá la contraseña", admin: "Código de administrador", new: "Escribí la contraseña nueva",
+      confirm: "Repetí la contraseña nueva", setupAdmin: "Código de administrador", setupNew: "Elijan la contraseña", setupConfirm: "Repitan la contraseña" };
+    passTitle.textContent = titles[m];
+    $("passStep").textContent = (m === "setupNew" || m === "setupConfirm") ? "Configuración · paso 3 de 3"
+      : m === "setupAdmin" ? "Configuración" : m === "login" ? "Nivel de seguridad 3/3" : "Cambiar contraseña";
+    const changing = m !== "login";
+    changeBtn.textContent = changing ? "✕ Cancelar" : "🔑 Cambiar contraseña";
+    changeBtn.classList.toggle("cancel", changing);
+    setStatus(passStatus, msg, cls);
+    renderDisplay();
+  }
+  changeBtn.addEventListener("click", () => {
+    if (locked) return;
+    audio(); tone(700, .08, "square", .06);
+    if (mode.startsWith("setup")) { goToEntrance(); return; }
+    if (mode === "login") setMode("admin", "Ingresá el código para cambiar la contraseña");
+    else setMode("login", "Cambio cancelado. Código de acceso requerido");
+  });
+  function press(k) {
+    if (locked || !k) return;
+    audio(); flashKey(k);
+    if (MODE_KEYS[k]) { layout = MODE_KEYS[k]; renderKeys(); tone(900, .05, "square", .05); return; }
+    if (k === "⇧") { upper = !upper; renderKeys(); tone(900, .05, "square", .05); return; }
+    if (k === "C") { entry = ""; tone(500, .08, "square", .06); }
+    else if (k === "DEL") { entry = entry.slice(0, -1); tone(600, .05, "square", .05); }
+    else if (k === "OK") { return check(); }
+    else if (entry.length < MAX_PASSWORD) {
+      let ch = k === "␣" ? " " : k;
+      if (layout === "abc" && ch.length === 1 && !upper) ch = ch.toLowerCase();
+      entry += ch; sfx.key(); vibrate(15);
+    } else { sfx.fail(); setStatus(passStatus, `Máximo ${MAX_PASSWORD} caracteres`, "err"); }
+    renderDisplay();
+  }
+  function flashKey(k) {
+    const b = panel.querySelector(`[data-k="${CSS.escape(k)}"]`);
+    if (!b) return;
+    b.classList.add("pressed"); setTimeout(() => b.classList.remove("pressed"), 120);
+  }
+  function denied(sub, after) {
+    locked = true; deniedSub.textContent = sub;
+    panel.classList.add("denied"); deniedOverlay.classList.add("show");
+    sfx.error(); vibrate([300, 100, 300]);
+    setTimeout(() => { deniedOverlay.classList.remove("show"); panel.classList.remove("denied"); locked = false; after(); }, 1800);
+  }
+  async function writeConfig(data) {
+    try { await db.doc("config/main").set(data); return true; }
+    catch (_) { return false; }
+  }
+  async function check() {
+    if (!entry.length) { setStatus(passStatus, "Escribí algo primero", "err"); sfx.fail(); return; }
+    const value = entry;
+    if (mode === "login") {
+      if (!cfg) { setStatus(passStatus, "Primero configurá la guarida (⚙ arriba a la izquierda).", "err"); return; }
+      locked = true;
+      const ok = (await hashPassword(value, cfg.pw.salt)) === cfg.pw.hash;
+      locked = false;
+      if (ok) {
+        locked = true;
+        approvedOverlay.classList.add("show"); sfx.approved(); vibrate([100, 60, 100, 60, 200]);
+        setTimeout(openLair, 2300);
+      } else denied("Contraseña incorrecta. Intentá de nuevo.", () => setMode("login", "Acceso denegado. Volvé a ingresar la contraseña", "err"));
+    } else if (mode === "admin" || mode === "setupAdmin") {
+      if (value === ADMIN_CODE) {
+        sfx.success();
+        if (mode === "admin") setMode("new", "Podés usar números, letras, mayúsculas, símbolos y espacios.");
+        else startSetup();
+      } else { const m = mode; denied("Código de administrador incorrecto.", () => setMode(m, "Código incorrecto. Probá de nuevo o tocá Cancelar", "err")); }
+    } else if (mode === "new" || mode === "setupNew") {
+      pendingPassword = value; sfx.key();
+      setMode(mode === "new" ? "confirm" : "setupConfirm", "Escribila otra vez para confirmar");
+    } else if (mode === "confirm" || mode === "setupConfirm") {
+      if (value !== pendingPassword) {
+        sfx.error();
+        setMode(mode === "confirm" ? "new" : "setupNew", "No coinciden. Escribí la contraseña otra vez", "err");
+        return;
+      }
+      const salt = newId();
+      const pw = { salt, hash: await hashPassword(value, salt) };
+      pendingPassword = "";
+      if (mode === "setupConfirm") {
+        const ok = await writeConfig({ names: setup.names, pw, upd: Date.now() });
+        if (!ok) { sfx.error(); setStatus(passStatus, "No se pudo guardar. ¿Tenés permiso de Editor en esta guarida?", "err"); return; }
+        sfx.approved();
+        $("doneText").textContent = `Listo. La guarida es de ${listNames(setup.names)}. Para entrar hace falta la mano, la cuenta de Claude de cada uno y la contraseña.`;
+        setup = null;
+        setMode("login", "Código de acceso requerido");
+        show("screenSetupDone");
+      } else {
+        const ok = await writeConfig({ ...cfg, pw, upd: Date.now() });
+        if (!ok) { sfx.error(); setMode("login", "No se pudo guardar la contraseña nueva. ¿Tenés permiso de Editor?", "err"); return; }
+        sfx.success();
+        setMode("login", "✔ Contraseña cambiada. Ahora ingresala para entrar", "ok-small");
+      }
+    }
+  }
+  document.addEventListener("keydown", e => {
+    if (!$("screenPass").classList.contains("active")) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === "Enter") { e.preventDefault(); press("OK"); }
+    else if (e.key === "Backspace") { e.preventDefault(); press("DEL"); }
+    else if (e.key === "Escape") press("C");
+    else if (e.key.length === 1 && !locked && entry.length < MAX_PASSWORD) { e.preventDefault(); audio(); entry += e.key; sfx.key(); renderDisplay(); }
+  });
+  const listNames = ns => ns.length === 1 ? ns[0] : ns.slice(0, -1).join(", ") + " y " + ns[ns.length - 1];
+
+  /* ================== CONFIGURACIÓN ================== */
+  $("setupBtn").addEventListener("click", async () => {
+    audio(); tone(700, .08, "square", .06);
+    await waitConfig();
+    if (cfg) { show("screenPass"); setMode("setupAdmin", "La guarida ya está configurada. Para configurarla de nuevo ingresá el código de administrador."); }
+    else startSetup();
+  });
+  function startSetup() {
+    const prev = cfg ? cfg.names || [] : [];
+    setup = { count: Math.max(2, prev.length || 2), names: prev.slice(), scanIndex: 0 };
+    renderSetup(); show("screenSetup"); $("setupBtn").hidden = true;
+  }
+  function renderSetup() {
+    const row = $("countRow"); row.innerHTML = "";
+    for (let n = 1; n <= MAX_PEOPLE; n++) {
+      const b = document.createElement("button");
+      b.className = "count-btn"; b.textContent = n; b.setAttribute("aria-pressed", n === setup.count);
+      b.onclick = () => { readNames(); setup.count = n; sfx.key(); renderSetup(); };
+      row.appendChild(b);
+    }
+    const names = $("names"); names.innerHTML = "";
+    for (let i = 0; i < setup.count; i++) {
+      const lab = document.createElement("label"); lab.className = "name-field";
+      const sp = document.createElement("span"); sp.textContent = `Persona ${i + 1}`;
+      const inp = document.createElement("input");
+      inp.id = "name" + i; inp.maxLength = 20; inp.autocomplete = "off";
+      inp.placeholder = i === 0 ? "Tu nombre" : "Nombre"; inp.value = setup.names[i] || "";
+      lab.append(sp, inp); names.appendChild(lab);
+    }
+  }
+  function readNames() { for (let i = 0; i < setup.count; i++) { const el = $("name" + i); if (el) setup.names[i] = el.value.trim(); } }
+  $("setupNext").addEventListener("click", async () => {
+    audio(); readNames();
+    if (!canWrite) { setStatus($("setupStatus"), "Necesitás permiso de Editor en esta guarida para configurarla.", "err"); sfx.fail(); return; }
+    setup.names = setup.names.slice(0, setup.count).map((n, i) => n || `Persona ${i + 1}`);
+    const lower = setup.names.map(n => n.toLowerCase());
+    if (new Set(lower).size !== lower.length) { setStatus($("setupStatus"), "Cada persona tiene que tener un nombre distinto.", "err"); sfx.fail(); return; }
+    sfx.success(); setup.scanIndex = -1; setupNextScan();
+  });
+  $("setupCancel").addEventListener("click", goToEntrance);
+  $("scanCancel").addEventListener("click", goToEntrance);
+  $("doneStart").addEventListener("click", goToEntrance);
+  function setupNextScan() {
+    setup.scanIndex++;
+    if (setup.scanIndex < setup.count) {
+      const name = setup.names[setup.scanIndex];
+      resetScanner(`Configuración · paso 2 de 3 · mano ${setup.scanIndex + 1} de ${setup.count}`, `Mano de ${name}`, `${name}: mantené tu mano apoyada 3 segundos`);
+      show("screenScan");
+    } else {
+      show("screenPass");
+      setMode("setupNew", setup.count > 1 ? "Decidan juntos una contraseña. Puede tener números, letras, mayúsculas, símbolos y espacios."
+        : "Elegí una contraseña. Puede tener números, letras, mayúsculas, símbolos y espacios.");
+    }
+  }
+
+  /* ================== LA GUARIDA ================== */
+  const chatList = $("chatList"), chatForm = $("chatForm"), chatInput = $("chatInput"), chatSend = $("chatSend"), codePicker = $("codePicker");
+  let currentTab = "chat";
+  function showTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll("#tabs [role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === tab));
+    document.querySelectorAll(".tab-panel").forEach(p => (p.hidden = p.id !== "tab-" + tab));
+    if (tab === "chat") chatList.scrollTop = chatList.scrollHeight;
+  }
+  $("tabs").addEventListener("click", e => { const b = e.target.closest("[role=tab]"); if (b) { sfx.key(); showTab(b.dataset.tab); } });
+
+  async function names(ids) {
+    const want = ids.filter(Boolean);
+    if (user && want.length) { const ps = await user.profiles(want); Object.assign(profileMap, ps); }
+    return id => id === myId ? "Vos" : ((profileMap[id] && profileMap[id].name) || "Alguien");
+  }
+  const writeErr = () => setNet(canWrite ? "No se pudo guardar. Probá de nuevo." : "Solo podés mirar: pedile al dueño que te invite como Editor.", true);
+  async function save(col, id, data) { try { await db.doc(`${col}/${id}`).set(data); return true; } catch (_) { writeErr(); return false; } }
+  async function remove(col, id) { try { await db.doc(`${col}/${id}`).delete(); } catch (_) { writeErr(); } }
+
+  function miniBtn(label, fn) { const b = document.createElement("button"); b.type = "button"; b.className = "mini"; b.textContent = label; b.onclick = fn; return b; }
+  function emptyNote(t) { const p = document.createElement("p"); p.className = "chat-empty"; p.textContent = t; return p; }
+  function confirmThen(row, q, fn) {
+    if (row.querySelector(".confirm")) return;
+    const box = document.createElement("div"); box.className = "confirm";
+    const s = document.createElement("span"); s.textContent = q;
+    box.append(s, miniBtn("Sí", () => { box.remove(); fn(); }), miniBtn("No", () => box.remove()));
+    row.append(box);
+  }
+  const liveCodes = () => Object.entries(codes).map(([id, v]) => ({ id, ...v })).sort((a, b) => String(a.name).localeCompare(String(b.name), "es", { numeric: true }));
+
+  // --- Códigos ---
+  const codeName = $("codeName"), codeMeaning = $("codeMeaning");
+  let editingCode = null;
+  function suggestCodeName() {
+    const ns = new Set(liveCodes().map(c => String(c.name).toLowerCase()));
+    let n = 1; while (ns.has("código " + n)) n++;
+    return "Código " + n;
+  }
+  $("codeForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const name = codeName.value.trim(), meaning = codeMeaning.value.trim();
+    if (!name || !meaning) return;
+    const dup = liveCodes().find(c => String(c.name).toLowerCase() === name.toLowerCase() && c.id !== editingCode);
+    if (dup) { setNet(`Ya existe un código llamado “${dup.name}”.`, true); sfx.fail(); return; }
+    const id = editingCode || newId();
+    const prev = codes[id] || {};
+    if (await save("codes", id, { ...prev, name, meaning, by: prev.by || myId, upd: Date.now() })) {
+      editingCode = null; $("codeSubmit").textContent = "+ Agregar código";
+      codeMeaning.value = ""; codeName.value = ""; sfx.success();
+    }
+  });
+  function renderCodes() {
+    const list = $("codeList"); list.textContent = "";
+    const cs = liveCodes();
+    if (!cs.length) list.append(emptyNote("Todavía no hay códigos. Inventen el primero arriba."));
+    for (const c of cs) {
+      const row = document.createElement("div"); row.className = "item"; row.id = "code-" + c.id;
+      const left = document.createElement("div"); left.className = "item-main";
+      const nm = document.createElement("span"); nm.className = "cval"; nm.textContent = c.name;
+      const eq = document.createElement("span"); eq.className = "eq"; eq.textContent = "=";
+      const mn = document.createElement("span"); mn.className = "meaning"; mn.textContent = c.meaning;
+      left.append(nm, eq, mn);
+      const acts = document.createElement("div"); acts.className = "item-acts";
+      acts.append(miniBtn("Mandar", () => { showTab("chat"); sendMsg({ k: "code", code: c.id, cn: c.name }); }),
+        miniBtn("Editar", () => { editingCode = c.id; codeName.value = c.name; codeMeaning.value = c.meaning; $("codeSubmit").textContent = "Guardar cambios"; codeMeaning.focus(); }),
+        miniBtn("Borrar", () => confirmThen(row, `¿Borrar ${c.name}?`, () => remove("codes", c.id))));
+      row.append(left, acts); list.append(row);
+    }
+    if (!codeName.value && !editingCode) codeName.value = suggestCodeName();
+    renderCodePicker();
+  }
+  function renderCodePicker() {
+    codePicker.textContent = "";
+    const cs = liveCodes();
+    const head = document.createElement("p"); head.className = "small";
+    head.textContent = cs.length ? "Tocá un código para mandarlo:" : "No hay códigos todavía.";
+    const wrap = document.createElement("div"); wrap.className = "chips";
+    for (const c of cs) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip";
+      const nm = document.createElement("b"); nm.textContent = c.name;
+      const mn = document.createElement("span"); mn.textContent = " = " + c.meaning;
+      b.append(nm, mn); b.onclick = () => sendMsg({ k: "code", code: c.id, cn: c.name });
+      wrap.append(b);
+    }
+    const add = document.createElement("button"); add.type = "button"; add.className = "chip add"; add.textContent = "+ Crear código nuevo";
+    add.onclick = () => { showTab("codes"); codeMeaning.focus(); };
+    wrap.append(add);
+    codePicker.append(head, wrap);
+  }
+
+  // --- Misiones ---
+  $("missionForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const title = $("missionTitle").value.trim(), detail = $("missionDetail").value.trim();
+    if (!title) return;
+    if (await save("missions", newId(), { title, detail, done: false, by: myId, created: Date.now() })) {
+      $("missionTitle").value = ""; $("missionDetail").value = ""; sfx.success();
+    }
+  });
+  async function renderMissions() {
+    const ms = Object.entries(missions).map(([id, v]) => ({ id, ...v })).sort((a, b) => (!!a.done - !!b.done) || ((b.created || 0) - (a.created || 0)));
+    const nm = await names(ms.map(m => m.by));
+    const list = $("missionList"); list.textContent = "";
+    if (!ms.length) list.append(emptyNote("No hay misiones. Agreguen la primera."));
+    for (const m of ms) {
+      const row = document.createElement("div"); row.className = "item" + (m.done ? " done" : "");
+      const left = document.createElement("label"); left.className = "item-main mission";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!m.done;
+      cb.onchange = () => { save("missions", m.id, { ...missions[m.id], done: cb.checked }); if (cb.checked) sfx.success(); };
+      const txt = document.createElement("span");
+      const t = document.createElement("b"); t.textContent = m.title; txt.append(t);
+      if (m.detail) { const d = document.createElement("small"); d.textContent = m.detail; txt.append(d); }
+      const by = document.createElement("small"); by.className = "by";
+      by.textContent = (m.done ? "✔ Completa" : "Pendiente") + (m.by ? ` · agregó ${nm(m.by)}` : "");
+      txt.append(by); left.append(cb, txt);
+      const acts = document.createElement("div"); acts.className = "item-acts";
+      acts.append(miniBtn("Borrar", () => confirmThen(row, "¿Borrar la misión?", () => remove("missions", m.id))));
+      row.append(left, acts); list.append(row);
+    }
+  }
+
+  // --- Personas ---
+  $("personForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const name = $("personName").value.trim(), role = $("personRole").value.trim();
+    if (!name) return;
+    if (await save("people", newId(), { name, role, by: myId, created: Date.now() })) {
+      $("personName").value = ""; $("personRole").value = ""; sfx.success();
+    }
+  });
+  function renderPeople() {
+    const ps = Object.entries(people).map(([id, v]) => ({ id, ...v })).sort((a, b) => String(a.name).localeCompare(String(b.name), "es"));
+    const list = $("personList"); list.textContent = "";
+    if (!ps.length) list.append(emptyNote("Todavía no agregaron personas."));
+    for (const p of ps) {
+      const row = document.createElement("div"); row.className = "item";
+      const left = document.createElement("div"); left.className = "item-main person";
+      const av = document.createElement("span"); av.className = "avatar"; av.textContent = String(p.name).slice(0, 1).toUpperCase();
+      const txt = document.createElement("span");
+      const n = document.createElement("b"); n.textContent = p.name; txt.append(n);
+      if (p.role) { const r = document.createElement("small"); r.textContent = p.role; txt.append(r); }
+      left.append(av, txt);
+      const acts = document.createElement("div"); acts.className = "item-acts";
+      acts.append(miniBtn("Borrar", () => confirmThen(row, `¿Borrar a ${p.name}?`, () => remove("people", p.id))));
+      row.append(left, acts); list.append(row);
+    }
+  }
+
+  // --- Chat ---
+  let chatKind = "text";
+  function setChatKind(k) {
+    chatKind = k;
+    $("kText").setAttribute("aria-pressed", k === "text");
+    $("kCode").setAttribute("aria-pressed", k === "code");
+    chatForm.hidden = k === "code"; codePicker.hidden = k !== "code";
+  }
+  $("kText").onclick = () => setChatKind("text");
+  $("kCode").onclick = () => setChatKind("code");
+  const fmtTime = t => {
+    const d = new Date(t), now = new Date();
+    const hm = d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+    return d.toDateString() === now.toDateString() ? hm : d.toLocaleDateString("es-AR", { day: "numeric", month: "short" }) + " " + hm;
+  };
+  let writing = Promise.resolve();
+  function sendMsg(fields) {
+    if (!db || !myId) return;
+    const item = { id: newId(), at: Date.now(), ...fields };
+    writing = writing.then(async () => {
+      try {
+        const items = [...(msgsByUser[myId] || []), item].slice(-400);
+        await db.doc("mensajes/" + myId).set({ items });
+        sfx.key();
+      } catch (_) { writeErr(); }
+    });
+    return writing;
+  }
+  function deleteMsg(uid, id) {
+    writing = writing.then(async () => {
+      try { await db.doc("mensajes/" + uid).set({ items: (msgsByUser[uid] || []).filter(m => m.id !== id) }); }
+      catch (_) { writeErr(); }
+    });
+  }
+  chatForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const t = chatInput.value.trim();
+    if (!t) return;
+    chatSend.disabled = true;
+    await sendMsg({ k: "text", t });
+    chatInput.value = ""; chatSend.disabled = false; chatInput.focus();
+  });
+  let renderingChat = false, chatAgain = false;
+  async function renderChat() {
+    if (renderingChat) { chatAgain = true; return; }
+    renderingChat = true;
+    const all = [];
+    for (const [uid, items] of Object.entries(msgsByUser)) for (const m of items) if (m && m.id) all.push({ ...m, uid });
+    all.sort((a, b) => (a.at || 0) - (b.at || 0));
+    const nm = await names([...new Set(all.map(m => m.uid))]);
+    const nearBottom = chatList.scrollHeight - chatList.scrollTop - chatList.clientHeight < 80;
+    chatList.textContent = "";
+    if (!all.length) chatList.append(emptyNote("Todavía no hay mensajes. Escribí el primero."));
+    for (const m of all) {
+      const mine = m.uid === myId;
+      const row = document.createElement("div"); row.className = "cmsg" + (mine ? " mine" : "");
+      const meta = document.createElement("div"); meta.className = "cmeta";
+      const who = document.createElement("span"); who.className = "who"; who.textContent = nm(m.uid);
+      const when = document.createElement("span"); when.textContent = fmtTime(m.at);
+      meta.append(who, when);
+      if (mine || isOwner) { const d = miniBtn("✕", () => deleteMsg(m.uid, m.id)); d.classList.add("del"); d.title = "Borrar"; d.setAttribute("aria-label", "Borrar mensaje"); meta.append(d); }
+      const body = document.createElement("div"); body.className = "cbody";
+      if (m.k === "code") {
+        const c = codes[m.code];
+        const lab = document.createElement("span"); lab.className = "clabel"; lab.textContent = "CÓDIGO";
+        const val = document.createElement("span"); val.className = "cval"; val.textContent = c ? c.name : (m.cn || "?");
+        body.append(lab, val);
+        if (c) {
+          const eq = document.createElement("span"); eq.className = "eq"; eq.textContent = "=";
+          const mn = document.createElement("span"); mn.className = "meaning"; mn.textContent = c.meaning;
+          body.append(eq, mn, miniBtn("📖 Ver códigos", () => {
+            showTab("codes"); const el = $("code-" + m.code);
+            if (el) { el.scrollIntoView({ block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1500); }
+          }));
+        } else { const mn = document.createElement("span"); mn.className = "meaning muted"; mn.textContent = "(este código se borró)"; body.append(mn); }
+      } else body.textContent = m.t;
+      row.append(meta, body); chatList.append(row);
+    }
+    if (nearBottom) chatList.scrollTop = chatList.scrollHeight;
+    renderingChat = false;
+    if (chatAgain) { chatAgain = false; renderChat(); }
+  }
+  function renderData() { renderCodes(); renderMissions(); renderPeople(); renderChat(); }
+
+  const doors = $("doors");
+  function openLair() {
+    locked = false;
+    doors.classList.remove("open"); doors.classList.add("show");
+    approvedOverlay.classList.remove("show");
+    $("welcomeSub").textContent = `Hola, ${myName} · Mano ✓ · Identidad ✓ · Código ✓`;
+    setChatKind("text"); showTab("chat");
+    setNet(canWrite ? "🔒 Conectado · todo queda guardado en la guarida" : "Solo podés mirar: pedile al dueño que te invite como Editor.", !canWrite);
+    if (!canWrite) { chatInput.disabled = true; chatSend.disabled = true; }
+    renderData();
+    show("lair");
+    setTimeout(() => { sfx.doors(); doors.classList.add("open"); }, 500);
+    setTimeout(() => { doors.classList.remove("show", "open"); chatList.scrollTop = chatList.scrollHeight; }, 3200);
+  }
+  $("logoutBtn").addEventListener("click", () => {
+    locked = false; setMode("login", "Código de acceso requerido");
+    tone(300, .3, "sine", .1, 0, 100); goToEntrance();
+  });
+
+  goToEntrance();
+})();
+</script>
