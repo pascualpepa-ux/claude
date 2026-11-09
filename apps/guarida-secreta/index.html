@@ -19,6 +19,7 @@
     --glow-b: 0 0 8px var(--blue), 0 0 22px rgba(34, 211, 255, .55);
     --glow-r: 0 0 8px var(--red), 0 0 26px rgba(255, 51, 85, .6);
     --font: "Orbitron", "Segoe UI", "Roboto Mono", ui-monospace, monospace;
+    color-scheme: dark;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,7 +59,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 16px;
+    padding-block: 24px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
     width: 100%;
   }
 
@@ -248,6 +251,7 @@
   .doors.open .door.right { transform: translateX(102%); }
   .doors.open .lock { opacity: 0; transition: opacity .3s; }
 
+  .sound-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
   .welcome {
     font-size: clamp(1.5rem, 7vw, 2.6rem); font-weight: 900;
     color: var(--green); text-shadow: var(--glow-g);
@@ -313,8 +317,12 @@
   .btn:hover { box-shadow: var(--glow-b); }
 
   /* Botón de sonido */
+  .corner-btns {
+    position: fixed; z-index: 60; display: flex; gap: 8px;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    right: calc(12px + env(safe-area-inset-right, 0px));
+  }
   .sound-toggle {
-    position: fixed; top: max(12px, env(safe-area-inset-top)); right: 12px; z-index: 60;
     width: 44px; height: 44px; border-radius: 50%;
     border: 1px solid rgba(34, 211, 255, .5); background: rgba(5, 15, 28, .85);
     color: var(--blue); font-size: 1.1rem; cursor: pointer;
@@ -338,7 +346,10 @@
 </head>
 <body>
 <div class="bg"></div>
-<button class="sound-toggle" id="soundBtn" aria-label="Activar o desactivar sonido">🔊</button>
+<div class="corner-btns">
+  <button class="sound-toggle" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa">⛶</button>
+  <button class="sound-toggle" id="soundBtn" aria-label="Activar o desactivar sonido" title="Sonido">🔊</button>
+</div>
 
 <main>
   <!-- ========== PANTALLA 1 ========== -->
@@ -530,6 +541,21 @@
     soundOn = !soundOn;
     soundBtn.textContent = soundOn ? "🔊" : "🔇";
     if (soundOn) { audio(); sfx.key(); } else humStop();
+  });
+
+  /* Pantalla completa (si el navegador lo permite) */
+  const fsBtn = document.getElementById("fsBtn");
+  const root = document.documentElement;
+  const canFs = root.requestFullscreen || root.webkitRequestFullscreen;
+  if (!canFs) fsBtn.hidden = true;
+  fsBtn.addEventListener("click", async () => {
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        await (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      } else {
+        await (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+      }
+    } catch (_) { fsBtn.hidden = true; }
   });
 
   /* ================== NAVEGACIÓN ================== */
