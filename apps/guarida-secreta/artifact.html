@@ -593,6 +593,16 @@
   .log-time { font-family: ui-monospace, "Roboto Mono", monospace; color: var(--muted); font-size: .8rem; }
   .item.log-in { border-left-color: var(--green); }
   .item.log-out { border-left-color: var(--red); }
+  .big-ic { font-size: 3.4rem; }
+  .card.danger { border-color: rgba(255, 51, 85, .5); }
+  .card.danger h2 { color: var(--red); text-shadow: var(--glow-r); }
+  .danger-btn { background: var(--red); color: #fff; box-shadow: 0 0 20px rgba(255, 51, 85, .45); }
+  .confirm-box { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .confirm-box p { color: var(--red); }
+  #screenOwner .big-btn { width: 100%; }
+  #screenOwner.active { max-width: 520px; }
+  #screenNoAccount.active { max-width: 520px; }
+  .done-text b { color: var(--green); }
 </style>
 <div class="bg"></div>
 <div class="corner-left">
@@ -714,6 +724,35 @@
     <button class="big-btn" id="doneStart">Ir a la entrada</button>
   </section>
 
+  <!-- ========== SIN CUENTA ========== -->
+  <section class="screen" id="screenNoAccount">
+    <div class="step">Acceso restringido</div>
+    <h1>Iniciá sesión para entrar</h1>
+    <div class="id-ring bad"><span class="big-ic">🔒</span></div>
+    <p class="done-text">La guarida guarda todo en Claude, así que para entrar hace falta <b>iniciar sesión en Claude</b> (tocá <b>Sign in</b> o <b>Iniciar sesión</b>). Si no tenés cuenta, crear una es gratis.</p>
+    <p class="done-text small">Después, el dueño de la guarida te tiene que invitar con tu email como <b>Editor</b> para que puedas escribir.</p>
+  </section>
+
+  <!-- ========== MENÚ DEL DUEÑO ========== -->
+  <section class="screen" id="screenOwner">
+    <div class="step">Solo para el dueño de la guarida</div>
+    <h1>Configuración</h1>
+    <button class="big-btn" id="ownerSetup">⚙ Configurar de nuevo (personas, tarjetas y contraseña)</button>
+    <button class="big-btn alt" id="ownerPw">🔑 Cambiar solo la contraseña</button>
+    <div class="card wide danger">
+      <h2><span class="ic">🗑</span>Borrar todo</h2>
+      <p>Borra la configuración, el chat, los códigos, las misiones, las personas y el registro. La guarida queda vacía para armarla de cero, con otras personas si querés.</p>
+      <button class="big-btn danger-btn" id="ownerWipe">Borrar todo y empezar de cero</button>
+      <div class="confirm-box" id="wipeConfirm" hidden>
+        <p>¿Seguro? Esto no se puede deshacer.</p>
+        <button class="big-btn danger-btn" id="wipeYes">Sí, borrar todo</button>
+        <button class="btn" id="wipeNo">No, cancelar</button>
+      </div>
+      <p class="small" id="wipeStatus"></p>
+    </div>
+    <button class="btn change-btn cancel" id="ownerBack">← Volver</button>
+  </section>
+
   <!-- ========== LA GUARIDA ========== -->
   <section class="screen" id="lair">
     <div class="welcome">Bienvenido a la Guarida</div>
@@ -787,11 +826,13 @@
     </article>
 
     <article class="card wide tab-panel" id="tab-more" hidden>
-      <h2><span class="ic">📲</span>Invitar a tu hermana</h2>
-      <p>Tocá <b>Compartir</b> arriba en Claude, poné el email de su cuenta de Claude y elegí <b>Editor</b>. Así puede entrar, leer y escribir en el chat. Si la invitás solo para ver, puede leer pero no escribir.</p>
+      <h2><span class="ic">📲</span>Invitar a alguien</h2>
+      <p>Tocá <b>Compartir</b> arriba en Claude, poné el email de su cuenta de Claude y elegí <b>Editor</b>. Para que pueda escribir, <b>no</b> compartas la guarida con “cualquiera con el link”: invitala solo con su email.</p>
+      <p>Tiene que entrar con su cuenta de Claude (es gratis). Sin iniciar sesión no puede ver nada.</p>
       <p class="small">Todo lo que escriben acá queda guardado: aunque cierren la guarida, el chat, los códigos y las misiones siguen ahí cuando vuelven.</p>
     </article>
 
+    <button class="btn" id="ownerFromLair" hidden>⚙ Configuración del dueño</button>
     <button class="btn" id="logoutBtn">⏻ Salir de la guarida</button>
   </section>
 </main>
@@ -1354,8 +1395,11 @@
   changeBtn.addEventListener("click", () => {
     if (locked) return;
     audio(); tone(700, .08, "square", .06);
-    if (mode.startsWith("setup") || mode === "cardAdmin") { goToEntrance(); return; }
-    if (mode === "login") setMode("admin", "Ingresá el código para cambiar la contraseña");
+    if (mode.startsWith("setup") || mode === "cardAdmin" || ((mode === "new" || mode === "confirm") && !$("lair").classList.contains("active") && !personName)) { goToEntrance(); return; }
+    if (mode === "login") {
+      if (!isOwner) { setStatus(passStatus, "Solo el dueño de la guarida puede cambiar la contraseña.", "err"); sfx.fail(); return; }
+      setMode("new", "Podés usar números, letras, mayúsculas, símbolos y espacios.");
+    }
     else setMode("login", "Cambio cancelado. Código de acceso requerido");
   });
   function press(k) {
@@ -1450,8 +1494,39 @@
   $("setupBtn").addEventListener("click", async () => {
     audio(); tone(700, .08, "square", .06);
     await waitConfig();
-    if (cfg) { show("screenPass"); setMode("setupAdmin", "La guarida ya está configurada. Para configurarla de nuevo ingresá el código de administrador."); }
-    else startSetup();
+    if (!db || !myId) { show("screenNoAccount"); return; }
+    if (!isOwner) {
+      setStatus(scanStatus, cfg ? "Solo el dueño de la guarida puede cambiar la configuración." : "Esperá a que el dueño de la guarida la configure.", "err");
+      sfx.fail(); return;
+    }
+    if (cfg) openOwnerMenu(); else startSetup();
+  });
+  function openOwnerMenu() {
+    $("wipeConfirm").hidden = true; $("ownerWipe").hidden = false; $("wipeStatus").textContent = "";
+    $("ownerPw").hidden = !cfg;
+    show("screenOwner"); $("setupBtn").hidden = true;
+  }
+  $("ownerBack").addEventListener("click", goToEntrance);
+  $("ownerSetup").addEventListener("click", () => { audio(); startSetup(); });
+  $("ownerPw").addEventListener("click", () => { audio(); show("screenPass"); setMode("new", "Podés usar números, letras, mayúsculas, símbolos y espacios."); });
+  $("ownerFromLair").addEventListener("click", () => { audio(); openOwnerMenu(); });
+  $("ownerWipe").addEventListener("click", () => { $("wipeConfirm").hidden = false; $("ownerWipe").hidden = true; sfx.fail(); });
+  $("wipeNo").addEventListener("click", () => { $("wipeConfirm").hidden = true; $("ownerWipe").hidden = false; });
+  $("wipeYes").addEventListener("click", async () => {
+    $("wipeConfirm").hidden = true;
+    $("wipeStatus").textContent = "Borrando…";
+    const paths = ["config/main"];
+    for (const id of Object.keys(codes)) paths.push("codes/" + id);
+    for (const id of Object.keys(missions)) paths.push("missions/" + id);
+    for (const id of Object.keys(people)) paths.push("people/" + id);
+    for (const id of Object.keys(msgsByUser)) paths.push("mensajes/" + id);
+    for (const id of Object.keys(registro)) paths.push("registro/" + id);
+    let fails = 0;
+    for (const p of paths) { try { await db.doc(p).delete(); } catch (_) { fails++; } }
+    if (fails) { $("wipeStatus").textContent = `No se pudieron borrar ${fails} cosas. Probá de nuevo.`; $("ownerWipe").hidden = false; sfx.error(); return; }
+    sfx.doors();
+    $("wipeStatus").textContent = "✔ Guarida borrada. Ahora configurala de nuevo.";
+    setTimeout(startSetup, 1500);
   });
   function startSetup() {
     const prev = cfg ? cfg.names || [] : [];
@@ -1745,6 +1820,7 @@
     setNet(canWrite ? "🔒 Conectado · todo queda guardado en la guarida" : "Solo podés mirar: pedile al dueño que te invite como Editor.", !canWrite);
     if (!canWrite) { chatInput.disabled = true; chatSend.disabled = true; }
     renderData();
+    $("ownerFromLair").hidden = !isOwner;
     show("lair");
     setTimeout(() => { sfx.doors(); doors.classList.add("open"); }, 500);
     setTimeout(() => { doors.classList.remove("show", "open"); chatList.scrollTop = chatList.scrollHeight; }, 3200);
@@ -1756,5 +1832,6 @@
   });
 
   goToEntrance();
+  ready.then(() => { if ((!db || !myId) && $("screenScan").classList.contains("active")) show("screenNoAccount"); });
 })();
 </script>
