@@ -27,6 +27,11 @@ Cada envío llega a la vez a pascualpepa@icloud.com (principal) y en copia a gui
 ## Publicar
 Es una web estática: sirve cualquier hosting (Vercel, Netlify, GitHub Pages…) subiendo la carpeta tal cual. No hace falta configurar nada más. Ojo: abriendo `index.html` directamente desde el ordenador (file://) el formulario no envía; tiene que estar servida desde una web.
 
+## Estadísticas de visitas (GoatCounter)
+1. Crear cuenta gratis en https://www.goatcounter.com/signup con el código **nordicworldwide** (si está ocupado, elegir otro y cambiarlo en `js/config.js` → `goatcounter`).
+2. Panel: https://nordicworldwide.goatcounter.com — visitas, páginas vistas, de dónde vienen, país, navegador y dispositivo.
+3. No cuenta visitas desde `localhost` ni desde la vista previa: solo con la web publicada.
+
 ## Pendiente
 - Número de WhatsApp → `js/config.js` (`whatsapp: "34600123456"`).
 - Enlaces reales de Instagram / TikTok → `js/config.js`.

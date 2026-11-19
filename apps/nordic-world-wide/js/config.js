@@ -20,6 +20,11 @@ window.SITE_CONFIG = {
     "alejandrorivasruiz@icloud.com"
   ],
 
+  // Estadísticas de visitas con GoatCounter (goatcounter.com).
+  // Es el "código" elegido al crear la cuenta: el panel queda en
+  // https://<código>.goatcounter.com  — vacío = sin estadísticas.
+  goatcounter: "nordicworldwide",
+
   // Tamaño máximo de imagen adjunta (MB)
   maxAdjuntoMB: 3
 };

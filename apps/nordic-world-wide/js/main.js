@@ -46,6 +46,16 @@
   $$(".nav a").forEach(function (a) { a.addEventListener("click", closeNav); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeNav(); });
 
+  /* ---------- Estadísticas (GoatCounter) ---------- */
+  var gc = String(CFG.goatcounter || "").replace(/[^a-z0-9-]/gi, "");
+  if (gc && !CFG.demo) {
+    var s = document.createElement("script");
+    s.async = true;
+    s.src = "https://gc.zgo.at/count.js";
+    s.setAttribute("data-goatcounter", "https://" + gc + ".goatcounter.com/count");
+    document.head.appendChild(s);
+  }
+
   /* ---------- Footer, redes, WhatsApp ---------- */
   $$(".year").forEach(function (el) { el.textContent = new Date().getFullYear(); });
   $$("[data-social]").forEach(function (a) { a.href = CFG[a.getAttribute("data-social")] || "#"; });
