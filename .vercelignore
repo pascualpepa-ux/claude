@@ -2,6 +2,7 @@
 !/apps
 /apps/*
 !/apps/viajes
+!/apps/nordic-world-wide
 /apps/viajes/node_modules
 /apps/viajes/.next
 /apps/viajes/vista-previa/dist
