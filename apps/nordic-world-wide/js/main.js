@@ -221,6 +221,8 @@
       var f = fileInput.files[0];
       (f ? readFile(f).then(function (b64) { data.adjunto = { nombre: f.name, tipo: f.type, base64: b64 }; }) : Promise.resolve())
         .then(function () {
+          // Modo demo (sin backend): simula el envío
+          if (CFG.demo) return { ok: true, json: function () { return Promise.resolve({}); } };
           return fetch(CFG.endpoint || "/api/send", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -236,7 +238,7 @@
           form.reset();
           form.elements.ts.value = String(Date.now());
           fileName.textContent = "Opcional · JPG/PNG/WEBP · máx. " + (CFG.maxAdjuntoMB || 3) + " MB";
-          setStatus("¡Recibido! Te respondemos pronto.", "ok");
+          setStatus("¡Recibido! Te respondemos pronto." + (CFG.demo ? " (Vista previa: no se envió ningún email.)" : ""), "ok");
         })
         .catch(function (err) {
           setStatus("No se pudo enviar (" + err.message + "). Inténtalo de nuevo o escríbenos por WhatsApp.", "err");
