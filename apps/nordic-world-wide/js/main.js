@@ -179,14 +179,6 @@
       fileName.textContent = f.name;
     });
 
-    function readFile(f) {
-      return new Promise(function (resolve, reject) {
-        var r = new FileReader();
-        r.onload = function () { resolve(String(r.result).split(",")[1]); };
-        r.onerror = reject;
-        r.readAsDataURL(f);
-      });
-    }
 
     function setStatus(msg, kind) { status.textContent = msg; status.className = "form-status" + (kind ? " " + kind : ""); }
 
@@ -202,36 +194,43 @@
       });
       if (!ok) { setStatus("Revisa los campos marcados.", "err"); return; }
 
-      var data = {
-        tipo: form.elements.producto.value.trim() ? "pedido" : form.elements.tipo.value,
-        nombre: form.elements.nombre.value.trim(),
-        email: form.elements.email.value.trim(),
-        telefono: form.elements.telefono.value.trim(),
-        producto: form.elements.producto.value.trim(),
-        talla: form.elements.talla.value,
-        mensaje: form.elements.mensaje.value.trim(),
-        website: form.elements.website.value, // honeypot
-        ts: Number(form.elements.ts.value)
-      };
+      var nombre = form.elements.nombre.value.trim();
+      var producto = form.elements.producto.value.trim();
+      var esPedido = producto !== "";
+      var tel = form.elements.telefono.value.trim();
+      // Antispam: honeypot relleno o formulario enviado en < 2,5 s → se finge éxito y no se envía nada
+      var esBot = form.elements.website.value !== "" || Date.now() - Number(form.elements.ts.value) < 2500;
+
+      var fd = new FormData();
+      fd.append("_subject", esPedido ? "🛒 Pedido – " + producto : "✉️ Contacto – " + nombre);
+      fd.append("_replyto", form.elements.email.value.trim());
+      fd.append("_cc", (CFG.copias || []).join(","));
+      fd.append("_template", "table");
+      fd.append("_captcha", "false");
+      fd.append("Tipo", esPedido ? "Pedido" : "Contacto");
+      fd.append("Nombre", nombre);
+      fd.append("email", form.elements.email.value.trim());
+      fd.append("Teléfono", tel || "—");
+      fd.append("Producto", producto || "—");
+      fd.append("Mensaje", form.elements.mensaje.value.trim());
+      var f = fileInput.files[0];
+      if (f) fd.append("attachment", f, f.name);
 
       submitBtn.disabled = true;
       var label = submitBtn.textContent;
       submitBtn.textContent = "ENVIANDO…";
 
-      var f = fileInput.files[0];
-      (f ? readFile(f).then(function (b64) { data.adjunto = { nombre: f.name, tipo: f.type, base64: b64 }; }) : Promise.resolve())
+      Promise.resolve()
         .then(function () {
-          // Modo demo (sin backend): simula el envío
-          if (CFG.demo) return { ok: true, json: function () { return Promise.resolve({}); } };
-          return fetch(CFG.endpoint || "/api/send", {
+          if (esBot || CFG.demo) return; // demo: vista previa sin envío real
+          return fetch("https://formsubmit.co/ajax/" + encodeURIComponent(CFG.destinatario), {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-          });
-        })
-        .then(function (res) {
-          return res.json().catch(function () { return {}; }).then(function (body) {
-            if (!res.ok) throw new Error(body.error || "Error " + res.status);
+            headers: { Accept: "application/json" },
+            body: fd
+          }).then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (body) {
+              if (!res.ok || String(body.success) === "false") throw new Error(body.message || "Error " + res.status);
+            });
           });
         })
         .then(function () {
