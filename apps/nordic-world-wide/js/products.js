@@ -18,39 +18,17 @@
    ========================================================= */
 
 window.PRODUCTS = [
-  {
-    id: "aurora-tee",
-    nombre: "AURORA OVERSIZED TEE",
-    precio: null,
-    tallas: ["S", "M", "L", "XL"],
-    fotos: ["img/products/aurora-1.svg", "img/products/aurora-2.svg"],
-    descripcion: "Algodón pesado 240 g, corte oversized y hombro caído. Estampado frontal en azul hielo.",
-    etiqueta: "DROP 01"
-  },
-  {
-    id: "fjord-tee",
-    nombre: "FJORD BLACK TEE",
-    precio: null,
-    tallas: ["S", "M", "L", "XL"],
-    fotos: ["img/products/fjord-1.svg", "img/products/fjord-2.svg"],
-    descripcion: "Negro total. Logo frontal y espalda NORDIC WORLD WIDE en blanco. Fit boxy.",
-    etiqueta: "DROP 01"
-  },
-  {
-    id: "polar-tee",
-    nombre: "POLAR GREY TEE",
-    precio: null,
-    tallas: ["S", "M", "L", "XL"],
-    fotos: ["img/products/polar-1.svg", "img/products/polar-2.svg"],
-    descripcion: "Gris nórdico lavado, cuello canalé grueso y estampado tono sobre tono."
-  },
-  {
-    id: "frost-tee",
-    nombre: "FROST WHITE TEE",
-    precio: null,
-    tallas: ["S", "M", "L", "XL"],
-    fotos: ["img/products/frost-1.svg", "img/products/frost-2.svg"],
-    descripcion: "Blanco óptico con detalles en azul hielo. Edición limitada.",
-    etiqueta: "LIMITADA"
-  }
+  // Todavía no hay camisetas publicadas. Mientras la lista esté vacía,
+  // el Shop muestra "Próximo drop muy pronto".
+  //
+  // Ejemplo para copiar (quita las // del principio de cada línea):
+  // {
+  //   id: "nombre-camiseta",
+  //   nombre: "NOMBRE CAMISETA",
+  //   precio: null,
+  //   tallas: ["S", "M", "L", "XL"],
+  //   fotos: ["img/products/foto-frente.jpg", "img/products/foto-espalda.jpg"],
+  //   descripcion: "Descripción corta.",
+  //   etiqueta: "DROP 01"
+  // },
 ];

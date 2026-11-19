@@ -57,7 +57,15 @@
 
   /* ---------- Shop ---------- */
   var grid = $("#shop-grid");
-  if (grid) {
+  if (grid && !PRODUCTS.length) {
+    grid.classList.add("is-empty");
+    grid.innerHTML =
+      '<div class="empty reveal">' +
+        '<p class="empty-title">PRÓXIMO DROP<br>MUY PRONTO</p>' +
+        '<p class="empty-sub">Estamos preparando la primera colección. Escríbenos y te avisamos antes que nadie.</p>' +
+        '<a class="btn btn-dark" href="#contacto">Avísame</a>' +
+      "</div>";
+  } else if (grid) {
     grid.innerHTML = PRODUCTS.map(function (p, i) {
       var fotos = p.fotos || [];
       return (
