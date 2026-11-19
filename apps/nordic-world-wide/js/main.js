@@ -205,15 +205,19 @@
       fd.append("_subject", esPedido ? "🛒 Pedido – " + producto : "✉️ Contacto – " + nombre);
       fd.append("_replyto", form.elements.email.value.trim());
       fd.append("_cc", (CFG.copias || []).join(","));
-      fd.append("_template", "table");
+      fd.append("_template", "box");
       fd.append("_captcha", "false");
-      fd.append("Tipo", esPedido ? "Pedido" : "Contacto");
-      fd.append("Nombre", nombre);
-      fd.append("email", form.elements.email.value.trim());
-      fd.append("Teléfono", tel || "—");
-      fd.append("Producto", producto || "—");
-      fd.append("Mensaje", form.elements.mensaje.value.trim());
+      // Campos en el orden en que se leen en el email (solo los que tienen valor)
+      var talla = form.elements.talla.value;
       var f = fileInput.files[0];
+      fd.append("Tipo", esPedido ? "PEDIDO" : "CONSULTA");
+      if (esPedido) fd.append("Producto", talla ? producto.replace(/\s*–\s*Talla\s+\S+$/, "") : producto);
+      if (talla) fd.append("Talla", talla);
+      fd.append("Cliente", nombre);
+      fd.append("Email", form.elements.email.value.trim());
+      if (tel) fd.append("Teléfono", tel);
+      fd.append("Mensaje", form.elements.mensaje.value.trim());
+      if (f) fd.append("Imagen", "Adjunta a este email");
       if (f) fd.append("attachment", f, f.name);
 
       submitBtn.disabled = true;
