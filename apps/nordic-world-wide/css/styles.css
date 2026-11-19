@@ -305,3 +305,7 @@ a { color: inherit; }
 @media (max-width: 719px) {
   .hero-scroll { display: none; }
 }
+
+.footer-admin { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--grey-700); text-decoration: none; }
+.footer-admin:hover { color: var(--ice); }
+@media (min-width: 720px) { .footer-admin { grid-column: 1 / -1; justify-self: end; } }

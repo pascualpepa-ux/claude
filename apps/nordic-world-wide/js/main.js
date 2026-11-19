@@ -237,6 +237,22 @@
       Promise.resolve()
         .then(function () {
           if (esBot || CFG.demo) return; // demo: vista previa sin envío real
+          // Copia para el panel admin (contador + lista). Si falla, el email sale igual.
+          fetch("/api/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            keepalive: true,
+            body: JSON.stringify({
+              tipo: esPedido ? "pedido" : "contacto",
+              nombre: nombre,
+              email: form.elements.email.value.trim(),
+              telefono: tel,
+              producto: esPedido ? (talla ? producto.replace(/\s*–\s*Talla\s+\S+$/, "") : producto) : "",
+              talla: talla,
+              mensaje: form.elements.mensaje.value.trim(),
+              adjunto: !!f
+            })
+          }).catch(function () {});
           return fetch("https://formsubmit.co/ajax/" + encodeURIComponent(CFG.destinatario), {
             method: "POST",
             headers: { Accept: "application/json" },

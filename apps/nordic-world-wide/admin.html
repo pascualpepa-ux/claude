@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin | NORDIC WORLD WIDE</title>
+  <meta name="theme-color" content="#0b0c0e">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230b0c0e'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Arial Black' font-size='22' fill='%23a9d6f5'%3ENWW%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0c0e; --panel: #15171a; --line: #26292e; --text: #f2f3f4; --muted: #8a9199;
+      --ice: #a9d6f5; --ok: #7fd1a8; --err: #ff8a80;
+      --display: "Anton", "Arial Narrow", Impact, sans-serif;
+      --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    :focus-visible { outline: 2px solid var(--ice); outline-offset: 2px; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+    .logo { font-family: var(--display); font-size: 26px; letter-spacing: .03em; text-decoration: none; color: var(--text); }
+    .logo span { font: 700 10px var(--body); letter-spacing: .3em; color: var(--ice); margin-left: 6px; }
+    .eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+    h1 { font-family: var(--display); font-weight: 400; font-size: clamp(40px, 9vw, 72px); line-height: .95; margin: 0; }
+    h2 { font-family: var(--display); font-weight: 400; font-size: 28px; line-height: 1; margin: 0; letter-spacing: .01em; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border: 1.5px solid var(--text); background: var(--text); color: var(--bg); font-size: 12px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; cursor: pointer; }
+    .btn:hover { background: var(--ice); border-color: var(--ice); }
+    .btn-ghost { background: transparent; color: var(--text); border-color: var(--line); }
+    .btn-ghost:hover { background: var(--panel); border-color: var(--text); }
+    .btn[disabled] { opacity: .5; cursor: wait; }
+    .field { display: grid; gap: 6px; }
+    .field label { font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+    .field input, .field select { background: var(--panel); border: 1.5px solid var(--line); padding: 12px; border-radius: 0; }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--ice); }
+    .note { color: var(--muted); font-size: 13px; }
+    .err { color: var(--err); font-size: 14px; min-height: 1.4em; margin: 0; }
+
+    /* Login */
+    .login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+    .login form { width: 100%; max-width: 380px; display: grid; gap: 18px; }
+    .who { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .who label { position: relative; }
+    .who input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+    .who span { display: flex; align-items: center; justify-content: center; height: 44px; border: 1.5px solid var(--line); font-weight: 700; font-size: 13px; }
+    .who input:checked + span { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .who input:focus-visible + span { outline: 2px solid var(--ice); outline-offset: 2px; }
+
+    /* Panel */
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 20px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+    .top-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .hello { color: var(--muted); font-size: 13px; }
+    .hello strong { color: var(--text); }
+    .grid { display: grid; gap: 16px; }
+    .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 24px 0 16px; }
+    @media (max-width: 600px) { .tile { padding: 12px; } .tile .num { font-size: 34px; } .tile .eyebrow { font-size: 9px; letter-spacing: .14em; } }
+    .tile { background: var(--panel); border: 1px solid var(--line); padding: 18px; min-width: 0; }
+    .tile .num { font-family: var(--display); font-size: 48px; line-height: 1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+    .tile .num.small { font-size: 32px; }
+    .card { background: var(--panel); border: 1px solid var(--line); padding: 20px; min-width: 0; }
+    .card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .setup { border: 1px dashed var(--line); padding: 14px; color: var(--muted); font-size: 13px; }
+    .setup strong { color: var(--ice); }
+
+    /* Gráfico de barras */
+    .chart { display: grid; grid-template-columns: repeat(30, 1fr); align-items: end; gap: 3px; height: 160px; padding-top: 18px; border-bottom: 1px solid var(--line); }
+    .bar { position: relative; background: var(--ice); min-height: 2px; opacity: .85; }
+    .bar.zero { background: var(--line); }
+    .bar:hover { opacity: 1; }
+    .bar span { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--muted); padding-bottom: 2px; font-variant-numeric: tabular-nums; }
+    .axis { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+    /* Mensajes */
+    .msgs { display: grid; gap: 10px; margin-top: 16px; max-height: 520px; overflow: auto; }
+    .msg { border: 1px solid var(--line); padding: 14px; background: var(--bg); }
+    .msg-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+    .pill { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .16em; padding: 3px 7px; background: var(--line); color: var(--text); }
+    .pill.pedido { background: var(--ice); color: var(--bg); }
+    .msg-meta { margin: 8px 0; font-size: 13px; color: var(--muted); word-break: break-word; }
+    .msg-meta strong { color: var(--text); }
+    .msg-body { white-space: pre-wrap; word-break: break-word; }
+
+    /* Chat */
+    .chat-log { height: 380px; overflow: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px 2px 8px; }
+    .bubble { max-width: 85%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--line); align-self: flex-start; }
+    .bubble.me { align-self: flex-end; border-color: var(--ice); }
+    .bubble .who-name { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .bubble .time { font-size: 11px; color: var(--muted); margin-left: 6px; font-weight: 400; letter-spacing: 0; text-transform: none; }
+    .bubble p { margin: 4px 0 0; white-space: pre-wrap; word-break: break-word; }
+    .chat-form { display: flex; gap: 8px; margin-top: 12px; }
+    .chat-form textarea { flex: 1; min-width: 0; resize: none; height: 48px; background: var(--bg); border: 1.5px solid var(--line); padding: 12px; border-radius: 0; }
+    .chat-form textarea:focus { outline: none; border-color: var(--ice); }
+    .c-Pascual { color: #a9d6f5; } .c-Nacho { color: #f2c38b; } .c-Billy { color: #b9e4a0; } .c-Bruno { color: #e3a9f5; }
+
+    @media (min-width: 900px) {
+      .grid { grid-template-columns: 1.3fr 1fr; align-items: start; }
+      .chat-card { position: sticky; top: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <section class="login" id="login-view">
+    <form id="login-form" novalidate>
+      <a class="logo" href="index.html">NORDIC<span>WORLD WIDE</span></a>
+      <div>
+        <p class="eyebrow">Panel del equipo</p>
+        <h1>ADMIN</h1>
+      </div>
+      <div class="field">
+        <label>¿Quién eres?</label>
+        <div class="who" id="who"></div>
+      </div>
+      <div class="field">
+        <label for="pass">Clave</label>
+        <input id="pass" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn" type="submit" id="login-btn">Entrar</button>
+      <p class="err" id="login-err" role="alert"></p>
+    </form>
+  </section>
+
+  <!-- PANEL -->
+  <div class="wrap" id="panel-view" hidden>
+    <header class="top">
+      <a class="logo" href="index.html">NORDIC<span>WORLD WIDE</span></a>
+      <div class="top-right">
+        <span class="hello">Hola, <strong id="me-name"></strong></span>
+        <button class="btn btn-ghost" id="logout" type="button">Salir</button>
+      </div>
+    </header>
+
+    <p class="eyebrow">Resumen</p>
+    <h1>PANEL</h1>
+
+    <div class="tiles">
+      <div class="tile"><p class="eyebrow">Mensajes recibidos</p><div class="num" id="t-msgs">—</div></div>
+      <div class="tile"><p class="eyebrow">Visitas · 30 días</p><div class="num" id="t-visits">—</div></div>
+      <div class="tile"><p class="eyebrow">Visitas · hoy</p><div class="num" id="t-today">—</div></div>
+    </div>
+    <p class="setup" id="db-setup" hidden>La base de datos todavía no está conectada: los mensajes y el chat no se guardan. Ver <strong>README → Panel admin</strong>.</p>
+
+    <div class="grid">
+      <div style="display:grid;gap:16px;min-width:0">
+        <section class="card">
+          <div class="card-head">
+            <h2>VISITAS POR DÍA</h2>
+            <a class="note" id="gc-link" href="https://nordicworldwide.goatcounter.com" target="_blank" rel="noopener">Abrir GoatCounter ↗</a>
+          </div>
+          <div id="chart-wrap"><p class="note">Cargando…</p></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>MENSAJES</h2>
+            <button class="btn btn-ghost" id="toggle-msgs" type="button">Ver mensajes</button>
+          </div>
+          <p class="note" id="msgs-note">Los mensajes están ocultos. Pulsa “Ver mensajes” para mostrarlos.</p>
+          <div class="msgs" id="msgs" hidden></div>
+        </section>
+      </div>
+
+      <section class="card chat-card">
+        <div class="card-head">
+          <h2>CHAT DEL EQUIPO</h2>
+          <span class="note" id="chat-status">Pascual · Nacho · Billy · Bruno</span>
+        </div>
+        <div class="chat-log" id="chat-log" aria-live="polite"></div>
+        <form class="chat-form" id="chat-form">
+          <textarea id="chat-text" placeholder="Escribe algo para el equipo…" maxlength="1000" aria-label="Mensaje para el equipo"></textarea>
+          <button class="btn" type="submit" id="chat-send">Enviar</button>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

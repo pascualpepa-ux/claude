@@ -32,6 +32,18 @@ Es una web estática: sirve cualquier hosting (Vercel, Netlify, GitHub Pages…)
 2. Panel: https://nordicworldwide.goatcounter.com — visitas, páginas vistas, de dónde vienen, país, navegador y dispositivo.
 3. No cuenta visitas desde `localhost` ni desde la vista previa: solo con la web publicada.
 
+## Panel admin (`/admin.html`)
+Link "Admin" abajo del todo en la web. Entran Pascual, Nacho, Billy y Bruno con la clave del equipo (se comprueba en el servidor; para cambiarla, definir `ADMIN_PASSWORD` en Vercel → Settings → Environment Variables).
+
+Muestra: mensajes recibidos (ocultos hasta pulsar "Ver mensajes"), visitas de GoatCounter con barras por día y un chat del equipo que se actualiza solo cada 4 segundos.
+
+Configuración en Vercel (una vez):
+1. **Base de datos** (mensajes + chat): proyecto → **Storage** → **Create Database** → **Upstash for Redis** (plan gratis) → conectarla al proyecto. Crea solas las variables `KV_REST_API_URL` y `KV_REST_API_TOKEN`.
+2. **Visitas en el panel**: GoatCounter → **Settings → API** → crear token con permiso *Read statistics* → en Vercel añadir la variable `GOATCOUNTER_TOKEN` con ese valor.
+3. **Redeploy** del proyecto para que tome las variables.
+
+Funciones del servidor en `api/`: `messages.js` (guarda y lista mensajes), `chat.js`, `stats.js` (GoatCounter), `_lib.js` (clave y base de datos).
+
 ## Pendiente
 - Número de WhatsApp → `js/config.js` (`whatsapp: "34600123456"`).
 - Enlaces reales de Instagram / TikTok → `js/config.js`.
