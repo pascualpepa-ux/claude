@@ -17,7 +17,7 @@ img/              Imágenes (placeholders SVG; reemplazar por fotos reales)
 Abre `js/products.js`, copia un bloque `{ ... }` y cambia los datos. Con `precio: null` se muestra **"Precio a consultar"**; pon un número (`precio: 39.9`) cuando esté definido. Las fotos van en `img/products/` (recomendado: cuadradas, 900×900 o más).
 
 ## Emails
-Cada envío llega a la vez a pascualpepa@icloud.com (principal) y en copia a guillermogg24@icloud.com (lista en `js/config.js`).
+Cada envío llega a la vez a pascualpepa@icloud.com (principal) y en copia a guillermogg24@icloud.com y pelayocc@icloud.com (lista en `js/config.js`).
 - Asunto: `🛒 Pedido – [producto]` si hay producto, si no `✉️ Contacto – [nombre]`.
 - "Responder a" = email del cliente.
 - Imagen adjunta opcional (máx. 3 MB).

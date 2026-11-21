@@ -6,7 +6,8 @@ window.SITE_CONFIG = {
   // hay que abrirlo y pulsar "Activate Form" (una sola vez).
   destinatario: "pascualpepa@icloud.com",
   copias: [
-    "guillermogg24@icloud.com"
+    "guillermogg24@icloud.com",
+    "pelayocc@icloud.com"
   ],
 
   // Estadísticas de visitas con GoatCounter (goatcounter.com).
