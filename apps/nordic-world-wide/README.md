@@ -14,7 +14,7 @@ img/              Imágenes (placeholders SVG; reemplazar por fotos reales)
 ```
 
 ## Añadir una camiseta
-Abre `js/products.js`, copia un bloque `{ ... }` y cambia los datos. Con `precio: null` se muestra **"Precio a consultar"**; pon un número (`precio: 39.9`) cuando esté definido. Las fotos van en `img/products/` (recomendado 1200×1500, formato 4:5).
+Abre `js/products.js`, copia un bloque `{ ... }` y cambia los datos. Con `precio: null` se muestra **"Precio a consultar"**; pon un número (`precio: 39.9`) cuando esté definido. Las fotos van en `img/products/` (recomendado: cuadradas, 900×900 o más).
 
 ## Emails
 Cada envío llega a la vez a pascualpepa@icloud.com (principal) y en copia a guillermogg24@icloud.com (lista en `js/config.js`).

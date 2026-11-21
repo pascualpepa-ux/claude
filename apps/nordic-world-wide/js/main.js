@@ -230,8 +230,8 @@
         '<article class="card ' + rv + '" style="transition-delay:' + (i % 4) * 80 + 'ms">' +
           '<a class="card-media" href="' + productUrl(p) + '" aria-label="' + esc(p.nombre) + '">' +
             (p.etiqueta ? '<span class="badge">' + esc(p.etiqueta) + "</span>" : "") +
-            '<img src="' + esc(fotos[0]) + '" alt="' + esc(p.nombre) + '" loading="lazy" width="600" height="750">' +
-            (fotos[1] ? '<img class="img-alt" src="' + esc(fotos[1]) + '" alt="" loading="lazy" width="600" height="750">' : "") +
+            '<img src="' + esc(fotos[0]) + '" alt="' + esc(p.nombre) + '" loading="lazy" width="900" height="900">' +
+            (fotos[1] ? '<img class="img-alt" src="' + esc(fotos[1]) + '" alt="" loading="lazy" width="900" height="900">' : "") +
           "</a>" +
           '<div class="card-body">' +
             '<h3 class="card-name"><a href="' + productUrl(p) + '">' + esc(p.nombre) + "</a></h3>" +
@@ -262,7 +262,8 @@
       }
       document.title = p.nombre + " | NORDIC WORLD WIDE | Streetwear";
       var meta = $('meta[name="description"]');
-      if (meta && p.descripcion) meta.setAttribute("content", p.nombre + " — " + p.descripcion);
+      var desc = (I18N.getLang() === "en" && p.descripcion_en) || p.descripcion;
+      if (meta && desc) meta.setAttribute("content", p.nombre + " — " + desc);
 
       var prevSize = ($('input[name="talla"]:checked', productEl) || {}).value;
       var fotos = p.fotos || [];
@@ -270,7 +271,7 @@
       productEl.innerHTML =
         '<div class="gallery-wrap">' +
           '<div class="gallery" id="gallery">' +
-            fotos.map(function (f, i) { return '<img src="' + esc(f) + '" alt="' + esc(p.nombre) + " — " + esc(t("product.photo")) + " " + (i + 1) + '" width="600" height="750">'; }).join("") +
+            fotos.map(function (f, i) { return '<img src="' + esc(f) + '" alt="' + esc(p.nombre) + " — " + esc(t("product.photo")) + " " + (i + 1) + '" width="900" height="900">'; }).join("") +
           "</div>" +
           (fotos.length > 1 ? '<div class="gallery-dots" id="dots">' + fotos.map(function (_, i) { return "<span" + (i === 0 ? ' class="on"' : "") + "></span>"; }).join("") + "</div>" : "") +
         "</div>" +
@@ -279,7 +280,7 @@
           (p.etiqueta ? '<p class="eyebrow" style="margin-top:18px;color:var(--ice-deep)">' + esc(p.etiqueta) + "</p>" : "") +
           '<h1 class="product-title">' + esc(p.nombre) + "</h1>" +
           formatPrice(p.precio) +
-          (p.descripcion ? '<p class="product-desc">' + esc(p.descripcion) + "</p>" : "") +
+          (desc ? '<p class="product-desc">' + esc(desc) + "</p>" : "") +
           '<p class="sizes-label">' + esc(t("product.size")) + " <span>" + esc(t("product.sizeHint")) + "</span></p>" +
           '<fieldset class="sizes" id="sizes"><legend class="hp">' + esc(t("product.chooseSize")) + "</legend>" +
             tallas.map(function (sz) {
