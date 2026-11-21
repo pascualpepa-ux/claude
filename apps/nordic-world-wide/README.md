@@ -7,6 +7,7 @@ index.html        Inicio · Shop · Nosotros · Contacto
 producto.html     Página de producto (producto.html?id=aurora-tee)
 css/styles.css    Estilos (mobile-first)
 js/products.js    ← CATÁLOGO: añadir/editar camisetas aquí
+js/i18n.js        ← TEXTOS de la web en español e inglés (botón ES / EN)
 js/config.js      ← emails destinatarios
 js/main.js        Lógica (grilla, producto, formulario, animaciones)
 img/              Imágenes (placeholders SVG; reemplazar por fotos reales)

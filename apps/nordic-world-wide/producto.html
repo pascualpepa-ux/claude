@@ -16,12 +16,13 @@
 
   <header class="header is-solid" id="header">
     <a class="logo" href="index.html#inicio">NORDIC<span>WORLD WIDE</span></a>
-    <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav"><span></span><span></span></button>
+    <button class="lang-toggle" type="button" data-i18n="lang.switch" data-i18n-attr="aria-label:lang.switchLabel" aria-label="Switch to English">EN</button>
+    <button class="nav-toggle" data-i18n-attr="aria-label:nav.open" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav"><span></span><span></span></button>
     <nav class="nav" id="nav">
-      <a href="index.html#inicio">Inicio</a>
-      <a href="index.html#shop">Shop</a>
-      <a href="index.html#nosotros">Nosotros</a>
-      <a href="index.html#contacto">Contacto</a>
+      <a href="index.html#inicio" data-i18n="nav.home">Inicio</a>
+      <a href="index.html#shop" data-i18n="nav.shop">Shop</a>
+      <a href="index.html#nosotros" data-i18n="nav.about">Nosotros</a>
+      <a href="index.html#contacto" data-i18n="nav.contact">Contacto</a>
     </nav>
   </header>
 
@@ -32,10 +33,11 @@
   <footer class="footer">
     <a class="logo logo-footer" href="index.html#inicio">NORDIC<span>WORLD WIDE</span></a>
     <p class="footer-copy">© <span class="year"></span> NORDIC WORLD WIDE</p>
-    <p class="footer-credit">Un proyecto de Pascual Pepa y Guillermo Ganteaume</p>
+    <p class="footer-credit" data-i18n="footer.credit">Un proyecto de Pascual Pepa y Guillermo Ganteaume</p>
     <a class="footer-admin" href="admin.html">Admin</a>
   </footer>
 
+  <script src="js/i18n.js"></script>
   <script src="js/config.js"></script>
   <script src="js/products.js"></script>
   <script src="js/main.js"></script>

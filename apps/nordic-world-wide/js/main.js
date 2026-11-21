@@ -4,8 +4,11 @@
 
   var PRODUCTS = window.PRODUCTS || [];
   var CFG = window.SITE_CONFIG || {};
+  var I18N = window.NWW_I18N || { t: function (k) { return k; }, apply: function () {}, setLang: function () {}, getLang: function () { return "es"; }, locale: function () { return "es-ES"; } };
+  var t = I18N.t;
   var $ = function (s, ctx) { return (ctx || document).querySelector(s); };
   var $$ = function (s, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(s)); };
+  var SIZE_SUFFIX = /\s*–\s*(Talla|Size)\s+\S+$/;
 
   function esc(str) {
     return String(str == null ? "" : str).replace(/[&<>"']/g, function (c) {
@@ -14,11 +17,21 @@
   }
 
   function formatPrice(p) {
-    if (typeof p !== "number" || !isFinite(p)) return '<span class="price is-tbd">Precio a consultar</span>';
-    return '<span class="price">' + p.toLocaleString("es-ES", { style: "currency", currency: "EUR" }) + "</span>";
+    if (typeof p !== "number" || !isFinite(p)) return '<span class="price is-tbd">' + esc(t("price.tbd")) + "</span>";
+    return '<span class="price">' + p.toLocaleString(I18N.locale(), { style: "currency", currency: "EUR" }) + "</span>";
   }
 
   function productUrl(p) { return "producto.html?id=" + encodeURIComponent(p.id); }
+
+  // Cada parte que se dibuja con JS se registra aquí para redibujarse al cambiar de idioma
+  var onLangChange = [];
+  document.addEventListener("nww:lang", function () { onLangChange.forEach(function (fn) { fn(); }); });
+
+  /* ---------- Idioma (botón ES / EN) ---------- */
+  I18N.apply();
+  $$(".lang-toggle").forEach(function (btn) {
+    btn.addEventListener("click", function () { I18N.setLang(I18N.getLang() === "es" ? "en" : "es"); });
+  });
 
   /* ---------- Header + menú ---------- */
   var header = $("#header");
@@ -32,17 +45,24 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
+  function navLabel() {
+    if (!toggle) return;
+    var open = document.body.classList.contains("nav-open");
+    toggle.setAttribute("aria-label", t(open ? "nav.close" : "nav.open"));
+  }
   function closeNav() {
     document.body.classList.remove("nav-open");
-    if (toggle) { toggle.setAttribute("aria-expanded", "false"); toggle.setAttribute("aria-label", "Abrir menú"); }
+    if (toggle) toggle.setAttribute("aria-expanded", "false");
+    navLabel();
   }
   if (toggle) {
     toggle.addEventListener("click", function () {
       var open = document.body.classList.toggle("nav-open");
       toggle.setAttribute("aria-expanded", String(open));
-      toggle.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
+      navLabel();
     });
   }
+  onLangChange.push(navLabel);
   $$(".nav a").forEach(function (a) { a.addEventListener("click", closeNav); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeNav(); });
 
@@ -69,23 +89,23 @@
     var root = document.createElement("div");
     root.className = "ai";
     root.innerHTML =
-      '<button class="ai-fab" type="button" aria-expanded="false" aria-controls="ai-panel" aria-label="Abrir asistente">' +
+      '<button class="ai-fab" type="button" aria-expanded="false" aria-controls="ai-panel">' +
         '<svg class="ai-ico-open" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01" stroke-width="2.6" stroke-linecap="round"/></svg>' +
         '<svg class="ai-ico-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
       "</button>" +
-      '<section class="ai-panel" id="ai-panel" role="dialog" aria-label="Asistente de NORDIC WORLD WIDE" hidden>' +
-        '<header class="ai-head"><div><p class="ai-title">ASISTENTE</p><p class="ai-sub">Respuestas con IA · pregunta lo que quieras</p></div>' +
-        '<button class="ai-close" type="button" aria-label="Cerrar asistente">×</button></header>' +
+      '<section class="ai-panel" id="ai-panel" role="dialog" data-i18n-attr="aria-label:ai.dialog" hidden>' +
+        '<header class="ai-head"><div><p class="ai-title" data-i18n="ai.title"></p><p class="ai-sub" data-i18n="ai.sub"></p></div>' +
+        '<button class="ai-close" type="button" data-i18n-attr="aria-label:ai.close">×</button></header>' +
         '<div class="ai-log" id="ai-log" aria-live="polite"></div>' +
         '<div class="ai-chips" id="ai-chips"></div>' +
-        '<form class="ai-form" id="ai-form"><input id="ai-input" type="text" maxlength="1500" placeholder="Escribe tu pregunta…" autocomplete="off" aria-label="Tu pregunta">' +
-        '<button type="submit" aria-label="Enviar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button></form>' +
-        '<p class="ai-legal">Las respuestas las genera una IA y pueden contener errores. Para pedidos, usa el formulario de Contacto.</p>' +
+        '<form class="ai-form" id="ai-form"><input id="ai-input" type="text" maxlength="1500" autocomplete="off" data-i18n-attr="placeholder:ai.placeholder;aria-label:ai.inputLabel">' +
+        '<button type="submit" data-i18n-attr="aria-label:ai.send"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button></form>' +
+        '<p class="ai-legal" data-i18n="ai.legal"></p>' +
       "</section>";
     document.body.appendChild(root);
+    I18N.apply(root);
 
     var fab = $(".ai-fab", root), panel = $("#ai-panel"), log = $("#ai-log"), input = $("#ai-input"), chips = $("#ai-chips");
-    var SUGGESTIONS = ["¿Cómo compro una camiseta?", "¿Qué tallas hay?", "¿Cuándo sale el próximo drop?"];
 
     function save() { try { sessionStorage.setItem(KEY, JSON.stringify(history.slice(-20))); } catch (e) {} }
     function bubble(role, text) {
@@ -96,17 +116,18 @@
       log.scrollTop = log.scrollHeight;
       return d;
     }
+    function fabLabel() { fab.setAttribute("aria-label", t(panel.hidden ? "ai.open" : "ai.close")); }
     function render() {
       log.innerHTML = "";
-      bubble("assistant", "¡Hola! Soy el asistente de NORDIC WORLD WIDE. Pregúntame sobre la ropa, las tallas, cómo comprar… o lo que quieras.");
+      bubble("assistant", t("ai.hello"));
       history.forEach(function (m) { bubble(m.role, m.content); });
-      chips.innerHTML = history.length ? "" : SUGGESTIONS.map(function (s) { return '<button type="button">' + esc(s) + "</button>"; }).join("");
+      chips.innerHTML = history.length ? "" : ["ai.s1", "ai.s2", "ai.s3"].map(function (k) { return '<button type="button">' + esc(t(k)) + "</button>"; }).join("");
     }
     function toggle(open) {
       panel.hidden = !open;
       root.classList.toggle("is-open", open);
       fab.setAttribute("aria-expanded", String(open));
-      fab.setAttribute("aria-label", open ? "Cerrar asistente" : "Abrir asistente");
+      fabLabel();
       if (open) { render(); setTimeout(function () { input.focus(); }, 50); }
     }
     function ask(text) {
@@ -127,7 +148,7 @@
       })
         .then(function (r) { return r.json().catch(function () { return {}; }); })
         .then(function (d) {
-          var reply = d.reply || "No he podido responder ahora. Prueba de nuevo o escríbenos desde el formulario de Contacto.";
+          var reply = d.reply || t("ai.fail");
           typing.classList.remove("ai-typing");
           typing.textContent = reply;
           if (d.reply && !d.error) { history.push({ role: "assistant", content: reply }); }
@@ -136,12 +157,14 @@
         })
         .catch(function () {
           typing.classList.remove("ai-typing");
-          typing.textContent = "Sin conexión. Prueba de nuevo en un momento.";
+          typing.textContent = t("ai.offline");
           history.pop();
         })
         .then(function () { busy = false; log.scrollTop = log.scrollHeight; input.focus(); });
     }
 
+    fabLabel();
+    onLangChange.push(function () { I18N.apply(root); fabLabel(); if (!panel.hidden && !busy) render(); });
     fab.addEventListener("click", function () { toggle(panel.hidden); });
     $(".ai-close", root).addEventListener("click", function () { toggle(false); fab.focus(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !panel.hidden) { toggle(false); fab.focus(); } });
@@ -151,19 +174,22 @@
 
   /* ---------- Shop ---------- */
   var grid = $("#shop-grid");
-  if (grid && !PRODUCTS.length) {
-    grid.classList.add("is-empty");
-    grid.innerHTML =
-      '<div class="empty reveal">' +
-        '<p class="empty-title">PRÓXIMO DROP<br>MUY PRONTO</p>' +
-        '<p class="empty-sub">Estamos preparando la primera colección. Escríbenos y te avisamos antes que nadie.</p>' +
-        '<a class="btn btn-dark" href="#contacto">Avísame</a>' +
-      "</div>";
-  } else if (grid) {
+  function renderShop(visible) {
+    var rv = visible ? "reveal is-visible" : "reveal";
+    if (!PRODUCTS.length) {
+      grid.classList.add("is-empty");
+      grid.innerHTML =
+        '<div class="empty ' + rv + '">' +
+          '<p class="empty-title">' + t("shop.emptyTitle") + "</p>" +
+          '<p class="empty-sub">' + esc(t("shop.emptySub")) + "</p>" +
+          '<a class="btn btn-dark" href="#contacto">' + esc(t("shop.emptyCta")) + "</a>" +
+        "</div>";
+      return;
+    }
     grid.innerHTML = PRODUCTS.map(function (p, i) {
       var fotos = p.fotos || [];
       return (
-        '<article class="card reveal" style="transition-delay:' + (i % 4) * 80 + 'ms">' +
+        '<article class="card ' + rv + '" style="transition-delay:' + (i % 4) * 80 + 'ms">' +
           '<a class="card-media" href="' + productUrl(p) + '" aria-label="' + esc(p.nombre) + '">' +
             (p.etiqueta ? '<span class="badge">' + esc(p.etiqueta) + "</span>" : "") +
             '<img src="' + esc(fotos[0]) + '" alt="' + esc(p.nombre) + '" loading="lazy" width="600" height="750">' +
@@ -172,12 +198,15 @@
           '<div class="card-body">' +
             '<h3 class="card-name"><a href="' + productUrl(p) + '">' + esc(p.nombre) + "</a></h3>" +
             formatPrice(p.precio) +
-            '<a class="btn btn-dark" href="' + productUrl(p) + '">Lo quiero</a>' +
+            '<a class="btn btn-dark" href="' + productUrl(p) + '">' + esc(t("shop.want")) + "</a>" +
           "</div>" +
         "</article>"
       );
     }).join("");
-
+  }
+  if (grid) {
+    renderShop(false);
+    onLangChange.push(function () { renderShop(true); });
     var dl = $("#product-list");
     if (dl) dl.innerHTML = PRODUCTS.map(function (p) { return '<option value="' + esc(p.nombre) + '">'; }).join("");
   }
@@ -188,19 +217,22 @@
     var id = new URLSearchParams(location.search).get("id");
     var p = PRODUCTS.filter(function (x) { return x.id === id; })[0];
 
-    if (!p) {
-      productEl.innerHTML = '<div class="not-found"><h1 class="section-title">NO ENCONTRADO</h1><p>Este producto no existe o ya no está disponible.</p><a class="btn btn-dark" href="index.html#shop">Volver al shop</a></div>';
-    } else {
+    var renderProduct = function () {
+      if (!p) {
+        productEl.innerHTML = '<div class="not-found"><h1 class="section-title">' + esc(t("product.notFound")) + "</h1><p>" + esc(t("product.notFoundText")) + '</p><a class="btn btn-dark" href="index.html#shop">' + esc(t("product.back")) + "</a></div>";
+        return;
+      }
       document.title = p.nombre + " | NORDIC WORLD WIDE | Streetwear";
       var meta = $('meta[name="description"]');
       if (meta && p.descripcion) meta.setAttribute("content", p.nombre + " — " + p.descripcion);
 
+      var prevSize = ($('input[name="talla"]:checked', productEl) || {}).value;
       var fotos = p.fotos || [];
       var tallas = p.tallas && p.tallas.length ? p.tallas : ["S", "M", "L", "XL"];
       productEl.innerHTML =
         '<div class="gallery-wrap">' +
           '<div class="gallery" id="gallery">' +
-            fotos.map(function (f, i) { return '<img src="' + esc(f) + '" alt="' + esc(p.nombre) + " — foto " + (i + 1) + '" width="600" height="750">'; }).join("") +
+            fotos.map(function (f, i) { return '<img src="' + esc(f) + '" alt="' + esc(p.nombre) + " — " + esc(t("product.photo")) + " " + (i + 1) + '" width="600" height="750">'; }).join("") +
           "</div>" +
           (fotos.length > 1 ? '<div class="gallery-dots" id="dots">' + fotos.map(function (_, i) { return "<span" + (i === 0 ? ' class="on"' : "") + "></span>"; }).join("") + "</div>" : "") +
         "</div>" +
@@ -210,15 +242,15 @@
           '<h1 class="product-title">' + esc(p.nombre) + "</h1>" +
           formatPrice(p.precio) +
           (p.descripcion ? '<p class="product-desc">' + esc(p.descripcion) + "</p>" : "") +
-          '<p class="sizes-label">TALLA <span>Fit oversized · si dudas, tu talla habitual</span></p>' +
-          '<fieldset class="sizes" id="sizes"><legend class="hp">Elige talla</legend>' +
-            tallas.map(function (t) {
-              return '<label class="size"><input type="radio" name="talla" value="' + esc(t) + '"><span>' + esc(t) + "</span></label>";
+          '<p class="sizes-label">' + esc(t("product.size")) + " <span>" + esc(t("product.sizeHint")) + "</span></p>" +
+          '<fieldset class="sizes" id="sizes"><legend class="hp">' + esc(t("product.chooseSize")) + "</legend>" +
+            tallas.map(function (sz) {
+              return '<label class="size"><input type="radio" name="talla" value="' + esc(sz) + '"' + (sz === prevSize ? " checked" : "") + "><span>" + esc(sz) + "</span></label>";
             }).join("") +
           "</fieldset>" +
-          '<button class="btn btn-dark" id="buy-btn" type="button">Comprar / Consultar</button>' +
+          '<button class="btn btn-dark" id="buy-btn" type="button">' + esc(t("product.buy")) + "</button>" +
           '<p class="size-error" id="size-error" role="alert"></p>' +
-          '<ul class="product-notes"><li>Envíos a toda España</li><li>Drop limitado · unidades contadas</li><li>Te confirmamos disponibilidad y precio por email</li></ul>' +
+          '<ul class="product-notes"><li>' + esc(t("product.note1")) + "</li><li>" + esc(t("product.note2")) + "</li><li>" + esc(t("product.note3")) + "</li></ul>" +
         "</div>";
 
       var gallery = $("#gallery"), dots = $$("#dots span");
@@ -233,7 +265,7 @@
         var sel = $('input[name="talla"]:checked', productEl);
         if (!sel) {
           $("#sizes").classList.add("is-invalid");
-          $("#size-error").textContent = "Elige una talla para continuar.";
+          $("#size-error").textContent = t("product.sizeError");
           return;
         }
         location.href = "index.html?producto=" + encodeURIComponent(p.nombre) + "&talla=" + encodeURIComponent(sel.value) + "#contacto";
@@ -241,7 +273,9 @@
       $$('input[name="talla"]', productEl).forEach(function (r) {
         r.addEventListener("change", function () { $("#sizes").classList.remove("is-invalid"); $("#size-error").textContent = ""; });
       });
-    }
+    };
+    renderProduct();
+    onLangChange.push(renderProduct);
   }
 
   /* ---------- Formulario de contacto / pedido ---------- */
@@ -251,30 +285,49 @@
     var submitBtn = $("#submit-btn");
     var fileInput = $("#f-img");
     var fileName = $("#file-name");
-    var maxBytes = (CFG.maxAdjuntoMB || 3) * 1024 * 1024;
+    var mb = CFG.maxAdjuntoMB || 3;
+    var maxBytes = mb * 1024 * 1024;
+    var fileMsgKey = "form.fileHint"; // texto que se muestra bajo "Adjuntar imagen" mientras no haya archivo
     form.elements.ts.value = String(Date.now());
+
+    var showFileHint = function () {
+      var f = fileInput.files[0];
+      fileName.textContent = f ? f.name : t(fileMsgKey, { mb: mb });
+    };
+    showFileHint();
 
     // Prefill desde la página de producto
     var params = new URLSearchParams(location.search);
     var preProd = params.get("producto"), preTalla = params.get("talla");
+    var prefillText = "";
+    var prefill = function () {
+      if (!preProd) return;
+      var prodField = preProd + (preTalla ? " – " + t("form.size") + " " + preTalla : "");
+      if (!form.elements.producto.value || SIZE_SUFFIX.test(form.elements.producto.value)) form.elements.producto.value = prodField;
+      var msg = t("form.prefill", { product: preProd, size: preTalla ? t("form.prefillSize", { size: preTalla }) : "" });
+      // Solo reescribe el mensaje si el cliente no lo ha cambiado
+      if (!form.elements.mensaje.value || form.elements.mensaje.value === prefillText) form.elements.mensaje.value = msg;
+      prefillText = msg;
+    };
     if (preProd) {
-      form.elements.producto.value = preProd + (preTalla ? " – Talla " + preTalla : "");
       form.elements.talla.value = preTalla || "";
       form.elements.tipo.value = "pedido";
-      form.elements.mensaje.value = "¡Hola! Quiero la " + preProd + (preTalla ? " en talla " + preTalla : "") + ". ¿Me confirmáis disponibilidad y precio?";
-      submitBtn.textContent = "ENVIAR PEDIDO";
+      submitBtn.setAttribute("data-i18n", "form.sendOrder");
+      submitBtn.textContent = t("form.sendOrder");
+      prefill();
     }
+
+    onLangChange.push(function () { showFileHint(); prefill(); });
 
     fileInput.addEventListener("change", function () {
       var f = fileInput.files[0];
-      if (!f) { fileName.textContent = "Opcional · JPG/PNG/WEBP · máx. " + (CFG.maxAdjuntoMB || 3) + " MB"; return; }
-      if (!/^image\//.test(f.type)) { fileInput.value = ""; fileName.textContent = "Solo se admiten imágenes."; return; }
-      if (f.size > maxBytes) { fileInput.value = ""; fileName.textContent = "La imagen supera " + (CFG.maxAdjuntoMB || 3) + " MB."; return; }
-      fileName.textContent = f.name;
+      fileMsgKey = "form.fileHint";
+      if (f && !/^image\//.test(f.type)) { fileInput.value = ""; fileMsgKey = "form.fileOnlyImages"; }
+      else if (f && f.size > maxBytes) { fileInput.value = ""; fileMsgKey = "form.fileTooBig"; }
+      showFileHint();
     });
 
-
-    function setStatus(msg, kind) { status.textContent = msg; status.className = "form-status" + (kind ? " " + kind : ""); }
+    var setStatus = function (msg, kind) { status.textContent = msg; status.className = "form-status" + (kind ? " " + kind : ""); };
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -286,7 +339,7 @@
         el.classList.toggle("is-invalid", !valid);
         if (!valid) ok = false;
       });
-      if (!ok) { setStatus("Revisa los campos marcados.", "err"); return; }
+      if (!ok) { setStatus(t("form.invalid"), "err"); return; }
 
       var nombre = form.elements.nombre.value.trim();
       var producto = form.elements.producto.value.trim();
@@ -295,28 +348,29 @@
       // Antispam: honeypot relleno o formulario enviado en < 2,5 s → se finge éxito y no se envía nada
       var esBot = form.elements.website.value !== "" || Date.now() - Number(form.elements.ts.value) < 2500;
 
+      // El email al equipo siempre va en español
+      var talla = form.elements.talla.value;
+      var prodSinTalla = talla ? producto.replace(SIZE_SUFFIX, "") : producto;
+      var f = fileInput.files[0];
       var fd = new FormData();
-      fd.append("_subject", esPedido ? "🛒 Pedido – " + producto : "✉️ Contacto – " + nombre);
+      fd.append("_subject", esPedido ? "🛒 Pedido – " + producto.replace(/\s*–\s*Size\s+/, " – Talla ") : "✉️ Contacto – " + nombre);
       fd.append("_replyto", form.elements.email.value.trim());
       fd.append("_cc", (CFG.copias || []).join(","));
       fd.append("_template", "box");
       fd.append("_captcha", "false");
-      // Campos en el orden en que se leen en el email (solo los que tienen valor)
-      var talla = form.elements.talla.value;
-      var f = fileInput.files[0];
       fd.append("Tipo", esPedido ? "PEDIDO" : "CONSULTA");
-      if (esPedido) fd.append("Producto", talla ? producto.replace(/\s*–\s*Talla\s+\S+$/, "") : producto);
+      if (esPedido) fd.append("Producto", prodSinTalla);
       if (talla) fd.append("Talla", talla);
       fd.append("Cliente", nombre);
       fd.append("Email", form.elements.email.value.trim());
       if (tel) fd.append("Teléfono", tel);
+      fd.append("Idioma de la web", I18N.getLang() === "en" ? "Inglés" : "Español");
       fd.append("Mensaje", form.elements.mensaje.value.trim());
       if (f) fd.append("Imagen", "Adjunta a este email");
       if (f) fd.append("attachment", f, f.name);
 
       submitBtn.disabled = true;
-      var label = submitBtn.textContent;
-      submitBtn.textContent = "ENVIANDO…";
+      submitBtn.textContent = t("form.sending");
 
       Promise.resolve()
         .then(function () {
@@ -331,7 +385,7 @@
               nombre: nombre,
               email: form.elements.email.value.trim(),
               telefono: tel,
-              producto: esPedido ? (talla ? producto.replace(/\s*–\s*Talla\s+\S+$/, "") : producto) : "",
+              producto: esPedido ? prodSinTalla : "",
               talla: talla,
               mensaje: form.elements.mensaje.value.trim(),
               adjunto: !!f
@@ -349,14 +403,16 @@
         })
         .then(function () {
           form.reset();
+          prefillText = "";
           form.elements.ts.value = String(Date.now());
-          fileName.textContent = "Opcional · JPG/PNG/WEBP · máx. " + (CFG.maxAdjuntoMB || 3) + " MB";
-          setStatus("¡Recibido! Te respondemos pronto." + (CFG.demo ? " (Vista previa: no se envió ningún email.)" : ""), "ok");
+          fileMsgKey = "form.fileHint";
+          showFileHint();
+          setStatus(t("form.ok") + (CFG.demo ? " (Vista previa: no se envió ningún email.)" : ""), "ok");
         })
         .catch(function (err) {
-          setStatus("No se pudo enviar (" + err.message + "). Inténtalo de nuevo en un momento.", "err");
+          setStatus(t("form.error", { err: err.message }), "err");
         })
-        .then(function () { submitBtn.disabled = false; submitBtn.textContent = label; });
+        .then(function () { submitBtn.disabled = false; submitBtn.textContent = t(submitBtn.getAttribute("data-i18n") || "form.send"); });
     });
   }
 
