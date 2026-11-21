@@ -7,7 +7,7 @@ index.html        Inicio · Shop · Nosotros · Contacto
 producto.html     Página de producto (producto.html?id=aurora-tee)
 css/styles.css    Estilos (mobile-first)
 js/products.js    ← CATÁLOGO: añadir/editar camisetas aquí
-js/config.js      ← emails destinatarios, WhatsApp, redes sociales
+js/config.js      ← emails destinatarios, WhatsApp
 js/main.js        Lógica (grilla, producto, formulario, animaciones)
 img/              Imágenes (placeholders SVG; reemplazar por fotos reales)
 ```
@@ -47,5 +47,4 @@ Funciones del servidor en `api/`: `messages.js` (guarda y lista mensajes), `chat
 
 ## Pendiente
 - Número de WhatsApp → `js/config.js` (`whatsapp: "34600123456"`).
-- Enlaces reales de Instagram / TikTok → `js/config.js`.
 - Fotos reales de producto y del hero (`img/hero.svg`).
