@@ -43,20 +43,20 @@ const FAQ = [
   {
     id: "producto",
     k: ["camiseta", "camisetas", "producto", "productos", "prenda", "prendas", "explore", "tee", "coleccion", "catalogo", "ropa", "diseno", "estampado", "shirt", "tshirt", "collection", "product", "products", "design"],
-    es: "Ahora mismo tenemos la EXPLORE TEE — BLANCA (DROP 01): camiseta oversized blanca con estampado azul marino. Delante lleva el logo NORDIC WORLDWIDE con montañas y una rosa de los vientos en la manga; detrás, un gran logo de montañas con «Explore more, go further». Tallas S a XL. La ves en el Shop.",
-    en: "Right now we have the EXPLORE TEE — WHITE (DROP 01): a white oversized tee with navy print. The front has the NORDIC WORLDWIDE mountain logo and a compass rose on the sleeve; the back, a large mountain logo with «Explore more, go further». Sizes S to XL. See it in the Shop."
+    es: "Ahora mismo no hay prendas publicadas: estamos preparando el primer drop de camisetas oversized de algodón pesado. Déjanos tu email en el formulario de Contacto y te avisamos en cuanto salga.",
+    en: "There are no items published right now: we're preparing our first drop of heavyweight oversized tees. Leave your email in the Contact form and we'll let you know as soon as it's out.",
   },
   {
     id: "otras",
     k: ["sudadera", "sudaderas", "hoodie", "gorra", "gorras", "pantalon", "pantalones", "chaqueta", "colores", "color", "negra", "negro", "gris", "cap", "hat", "jacket", "pants", "colour", "colors", "black"],
-    es: "Por ahora solo tenemos la Explore Tee en blanco. Sudaderas, otros colores y más prendas llegarán en próximos drops: déjanos tu email en el formulario de Contacto y te avisamos.",
-    en: "For now we only have the Explore Tee in white. Hoodies, other colours and more items will come in future drops: leave your email in the Contact form and we'll let you know."
+    es: "Todavía no hay prendas publicadas. Sudaderas, colores y más prendas llegarán en los próximos drops: déjanos tu email en el formulario de Contacto y te avisamos.",
+    en: "There are no items published yet. Hoodies, colours and more items will come in upcoming drops: leave your email in the Contact form and we'll let you know.",
   },
   {
     id: "drop",
     k: ["drop", "drops", "proximo", "nuevo", "nueva", "nuevos", "lanzamiento", "sale", "salen", "cuando", "limitado", "limitada", "next", "new", "release", "when", "limited"],
-    es: "Trabajamos por drops limitados: cuando una pieza se agota, no vuelve. El DROP 01 es la Explore Tee. Para enterarte del próximo antes que nadie, déjanos tu email en el formulario de Contacto.",
-    en: "We work in limited drops: once a piece sells out, it doesn't come back. DROP 01 is the Explore Tee. To hear about the next one first, leave your email in the Contact form."
+    es: "Trabajamos por drops limitados: cuando una pieza se agota, no vuelve. El primer drop sale muy pronto: para enterarte antes que nadie, déjanos tu email en el formulario de Contacto.",
+    en: "We work in limited drops: once a piece sells out, it doesn't come back. Our first drop is coming soon: to hear about it first, leave your email in the Contact form.",
   },
   {
     id: "stock",

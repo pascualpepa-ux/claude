@@ -21,15 +21,17 @@
    ========================================================= */
 
 window.PRODUCTS = [
-  {
-    // Camiseta de prueba
-    id: "explore-tee",
-    nombre: "EXPLORE TEE — BLANCA",
-    precio: null,
-    tallas: ["S", "M", "L", "XL"],
-    fotos: ["img/products/explore-tee-frente.jpg", "img/products/explore-tee-espalda.jpg"],
-    descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE con montañas, rosa de los vientos en la manga y detalle «Explore more · Est. 2024». Detrás: gran logo de montañas con el lema «Explore more, go further».",
-    descripcion_en: "White oversized tee with navy print. Front: NORDIC WORLDWIDE mountain logo, compass rose on the sleeve and an «Explore more · Est. 2024» detail. Back: large mountain logo with the «Explore more, go further» slogan.",
-    etiqueta: "DROP 01"
-  }
+  // Todavía no hay camisetas publicadas: el Shop muestra "Próximo drop muy pronto".
+  //
+  // Ejemplo para copiar (quita las // del principio de cada línea):
+  // {
+  //   id: "nombre-camiseta",
+  //   nombre: "NOMBRE CAMISETA",
+  //   precio: null,
+  //   tallas: ["S", "M", "L", "XL"],
+  //   fotos: ["img/products/foto-frente.jpg", "img/products/foto-espalda.jpg"],
+  //   descripcion: "Descripción corta.",
+  //   descripcion_en: "Short description.",
+  //   etiqueta: "DROP 01"
+  // },
 ];
