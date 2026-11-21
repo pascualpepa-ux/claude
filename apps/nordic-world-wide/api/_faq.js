@@ -24,7 +24,7 @@ const FAQ = [
   },
   {
     id: "envio",
-    k: ["cuando llega", "llega mi pedido", "cuanto tarda", "cuanto tardan", "envio", "envios", "enviais", "envian", "entrega", "llega", "tarda", "plazo", "domicilio", "shipping", "ship", "delivery", "deliver", "arrive"],
+    k: ["precio del envio", "coste del envio", "cuesta el envio", "gastos de envio", "how much is shipping", "shipping cost", "cost of shipping", "cuando llega", "llega mi pedido", "cuanto tarda", "cuanto tardan", "envio", "envios", "enviais", "envian", "entrega", "llega", "tarda", "plazo", "domicilio", "shipping", "ship", "delivery", "deliver", "arrive"],
     es: "Hacemos envíos a toda España. El plazo y el coste del envío te los confirmamos por email cuando hagas el pedido.",
     en: "We ship across Spain. We'll confirm shipping time and cost by email when you place your order."
   },
