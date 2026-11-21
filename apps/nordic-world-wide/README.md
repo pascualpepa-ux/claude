@@ -39,8 +39,9 @@ Muestra: mensajes recibidos (ocultos hasta pulsar "Ver mensajes"), visitas de Go
 
 Configuración en Vercel (una vez):
 1. **Base de datos** (mensajes + chat): proyecto → **Storage** → **Create Database** → **Upstash for Redis** (plan gratis) → conectarla al proyecto. Crea solas las variables `KV_REST_API_URL` y `KV_REST_API_TOKEN`.
-2. **Visitas en el panel**: GoatCounter → **Settings → API** → crear token con permiso *Read statistics* → en Vercel añadir la variable `GOATCOUNTER_TOKEN` con ese valor.
-3. **Redeploy** del proyecto para que tome las variables.
+2. **Redeploy** del proyecto para que tome las variables.
+
+Las visitas no necesitan configuración: el panel lee el contador público de GoatCounter (`/counter/TOTAL.json`) y se actualiza solo cada minuto. (Opcional: con la variable `GOATCOUNTER_TOKEN` usa la API completa.)
 
 Funciones del servidor en `api/`: `messages.js` (guarda y lista mensajes), `chat.js`, `stats.js` (GoatCounter), `_lib.js` (clave y base de datos).
 

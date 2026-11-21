@@ -5,7 +5,7 @@
   var TEAM = ["Pascual", "Nacho", "Billy", "Bruno"];
   var $ = function (id) { return document.getElementById(id); };
   var session = load();
-  var chatTimer = null, lastChatLen = -1;
+  var chatTimer = null, statsTimer = null, lastChatLen = -1;
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -60,7 +60,7 @@
 
   function logout() {
     save(null); session = null;
-    clearInterval(chatTimer);
+    clearInterval(chatTimer); clearInterval(statsTimer);
     $("panel-view").hidden = true; $("login-view").hidden = false;
     $("pass").value = "";
   }
@@ -73,6 +73,8 @@
     loadCount(); loadStats(); loadChat();
     clearInterval(chatTimer);
     chatTimer = setInterval(function () { if (!document.hidden) { loadChat(); loadCount(); } }, 4000);
+    clearInterval(statsTimer);
+    statsTimer = setInterval(function () { if (!document.hidden) loadStats(); }, 60000);
   }
 
   function loadCount() {
@@ -98,7 +100,8 @@
           return '<div class="bar' + (x.count ? "" : " zero") + '" style="height:' + Math.max(h, 1) + '%" title="' + x.day + ": " + x.count + ' visitas">' + (x.count ? "<span>" + x.count + "</span>" : "") + "</div>";
         }).join("") +
         "</div>" +
-        '<div class="axis"><span>' + (days[0] ? days[0].day.slice(5) : "") + "</span><span>hoy</span></div>";
+        '<div class="axis"><span>' + (days[0] ? days[0].day.slice(5) : "") + "</span><span>hoy</span></div>" +
+        '<p class="note" style="margin:10px 0 0">Se actualiza solo cada minuto · última vez ' + new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) + "</p>";
     }).catch(function (err) {
       if (err.message !== "NO_DB") $("chart-wrap").innerHTML = '<p class="setup">No se pudieron cargar las visitas (' + esc(err.message) + ").</p>";
     });
