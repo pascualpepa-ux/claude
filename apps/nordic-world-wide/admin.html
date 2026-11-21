@@ -44,7 +44,7 @@
     /* Login */
     .login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
     .login form { width: 100%; max-width: 380px; display: grid; gap: 18px; }
-    .who { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .who { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .who label { position: relative; }
     .who input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
     .who span { display: flex; align-items: center; justify-content: center; height: 44px; border: 1.5px solid var(--line); font-weight: 700; font-size: 13px; }
@@ -95,7 +95,7 @@
     .chat-form { display: flex; gap: 8px; margin-top: 12px; }
     .chat-form textarea { flex: 1; min-width: 0; resize: none; height: 48px; background: var(--bg); border: 1.5px solid var(--line); padding: 12px; border-radius: 0; }
     .chat-form textarea:focus { outline: none; border-color: var(--ice); }
-    .c-Pascual { color: #a9d6f5; } .c-Guillermo { color: #f2c38b; }
+    .c-Pascual { color: #a9d6f5; } .c-Billy { color: #f2c38b; } .c-Pelayo { color: #b9e4a0; }
 
     @media (min-width: 900px) {
       .grid { grid-template-columns: 1.3fr 1fr; align-items: start; }
@@ -170,7 +170,7 @@
       <section class="card chat-card">
         <div class="card-head">
           <h2>CHAT DEL EQUIPO</h2>
-          <span class="note" id="chat-status">Pascual · Guillermo</span>
+          <span class="note" id="chat-status">Pascual · Billy · Pelayo</span>
         </div>
         <div class="chat-log" id="chat-log" aria-live="polite"></div>
         <form class="chat-form" id="chat-form">

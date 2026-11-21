@@ -79,8 +79,8 @@ const FAQ = [
   {
     id: "nosotros",
     k: ["nordic world wide", "que es nordic", "que vendeis", "what is nordic", "what do you sell", "quienes sois", "quien sois", "quienes son", "quien esta detras", "quien hay detras", "sobre vosotros", "nosotros", "vuestra marca", "la marca", "duenos", "fundadores", "historia", "who are you", "about you", "about us", "your brand", "founders", "your company"],
-    es: "NORDIC WORLD WIDE es un proyecto de Pascual Pepa y Guillermo Ganteaume, dos amigos que empezaron desde cero. Hacemos streetwear oversized de estética nórdica, en drops limitados.",
-    en: "NORDIC WORLD WIDE is a project by Pascual Pepa and Guillermo Ganteaume, two friends starting from scratch. We make Nordic-inspired oversized streetwear in limited drops."
+    es: "NORDIC WORLD WIDE es un proyecto de tres amigos (Pascual, Billy y Pelayo) que empezaron desde cero. Hacemos streetwear oversized de estética nórdica, en drops limitados.",
+    en: "NORDIC WORLD WIDE is a project by three friends (Pascual, Billy and Pelayo) starting from scratch. We make Nordic-inspired oversized streetwear in limited drops."
   },
   {
     id: "idioma",

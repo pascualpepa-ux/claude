@@ -31,11 +31,11 @@
       "price.tbd": "Precio a consultar",
 
       "about.title": "NOSOTROS",
-      "about.lead": "Dos amigos. Una idea. Empezando desde cero.",
-      "about.p1": "Somos <strong>Pascual y Guillermo</strong>, dos amigos con una idea clara: hacer algo propio. De ahí nació NORDIC WORLD WIDE, la marca de ropa que nos habría gustado encontrar.",
+      "about.lead": "Tres amigos. Una idea. Empezando desde cero.",
+      "about.p1": "Somos <strong>un grupo de tres amigos</strong> con una idea clara: hacer algo propio. De ahí nació NORDIC WORLD WIDE, la marca de ropa que nos habría gustado encontrar.",
       "about.p2": "Hacemos streetwear oversized, de líneas limpias y estética nórdica, en <strong>drops limitados</strong>. No tenemos una gran empresa detrás. Tenemos ganas, ideas y una <strong>comunidad</strong> que queremos construir con vosotros.",
       "about.p3": "Esto es solo el principio. Nuestro objetivo es convertir NORDIC WORLD WIDE en una empresa de verdad, y cada camiseta que compras nos ayuda a dar el siguiente paso.",
-      "about.tag1": "2 AMIGOS",
+      "about.tag1": "3 AMIGOS",
       "about.tag3": "DROPS LIMITADOS",
       "about.tag4": "COMUNIDAD",
 
@@ -120,11 +120,11 @@
       "price.tbd": "Price on request",
 
       "about.title": "ABOUT US",
-      "about.lead": "Two friends. One idea. Starting from scratch.",
-      "about.p1": "We're <strong>Pascual and Guillermo</strong>, two friends with a clear idea: build something of our own. That's how NORDIC WORLD WIDE was born, the clothing brand we wished we could find.",
+      "about.lead": "Three friends. One idea. Starting from scratch.",
+      "about.p1": "We're <strong>a group of three friends</strong> with a clear idea: build something of our own. That's how NORDIC WORLD WIDE was born, the clothing brand we wished we could find.",
       "about.p2": "We make oversized streetwear with clean lines and a Nordic look, in <strong>limited drops</strong>. There's no big company behind us. We have drive, ideas and a <strong>community</strong> we want to build with you.",
       "about.p3": "This is just the beginning. Our goal is to turn NORDIC WORLD WIDE into a real company, and every tee you buy helps us take the next step.",
-      "about.tag1": "2 FRIENDS",
+      "about.tag1": "3 FRIENDS",
       "about.tag3": "LIMITED DROPS",
       "about.tag4": "COMMUNITY",
 

@@ -34,7 +34,7 @@ Es una web estática: sirve cualquier hosting (Vercel, Netlify, GitHub Pages…)
 3. No cuenta visitas desde `localhost` ni desde la vista previa: solo con la web publicada.
 
 ## Panel admin (`/admin.html`)
-Link "Admin" abajo del todo en la web. Entran Pascual y Guillermo con la clave del equipo (se comprueba en el servidor; para cambiarla, definir `ADMIN_PASSWORD` en Vercel → Settings → Environment Variables).
+Link "Admin" abajo del todo en la web. Entran Pascual, Billy y Pelayo con la clave del equipo (se comprueba en el servidor; para cambiarla, definir `ADMIN_PASSWORD` en Vercel → Settings → Environment Variables).
 
 Muestra: mensajes recibidos (ocultos hasta pulsar "Ver mensajes"), visitas de GoatCounter con barras por día y un chat del equipo que se actualiza solo cada 4 segundos.
 

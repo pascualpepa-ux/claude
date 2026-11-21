@@ -6,7 +6,7 @@ const crypto = require("crypto");
 // definir la variable de entorno ADMIN_PASSWORD en Vercel.
 const DEFAULT_PASS_HASH = "9c06eacb8b764b96066a3162d057467ff8788fba14df18e4195829df674f854d";
 
-const TEAM = ["Pascual", "Guillermo"];
+const TEAM = ["Pascual", "Billy", "Pelayo"];
 
 const sha = (s) => crypto.createHash("sha256").update(String(s)).digest();
 
