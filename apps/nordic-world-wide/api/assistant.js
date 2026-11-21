@@ -84,7 +84,7 @@ async function gatewayToken(req) {
 // Modelo gratis por el AI Gateway de Vercel (formato de chat compatible con OpenAI)
 async function replyWithGateway(req, messages) {
   const token = await gatewayToken(req);
-  if (!token) return { status: 503, body: { error: "NOT_CONFIGURED", reply: REPLY_OFF } };
+  if (!token) return { status: 503, body: { error: "NOT_CONFIGURED", reason: "no_token", reply: REPLY_OFF } };
   let r;
   try {
     r = await fetch(GATEWAY_URL, {
@@ -95,16 +95,17 @@ async function replyWithGateway(req, messages) {
     });
   } catch (e) {
     console.error("AI Gateway: sin conexión", e.message);
-    return { status: 502, body: { error: "AI_ERROR", reply: REPLY_ERROR } };
+    return { status: 502, body: { error: "AI_ERROR", reason: "network", reply: REPLY_ERROR } };
   }
   if (!r.ok) {
     const detail = await r.text().catch(() => "");
     console.error("AI Gateway", r.status, detail.slice(0, 300));
-    if (r.status === 429) return { status: 503, body: { error: "BUSY", reply: REPLY_BUSY } };
+    const reason = "gateway_" + r.status + (/credit card|customer_verification/i.test(detail) ? "_needs_card" : /insufficient|credits/i.test(detail) ? "_no_credits" : "");
+    if (r.status === 429) return { status: 503, body: { error: "BUSY", reason, reply: REPLY_BUSY } };
     if (r.status === 401 || r.status === 403 || /credit card|customer_verification|insufficient|credits/i.test(detail)) {
-      return { status: 503, body: { error: "NOT_CONFIGURED", reply: REPLY_OFF } };
+      return { status: 503, body: { error: "NOT_CONFIGURED", reason, reply: REPLY_OFF } };
     }
-    return { status: 502, body: { error: "AI_ERROR", reply: REPLY_ERROR } };
+    return { status: 502, body: { error: "AI_ERROR", reason, reply: REPLY_ERROR } };
   }
   const data = await r.json().catch(() => ({}));
   const reply = String((((data.choices || [])[0] || {}).message || {}).content || "").trim();
