@@ -56,9 +56,8 @@
     document.head.appendChild(s);
   }
 
-  /* ---------- Footer, redes, WhatsApp ---------- */
+  /* ---------- Footer, WhatsApp ---------- */
   $$(".year").forEach(function (el) { el.textContent = new Date().getFullYear(); });
-  $$("[data-social]").forEach(function (a) { a.href = CFG[a.getAttribute("data-social")] || "#"; });
   var wa = $("#whatsapp");
   if (wa) {
     var num = String(CFG.whatsapp || "").replace(/\D/g, "");

@@ -5,10 +5,6 @@ window.SITE_CONFIG = {
   whatsapp: "",
   whatsappMensaje: "Hola NORDIC WORLD WIDE 👋",
 
-  // Redes sociales (placeholders)
-  instagram: "https://instagram.com/",
-  tiktok: "https://www.tiktok.com/",
-
   // Emails: se envían con FormSubmit (formsubmit.co) — gratis, sin cuenta ni API key.
   // "destinatario" recibe el email principal; "copias" reciben copia a la vez.
   // La primera vez, FormSubmit manda un email de ACTIVACIÓN al destinatario:
