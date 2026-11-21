@@ -7,6 +7,8 @@ const DAYS = 30;
 const DAY_MS = 86400000;
 const iso = (d) => d.toISOString().slice(0, 10);
 const toNum = (s) => Number(String(s == null ? "0" : s).replace(/\D/g, "")) || 0;
+const REFRESH_MS = 5 * 60 * 1000; // datos nuevos cada 5 minutos
+let memo = null;                    // último resultado (por instancia del servidor)
 
 module.exports = async function handler(req, res) {
   if (!isAdmin(req)) return send(res, 401, { error: "UNAUTHORIZED" });
@@ -33,14 +35,26 @@ module.exports = async function handler(req, res) {
       });
       days = dayList.map((d) => ({ day: iso(d), count: byDay[iso(d)] || 0 }));
     } else {
-      // Contador público: un pedido por día ("end" no incluye ese día)
-      days = await Promise.all(dayList.map(async (d) => {
-        const r = await fetch(`${base}/counter/TOTAL.json?start=${iso(d)}&end=${iso(new Date(d.getTime() + DAY_MS))}`);
-        if (r.status === 404) return { day: iso(d), count: 0 }; // GoatCounter devuelve 404 si no hay visitas
+      // Contador público. GoatCounter guarda en caché cada rango de fechas durante horas,
+      // así que pedir "el día X" devuelve un número viejo. Truco: se pide el acumulado desde
+      // una fecha muy anterior a la web (sin visitas) que cambia cada 5 minutos; como ese
+      // rango es nuevo, GoatCounter lo calcula en el momento. Visitas del día = acumulado
+      // hasta el día siguiente − acumulado hasta ese día ("end" no incluye ese día).
+      const slot = Math.floor(Date.now() / REFRESH_MS);
+      if (memo && memo.slot === slot) return send(res, 200, memo.body);
+      const anchor = iso(new Date(Date.UTC(2000, 0, 1) + (slot % 8000) * DAY_MS)); // siempre antes de 2022
+      const bounds = dayList.concat([new Date(today.getTime() + DAY_MS)]);
+      const cumul = await Promise.all(bounds.map(async (d) => {
+        const r = await fetch(`${base}/counter/TOTAL.json?start=${anchor}&end=${iso(d)}`);
+        if (r.status === 404) return 0; // GoatCounter devuelve 404 si no hay visitas
         if (!r.ok) throw new Error("GoatCounter respondió " + r.status);
         const j = await r.json();
-        return { day: iso(d), count: toNum(j.count) };
+        return toNum(j.count);
       }));
+      days = dayList.map((d, i) => ({ day: iso(d), count: Math.max(0, cumul[i + 1] - cumul[i]) }));
+      const body = { configured: true, total: days.reduce((a, b) => a + b.count, 0), days, dashboard: `https://${code}.goatcounter.com`, updated: new Date().toISOString() };
+      memo = { slot, body };
+      return send(res, 200, body);
     }
 
     const total = days.reduce((a, b) => a + b.count, 0);

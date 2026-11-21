@@ -74,7 +74,7 @@
     clearInterval(chatTimer);
     chatTimer = setInterval(function () { if (!document.hidden) { loadChat(); loadCount(); } }, 4000);
     clearInterval(statsTimer);
-    statsTimer = setInterval(function () { if (!document.hidden) loadStats(); }, 60000);
+    statsTimer = setInterval(function () { if (!document.hidden) loadStats(); }, 5 * 60 * 1000);
   }
 
   function loadCount() {
@@ -101,7 +101,7 @@
         }).join("") +
         "</div>" +
         '<div class="axis"><span>' + (days[0] ? days[0].day.slice(5) : "") + "</span><span>hoy</span></div>" +
-        '<p class="note" style="margin:10px 0 0">Se actualiza solo cada minuto · última vez ' + new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) + "</p>";
+        '<p class="note" style="margin:10px 0 0">Se actualiza solo cada 5 minutos · última vez ' + new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) + "</p>";
     }).catch(function (err) {
       if (err.message !== "NO_DB") $("chart-wrap").innerHTML = '<p class="setup">No se pudieron cargar las visitas (' + esc(err.message) + ").</p>";
     });
