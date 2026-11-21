@@ -117,8 +117,39 @@
       return d;
     }
     function fabLabel() { fab.setAttribute("aria-label", t(panel.hidden ? "ai.open" : "ai.close")); }
+
+    // ¿Está activado el asistente? (null = todavía no se sabe)
+    var active = null;
+    function checkActive() {
+      return fetch("/api/assistant")
+        .then(function (r) { return r.ok ? r.json() : { active: false }; })
+        .then(function (d) { active = !!d.active; })
+        .catch(function () { active = true; }); // sin conexión: se intenta al preguntar
+    }
+    function applyState() {
+      var off = active === false;
+      root.classList.toggle("is-off", off);
+      $(".ai-title", root).setAttribute("data-i18n", off ? "ai.offTitle" : "ai.title");
+      $(".ai-sub", root).setAttribute("data-i18n", off ? "ai.offSub" : "ai.sub");
+      input.disabled = off;
+      $("#ai-form button").disabled = off;
+      input.setAttribute("data-i18n-attr", (off ? "placeholder:ai.offPlaceholder" : "placeholder:ai.placeholder") + ";aria-label:ai.inputLabel");
+      I18N.apply(root);
+    }
+
     function render() {
       log.innerHTML = "";
+      if (active === false) {
+        bubble("assistant", t("ai.offText"));
+        var cta = document.createElement("a");
+        cta.className = "ai-cta";
+        cta.href = $("#contacto") ? "#contacto" : "index.html#contacto";
+        cta.textContent = t("ai.offCta");
+        cta.addEventListener("click", function () { toggle(false); });
+        log.appendChild(cta);
+        chips.innerHTML = "";
+        return;
+      }
       bubble("assistant", t("ai.hello"));
       history.forEach(function (m) { bubble(m.role, m.content); });
       chips.innerHTML = history.length ? "" : ["ai.s1", "ai.s2", "ai.s3"].map(function (k) { return '<button type="button">' + esc(t(k)) + "</button>"; }).join("");
@@ -128,7 +159,9 @@
       root.classList.toggle("is-open", open);
       fab.setAttribute("aria-expanded", String(open));
       fabLabel();
-      if (open) { render(); setTimeout(function () { input.focus(); }, 50); }
+      if (!open) return;
+      var show = function () { applyState(); render(); if (!input.disabled) setTimeout(function () { input.focus(); }, 50); };
+      if (active === null) { render(); checkActive().then(show); } else show();
     }
     function ask(text) {
       text = String(text || "").trim();
@@ -148,6 +181,11 @@
       })
         .then(function (r) { return r.json().catch(function () { return {}; }); })
         .then(function (d) {
+          if (d.error === "NOT_CONFIGURED") { // la clave se quitó o no es válida
+            history.pop(); save();
+            active = false; applyState(); render();
+            return;
+          }
           var reply = d.reply || t("ai.fail");
           typing.classList.remove("ai-typing");
           typing.textContent = reply;
@@ -160,7 +198,7 @@
           typing.textContent = t("ai.offline");
           history.pop();
         })
-        .then(function () { busy = false; log.scrollTop = log.scrollHeight; input.focus(); });
+        .then(function () { busy = false; log.scrollTop = log.scrollHeight; if (!input.disabled) input.focus(); });
     }
 
     fabLabel();

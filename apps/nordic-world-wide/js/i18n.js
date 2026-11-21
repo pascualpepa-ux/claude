@@ -89,7 +89,12 @@
       "ai.s2": "¿Qué tallas hay?",
       "ai.s3": "¿Cuándo sale el próximo drop?",
       "ai.fail": "No he podido responder ahora. Prueba de nuevo o escríbenos desde el formulario de Contacto.",
-      "ai.offline": "Sin conexión. Prueba de nuevo en un momento."
+      "ai.offline": "Sin conexión. Prueba de nuevo en un momento.",
+      "ai.offTitle": "ASISTENTE NO ACTIVADO",
+      "ai.offSub": "Todavía no está disponible",
+      "ai.offText": "El asistente con IA todavía no está activado. Mientras tanto, escríbenos desde el formulario de Contacto y te respondemos por email.",
+      "ai.offCta": "Ir a Contacto",
+      "ai.offPlaceholder": "Asistente no activado"
     },
 
     en: {
@@ -173,7 +178,12 @@
       "ai.s2": "What sizes are there?",
       "ai.s3": "When is the next drop?",
       "ai.fail": "I couldn't answer right now. Try again or write to us through the Contact form.",
-      "ai.offline": "No connection. Please try again in a moment."
+      "ai.offline": "No connection. Please try again in a moment.",
+      "ai.offTitle": "ASSISTANT NOT ACTIVE",
+      "ai.offSub": "Not available yet",
+      "ai.offText": "The AI assistant isn't active yet. In the meantime, write to us through the Contact form and we'll reply by email.",
+      "ai.offCta": "Go to Contact",
+      "ai.offPlaceholder": "Assistant not active"
     }
   };
 

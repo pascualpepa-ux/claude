@@ -60,8 +60,12 @@ function cleanHistory(raw) {
 let client = null;
 
 module.exports = async function handler(req, res) {
+  // GET: la web pregunta si el asistente está activado (sin gastar nada)
+  if (req.method === "GET") {
+    return send(res, 200, { active: !!process.env.ANTHROPIC_API_KEY });
+  }
   if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
+    res.setHeader("Allow", "GET, POST");
     return send(res, 405, { error: "METHOD" });
   }
   if (!process.env.ANTHROPIC_API_KEY) {
