@@ -60,7 +60,7 @@
       "form.prefill": "¡Hola! Quiero la {product}{size}. ¿Me confirmáis disponibilidad y precio?",
       "form.prefillSize": " en talla {size}",
 
-      "footer.credit": "Un proyecto de Pascual Pepa y Guillermo Ganteaume",
+      "footer.credit": "Un proyecto de Pascual, Billy y Pelayo",
 
       "product.notFound": "NO ENCONTRADO",
       "product.notFoundText": "Este producto no existe o ya no está disponible.",
@@ -149,7 +149,7 @@
       "form.prefill": "Hi! I'd like the {product}{size}. Can you confirm availability and price?",
       "form.prefillSize": " in size {size}",
 
-      "footer.credit": "A project by Pascual Pepa and Guillermo Ganteaume",
+      "footer.credit": "A project by Pascual, Billy and Pelayo",
 
       "product.notFound": "NOT FOUND",
       "product.notFoundText": "This product doesn't exist or is no longer available.",
