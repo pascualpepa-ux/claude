@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  var TEAM = ["Pascual", "Nacho", "Billy", "Bruno"];
+  var TEAM = ["Pascual", "Guillermo"];
   var $ = function (id) { return document.getElementById(id); };
   var session = load();
   var chatTimer = null, statsTimer = null, lastChatLen = -1;
