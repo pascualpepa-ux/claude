@@ -1,13 +1,20 @@
-/* /api/assistant — asistente con IA de la web (Claude, de Anthropic).
+/* /api/assistant — asistente con IA de la web.
    POST { messages: [{ role: "user"|"assistant", content: "..." }, ...] }
    → { reply: "..." }
 
-   Necesita la variable de entorno ANTHROPIC_API_KEY en Vercel
-   (se crea en https://platform.claude.com → API Keys). La clave nunca llega al navegador. */
+   Dos formas de funcionar (la clave nunca llega al navegador):
+   1. GRATIS (por defecto): un modelo gratuito a través del AI Gateway de Vercel
+      (https://vercel.com/docs/ai-gateway). En Vercel se autentica solo con el token
+      OIDC del proyecto: no hace falta ninguna clave. Mismo sistema que Rumbo Traveling.
+      ASSISTANT_FREE_MODEL cambia el modelo gratuito.
+   2. Claude (Anthropic, de pago): si se define ANTHROPIC_API_KEY en Vercel, usa Claude. */
 const { Anthropic } = require("@anthropic-ai/sdk");
+const { getVercelOidcToken } = require("@vercel/oidc");
 const { redis, readBody, send } = require("./_lib");
 
 const MODEL = process.env.ASSISTANT_MODEL || "claude-opus-5-5";
+const GATEWAY_URL = "https://ai-gateway.vercel.sh/v1/chat/completions";
+const FREE_MODEL = process.env.ASSISTANT_FREE_MODEL || "nvidia/nemotron-3.5-lightning-free";
 const MAX_TURNS = 12;          // mensajes de historial que se envían
 const MAX_CHARS = 1500;        // largo máximo de cada mensaje
 const LIMIT_PER_HOUR = 40;     // mensajes por hora por visitante (IP)
@@ -61,17 +68,58 @@ function cleanHistory(raw) {
 
 let client = null;
 
+const REPLY_OFF = "El asistente no está disponible ahora mismo. Escríbenos desde el formulario de Contacto y te respondemos por email.";
+const REPLY_BUSY = "Estoy recibiendo muchas preguntas a la vez. Prueba de nuevo en un minuto.";
+const REPLY_ERROR = "Ha habido un problema al responder. Prueba de nuevo o escríbenos desde el formulario de Contacto.";
+const REPLY_EMPTY = "No he podido generar una respuesta. ¿Puedes repetir la pregunta?";
+
+// Credencial del AI Gateway: clave propia si existe; si no, el token OIDC del proyecto en Vercel.
+async function gatewayToken(req) {
+  if (process.env.AI_GATEWAY_API_KEY) return process.env.AI_GATEWAY_API_KEY;
+  const header = req.headers["x-vercel-oidc-token"];
+  if (header) return String(header);
+  try { return await getVercelOidcToken(); } catch (e) { return null; }
+}
+
+// Modelo gratis por el AI Gateway de Vercel (formato de chat compatible con OpenAI)
+async function replyWithGateway(req, messages) {
+  const token = await gatewayToken(req);
+  if (!token) return { status: 503, body: { error: "NOT_CONFIGURED", reply: REPLY_OFF } };
+  let r;
+  try {
+    r = await fetch(GATEWAY_URL, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: FREE_MODEL, max_tokens: 800, messages: [{ role: "system", content: SYSTEM }].concat(messages) }),
+      signal: AbortSignal.timeout(45000)
+    });
+  } catch (e) {
+    console.error("AI Gateway: sin conexión", e.message);
+    return { status: 502, body: { error: "AI_ERROR", reply: REPLY_ERROR } };
+  }
+  if (!r.ok) {
+    const detail = await r.text().catch(() => "");
+    console.error("AI Gateway", r.status, detail.slice(0, 300));
+    if (r.status === 429) return { status: 503, body: { error: "BUSY", reply: REPLY_BUSY } };
+    if (r.status === 401 || r.status === 403 || /credit card|customer_verification|insufficient|credits/i.test(detail)) {
+      return { status: 503, body: { error: "NOT_CONFIGURED", reply: REPLY_OFF } };
+    }
+    return { status: 502, body: { error: "AI_ERROR", reply: REPLY_ERROR } };
+  }
+  const data = await r.json().catch(() => ({}));
+  const reply = String((((data.choices || [])[0] || {}).message || {}).content || "").trim();
+  return { status: 200, body: { reply: reply || REPLY_EMPTY } };
+}
+
 module.exports = async function handler(req, res) {
-  // GET: la web pregunta si el asistente está activado (sin gastar nada)
+  // GET: la web pregunta si el asistente está activado (sin gastar nada).
+  // Activado si hay clave de Anthropic, clave del Gateway o estamos en Vercel (token OIDC automático).
   if (req.method === "GET") {
-    return send(res, 200, { active: !!process.env.ANTHROPIC_API_KEY });
+    return send(res, 200, { active: !!(process.env.ANTHROPIC_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.VERCEL || req.headers["x-vercel-oidc-token"]) });
   }
   if (req.method !== "POST") {
     res.setHeader("Allow", "GET, POST");
     return send(res, 405, { error: "METHOD" });
-  }
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return send(res, 503, { error: "NOT_CONFIGURED", reply: "El asistente todavía se está configurando. Mientras tanto, escríbenos desde el formulario de Contacto y te respondemos por email." });
   }
 
   const messages = cleanHistory(readBody(req).messages);
@@ -80,6 +128,12 @@ module.exports = async function handler(req, res) {
   const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "?";
   if (await overLimit(ip)) {
     return send(res, 429, { error: "RATE_LIMIT", reply: "Has enviado muchos mensajes seguidos. Prueba de nuevo en un rato o escríbenos desde el formulario de Contacto." });
+  }
+
+  // Sin clave de Anthropic: modelo gratis por el AI Gateway de Vercel
+  if (!process.env.ANTHROPIC_API_KEY) {
+    const out = await replyWithGateway(req, messages);
+    return send(res, out.status, out.body);
   }
 
   client = client || new Anthropic();

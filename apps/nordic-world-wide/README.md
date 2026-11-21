@@ -47,11 +47,12 @@ Las visitas no necesitan configuración: el panel lee el contador público de Go
 Funciones del servidor en `api/`: `messages.js` (guarda y lista mensajes), `chat.js`, `stats.js` (GoatCounter), `_lib.js` (clave y base de datos).
 
 ## Asistente con IA (botón flotante)
-Botón abajo a la derecha en todas las páginas: un chat que responde dudas de la tienda (cómo comprar, tallas, drops…) y preguntas generales. Usa Claude (Anthropic) desde la función `api/assistant.js`; la clave nunca llega al navegador.
-- Para activarlo: crear una API key en https://platform.claude.com (API Keys, con saldo cargado) y añadirla en Vercel → Settings → Environment Variables como `ANTHROPIC_API_KEY`. Después, Redeploy.
-- Sin la clave, el chat responde que se está configurando y remite al formulario.
+Botón abajo a la derecha en todas las páginas: un chat que responde dudas de la tienda (cómo comprar, tallas, drops…) y preguntas generales. Funciona desde `api/assistant.js`; ninguna clave llega al navegador.
+- **Gratis por defecto:** usa un modelo gratuito (`nvidia/nemotron-3.5-lightning-free`) a través del AI Gateway de Vercel. En Vercel se conecta solo con el token OIDC del proyecto: no hay que configurar nada ni pagar (mismo sistema que Rumbo Traveling). Otro modelo: variable `ASSISTANT_FREE_MODEL`.
+- **Opcional, de pago (mejor calidad):** si se añade `ANTHROPIC_API_KEY` en Vercel, usa Claude (`claude-opus-5-5`, esfuerzo `low`).
+- Si la IA no está disponible, el chat muestra "Asistente no activado" y remite al formulario.
 - Lo que sabe de la tienda está en el texto `SYSTEM` de `api/assistant.js` (actualizarlo cuando haya productos o precios).
-- Límite: 40 mensajes por hora por visitante. Modelo: `claude-opus-5-5` con esfuerzo `low` (se puede cambiar con la variable `ASSISTANT_MODEL`).
+- Límite: 40 mensajes por hora por visitante.
 
 ## Pendiente
 - Fotos reales de producto y del hero (`img/hero.svg`).
