@@ -264,7 +264,7 @@ a { color: inherit; }
 .ai.is-open .ai-fab .ai-ico-close { display: block; }
 .ai-panel {
   position: fixed; z-index: 69; right: 16px; bottom: 86px; left: 16px;
-  max-height: min(560px, calc(100svh - 110px));
+  max-height: min(560px, calc(100svh - 86px - var(--header-h) - 16px));
   display: flex; flex-direction: column;
   background: var(--black); color: var(--white);
   border: 1px solid #2a2e34; box-shadow: 0 24px 60px rgba(0,0,0,.45);
