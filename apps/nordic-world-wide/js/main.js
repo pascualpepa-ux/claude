@@ -56,13 +56,98 @@
     document.head.appendChild(s);
   }
 
-  /* ---------- Footer, WhatsApp ---------- */
+  /* ---------- Footer ---------- */
   $$(".year").forEach(function (el) { el.textContent = new Date().getFullYear(); });
-  var wa = $("#whatsapp");
-  if (wa) {
-    var num = String(CFG.whatsapp || "").replace(/\D/g, "");
-    wa.href = "https://wa.me/" + num + "?text=" + encodeURIComponent(CFG.whatsappMensaje || "Hola");
-  }
+
+  /* ---------- Asistente con IA (botón flotante) ---------- */
+  (function assistant() {
+    var KEY = "nww-assistant";
+    var history = [];
+    try { history = JSON.parse(sessionStorage.getItem(KEY) || "[]"); } catch (e) { history = []; }
+    var busy = false;
+
+    var root = document.createElement("div");
+    root.className = "ai";
+    root.innerHTML =
+      '<button class="ai-fab" type="button" aria-expanded="false" aria-controls="ai-panel" aria-label="Abrir asistente">' +
+        '<svg class="ai-ico-open" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01" stroke-width="2.6" stroke-linecap="round"/></svg>' +
+        '<svg class="ai-ico-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
+      "</button>" +
+      '<section class="ai-panel" id="ai-panel" role="dialog" aria-label="Asistente de NORDIC WORLD WIDE" hidden>' +
+        '<header class="ai-head"><div><p class="ai-title">ASISTENTE</p><p class="ai-sub">Respuestas con IA · pregunta lo que quieras</p></div>' +
+        '<button class="ai-close" type="button" aria-label="Cerrar asistente">×</button></header>' +
+        '<div class="ai-log" id="ai-log" aria-live="polite"></div>' +
+        '<div class="ai-chips" id="ai-chips"></div>' +
+        '<form class="ai-form" id="ai-form"><input id="ai-input" type="text" maxlength="1500" placeholder="Escribe tu pregunta…" autocomplete="off" aria-label="Tu pregunta">' +
+        '<button type="submit" aria-label="Enviar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button></form>' +
+        '<p class="ai-legal">Las respuestas las genera una IA y pueden contener errores. Para pedidos, usa el formulario de Contacto.</p>' +
+      "</section>";
+    document.body.appendChild(root);
+
+    var fab = $(".ai-fab", root), panel = $("#ai-panel"), log = $("#ai-log"), input = $("#ai-input"), chips = $("#ai-chips");
+    var SUGGESTIONS = ["¿Cómo compro una camiseta?", "¿Qué tallas hay?", "¿Cuándo sale el próximo drop?"];
+
+    function save() { try { sessionStorage.setItem(KEY, JSON.stringify(history.slice(-20))); } catch (e) {} }
+    function bubble(role, text) {
+      var d = document.createElement("div");
+      d.className = "ai-msg ai-" + role;
+      d.textContent = text;
+      log.appendChild(d);
+      log.scrollTop = log.scrollHeight;
+      return d;
+    }
+    function render() {
+      log.innerHTML = "";
+      bubble("assistant", "¡Hola! Soy el asistente de NORDIC WORLD WIDE. Pregúntame sobre la ropa, las tallas, cómo comprar… o lo que quieras.");
+      history.forEach(function (m) { bubble(m.role, m.content); });
+      chips.innerHTML = history.length ? "" : SUGGESTIONS.map(function (s) { return '<button type="button">' + esc(s) + "</button>"; }).join("");
+    }
+    function toggle(open) {
+      panel.hidden = !open;
+      root.classList.toggle("is-open", open);
+      fab.setAttribute("aria-expanded", String(open));
+      fab.setAttribute("aria-label", open ? "Cerrar asistente" : "Abrir asistente");
+      if (open) { render(); setTimeout(function () { input.focus(); }, 50); }
+    }
+    function ask(text) {
+      text = String(text || "").trim();
+      if (!text || busy) return;
+      busy = true;
+      chips.innerHTML = "";
+      history.push({ role: "user", content: text });
+      bubble("user", text);
+      input.value = "";
+      var typing = bubble("assistant", "");
+      typing.classList.add("ai-typing");
+      typing.innerHTML = "<span></span><span></span><span></span>";
+      fetch("/api/assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history })
+      })
+        .then(function (r) { return r.json().catch(function () { return {}; }); })
+        .then(function (d) {
+          var reply = d.reply || "No he podido responder ahora. Prueba de nuevo o escríbenos desde el formulario de Contacto.";
+          typing.classList.remove("ai-typing");
+          typing.textContent = reply;
+          if (d.reply && !d.error) { history.push({ role: "assistant", content: reply }); }
+          else { history.pop(); } // no guardar preguntas sin respuesta real
+          save();
+        })
+        .catch(function () {
+          typing.classList.remove("ai-typing");
+          typing.textContent = "Sin conexión. Prueba de nuevo en un momento.";
+          history.pop();
+        })
+        .then(function () { busy = false; log.scrollTop = log.scrollHeight; input.focus(); });
+    }
+
+    fab.addEventListener("click", function () { toggle(panel.hidden); });
+    $(".ai-close", root).addEventListener("click", function () { toggle(false); fab.focus(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !panel.hidden) { toggle(false); fab.focus(); } });
+    $("#ai-form").addEventListener("submit", function (e) { e.preventDefault(); ask(input.value); });
+    chips.addEventListener("click", function (e) { if (e.target.tagName === "BUTTON") ask(e.target.textContent); });
+  })();
 
   /* ---------- Shop ---------- */
   var grid = $("#shop-grid");
@@ -269,7 +354,7 @@
           setStatus("¡Recibido! Te respondemos pronto." + (CFG.demo ? " (Vista previa: no se envió ningún email.)" : ""), "ok");
         })
         .catch(function (err) {
-          setStatus("No se pudo enviar (" + err.message + "). Inténtalo de nuevo o escríbenos por WhatsApp.", "err");
+          setStatus("No se pudo enviar (" + err.message + "). Inténtalo de nuevo en un momento.", "err");
         })
         .then(function () { submitBtn.disabled = false; submitBtn.textContent = label; });
     });

@@ -1,0 +1,11 @@
+{
+  "name": "nordic-world-wide",
+  "private": true,
+  "description": "Web de NORDIC WORLD WIDE + funciones del servidor (Vercel)",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0"
+  }
+}

@@ -7,7 +7,7 @@ index.html        Inicio · Shop · Nosotros · Contacto
 producto.html     Página de producto (producto.html?id=aurora-tee)
 css/styles.css    Estilos (mobile-first)
 js/products.js    ← CATÁLOGO: añadir/editar camisetas aquí
-js/config.js      ← emails destinatarios, WhatsApp
+js/config.js      ← emails destinatarios
 js/main.js        Lógica (grilla, producto, formulario, animaciones)
 img/              Imágenes (placeholders SVG; reemplazar por fotos reales)
 ```
@@ -16,7 +16,7 @@ img/              Imágenes (placeholders SVG; reemplazar por fotos reales)
 Abre `js/products.js`, copia un bloque `{ ... }` y cambia los datos. Con `precio: null` se muestra **"Precio a consultar"**; pon un número (`precio: 39.9`) cuando esté definido. Las fotos van en `img/products/` (recomendado 1200×1500, formato 4:5).
 
 ## Emails
-Cada envío llega a la vez a pascualpepa@icloud.com (principal) y en copia a guillermogg24@icloud.com, nachovaro89@icloud.com y alejandrorivasruiz@icloud.com (lista en `js/config.js`).
+Cada envío llega a la vez a pascualpepa@icloud.com (principal) y en copia a guillermogg24@icloud.com (lista en `js/config.js`).
 - Asunto: `🛒 Pedido – [producto]` si hay producto, si no `✉️ Contacto – [nombre]`.
 - "Responder a" = email del cliente.
 - Imagen adjunta opcional (máx. 3 MB).
@@ -45,6 +45,12 @@ Las visitas no necesitan configuración: el panel lee el contador público de Go
 
 Funciones del servidor en `api/`: `messages.js` (guarda y lista mensajes), `chat.js`, `stats.js` (GoatCounter), `_lib.js` (clave y base de datos).
 
+## Asistente con IA (botón flotante)
+Botón abajo a la derecha en todas las páginas: un chat que responde dudas de la tienda (cómo comprar, tallas, drops…) y preguntas generales. Usa Claude (Anthropic) desde la función `api/assistant.js`; la clave nunca llega al navegador.
+- Para activarlo: crear una API key en https://platform.claude.com (API Keys, con saldo cargado) y añadirla en Vercel → Settings → Environment Variables como `ANTHROPIC_API_KEY`. Después, Redeploy.
+- Sin la clave, el chat responde que se está configurando y remite al formulario.
+- Lo que sabe de la tienda está en el texto `SYSTEM` de `api/assistant.js` (actualizarlo cuando haya productos o precios).
+- Límite: 40 mensajes por hora por visitante. Modelo: `claude-opus-5-5` con esfuerzo `low` (se puede cambiar con la variable `ASSISTANT_MODEL`).
+
 ## Pendiente
-- Número de WhatsApp → `js/config.js` (`whatsapp: "34600123456"`).
 - Fotos reales de producto y del hero (`img/hero.svg`).
