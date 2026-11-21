@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { CartelSorteo } from "@/components/Sorteo";
 import { FormularioSuscripcion } from "@/components/FormularioSuscripcion";
 import { textosActuales } from "@/lib/idioma-servidor";
@@ -18,7 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PaginaSorteo({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
-  if (!sorteoActivo()) notFound();
+  // Terminado o apagado: los links viejos (YouTube, LinkedIn) llevan a la portada en vez de dar error.
+  if (!sorteoActivo()) redirect("/");
   const { idioma } = await textosActuales();
   const S = SORTEO[idioma];
   const { ref } = await searchParams;

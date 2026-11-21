@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { textosActuales } from "@/lib/idioma-servidor";
 import { datosSorteo, sorteoActivo } from "@/lib/sorteo";
 import { LOCALE } from "@/lib/idioma";
@@ -10,7 +10,8 @@ export const metadata: Metadata = { title: "Bases del concurso | Rumbo Traveling
 const FALTA = { es: "[a completar]", en: "[to be completed]" };
 
 export default async function BasesSorteo() {
-  if (!sorteoActivo()) notFound();
+  // Terminado o apagado: los links viejos (YouTube, LinkedIn) llevan a la portada en vez de dar error.
+  if (!sorteoActivo()) redirect("/");
   const { idioma } = await textosActuales();
   const { cierre, organizador } = datosSorteo();
   const fecha = cierre
