@@ -46,12 +46,11 @@ Las visitas no necesitan configuración: el panel lee el contador público de Go
 
 Funciones del servidor en `api/`: `messages.js` (guarda y lista mensajes), `chat.js`, `stats.js` (GoatCounter), `_lib.js` (clave y base de datos).
 
-## Asistente con IA (botón flotante)
-Botón abajo a la derecha en todas las páginas: un chat que responde dudas de la tienda (cómo comprar, tallas, drops…) y preguntas generales. Funciona desde `api/assistant.js`; ninguna clave llega al navegador.
-- **Gratis por defecto:** usa un modelo gratuito (`nvidia/nemotron-3.5-lightning-free`) a través del AI Gateway de Vercel. En Vercel se conecta solo con el token OIDC del proyecto: no hay que configurar nada ni pagar (mismo sistema que Rumbo Traveling). Otro modelo: variable `ASSISTANT_FREE_MODEL`.
-- **Opcional, de pago (mejor calidad):** si se añade `ANTHROPIC_API_KEY` en Vercel, usa Claude (`claude-opus-5-5`, esfuerzo `low`).
-- Si la IA no está disponible, el chat muestra "Asistente no activado" y remite al formulario.
-- Lo que sabe de la tienda está en el texto `SYSTEM` de `api/assistant.js` (actualizarlo cuando haya productos o precios).
+## Asistente (botón flotante)
+Botón abajo a la derecha en todas las páginas. Responde **solo sobre la web**: cómo comprar, tallas, precios, envíos, pagos, cambios, drops, contacto y la marca. Funciona desde `api/assistant.js`.
+- **Siempre funciona, gratis y sin claves:** las respuestas salen de la ficha `api/_faq.js` (español e inglés) y una calculadora para cuentas simples ("2+2"). Para cambiar o añadir respuestas, editar `api/_faq.js`.
+- Si la pregunta no está en la ficha, muestra la lista de temas y remite al formulario de Contacto.
+- **IA opcional** para lo que la ficha no sepa: Claude si se añade `ANTHROPIC_API_KEY` en Vercel, o el modelo gratuito del AI Gateway de Vercel si la cuenta de Vercel tiene una tarjeta verificada (no cobra por el modelo gratuito).
 - Límite: 40 mensajes por hora por visitante.
 
 ## Pendiente

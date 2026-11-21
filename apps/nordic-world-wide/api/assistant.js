@@ -11,6 +11,7 @@
 const { Anthropic } = require("@anthropic-ai/sdk");
 const { getVercelOidcToken } = require("@vercel/oidc");
 const { redis, readBody, send } = require("./_lib");
+const { findAnswer, calc, NO_MATCH } = require("./_faq");
 
 const MODEL = process.env.ASSISTANT_MODEL || "claude-opus-5-5";
 const GATEWAY_URL = "https://ai-gateway.vercel.sh/v1/chat/completions";
@@ -32,7 +33,7 @@ Cómo funciona la tienda:
 
 Reglas:
 - Responde en el idioma del usuario (normalmente español de España), con un tono cercano y directo, en 1 a 4 frases. Sin markdown pesado: texto plano, como mucho una lista corta.
-- También puedes responder preguntas generales que no tengan que ver con la tienda (cálculos, dudas, consejos de estilo...), de forma breve.
+- Responde SOLO sobre NORDIC WORLD WIDE y la web (ropa, tallas, compras, envíos, contacto, la marca). Si preguntan otra cosa, di amablemente que solo ayudas con la tienda.
 - No inventes precios, stock, fechas de lanzamiento, descuentos ni políticas que no estén arriba. Si no lo sabes, dilo y remite al formulario de Contacto.
 - No pidas datos personales en el chat: para pedidos, remite siempre al formulario.`;
 
@@ -113,17 +114,19 @@ async function replyWithGateway(req, messages) {
 }
 
 module.exports = async function handler(req, res) {
-  // GET: la web pregunta si el asistente está activado (sin gastar nada).
-  // Activado si hay clave de Anthropic, clave del Gateway o estamos en Vercel (token OIDC automático).
+  // GET: la web pregunta si el asistente está activado. Siempre lo está:
+  // las preguntas de la web se responden sin IA (ficha + calculadora).
   if (req.method === "GET") {
-    return send(res, 200, { active: !!(process.env.ANTHROPIC_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.VERCEL || req.headers["x-vercel-oidc-token"]) });
+    return send(res, 200, { active: true });
   }
   if (req.method !== "POST") {
     res.setHeader("Allow", "GET, POST");
     return send(res, 405, { error: "METHOD" });
   }
 
-  const messages = cleanHistory(readBody(req).messages);
+  const body = readBody(req);
+  const lang = body.lang === "en" ? "en" : "es";
+  const messages = cleanHistory(body.messages);
   if (!messages.length) return send(res, 400, { error: "BAD_REQUEST" });
 
   const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "?";
@@ -131,12 +134,25 @@ module.exports = async function handler(req, res) {
     return send(res, 429, { error: "RATE_LIMIT", reply: "Has enviado muchos mensajes seguidos. Prueba de nuevo en un rato o escríbenos desde el formulario de Contacto." });
   }
 
-  // Sin clave de Anthropic: modelo gratis por el AI Gateway de Vercel
-  if (!process.env.ANTHROPIC_API_KEY) {
-    const out = await replyWithGateway(req, messages);
-    return send(res, out.status, out.body);
-  }
+  const last = messages[messages.length - 1].content;
 
+  // 1) Cuentas ("2+2") y 2) preguntas frecuentes de la web: exactas, gratis y al instante.
+  const quick = calc(last, lang) || findAnswer(last, lang);
+  if (quick) return send(res, 200, { reply: quick, source: "faq" });
+
+  // 3) Si hay IA disponible, la usa para lo que la ficha no sabe. Si no hay o falla: lista de temas.
+  const ai = await replyWithAI(req, messages);
+  if (ai && ai.reply) return send(res, 200, { reply: ai.reply, source: "ai" });
+  return send(res, 200, { reply: NO_MATCH[lang], source: "faq", reason: ai && ai.reason });
+};
+
+// Devuelve { reply } o { reason } si no hay IA o falla (nunca lanza).
+async function replyWithAI(req, messages) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL && !req.headers["x-vercel-oidc-token"]) return { reason: "no_ai" };
+    const out = await replyWithGateway(req, messages);
+    return out.status === 200 && out.body.reply !== REPLY_EMPTY ? { reply: out.body.reply } : { reason: out.body.reason || out.body.error };
+  }
   client = client || new Anthropic();
   try {
     const response = await client.beta.messages.create({
@@ -148,27 +164,15 @@ module.exports = async function handler(req, res) {
       system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
       messages
     });
-
-    if (response.stop_reason === "refusal") {
-      return send(res, 200, { reply: "Prefiero no responder a eso. Si tienes una duda sobre NORDIC WORLD WIDE, pregúntame o escríbenos desde el formulario de Contacto." });
-    }
+    if (response.stop_reason === "refusal") return { reason: "refusal" };
     const reply = response.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-    return send(res, 200, { reply: reply || "No he podido generar una respuesta. ¿Puedes repetir la pregunta?" });
+    return reply ? { reply } : { reason: "empty" };
   } catch (err) {
-    if (err instanceof Anthropic.AuthenticationError) {
-      console.error("Anthropic: clave inválida");
-      return send(res, 503, { error: "NOT_CONFIGURED", reply: "El asistente no está disponible ahora mismo. Escríbenos desde el formulario de Contacto." });
-    }
-    if (err instanceof Anthropic.RateLimitError) {
-      return send(res, 503, { error: "BUSY", reply: "Estoy recibiendo muchas preguntas a la vez. Prueba de nuevo en un minuto." });
-    }
-    if (err instanceof Anthropic.APIConnectionError) {
-      console.error("Anthropic: sin conexión", err.message);
-    } else if (err instanceof Anthropic.APIError) {
-      console.error("Anthropic API", err.status, err.message);
-    } else {
-      console.error(err);
-    }
-    return send(res, 502, { error: "AI_ERROR", reply: "Ha habido un problema al responder. Prueba de nuevo o escríbenos desde el formulario de Contacto." });
+    if (err instanceof Anthropic.AuthenticationError) console.error("Anthropic: clave inválida");
+    else if (err instanceof Anthropic.RateLimitError) console.error("Anthropic: límite de uso");
+    else if (err instanceof Anthropic.APIConnectionError) console.error("Anthropic: sin conexión", err.message);
+    else if (err instanceof Anthropic.APIError) console.error("Anthropic API", err.status, err.message);
+    else console.error(err);
+    return { reason: "anthropic_error" };
   }
-};
+}

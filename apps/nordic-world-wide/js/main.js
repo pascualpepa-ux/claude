@@ -177,7 +177,7 @@
       fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history })
+        body: JSON.stringify({ messages: history, lang: I18N.getLang() })
       })
         .then(function (r) { return r.json().catch(function () { return {}; }); })
         .then(function (d) {
