@@ -7,14 +7,14 @@ const FAQ = [
   {
     id: "comprar",
     k: ["comprar", "compro", "compra", "pedido", "pedir", "encargar", "quiero", "conseguir", "buy", "order", "purchase", "get one"],
-    es: "Para comprar: entra en el Shop, abre la camiseta, elige tu talla (S, M, L o XL) y pulsa «Comprar / Consultar». Se abre el formulario con la prenda y la talla ya puestas; lo envías y te confirmamos por email disponibilidad, precio, pago y envío.",
-    en: "To buy: go to the Shop, open the tee, choose your size (S, M, L or XL) and tap «Buy / Enquire». The form opens with the item and size filled in; send it and we'll confirm availability, price, payment and shipping by email."
+    es: "Para comprar: entra en el Shop, abre la camiseta, elige tu talla (XS, S, M, L o XL) y pulsa «Comprar / Consultar». Se abre el formulario con la prenda y la talla ya puestas; lo envías y te confirmamos por email disponibilidad, precio, pago y envío.",
+    en: "To buy: go to the Shop, open the tee, choose your size (XS, S, M, L or XL) and tap «Buy / Enquire». The form opens with the item and size filled in; send it and we'll confirm availability, price, payment and shipping by email."
   },
   {
     id: "tallas",
-    k: ["talla", "tallas", "tamano", "medida", "medidas", "queda", "fit", "oversized", "grande", "pequena", "size", "sizes", "sizing"],
-    es: "Hay tallas S, M, L y XL. El corte es oversized (ancho y con el hombro caído): si dudas, elige tu talla habitual; si la quieres más ajustada, una menos.",
-    en: "Sizes are S, M, L and XL. The fit is oversized (boxy with dropped shoulders): if unsure, take your usual size; for a closer fit, go one size down."
+    k: ["xs", "talla", "tallas", "tamano", "medida", "medidas", "queda", "fit", "oversized", "grande", "pequena", "size", "sizes", "sizing"],
+    es: "Hay tallas XS, S, M, L y XL. El corte es oversized (ancho y con el hombro caído): si dudas, elige tu talla habitual; si la quieres más ajustada, una menos.",
+    en: "Sizes are XS, S, M, L and XL. The fit is oversized (boxy with dropped shoulders): if unsure, take your usual size; for a closer fit, go one size down."
   },
   {
     id: "precio",
@@ -43,8 +43,8 @@ const FAQ = [
   {
     id: "producto",
     k: ["camiseta", "camisetas", "producto", "productos", "prenda", "prendas", "original", "nordic original", "polaris", "summit", "alpenglow", "nordlys", "chico", "chica", "chicos", "chicas", "hombre", "mujer", "explore", "tee", "coleccion", "catalogo", "ropa", "diseno", "estampado", "shirt", "tshirt", "collection", "product", "products", "design"],
-    es: "En el DROP 01 tenemos 4 camisetas oversized: para chico, NORDIC ORIGINAL (blanca, estrella polar y planeta, 35 €) y SUMMIT TEE (blanca, montañas, 35 €); para chica, ALPENGLOW TEE (blanca con detalles rojos, 36 €) y NORDLYS TEE (crema, 35 €). Todas en tallas S a XL. Las ves en el Shop.",
-    en: "DROP 01 has 4 oversized tees: men's NORDIC ORIGINAL (white, north star and planet, €35) and SUMMIT TEE (white, mountains, €35); women's ALPENGLOW TEE (white with red details, €36) and NORDLYS TEE (cream, €35). All in sizes S to XL. See them in the Shop.",
+    es: "En el DROP 01 tenemos 4 camisetas oversized: para chico, NORDIC ORIGINAL (blanca, estrella polar y planeta, 35 €) y SUMMIT TEE (blanca, montañas, 35 €); para chica, ALPENGLOW TEE (blanca con detalles rojos, 36 €) y NORDLYS TEE (crema, 35 €). Todas en tallas XS a XL. Las ves en el Shop.",
+    en: "DROP 01 has 4 oversized tees: men's NORDIC ORIGINAL (white, north star and planet, €35) and SUMMIT TEE (white, mountains, €35); women's ALPENGLOW TEE (white with red details, €36) and NORDLYS TEE (cream, €35). All in sizes XS to XL. See them in the Shop.",
   },
   {
     id: "otras",

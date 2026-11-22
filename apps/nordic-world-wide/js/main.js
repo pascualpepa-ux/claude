@@ -269,7 +269,7 @@
 
       var prevSize = ($('input[name="talla"]:checked', productEl) || {}).value;
       var fotos = p.fotos || [];
-      var tallas = p.tallas && p.tallas.length ? p.tallas : ["S", "M", "L", "XL"];
+      var tallas = p.tallas && p.tallas.length ? p.tallas : ["XS", "S", "M", "L", "XL"];
       productEl.innerHTML =
         '<div class="gallery-wrap">' +
           '<div class="gallery" id="gallery">' +

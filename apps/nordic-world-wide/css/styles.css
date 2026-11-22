@@ -217,7 +217,7 @@ a { color: inherit; }
 .product-desc { color: var(--grey-700); margin: 18px 0 26px; max-width: 52ch; }
 .sizes-label { font-size: 11px; font-weight: 800; letter-spacing: .18em; margin: 0 0 10px; display: flex; justify-content: space-between; }
 .sizes-label span { color: var(--grey-500); font-weight: 500; letter-spacing: .05em; }
-.sizes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; border: 0; padding: 0; }
+.sizes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; border: 0; padding: 0; }
 .size { position: relative; }
 .size input { position: absolute; opacity: 0; inset: 0; cursor: pointer; margin: 0; }
 .size span {
