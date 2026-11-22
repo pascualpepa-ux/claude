@@ -21,6 +21,8 @@
     return '<span class="price">' + p.toLocaleString(I18N.locale(), { style: "currency", currency: "EUR" }) + "</span>";
   }
 
+  function tagText(p) { return (I18N.getLang() === "en" && p.etiqueta_en) || p.etiqueta; }
+
   function productUrl(p) { return "producto.html?id=" + encodeURIComponent(p.id); }
 
   // Cada parte que se dibuja con JS se registra aquí para redibujarse al cambiar de idioma
@@ -229,7 +231,7 @@
       return (
         '<article class="card ' + rv + '" style="transition-delay:' + (i % 4) * 80 + 'ms">' +
           '<a class="card-media" href="' + productUrl(p) + '" aria-label="' + esc(p.nombre) + '">' +
-            (p.etiqueta ? '<span class="badge">' + esc(p.etiqueta) + "</span>" : "") +
+            (p.etiqueta ? '<span class="badge">' + esc(tagText(p)) + "</span>" : "") +
             '<img src="' + esc(fotos[0]) + '" alt="' + esc(p.nombre) + '" loading="lazy" width="900" height="900">' +
             (fotos[1] ? '<img class="img-alt" src="' + esc(fotos[1]) + '" alt="" loading="lazy" width="900" height="900">' : "") +
           "</a>" +
@@ -277,7 +279,7 @@
         "</div>" +
         '<div class="product-info">' +
           '<a class="breadcrumb" href="index.html#shop">← Shop</a>' +
-          (p.etiqueta ? '<p class="eyebrow" style="margin-top:18px;color:var(--ice-deep)">' + esc(p.etiqueta) + "</p>" : "") +
+          (p.etiqueta ? '<p class="eyebrow" style="margin-top:18px;color:var(--ice-deep)">' + esc(tagText(p)) + "</p>" : "") +
           '<h1 class="product-title">' + esc(p.nombre) + "</h1>" +
           formatPrice(p.precio) +
           (desc ? '<p class="product-desc">' + esc(desc) + "</p>" : "") +

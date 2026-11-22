@@ -19,8 +19,8 @@ const FAQ = [
   {
     id: "precio",
     k: ["precio", "precios", "cuesta", "cuestan", "vale", "valen", "coste", "euros", "barato", "caro", "price", "prices", "cost", "how much"],
-    es: "Los precios todavía no están publicados («Precio a consultar»). Mándanos la consulta desde el formulario de Contacto o con «Comprar / Consultar» y te decimos el precio por email.",
-    en: "Prices aren't published yet («Price on request»). Send us a message through the Contact form or with «Buy / Enquire» and we'll tell you the price by email."
+    es: "Precios: POLARIS TEE y SUMMIT TEE (chico) 35 €; ALPENGLOW TEE (chica) 36 €; NORDLYS TEE (chica) 35 €. El envío te lo confirmamos por email al hacer el pedido.",
+    en: "Prices: POLARIS TEE and SUMMIT TEE (men's) €35; ALPENGLOW TEE (women's) €36; NORDLYS TEE (women's) €35. We'll confirm shipping by email when you order."
   },
   {
     id: "envio",
@@ -42,21 +42,21 @@ const FAQ = [
   },
   {
     id: "producto",
-    k: ["camiseta", "camisetas", "producto", "productos", "prenda", "prendas", "explore", "tee", "coleccion", "catalogo", "ropa", "diseno", "estampado", "shirt", "tshirt", "collection", "product", "products", "design"],
-    es: "Ahora mismo no hay prendas publicadas: estamos preparando el primer drop de camisetas oversized de algodón pesado. Déjanos tu email en el formulario de Contacto y te avisamos en cuanto salga.",
-    en: "There are no items published right now: we're preparing our first drop of heavyweight oversized tees. Leave your email in the Contact form and we'll let you know as soon as it's out.",
+    k: ["camiseta", "camisetas", "producto", "productos", "prenda", "prendas", "polaris", "summit", "alpenglow", "nordlys", "chico", "chica", "chicos", "chicas", "hombre", "mujer", "explore", "tee", "coleccion", "catalogo", "ropa", "diseno", "estampado", "shirt", "tshirt", "collection", "product", "products", "design"],
+    es: "En el DROP 01 tenemos 4 camisetas oversized: para chico, POLARIS TEE (blanca, estrella polar y planeta, 35 €) y SUMMIT TEE (blanca, montañas, 35 €); para chica, ALPENGLOW TEE (blanca con detalles rojos, 36 €) y NORDLYS TEE (crema, 35 €). Todas en tallas S a XL. Las ves en el Shop.",
+    en: "DROP 01 has 4 oversized tees: men's POLARIS TEE (white, north star and planet, €35) and SUMMIT TEE (white, mountains, €35); women's ALPENGLOW TEE (white with red details, €36) and NORDLYS TEE (cream, €35). All in sizes S to XL. See them in the Shop.",
   },
   {
     id: "otras",
-    k: ["sudadera", "sudaderas", "hoodie", "gorra", "gorras", "pantalon", "pantalones", "chaqueta", "colores", "color", "negra", "negro", "gris", "cap", "hat", "jacket", "pants", "colour", "colors", "black"],
-    es: "Todavía no hay prendas publicadas. Sudaderas, colores y más prendas llegarán en los próximos drops: déjanos tu email en el formulario de Contacto y te avisamos.",
-    en: "There are no items published yet. Hoodies, colours and more items will come in upcoming drops: leave your email in the Contact form and we'll let you know.",
+    k: ["sudadera", "sudaderas", "hoodie", "gorra", "gorras", "pantalon", "pantalones", "chaqueta", "colores", "color", "negra", "negro", "gris", "rosa", "verde", "azul", "cap", "hat", "jacket", "pants", "colour", "colors", "black"],
+    es: "Por ahora tenemos camisetas: blancas (Polaris, Summit y Alpenglow, esta con detalles rojos) y crema (Nordlys). Sudaderas, otros colores y más prendas llegarán en próximos drops: déjanos tu email en el formulario de Contacto y te avisamos.",
+    en: "For now we have tees: white (Polaris, Summit and Alpenglow, with red details) and cream (Nordlys). Hoodies, other colours and more items will come in future drops: leave your email in the Contact form and we'll let you know.",
   },
   {
     id: "drop",
     k: ["drop", "drops", "proximo", "nuevo", "nueva", "nuevos", "lanzamiento", "sale", "salen", "cuando", "limitado", "limitada", "next", "new", "release", "when", "limited"],
-    es: "Trabajamos por drops limitados: cuando una pieza se agota, no vuelve. El primer drop sale muy pronto: para enterarte antes que nadie, déjanos tu email en el formulario de Contacto.",
-    en: "We work in limited drops: once a piece sells out, it doesn't come back. Our first drop is coming soon: to hear about it first, leave your email in the Contact form.",
+    es: "Trabajamos por drops limitados: cuando una pieza se agota, no vuelve. El DROP 01 ya está disponible en el Shop (Polaris, Summit, Alpenglow y Nordlys). Para enterarte del próximo antes que nadie, déjanos tu email en el formulario de Contacto.",
+    en: "We work in limited drops: once a piece sells out, it doesn't come back. DROP 01 is out now in the Shop (Polaris, Summit, Alpenglow and Nordlys). To hear about the next one first, leave your email in the Contact form.",
   },
   {
     id: "stock",
