@@ -24,8 +24,8 @@
 window.PRODUCTS = [
   /* ---------- CHICO ---------- */
   {
-    id: "polaris-tee",
-    nombre: "POLARIS TEE",
+    id: "nordic-original",
+    nombre: "NORDIC ORIGINAL",
     precio: 35,
     tallas: ["S", "M", "L", "XL"],
     fotos: ["img/products/polaris-tee-frente.jpg", "img/products/polaris-tee-espalda.jpg"],
