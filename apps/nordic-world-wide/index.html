@@ -82,6 +82,12 @@
       <div class="section-head reveal">
         <h2 class="section-title" data-i18n="contact.title">CONTACTO</h2>
         <p class="section-sub" data-i18n="contact.sub">Pedidos, dudas o colaboraciones. Te respondemos en menos de 24 h.</p>
+        <!-- Email directo (se rellena desde js/config.js → emailPublico) -->
+        <p class="contact-direct" id="contact-direct" hidden>
+          <span data-i18n="contact.direct">¿Prefieres escribirnos directamente?</span>
+          <a id="direct-email" href="#"></a>
+          <button class="copy-btn" id="copy-email" type="button" data-i18n="contact.copy">Copiar</button>
+        </p>
       </div>
 
       <form class="form reveal" id="contact-form" novalidate>

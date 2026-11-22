@@ -398,6 +398,26 @@
     onLangChange.push(renderProduct);
   }
 
+  /* ---------- Email directo en Contacto (js/config.js → emailPublico) ---------- */
+  var direct = $("#contact-direct");
+  if (direct && CFG.emailPublico) {
+    var mail = String(CFG.emailPublico);
+    var link = $("#direct-email");
+    link.textContent = mail;
+    link.href = "mailto:" + mail + "?subject=" + encodeURIComponent("NORDIC WORLD WIDE");
+    direct.hidden = false;
+    var copyBtn = $("#copy-email");
+    copyBtn.addEventListener("click", function () {
+      var done = function () {
+        copyBtn.textContent = t("contact.copied");
+        setTimeout(function () { copyBtn.textContent = t("contact.copy"); }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(mail).then(done, function () { selectText(link); });
+      else selectText(link);
+    });
+    var selectText = function (el) { var r = document.createRange(); r.selectNodeContents(el); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); };
+  }
+
   /* ---------- Formulario de contacto / pedido ---------- */
   var form = $("#contact-form");
   if (form) {
@@ -493,34 +513,68 @@
       submitBtn.disabled = true;
       submitBtn.textContent = t("form.sending");
 
-      Promise.resolve()
-        .then(function () {
-          if (CFG.demo) return; // demo: vista previa sin envío real
-          // Copia para el panel admin (contador + lista). Si falla, el email sale igual.
-          fetch("/api/messages", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            keepalive: true,
-            body: JSON.stringify({
-              tipo: esPedido ? "pedido" : "contacto",
-              nombre: nombre,
-              email: form.elements.email.value.trim(),
-              telefono: tel,
-              producto: esPedido ? prodSinTalla : "",
-              talla: talla,
-              mensaje: form.elements.mensaje.value.trim(),
-              adjunto: !!f
-            })
-          }).catch(function () {});
-          return fetch("https://formsubmit.co/ajax/" + encodeURIComponent(CFG.destinatario), {
-            method: "POST",
-            headers: { Accept: "application/json" },
-            body: fd
-          }).then(function (res) {
+      // Se envía por TODOS los caminos a la vez; basta con que uno funcione para no perder el pedido.
+      var settle = function (pr) { return pr.then(function () { return true; }, function (e) { return e && e.message ? e.message : "error"; }); };
+      var datos = {
+        tipo: esPedido ? "pedido" : "contacto",
+        nombre: nombre,
+        email: form.elements.email.value.trim(),
+        telefono: tel,
+        producto: esPedido ? prodSinTalla : "",
+        talla: talla,
+        mensaje: form.elements.mensaje.value.trim(),
+        adjunto: !!f
+      };
+      var asunto = fd.get("_subject");
+
+      // 1) Panel admin (base de datos de Vercel)
+      var viaAdmin = function () {
+        return fetch("/api/messages", { method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true, body: JSON.stringify(datos) })
+          .then(function (r) { if (!r.ok) throw new Error("admin " + r.status); });
+      };
+      // 2) FormSubmit
+      var viaFormSubmit = function () {
+        return fetch("https://formsubmit.co/ajax/" + encodeURIComponent(CFG.destinatario), { method: "POST", headers: { Accept: "application/json" }, body: fd })
+          .then(function (res) {
             return res.json().catch(function () { return {}; }).then(function (body) {
-              if (!res.ok || String(body.success) === "false") throw new Error(body.message || "Error " + res.status);
+              if (!res.ok || String(body.success) === "false") throw new Error(body.message || "FormSubmit " + res.status);
             });
           });
+      };
+      // 3) EmailJS (solo si está configurado en js/config.js)
+      var ej = CFG.emailjs || {};
+      var viaEmailJS = function () {
+        if (!ej.serviceId || !ej.templateId || !ej.publicKey) return Promise.reject(new Error("EmailJS sin configurar"));
+        var texto = [
+          "Tipo: " + (esPedido ? "PEDIDO" : "CONSULTA"),
+          esPedido ? "Producto: " + datos.producto : null,
+          talla ? "Talla: " + talla : null,
+          "Cliente: " + nombre,
+          "Email: " + datos.email,
+          tel ? "Teléfono: " + tel : null,
+          "Idioma de la web: " + (I18N.getLang() === "en" ? "Inglés" : "Español"),
+          f ? "Imagen: el cliente adjuntó una imagen (llega en el email de FormSubmit)" : null,
+          "",
+          "Mensaje:",
+          datos.mensaje
+        ].filter(function (l) { return l !== null; }).join("\n");
+        return fetch("https://api.emailjs.com/api/v1.0/email/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            service_id: ej.serviceId, template_id: ej.templateId, user_id: ej.publicKey,
+            template_params: {
+              to_email: CFG.destinatario, cc_emails: (CFG.copias || []).join(","),
+              reply_to: datos.email, from_name: nombre, subject: asunto, message: texto
+            }
+          })
+        }).then(function (r) { if (!r.ok) return r.text().then(function (x) { throw new Error("EmailJS " + r.status + " " + x); }); });
+      };
+
+      (CFG.demo ? Promise.resolve([true]) : Promise.all([settle(viaFormSubmit()), settle(viaEmailJS()), settle(viaAdmin())]))
+        .then(function (res) {
+          var ok = res.some(function (x) { return x === true; });
+          if (!ok) throw new Error(res.filter(function (x) { return x !== true && x !== "EmailJS sin configurar"; })[0] || "error");
         })
         .then(function () {
           form.reset();

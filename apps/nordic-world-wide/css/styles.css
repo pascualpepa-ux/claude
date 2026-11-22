@@ -157,6 +157,12 @@ a { color: inherit; }
   margin: 0; font-family: var(--display); font-weight: 400;
   font-size: clamp(56px, 16vw, 160px); line-height: .9; letter-spacing: -.005em;
 }
+.contact-direct { margin: 18px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 15px; color: var(--grey-700); }
+.contact-direct[hidden] { display: none; }
+.contact-direct a { color: var(--black); font-weight: 800; text-decoration: underline; text-decoration-color: var(--ice-deep); text-underline-offset: 4px; word-break: break-all; }
+.contact-direct a:hover { color: var(--ice-deep); }
+.copy-btn { border: 1.5px solid var(--grey-300); background: none; padding: 6px 10px; font: 800 10px var(--body); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; color: var(--black); }
+.copy-btn:hover { border-color: var(--black); }
 .section-sub { margin: 10px 0 0; color: var(--grey-500); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
 
 /* ---------- Grilla de productos ---------- */

@@ -25,6 +25,17 @@ Cada envío llega a la vez a pascualpepa@icloud.com (principal) y en copia a gui
 
 **Activación (una sola vez):** el primer envío hace que FormSubmit mande a pascualpepa@icloud.com un email "Activate Form". Hay que abrirlo y pulsar el botón. A partir de ahí todos los envíos llegan. Si se cambia el destinatario principal, hay que volver a activar.
 
+**Tres caminos a la vez (para no perder pedidos):** cada mensaje se envía por FormSubmit **y** por EmailJS, y además se guarda en el panel Admin (si la base de datos está conectada). Basta con que uno funcione para que la web muestre "¡Recibido!"; si fallan todos, muestra un error y remite al email directo. Puede llegar el mismo pedido dos veces (uno por cada servicio).
+
+**EmailJS (configurar una vez, gratis hasta 200 emails/mes):**
+1. Crear cuenta en https://www.emailjs.com.
+2. **Email Services → Add New Service**: conectar el correo desde el que se enviará (Gmail es lo más fácil; iCloud se conecta como "Other SMTP" con `smtp.mail.me.com`, puerto 587 y una contraseña de app de Apple). Copiar el **Service ID**.
+3. **Email Templates → Create New Template**. En la pestaña de ajustes: *To Email* `{{to_email}}`, *CC* `{{cc_emails}}`, *Reply To* `{{reply_to}}`, *From Name* `{{from_name}}`, *Subject* `{{subject}}`. Contenido: `{{message}}`. Guardar y copiar el **Template ID**.
+4. **Account → General**: copiar la **Public Key**.
+5. Pegar los tres datos en `js/config.js` → `emailjs` (no son secretos).
+
+**Email directo en Contacto:** se muestra el de `emailPublico` en `js/config.js` (vacío = no se muestra), con enlace y botón "Copiar".
+
 ## Publicar
 Es una web estática: sirve cualquier hosting (Vercel, Netlify, GitHub Pages…) subiendo la carpeta tal cual. No hace falta configurar nada más. Ojo: abriendo `index.html` directamente desde el ordenador (file://) el formulario no envía; tiene que estar servida desde una web.
 
