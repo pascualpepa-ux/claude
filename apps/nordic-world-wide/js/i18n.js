@@ -22,6 +22,9 @@
 
       "hero.eyebrow": "Drop 01 · Ya disponible",
       "hero.cta": "VER COLECCIÓN",
+      "ad.label": "Anuncio de NORDIC WORLD WIDE",
+      "ad.unmute": "Activar sonido",
+      "ad.mute": "Quitar sonido",
 
       "shop.sub": "Camisetas oversized · Algodón pesado · Unidades limitadas",
       "shop.emptyTitle": "PRÓXIMO DROP<br>MUY PRONTO",
@@ -111,6 +114,9 @@
 
       "hero.eyebrow": "Drop 01 · Available now",
       "hero.cta": "VIEW COLLECTION",
+      "ad.label": "NORDIC WORLD WIDE ad",
+      "ad.unmute": "Turn sound on",
+      "ad.mute": "Turn sound off",
 
       "shop.sub": "Oversized tees · Heavyweight cotton · Limited units",
       "shop.emptyTitle": "NEXT DROP<br>COMING SOON",

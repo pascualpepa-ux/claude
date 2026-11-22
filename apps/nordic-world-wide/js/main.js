@@ -212,6 +212,38 @@
     chips.addEventListener("click", function (e) { if (e.target.tagName === "BUTTON") ask(e.target.textContent); });
   })();
 
+  /* ---------- Anuncio en vídeo de la portada (cambia con el idioma) ---------- */
+  var ad = $("#ad-video"), adSound = $("#ad-sound");
+  if (ad) {
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var setAdLang = function () {
+      var lang = I18N.getLang() === "en" ? "en" : "es";
+      var src = "video/anuncio-" + lang + ".mp4";
+      if (ad.getAttribute("src") === src) return;
+      var wasMuted = ad.muted;
+      ad.setAttribute("poster", "video/anuncio-" + lang + ".jpg");
+      ad.setAttribute("src", src);
+      ad.load();
+      ad.muted = wasMuted;
+      if (!reduceMotion) { var pr = ad.play(); if (pr && pr.catch) pr.catch(function () {}); }
+    };
+    var soundLabel = function () {
+      var on = !ad.muted;
+      adSound.setAttribute("aria-pressed", String(on));
+      adSound.setAttribute("data-i18n-attr", "aria-label:" + (on ? "ad.mute" : "ad.unmute"));
+      adSound.setAttribute("aria-label", t(on ? "ad.mute" : "ad.unmute"));
+    };
+    if (reduceMotion) { ad.removeAttribute("autoplay"); ad.pause(); ad.setAttribute("controls", ""); }
+    setAdLang();
+    adSound.addEventListener("click", function () {
+      ad.muted = !ad.muted;
+      if (!ad.muted) { var pr = ad.play(); if (pr && pr.catch) pr.catch(function () {}); }
+      soundLabel();
+    });
+    soundLabel();
+    onLangChange.push(function () { setAdLang(); soundLabel(); });
+  }
+
   /* ---------- Shop ---------- */
   var grid = $("#shop-grid");
   function renderShop(visible) {
