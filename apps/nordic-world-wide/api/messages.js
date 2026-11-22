@@ -9,7 +9,6 @@ module.exports = async function handler(req, res) {
   try {
     if (req.method === "POST") {
       const b = readBody(req);
-      if (b.website) return send(res, 200, { ok: true }); // honeypot
 
       const msg = {
         tipo: b.tipo === "pedido" ? "pedido" : "contacto",

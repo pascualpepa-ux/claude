@@ -418,15 +418,16 @@
       var producto = form.elements.producto.value.trim();
       var esPedido = producto !== "";
       var tel = form.elements.telefono.value.trim();
-      // Antispam: honeypot relleno o formulario enviado en < 2,5 s → se finge éxito y no se envía nada
-      var esBot = form.elements.website.value !== "" || Date.now() - Number(form.elements.ts.value) < 2500;
+      // Antispam: NUNCA se descarta un mensaje (un cliente real podría perderse). Si parece de un bot
+      // (campo oculto relleno o enviado en menos de 2,5 s), se envía igual con un aviso en el asunto.
+      var sospechoso = form.elements.nww_trap.value !== "" || Date.now() - Number(form.elements.ts.value) < 2500;
 
       // El email al equipo siempre va en español
       var talla = form.elements.talla.value;
       var prodSinTalla = talla ? producto.replace(SIZE_SUFFIX, "") : producto;
       var f = fileInput.files[0];
       var fd = new FormData();
-      fd.append("_subject", esPedido ? "🛒 Pedido – " + producto.replace(/\s*–\s*Size\s+/, " – Talla ") : "✉️ Contacto – " + nombre);
+      fd.append("_subject", (sospechoso ? "⚠️ Posible spam · " : "") + (esPedido ? "🛒 Pedido – " + producto.replace(/\s*–\s*Size\s+/, " – Talla ") : "✉️ Contacto – " + nombre));
       fd.append("_replyto", form.elements.email.value.trim());
       fd.append("_cc", (CFG.copias || []).join(","));
       fd.append("_template", "box");
@@ -447,7 +448,7 @@
 
       Promise.resolve()
         .then(function () {
-          if (esBot || CFG.demo) return; // demo: vista previa sin envío real
+          if (CFG.demo) return; // demo: vista previa sin envío real
           // Copia para el panel admin (contador + lista). Si falla, el email sale igual.
           fetch("/api/messages", {
             method: "POST",
