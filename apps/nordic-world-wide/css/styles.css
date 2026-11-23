@@ -416,3 +416,9 @@ a { color: inherit; }
   .cart-btn { order: 3; margin: 0 0 0 24px; }
   .cart-btn + .lang-toggle { margin-left: 12px; }
 }
+
+/* Reservas */
+.res-left { margin: 6px 0 10px; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.res-left.last { color: #b3261e; opacity: 1; font-weight: 600; }
+.res-left.full { color: #b3261e; opacity: 1; font-weight: 700; }
+.btn.is-full, .btn[disabled] { opacity: .45; cursor: not-allowed; }

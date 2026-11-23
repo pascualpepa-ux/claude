@@ -6,6 +6,7 @@ const path = require("path");
 const vm = require("vm");
 
 let cache = null;
+let maxRes = 5;
 
 function loadProducts() {
   if (cache) return cache;
@@ -20,6 +21,7 @@ function loadProducts() {
       vm.runInNewContext(code, sandbox, { timeout: 1000 });
       if (Array.isArray(sandbox.window.PRODUCTS)) {
         cache = sandbox.window.PRODUCTS;
+        if (typeof sandbox.window.MAX_RESERVAS === "number") maxRes = sandbox.window.MAX_RESERVAS;
         return cache;
       }
     } catch (e) { /* probar la siguiente ruta */ }
@@ -29,4 +31,6 @@ function loadProducts() {
 
 const findProduct = (id) => loadProducts().find((p) => p.id === id) || null;
 
-module.exports = { loadProducts, findProduct };
+const maxReservas = () => { loadProducts(); return maxRes; };
+
+module.exports = { loadProducts, findProduct, maxReservas };

@@ -172,7 +172,9 @@
   }
 
   /* ---------- Arranque: ¿hay pagos activos? ---------- */
-  fetch("/api/checkout").then(function (r) { return r.ok ? r.json() : { active: false }; })
+  // Ahora se vende por reservas (máx. 5 por camiseta): el carrito con tarjeta queda apagado.
+  // Para volver a activarlo: CFG.pagosConTarjeta = true en js/config.js.
+  (CFG.pagosConTarjeta ? fetch("/api/checkout") : Promise.reject()).then(function (r) { return r.ok ? r.json() : { active: false }; })
     .catch(function () { return { active: false }; })
     .then(function (s) {
       api.active = !!s.active; api.test = !!s.test; api.ready = true;

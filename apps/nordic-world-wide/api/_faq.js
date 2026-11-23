@@ -6,9 +6,9 @@
 const FAQ = [
   {
     id: "comprar",
-    k: ["comprar", "compro", "compra", "pedido", "pedir", "encargar", "quiero", "conseguir", "buy", "order", "purchase", "get one"],
-    es: "Para comprar: entra en el Shop, abre la camiseta, elige tu talla (XS, S, M, L o XL) y pulsa «Comprar / Consultar». Se abre el formulario con la prenda y la talla ya puestas; lo envías y te confirmamos por email disponibilidad, precio, pago y envío.",
-    en: "To buy: go to the Shop, open the tee, choose your size (XS, S, M, L or XL) and tap «Buy / Enquire». The form opens with the item and size filled in; send it and we'll confirm availability, price, payment and shipping by email."
+    k: ["reservar", "reserva", "reserve", "reservation", "comprar", "compro", "compra", "pedido", "pedir", "encargar", "quiero", "conseguir", "buy", "order", "purchase", "get one"],
+    es: "Se compra por reserva: entra en el Shop, abre la camiseta, elige tu talla (XS, S, M, L o XL) y pulsa «Reservar». Se abre el formulario con la prenda y la talla puestas; lo envías y te confirmamos la reserva, el pago y el envío por email. Cada camiseta tiene solo 5 reservas: las primeras 5 personas se la llevan.",
+    en: "Tees are sold by reservation: go to the Shop, open the tee, choose your size (XS, S, M, L or XL) and tap «Reserve». The form opens with the item and size filled in; send it and we'll confirm the reservation, payment and shipping by email. Each tee has only 5 reservations: the first 5 people get it."
   },
   {
     id: "tallas",
@@ -61,8 +61,8 @@ const FAQ = [
   {
     id: "stock",
     k: ["stock", "disponible", "disponibles", "quedan", "agotado", "agotada", "unidades", "hay", "available", "sold out", "left"],
-    es: "Las unidades son limitadas. Pregúntanos con «Comprar / Consultar» o desde el formulario de Contacto y te confirmamos por email si queda tu talla.",
-    en: "Units are limited. Ask us with «Buy / Enquire» or through the Contact form and we'll confirm by email whether your size is available."
+    es: "Cada camiseta tiene como máximo 5 reservas. En el Shop ves cuántas quedan de cada una; cuando se llenan aparece «RESERVAS COMPLETAS». Si quieres una completa, escríbenos y te apuntamos a la lista de espera.",
+    en: "Each tee has a maximum of 5 reservations. The Shop shows how many are left for each one; when full it says «FULLY RESERVED». If you want a full one, write to us and we'll add you to the waiting list."
   },
   {
     id: "material",

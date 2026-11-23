@@ -16,9 +16,15 @@ img/              Imágenes (placeholders SVG; reemplazar por fotos reales)
 ## Añadir una camiseta
 Abre `js/products.js`, copia un bloque `{ ... }` y cambia los datos. Con `precio: null` se muestra **"Precio a consultar"**; pon un número (`precio: 39.9`) cuando esté definido. Las fotos van en `img/products/` (recomendado: cuadradas, 900×900 o más).
 
+## Reservas (máx. 5 por camiseta)
+Los botones dicen «Reservar». Cada camiseta admite `MAX_RESERVAS` (5) reservas; el Shop muestra «Quedan X de 5» y, al llenarse, «RESERVAS COMPLETAS» (ya no deja reservar).
+- Reservas hechas fuera de la web: campo `reservadas` de cada camiseta en `js/products.js`.
+- Contador automático: `api/reserve.js` suma las reservas de la web en la base de datos (Upstash, ver Panel admin). **Sin base de datos** el contador no sube solo: el email de la reserva lo avisa («actualizar reservadas») y hay que sumar 1 a mano en `js/products.js`.
+- El carrito con tarjeta está apagado (`pagosConTarjeta: false` en `js/config.js`).
+
 ## Emails
 Cada envío llega a la vez a pascualpepa@icloud.com (principal) y en copia a guillermogg24@icloud.com y pelayocc@icloud.com (lista en `js/config.js`).
-- Asunto: `🛒 Pedido – [producto]` si hay producto, si no `✉️ Contacto – [nombre]`.
+- Asunto: `🛒 Reserva – [producto]` (con «Reserva nº X de 5») si hay producto, si no `✉️ Contacto – [nombre]`.
 - "Responder a" = email del cliente.
 - Imagen adjunta opcional (máx. 3 MB).
 - Antispam: campo honeypot oculto + tiempo mínimo de rellenado.

@@ -1,5 +1,6 @@
 {
   "functions": {
-    "api/checkout.js": { "includeFiles": "js/products.js" }
+    "api/checkout.js": { "includeFiles": "js/products.js" },
+    "api/reserve.js": { "includeFiles": "js/products.js" }
   }
 }

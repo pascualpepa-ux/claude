@@ -15,11 +15,15 @@
      descripcion_en → (opcional) el mismo texto en inglés, para el botón EN
      etiqueta       → (opcional) badge sobre la foto, ej: "CHICO", "AGOTADO"
      etiqueta_en    → (opcional) la etiqueta en inglés, ej: "MEN", "SOLD OUT"
+     reservadas     → reservas que ya tiene (fuera de la web). Máximo: MAX_RESERVAS
 
    Para añadir una camiseta: copia un bloque { ... }, pégalo
    al final de la lista y cambia los datos.
    Si la lista queda vacía, el Shop muestra "Próximo drop muy pronto".
    ========================================================= */
+
+// Cada camiseta admite como máximo este número de reservas; después aparece "RESERVAS COMPLETAS".
+window.MAX_RESERVAS = 5;
 
 window.PRODUCTS = [
   /* ---------- CHICO ---------- */
@@ -27,6 +31,7 @@ window.PRODUCTS = [
     id: "nordic-original",
     nombre: "NORDIC ORIGINAL",
     precio: 36,
+    reservadas: 4,
     tallas: ["XS", "S", "M", "L", "XL"],
     fotos: ["img/products/polaris-tee-frente.jpg", "img/products/polaris-tee-espalda.jpg"],
     descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE con la estrella polar, un planeta con órbita y franjas en la manga. Detrás: gran logo NORDIC en órbita, montañas y el lema «Explore · Discover · Belong».",
@@ -38,6 +43,7 @@ window.PRODUCTS = [
     id: "summit-tee",
     nombre: "SUMMIT TEE",
     precio: 35,
+    reservadas: 0,
     tallas: ["XS", "S", "M", "L", "XL"],
     fotos: ["img/products/summit-tee-frente.jpg", "img/products/summit-tee-espalda.jpg"],
     descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE con montañas, rosa de los vientos en la manga y detalle «Explore more · Est. 2024». Detrás: gran logo de montañas con el lema «Explore more, go further».",
@@ -50,6 +56,7 @@ window.PRODUCTS = [
     id: "meridian-tee",
     nombre: "MERIDIAN TEE",
     precio: 35,
+    reservadas: 0,
     tallas: ["XS", "S", "M", "L", "XL"],
     fotos: ["img/products/meridian-tee-frente.jpg", "img/products/meridian-tee-espalda.jpg"],
     descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE con montañas, una línea horizontal que cruza el pecho, rosa de los vientos en la manga y «Explore · Discover · Belong» abajo. Detrás: gran logo de montañas atravesado por una línea vertical, el planeta y franjas diagonales en las mangas.",
@@ -61,6 +68,7 @@ window.PRODUCTS = [
     id: "fjell-tee",
     nombre: "FJELL TEE",
     precio: 36,
+    reservadas: 0,
     tallas: ["XS", "S", "M", "L", "XL"],
     fotos: ["img/products/fjell-tee-frente.jpg", "img/products/fjell-tee-espalda.jpg"],
     descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE y una pequeña cordillera, con el planeta en una manga y franjas en la otra. Detrás: gran logo NORDIC WORLDWIDE sobre una cordillera y la estrella polar. «Fjell» significa montaña en noruego.",
@@ -74,6 +82,7 @@ window.PRODUCTS = [
     id: "alpenglow-tee",
     nombre: "ALPENGLOW TEE",
     precio: 36,
+    reservadas: 1,
     tallas: ["XS", "S", "M", "L", "XL"],
     fotos: ["img/products/alpenglow-tee-frente.jpg", "img/products/alpenglow-tee-espalda.jpg", "img/products/alpenglow-tee-detalle.jpg"],
     descripcion: "Camiseta oversized blanca con estampado en rojo granate y azul marino. Delante: logo NORDIC con montañas, estrellas fugaces y «Explore more, go further» escrito a mano. Detrás: gran logo NORDIC WORLDWIDE entre montañas y estrellas, con coordenadas. Rosa de los vientos y franjas en las mangas.",
@@ -85,6 +94,7 @@ window.PRODUCTS = [
     id: "nordlys-tee",
     nombre: "NORDLYS TEE",
     precio: 35,
+    reservadas: 1,
     tallas: ["XS", "S", "M", "L", "XL"],
     fotos: ["img/products/nordlys-tee-frente.jpg", "img/products/nordlys-tee-espalda.jpg", "img/products/nordlys-tee-detalle.jpg"],
     descripcion: "Camiseta oversized color crema con estampado azul marino y franjas rosas en la manga. Delante: logo NORDIC con la estrella polar. Detrás: logo NORDIC WORLDWIDE en órbita y «Explore · Discover · Belong». «Nordlys» significa aurora boreal en noruego.",
@@ -96,6 +106,7 @@ window.PRODUCTS = [
     id: "midnattsol-tee",
     nombre: "MIDNATTSOL TEE",
     precio: 35,
+    reservadas: 0,
     tallas: ["XS", "S", "M", "L", "XL"],
     fotos: ["img/products/midnattsol-tee-frente.jpg", "img/products/midnattsol-tee-espalda.jpg"],
     descripcion: "Camiseta oversized color crema con estampado negro y rojo granate. Delante: un sol rojo sobre una cordillera, líneas onduladas en el hombro y NORDIC con la estrella polar. Detrás: NORDIC en letras finas con montaña y estrella, líneas onduladas y franjas rojas en la manga. «Midnattsol» es el sol de medianoche en noruego.",

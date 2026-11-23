@@ -25,6 +25,23 @@
 
   function productUrl(p) { return "producto.html?id=" + encodeURIComponent(p.id); }
 
+  /* ---------- Reservas (máximo window.MAX_RESERVAS por camiseta) ---------- */
+  var MAXRES = window.MAX_RESERVAS || 5;
+  var RES = {};
+  PRODUCTS.forEach(function (p) { RES[p.id] = Math.min(MAXRES, p.reservadas || 0); });
+  function resLeft(p) { return Math.max(0, MAXRES - (RES[p.id] || 0)); }
+  function resLine(p) {
+    var left = resLeft(p);
+    return '<p class="res-left' + (left ? (left === 1 ? " last" : "") : " full") + '">' +
+      esc(left ? t(left === 1 ? "res.leftOne" : "res.left", { n: left, max: MAXRES }) : t("res.full")) + "</p>";
+  }
+  fetch("/api/reserve").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    if (!d || !d.counts) return;
+    MAXRES = d.max || MAXRES;
+    Object.keys(d.counts).forEach(function (k) { RES[k] = d.counts[k]; });
+    document.dispatchEvent(new CustomEvent("nww:res"));
+  }).catch(function () {});
+
   // Cada parte que se dibuja con JS se registra aquí para redibujarse al cambiar de idioma
   var onLangChange = [];
   document.addEventListener("nww:lang", function () { onLangChange.forEach(function (fn) { fn(); }); });
@@ -238,7 +255,10 @@
           '<div class="card-body">' +
             '<h3 class="card-name"><a href="' + productUrl(p) + '">' + esc(p.nombre) + "</a></h3>" +
             formatPrice(p.precio) +
-            '<a class="btn btn-dark" href="' + productUrl(p) + '">' + esc(t("shop.want")) + "</a>" +
+            resLine(p) +
+            (resLeft(p)
+              ? '<a class="btn btn-dark" href="' + productUrl(p) + '">' + esc(t("shop.want")) + "</a>"
+              : '<a class="btn btn-dark is-full" href="' + productUrl(p) + '">' + esc(t("res.fullBtn")) + "</a>") +
           "</div>" +
         "</article>"
       );
@@ -247,6 +267,7 @@
   if (grid) {
     renderShop(false);
     onLangChange.push(function () { renderShop(true); });
+    document.addEventListener("nww:res", function () { renderShop(true); });
     var dl = $("#product-list");
     if (dl) dl.innerHTML = PRODUCTS.map(function (p) { return '<option value="' + esc(p.nombre) + '">'; }).join("");
   }
@@ -289,10 +310,10 @@
               return '<label class="size"><input type="radio" name="talla" value="' + esc(sz) + '"' + (sz === prevSize ? " checked" : "") + "><span>" + esc(sz) + "</span></label>";
             }).join("") +
           "</fieldset>" +
-          (window.NWW_CART && window.NWW_CART.active && typeof p.precio === "number"
-            ? '<button class="btn btn-dark" id="add-cart-btn" type="button">' + esc(t("cart.add")) + "</button>" +
-              '<button class="btn btn-outline btn-second" id="buy-btn" type="button">' + esc(t("product.ask")) + "</button>"
-            : '<button class="btn btn-dark" id="buy-btn" type="button">' + esc(t("product.buy")) + "</button>") +
+          resLine(p) +
+          (resLeft(p)
+            ? '<button class="btn btn-dark" id="buy-btn" type="button">' + esc(t("product.buy")) + "</button>"
+            : '<button class="btn btn-dark is-full" id="buy-btn" type="button" disabled>' + esc(t("res.fullBtn")) + "</button>") +
           '<p class="size-error" id="size-error" role="alert"></p>' +
           '<ul class="product-notes"><li>' + esc(t("product.note1")) + "</li><li>" + esc(t("product.note2")) + "</li><li>" + esc(t("product.note3")) + "</li></ul>" +
         "</div>";
@@ -314,15 +335,9 @@
         return sel ? sel.value : null;
       };
       $("#buy-btn").addEventListener("click", function () {
+        if (!resLeft(p)) return;
         var size = pickSize(); if (!size) return;
-        location.href = "index.html?producto=" + encodeURIComponent(p.nombre) + "&talla=" + encodeURIComponent(size) + "#contacto";
-      });
-      var addBtn = $("#add-cart-btn");
-      if (addBtn) addBtn.addEventListener("click", function () {
-        var size = pickSize(); if (!size) return;
-        window.NWW_CART.add(p.id, size);
-        addBtn.textContent = t("cart.added");
-        setTimeout(function () { addBtn.textContent = t("cart.add"); }, 1800);
+        location.href = "index.html?producto=" + encodeURIComponent(p.nombre) + "&talla=" + encodeURIComponent(size) + "&id=" + encodeURIComponent(p.id) + "#contacto";
       });
       $$('input[name="talla"]', productEl).forEach(function (r) {
         r.addEventListener("change", function () { $("#sizes").classList.remove("is-invalid"); $("#size-error").textContent = ""; });
@@ -330,7 +345,7 @@
     };
     renderProduct();
     onLangChange.push(renderProduct);
-    document.addEventListener("nww:cart-ready", function () { if (window.NWW_CART.active) renderProduct(); });
+    document.addEventListener("nww:res", renderProduct);
   }
 
   /* ---------- Email directo en Contacto (js/config.js → emailPublico) ---------- */
@@ -373,7 +388,7 @@
 
     // Prefill desde la página de producto
     var params = new URLSearchParams(location.search);
-    var preProd = params.get("producto"), preTalla = params.get("talla");
+    var preProd = params.get("producto"), preTalla = params.get("talla"), preId = params.get("id");
     var prefillText = "";
     var prefill = function () {
       if (!preProd) return;
@@ -419,6 +434,8 @@
       var nombre = form.elements.nombre.value.trim();
       var producto = form.elements.producto.value.trim();
       var esPedido = producto !== "";
+      // Reserva: solo si viene de "Reservar" y el producto sigue siendo el mismo
+      var resProd = preId && esPedido && producto.indexOf(preProd) === 0 ? PRODUCTS.filter(function (x) { return x.id === preId; })[0] : null;
       var tel = form.elements.telefono.value.trim();
       // Antispam: NUNCA se descarta un mensaje (un cliente real podría perderse). Si parece de un bot
       // (campo oculto relleno o enviado en menos de 2,5 s), se envía igual con un aviso en el asunto.
@@ -429,12 +446,12 @@
       var prodSinTalla = talla ? producto.replace(SIZE_SUFFIX, "") : producto;
       var f = fileInput.files[0];
       var fd = new FormData();
-      fd.append("_subject", (sospechoso ? "⚠️ Posible spam · " : "") + (esPedido ? "🛒 Pedido – " + producto.replace(/\s*–\s*Size\s+/, " – Talla ") : "✉️ Contacto – " + nombre));
+      fd.append("_subject", (sospechoso ? "⚠️ Posible spam · " : "") + (esPedido ? (resProd ? "🛒 Reserva – " : "🛒 Pedido – ") + producto.replace(/\s*–\s*Size\s+/, " – Talla ") : "✉️ Contacto – " + nombre));
       fd.append("_replyto", form.elements.email.value.trim());
       fd.append("_cc", (CFG.copias || []).join(","));
       fd.append("_template", "box");
       fd.append("_captcha", "false");
-      fd.append("Tipo", esPedido ? "PEDIDO" : "CONSULTA");
+      fd.append("Tipo", resProd ? "RESERVA" : esPedido ? "PEDIDO" : "CONSULTA");
       if (esPedido) fd.append("Producto", prodSinTalla);
       if (talla) fd.append("Talla", talla);
       fd.append("Cliente", nombre);
@@ -481,7 +498,8 @@
       var viaEmailJS = function () {
         if (!ej.serviceId || !ej.templateId || !ej.publicKey) return Promise.reject(new Error("EmailJS sin configurar"));
         var texto = [
-          "Tipo: " + (esPedido ? "PEDIDO" : "CONSULTA"),
+          "Tipo: " + (resProd ? "RESERVA" : esPedido ? "PEDIDO" : "CONSULTA"),
+          fd.get("Reserva") ? "Reserva: " + fd.get("Reserva") : null,
           esPedido ? "Producto: " + datos.producto : null,
           talla ? "Talla: " + talla : null,
           "Cliente: " + nombre,
@@ -506,7 +524,22 @@
         }).then(function (r) { if (!r.ok) return r.text().then(function (x) { throw new Error("EmailJS " + r.status + " " + x); }); });
       };
 
-      (CFG.demo ? Promise.resolve([true]) : Promise.all([settle(viaFormSubmit()), settle(viaEmailJS()), settle(viaAdmin())]))
+      // Primero se aparta la reserva (máximo por camiseta); si ya no quedan, no se envía nada.
+      var reservar = function () {
+        if (!resProd || CFG.demo) return Promise.resolve();
+        return fetch("/api/reserve", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: resProd.id }) })
+          .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d }; }); })
+          .then(function (x) {
+            if (x.status === 409) { RES[resProd.id] = MAXRES; document.dispatchEvent(new CustomEvent("nww:res")); throw new Error("FULL"); }
+            if (x.d && x.d.total) {
+              RES[resProd.id] = x.d.total;
+              fd.append("Reserva", "nº " + x.d.total + " de " + MAXRES + " para esta camiseta" + (x.d.persisted ? "" : " — ⚠️ sin base de datos: actualizar «reservadas» en js/products.js"));
+            }
+          }, function (e) { if (e && e.message === "FULL") throw e; /* sin conexión al contador: se envía igual */ });
+      };
+
+      reservar()
+        .then(function () { return CFG.demo ? [true] : Promise.all([settle(viaFormSubmit()), settle(viaEmailJS()), settle(viaAdmin())]); })
         .then(function (res) {
           var ok = res.some(function (x) { return x === true; });
           if (!ok) throw new Error(res.filter(function (x) { return x !== true && x !== "EmailJS sin configurar"; })[0] || "error");
@@ -520,7 +553,7 @@
           setStatus(t("form.ok") + (CFG.demo ? " (Vista previa: no se envió ningún email.)" : ""), "ok");
         })
         .catch(function (err) {
-          setStatus(t("form.error", { err: err.message }), "err");
+          setStatus(err && err.message === "FULL" ? t("res.fullMsg", { max: MAXRES }) : t("form.error", { err: err.message }), "err");
         })
         .then(function () { submitBtn.disabled = false; submitBtn.textContent = t(submitBtn.getAttribute("data-i18n") || "form.send"); });
     });
