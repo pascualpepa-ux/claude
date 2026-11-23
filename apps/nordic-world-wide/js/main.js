@@ -289,7 +289,10 @@
               return '<label class="size"><input type="radio" name="talla" value="' + esc(sz) + '"' + (sz === prevSize ? " checked" : "") + "><span>" + esc(sz) + "</span></label>";
             }).join("") +
           "</fieldset>" +
-          '<button class="btn btn-dark" id="buy-btn" type="button">' + esc(t("product.buy")) + "</button>" +
+          (window.NWW_CART && window.NWW_CART.active && typeof p.precio === "number"
+            ? '<button class="btn btn-dark" id="add-cart-btn" type="button">' + esc(t("cart.add")) + "</button>" +
+              '<button class="btn btn-outline btn-second" id="buy-btn" type="button">' + esc(t("product.ask")) + "</button>"
+            : '<button class="btn btn-dark" id="buy-btn" type="button">' + esc(t("product.buy")) + "</button>") +
           '<p class="size-error" id="size-error" role="alert"></p>' +
           '<ul class="product-notes"><li>' + esc(t("product.note1")) + "</li><li>" + esc(t("product.note2")) + "</li><li>" + esc(t("product.note3")) + "</li></ul>" +
         "</div>";
@@ -302,14 +305,24 @@
         }, { passive: true });
       }
 
-      $("#buy-btn").addEventListener("click", function () {
+      var pickSize = function () {
         var sel = $('input[name="talla"]:checked', productEl);
         if (!sel) {
           $("#sizes").classList.add("is-invalid");
           $("#size-error").textContent = t("product.sizeError");
-          return;
         }
-        location.href = "index.html?producto=" + encodeURIComponent(p.nombre) + "&talla=" + encodeURIComponent(sel.value) + "#contacto";
+        return sel ? sel.value : null;
+      };
+      $("#buy-btn").addEventListener("click", function () {
+        var size = pickSize(); if (!size) return;
+        location.href = "index.html?producto=" + encodeURIComponent(p.nombre) + "&talla=" + encodeURIComponent(size) + "#contacto";
+      });
+      var addBtn = $("#add-cart-btn");
+      if (addBtn) addBtn.addEventListener("click", function () {
+        var size = pickSize(); if (!size) return;
+        window.NWW_CART.add(p.id, size);
+        addBtn.textContent = t("cart.added");
+        setTimeout(function () { addBtn.textContent = t("cart.add"); }, 1800);
       });
       $$('input[name="talla"]', productEl).forEach(function (r) {
         r.addEventListener("change", function () { $("#sizes").classList.remove("is-invalid"); $("#size-error").textContent = ""; });
@@ -317,6 +330,7 @@
     };
     renderProduct();
     onLangChange.push(renderProduct);
+    document.addEventListener("nww:cart-ready", function () { if (window.NWW_CART.active) renderProduct(); });
   }
 
   /* ---------- Email directo en Contacto (js/config.js → emailPublico) ---------- */
