@@ -46,6 +46,29 @@ window.PRODUCTS = [
     etiqueta_en: "MEN"
   },
 
+  {
+    id: "meridian-tee",
+    nombre: "MERIDIAN TEE",
+    precio: 35,
+    tallas: ["XS", "S", "M", "L", "XL"],
+    fotos: ["img/products/meridian-tee-frente.jpg", "img/products/meridian-tee-espalda.jpg"],
+    descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE con montañas, una línea horizontal que cruza el pecho, rosa de los vientos en la manga y «Explore · Discover · Belong» abajo. Detrás: gran logo de montañas atravesado por una línea vertical, el planeta y franjas diagonales en las mangas.",
+    descripcion_en: "White oversized tee with navy print. Front: NORDIC WORLDWIDE mountain logo, a horizontal line across the chest, compass rose on the sleeve and «Explore · Discover · Belong» at the hem. Back: large mountain logo crossed by a vertical line, the globe and diagonal sleeve stripes.",
+    etiqueta: "CHICO",
+    etiqueta_en: "MEN"
+  },
+  {
+    id: "fjell-tee",
+    nombre: "FJELL TEE",
+    precio: 35,
+    tallas: ["XS", "S", "M", "L", "XL"],
+    fotos: ["img/products/fjell-tee-frente.jpg", "img/products/fjell-tee-espalda.jpg"],
+    descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE y una pequeña cordillera, con el planeta en una manga y franjas en la otra. Detrás: gran logo NORDIC WORLDWIDE sobre una cordillera y la estrella polar. «Fjell» significa montaña en noruego.",
+    descripcion_en: "White oversized tee with navy print. Front: NORDIC WORLDWIDE logo and a small mountain range, with the globe on one sleeve and stripes on the other. Back: large NORDIC WORLDWIDE logo over a mountain range and the north star. «Fjell» means mountain in Norwegian.",
+    etiqueta: "CHICO",
+    etiqueta_en: "MEN"
+  },
+
   /* ---------- CHICA ---------- */
   {
     id: "alpenglow-tee",
@@ -66,6 +89,17 @@ window.PRODUCTS = [
     fotos: ["img/products/nordlys-tee-frente.jpg", "img/products/nordlys-tee-espalda.jpg", "img/products/nordlys-tee-detalle.jpg"],
     descripcion: "Camiseta oversized color crema con estampado azul marino y franjas rosas en la manga. Delante: logo NORDIC con la estrella polar. Detrás: logo NORDIC WORLDWIDE en órbita y «Explore · Discover · Belong». «Nordlys» significa aurora boreal en noruego.",
     descripcion_en: "Cream oversized tee with navy print and pink sleeve stripes. Front: NORDIC logo with the north star. Back: orbiting NORDIC WORLDWIDE logo and «Explore · Discover · Belong». «Nordlys» means northern lights in Norwegian.",
+    etiqueta: "CHICA",
+    etiqueta_en: "WOMEN"
+  },
+  {
+    id: "midnattsol-tee",
+    nombre: "MIDNATTSOL TEE",
+    precio: 35,
+    tallas: ["XS", "S", "M", "L", "XL"],
+    fotos: ["img/products/midnattsol-tee-frente.jpg", "img/products/midnattsol-tee-espalda.jpg"],
+    descripcion: "Camiseta oversized color crema con estampado negro y rojo granate. Delante: un sol rojo sobre una cordillera, líneas onduladas en el hombro y NORDIC con la estrella polar. Detrás: NORDIC en letras finas con montaña y estrella, líneas onduladas y franjas rojas en la manga. «Midnattsol» es el sol de medianoche en noruego.",
+    descripcion_en: "Cream oversized tee with black and burgundy print. Front: a red sun over a mountain range, wavy lines on the shoulder and NORDIC with the north star. Back: fine-lettered NORDIC with a mountain and star, wavy lines and red sleeve stripes. «Midnattsol» is the midnight sun in Norwegian.",
     etiqueta: "CHICA",
     etiqueta_en: "WOMEN"
   }

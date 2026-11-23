@@ -19,8 +19,8 @@ const FAQ = [
   {
     id: "precio",
     k: ["precio", "precios", "cuesta", "cuestan", "vale", "valen", "coste", "euros", "barato", "caro", "price", "prices", "cost", "how much"],
-    es: "Precios: NORDIC ORIGINAL y SUMMIT TEE (chico) 35 €; ALPENGLOW TEE (chica) 36 €; NORDLYS TEE (chica) 35 €. El envío te lo confirmamos por email al hacer el pedido.",
-    en: "Prices: NORDIC ORIGINAL and SUMMIT TEE (men's) €35; ALPENGLOW TEE (women's) €36; NORDLYS TEE (women's) €35. We'll confirm shipping by email when you order."
+    es: "Precios: chico — NORDIC ORIGINAL, SUMMIT TEE, MERIDIAN TEE y FJELL TEE, 35 € cada una; chica — ALPENGLOW TEE 36 €, NORDLYS TEE 35 € y MIDNATTSOL TEE 35 €. El envío te lo confirmamos por email al hacer el pedido.",
+    en: "Prices: men's — NORDIC ORIGINAL, SUMMIT TEE, MERIDIAN TEE and FJELL TEE, €35 each; women's — ALPENGLOW TEE €36, NORDLYS TEE €35 and MIDNATTSOL TEE €35. We'll confirm shipping by email when you order."
   },
   {
     id: "envio",
@@ -42,21 +42,21 @@ const FAQ = [
   },
   {
     id: "producto",
-    k: ["camiseta", "camisetas", "producto", "productos", "prenda", "prendas", "original", "nordic original", "polaris", "summit", "alpenglow", "nordlys", "chico", "chica", "chicos", "chicas", "hombre", "mujer", "explore", "tee", "coleccion", "catalogo", "ropa", "diseno", "estampado", "shirt", "tshirt", "collection", "product", "products", "design"],
-    es: "En el DROP 01 tenemos 4 camisetas oversized: para chico, NORDIC ORIGINAL (blanca, estrella polar y planeta, 35 €) y SUMMIT TEE (blanca, montañas, 35 €); para chica, ALPENGLOW TEE (blanca con detalles rojos, 36 €) y NORDLYS TEE (crema, 35 €). Todas en tallas XS a XL. Las ves en el Shop.",
-    en: "DROP 01 has 4 oversized tees: men's NORDIC ORIGINAL (white, north star and planet, €35) and SUMMIT TEE (white, mountains, €35); women's ALPENGLOW TEE (white with red details, €36) and NORDLYS TEE (cream, €35). All in sizes XS to XL. See them in the Shop.",
+    k: ["camiseta", "camisetas", "producto", "productos", "prenda", "prendas", "original", "nordic original", "polaris", "summit", "meridian", "fjell", "alpenglow", "nordlys", "midnattsol", "chico", "chica", "chicos", "chicas", "hombre", "mujer", "explore", "tee", "coleccion", "catalogo", "ropa", "diseno", "estampado", "shirt", "tshirt", "collection", "product", "products", "design"],
+    es: "En el DROP 01 tenemos 7 camisetas oversized. Para chico (35 €): NORDIC ORIGINAL (estrella polar y planeta), SUMMIT TEE (montañas), MERIDIAN TEE (líneas y montañas) y FJELL TEE (cordillera). Para chica: ALPENGLOW TEE (detalles rojos, 36 €), NORDLYS TEE (crema, 35 €) y MIDNATTSOL TEE (crema con sol rojo, 35 €). Tallas XS a XL. Las ves en el Shop.",
+    en: "DROP 01 has 7 oversized tees. Men's (€35): NORDIC ORIGINAL (north star and planet), SUMMIT TEE (mountains), MERIDIAN TEE (lines and mountains) and FJELL TEE (mountain range). Women's: ALPENGLOW TEE (red details, €36), NORDLYS TEE (cream, €35) and MIDNATTSOL TEE (cream with a red sun, €35). Sizes XS to XL. See them in the Shop.",
   },
   {
     id: "otras",
     k: ["sudadera", "sudaderas", "hoodie", "gorra", "gorras", "pantalon", "pantalones", "chaqueta", "colores", "color", "negra", "negro", "gris", "rosa", "verde", "azul", "cap", "hat", "jacket", "pants", "colour", "colors", "black"],
-    es: "Por ahora tenemos camisetas: blancas (Nordic Original, Summit y Alpenglow, esta con detalles rojos) y crema (Nordlys). Sudaderas, otros colores y más prendas llegarán en próximos drops: déjanos tu email en el formulario de Contacto y te avisamos.",
-    en: "For now we have tees: white (Nordic Original, Summit and Alpenglow, with red details) and cream (Nordlys). Hoodies, other colours and more items will come in future drops: leave your email in the Contact form and we'll let you know.",
+    es: "Por ahora tenemos camisetas blancas (Nordic Original, Summit, Meridian, Fjell y Alpenglow) y crema (Nordlys y Midnattsol). Sudaderas, otros colores y más prendas llegarán en próximos drops: déjanos tu email en el formulario de Contacto y te avisamos.",
+    en: "For now we have white tees (Nordic Original, Summit, Meridian, Fjell and Alpenglow) and cream ones (Nordlys and Midnattsol). Hoodies, other colours and more items will come in future drops: leave your email in the Contact form and we'll let you know.",
   },
   {
     id: "drop",
     k: ["drop", "drops", "proximo", "nuevo", "nueva", "nuevos", "lanzamiento", "sale", "salen", "cuando", "limitado", "limitada", "next", "new", "release", "when", "limited"],
-    es: "Trabajamos por drops limitados: cuando una pieza se agota, no vuelve. El DROP 01 ya está disponible en el Shop (Nordic Original, Summit, Alpenglow y Nordlys). Para enterarte del próximo antes que nadie, déjanos tu email en el formulario de Contacto.",
-    en: "We work in limited drops: once a piece sells out, it doesn't come back. DROP 01 is out now in the Shop (Nordic Original, Summit, Alpenglow and Nordlys). To hear about the next one first, leave your email in the Contact form.",
+    es: "Trabajamos por drops limitados: cuando una pieza se agota, no vuelve. El DROP 01 ya está disponible en el Shop (7 camisetas: Nordic Original, Summit, Meridian, Fjell, Alpenglow, Nordlys y Midnattsol). Para enterarte del próximo antes que nadie, déjanos tu email en el formulario de Contacto.",
+    en: "We work in limited drops: once a piece sells out, it doesn't come back. DROP 01 is out now in the Shop (7 tees: Nordic Original, Summit, Meridian, Fjell, Alpenglow, Nordlys and Midnattsol). To hear about the next one first, leave your email in the Contact form.",
   },
   {
     id: "stock",
