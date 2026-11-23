@@ -19,8 +19,8 @@ const FAQ = [
   {
     id: "precio",
     k: ["precio", "precios", "cuesta", "cuestan", "vale", "valen", "coste", "euros", "barato", "caro", "price", "prices", "cost", "how much"],
-    es: "Precios: chico — NORDIC ORIGINAL, SUMMIT TEE, MERIDIAN TEE y FJELL TEE, 35 € cada una; chica — ALPENGLOW TEE 36 €, NORDLYS TEE 35 € y MIDNATTSOL TEE 35 €. El envío te lo confirmamos por email al hacer el pedido.",
-    en: "Prices: men's — NORDIC ORIGINAL, SUMMIT TEE, MERIDIAN TEE and FJELL TEE, €35 each; women's — ALPENGLOW TEE €36, NORDLYS TEE €35 and MIDNATTSOL TEE €35. We'll confirm shipping by email when you order."
+    es: "Precios: chico — NORDIC ORIGINAL 36 €, FJELL TEE 36 €, SUMMIT TEE 35 € y MERIDIAN TEE 35 €; chica — ALPENGLOW TEE 36 €, NORDLYS TEE 35 € y MIDNATTSOL TEE 35 €. El envío te lo confirmamos por email al hacer el pedido.",
+    en: "Prices: men's — NORDIC ORIGINAL €36, FJELL TEE €36, SUMMIT TEE €35 and MERIDIAN TEE €35; women's — ALPENGLOW TEE €36, NORDLYS TEE €35 and MIDNATTSOL TEE €35. We'll confirm shipping by email when you order."
   },
   {
     id: "envio",
@@ -43,8 +43,8 @@ const FAQ = [
   {
     id: "producto",
     k: ["camiseta", "camisetas", "producto", "productos", "prenda", "prendas", "original", "nordic original", "polaris", "summit", "meridian", "fjell", "alpenglow", "nordlys", "midnattsol", "chico", "chica", "chicos", "chicas", "hombre", "mujer", "explore", "tee", "coleccion", "catalogo", "ropa", "diseno", "estampado", "shirt", "tshirt", "collection", "product", "products", "design"],
-    es: "En el DROP 01 tenemos 7 camisetas oversized. Para chico (35 €): NORDIC ORIGINAL (estrella polar y planeta), SUMMIT TEE (montañas), MERIDIAN TEE (líneas y montañas) y FJELL TEE (cordillera). Para chica: ALPENGLOW TEE (detalles rojos, 36 €), NORDLYS TEE (crema, 35 €) y MIDNATTSOL TEE (crema con sol rojo, 35 €). Tallas XS a XL. Las ves en el Shop.",
-    en: "DROP 01 has 7 oversized tees. Men's (€35): NORDIC ORIGINAL (north star and planet), SUMMIT TEE (mountains), MERIDIAN TEE (lines and mountains) and FJELL TEE (mountain range). Women's: ALPENGLOW TEE (red details, €36), NORDLYS TEE (cream, €35) and MIDNATTSOL TEE (cream with a red sun, €35). Sizes XS to XL. See them in the Shop.",
+    es: "En el DROP 01 tenemos 7 camisetas oversized. Para chico: NORDIC ORIGINAL (estrella polar y planeta, 36 €), SUMMIT TEE (montañas, 35 €), MERIDIAN TEE (líneas y montañas, 35 €) y FJELL TEE (cordillera, 36 €). Para chica: ALPENGLOW TEE (detalles rojos, 36 €), NORDLYS TEE (crema, 35 €) y MIDNATTSOL TEE (crema con sol rojo, 35 €). Tallas XS a XL. Las ves en el Shop.",
+    en: "DROP 01 has 7 oversized tees. Men's: NORDIC ORIGINAL (north star and planet, €36), SUMMIT TEE (mountains, €35), MERIDIAN TEE (lines and mountains, €35) and FJELL TEE (mountain range, €36). Women's: ALPENGLOW TEE (red details, €36), NORDLYS TEE (cream, €35) and MIDNATTSOL TEE (cream with a red sun, €35). Sizes XS to XL. See them in the Shop.",
   },
   {
     id: "otras",

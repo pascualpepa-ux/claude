@@ -26,7 +26,7 @@ window.PRODUCTS = [
   {
     id: "nordic-original",
     nombre: "NORDIC ORIGINAL",
-    precio: 35,
+    precio: 36,
     tallas: ["XS", "S", "M", "L", "XL"],
     fotos: ["img/products/polaris-tee-frente.jpg", "img/products/polaris-tee-espalda.jpg"],
     descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE con la estrella polar, un planeta con órbita y franjas en la manga. Detrás: gran logo NORDIC en órbita, montañas y el lema «Explore · Discover · Belong».",
@@ -60,7 +60,7 @@ window.PRODUCTS = [
   {
     id: "fjell-tee",
     nombre: "FJELL TEE",
-    precio: 35,
+    precio: 36,
     tallas: ["XS", "S", "M", "L", "XL"],
     fotos: ["img/products/fjell-tee-frente.jpg", "img/products/fjell-tee-espalda.jpg"],
     descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE y una pequeña cordillera, con el planeta en una manga y franjas en la otra. Detrás: gran logo NORDIC WORLDWIDE sobre una cordillera y la estrella polar. «Fjell» significa montaña en noruego.",

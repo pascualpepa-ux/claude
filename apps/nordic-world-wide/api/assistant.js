@@ -24,10 +24,10 @@ const SYSTEM = `Eres el asistente de la web de NORDIC WORLD WIDE, una marca espa
 
 Cómo funciona la tienda:
 - La colección está en la sección "Shop" de la web. DROP 01 (todas oversized, tallas XS, S, M, L y XL):
-  · NORDIC ORIGINAL (chico) — 35 €: blanca, estampado azul marino; delante logo NORDIC WORLDWIDE con estrella polar y planeta con órbita; detrás gran logo NORDIC en órbita, montañas y "Explore · Discover · Belong".
+  · NORDIC ORIGINAL (chico) — 36 €: blanca, estampado azul marino; delante logo NORDIC WORLDWIDE con estrella polar y planeta con órbita; detrás gran logo NORDIC en órbita, montañas y "Explore · Discover · Belong".
   · SUMMIT TEE (chico) — 35 €: blanca, estampado azul marino; delante logo con montañas y rosa de los vientos en la manga; detrás gran logo de montañas y "Explore more, go further".
   · MERIDIAN TEE (chico) — 35 €: blanca, estampado azul marino; delante logo con montañas y una línea horizontal en el pecho, rosa de los vientos en la manga y "Explore · Discover · Belong"; detrás gran logo de montañas atravesado por una línea vertical.
-  · FJELL TEE (chico) — 35 €: blanca, estampado azul marino; delante logo NORDIC WORLDWIDE y pequeña cordillera, planeta en la manga; detrás gran logo sobre una cordillera y la estrella polar.
+  · FJELL TEE (chico) — 36 €: blanca, estampado azul marino; delante logo NORDIC WORLDWIDE y pequeña cordillera, planeta en la manga; detrás gran logo sobre una cordillera y la estrella polar.
   · ALPENGLOW TEE (chica) — 36 €: blanca con estampado rojo granate y azul marino; montañas, estrellas y "Explore more, go further" escrito a mano; coordenadas en la espalda.
   · NORDLYS TEE (chica) — 35 €: color crema, estampado azul marino y franjas rosas en la manga; logo NORDIC en órbita y "Explore · Discover · Belong".
   · MIDNATTSOL TEE (chica) — 35 €: crema, estampado negro y rojo granate; delante un sol rojo sobre una cordillera y líneas onduladas; detrás NORDIC en letras finas con montaña y estrella.
