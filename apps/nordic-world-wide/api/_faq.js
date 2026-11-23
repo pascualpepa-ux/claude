@@ -19,14 +19,14 @@ const FAQ = [
   {
     id: "precio",
     k: ["precio", "precios", "cuesta", "cuestan", "vale", "valen", "coste", "euros", "barato", "caro", "price", "prices", "cost", "how much"],
-    es: "Precios: chico — NORDIC ORIGINAL 36 €, FJELL TEE 36 €, SUMMIT TEE 35 € y MERIDIAN TEE 35 €; chica — ALPENGLOW TEE 36 €, NORDLYS TEE 35 € y MIDNATTSOL TEE 35 €. El envío te lo confirmamos por email al hacer el pedido.",
-    en: "Prices: men's — NORDIC ORIGINAL €36, FJELL TEE €36, SUMMIT TEE €35 and MERIDIAN TEE €35; women's — ALPENGLOW TEE €36, NORDLYS TEE €35 and MIDNATTSOL TEE €35. We'll confirm shipping by email when you order."
+    es: "Precios: chico — NORDIC ORIGINAL 36 €, FJELL TEE 36 €, SUMMIT TEE 35 € y MERIDIAN TEE 35 €; chica — ALPENGLOW TEE 36 €, NORDLYS TEE 35 € y MIDNATTSOL TEE 35 €. El envío cuesta 4,99 € por pedido.",
+    en: "Prices: men's — NORDIC ORIGINAL €36, FJELL TEE €36, SUMMIT TEE €35 and MERIDIAN TEE €35; women's — ALPENGLOW TEE €36, NORDLYS TEE €35 and MIDNATTSOL TEE €35. Shipping is €4.99 per order."
   },
   {
     id: "envio",
     k: ["precio del envio", "coste del envio", "cuesta el envio", "gastos de envio", "how much is shipping", "shipping cost", "cost of shipping", "cuando llega", "llega mi pedido", "cuanto tarda", "cuanto tardan", "envio", "envios", "enviais", "envian", "entrega", "llega", "tarda", "plazo", "domicilio", "shipping", "ship", "delivery", "deliver", "arrive"],
-    es: "Hacemos envíos a toda España. El plazo y el coste del envío te los confirmamos por email cuando hagas el pedido.",
-    en: "We ship across Spain. We'll confirm shipping time and cost by email when you place your order."
+    es: "Hacemos envíos a toda España. El envío cuesta 4,99 € por pedido. El plazo te lo confirmamos por email cuando hagas el pedido.",
+    en: "We ship across Spain. Shipping costs €4.99 per order. We'll confirm delivery time by email when you place your order."
   },
   {
     id: "pago",

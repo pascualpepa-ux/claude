@@ -1,6 +1,6 @@
 /* Carrito y pago con tarjeta (Stripe Checkout) — NORDIC WORLD WIDE
    Solo aparece si el servidor tiene la clave de Stripe (GET /api/checkout → active).
-   Envío: 4,99 € con 1 camiseta, gratis desde 2 (lo calcula también el servidor). */
+   Envío: 4,99 € por pedido, siempre (lo calcula también el servidor). */
 (function () {
   "use strict";
 
@@ -9,7 +9,7 @@
   var CFG = window.SITE_CONFIG || {};
   var PRODUCTS = window.PRODUCTS || [];
   var KEY = "nww-cart";
-  var ENVIO = 4.99, GRATIS_DESDE = 2;
+  var ENVIO = 4.99;
 
   var api = { active: false, test: false, add: add, ready: false };
   window.NWW_CART = api;
@@ -24,7 +24,7 @@
 
   function units() { return cart.reduce(function (a, i) { return a + i.cantidad; }, 0); }
   function subtotal() { return cart.reduce(function (a, i) { var p = find(i.id); return a + (p ? p.precio * i.cantidad : 0); }, 0); }
-  function shipping() { return units() >= GRATIS_DESDE || !units() ? 0 : ENVIO; }
+  function shipping() { return units() ? ENVIO : 0; }
 
   function add(id, talla) {
     var p = find(id); if (!p || typeof p.precio !== "number") return;
@@ -92,7 +92,6 @@
         '<div class="cart-sum">' +
           "<p><span>" + esc(t("cart.subtotal")) + "</span><span>" + money(subtotal()) + "</span></p>" +
           "<p><span>" + esc(t("cart.shipping")) + "</span><span>" + (ship ? money(ship) : esc(t("cart.free"))) + "</span></p>" +
-          (ship ? '<p class="cart-hint">' + esc(t("cart.freeHint")) + "</p>" : "") +
           '<p class="cart-total"><span>' + esc(t("cart.total")) + "</span><span>" + money(subtotal() + ship) + "</span></p>" +
           '<button type="button" class="btn btn-dark cart-pay" data-pay>' + esc(t("cart.pay")) + "</button>" +
           '<p class="cart-secure">' + esc(t("cart.secure")) + "</p>" +

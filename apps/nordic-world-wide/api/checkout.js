@@ -6,14 +6,13 @@
         items: [{ id, talla, cantidad }]
    GET  /api/checkout?session_id=...   → resumen del pedido pagado (para avisar al equipo)
 
-   Envío: 4,99 € si compran 1 camiseta; gratis desde 2. Solo España. */
+   Envío: 4,99 € por pedido, siempre (sin envío gratis). Solo España. */
 const { findProduct } = require("./_catalog");
 const { readBody, send } = require("./_lib");
 
 const STRIPE = process.env.STRIPE_API_BASE || "https://api.stripe.com/v1";
 const SITE = process.env.SITE_URL || "https://nordicworldwide.vercel.app";
-const ENVIO_CENT = 499;           // 4,99 €
-const ENVIO_GRATIS_DESDE = 2;     // camisetas
+const ENVIO_CENT = 499;           // 4,99 € por pedido
 const MAX_UNIDADES = 20;
 
 async function stripe(route, data) {
@@ -88,8 +87,6 @@ module.exports = async function handler(req, res) {
     const lang = body.lang === "en" ? "en" : "es";
     const items = validItems(body.items);
     if (!items.length) return send(res, 400, { error: "EMPTY_CART" });
-    const units = items.reduce((a, b) => a + b.qty, 0);
-    const freeShipping = units >= ENVIO_GRATIS_DESDE;
 
     const data = {
       mode: "payment",
@@ -100,11 +97,9 @@ module.exports = async function handler(req, res) {
       "shipping_address_collection[allowed_countries][0]": "ES",
       "phone_number_collection[enabled]": "true",
       "shipping_options[0][shipping_rate_data][type]": "fixed_amount",
-      "shipping_options[0][shipping_rate_data][fixed_amount][amount]": freeShipping ? 0 : ENVIO_CENT,
+      "shipping_options[0][shipping_rate_data][fixed_amount][amount]": ENVIO_CENT,
       "shipping_options[0][shipping_rate_data][fixed_amount][currency]": "eur",
-      "shipping_options[0][shipping_rate_data][display_name]": freeShipping
-        ? (lang === "en" ? "Free shipping (Spain)" : "Envío gratis (España)")
-        : (lang === "en" ? "Standard shipping (Spain)" : "Envío estándar (España)"),
+      "shipping_options[0][shipping_rate_data][display_name]": lang === "en" ? "Standard shipping (Spain)" : "Envío estándar (España)",
       "payment_intent_data[description]": "NORDIC WORLD WIDE",
       "payment_intent_data[statement_descriptor_suffix]": "NORDIC",
       "metadata[tienda]": "nordicworldwide",

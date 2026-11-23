@@ -66,7 +66,7 @@ Botón abajo a la derecha en todas las páginas. Responde **solo sobre la web**:
 
 ## Pagos con tarjeta (Stripe)
 Carrito + página de pago de Stripe (tarjeta, Apple Pay, Google Pay). Código: `js/cart.js` (web) y `api/checkout.js` (servidor). Los precios se cobran desde `js/products.js` en el servidor; el navegador no puede cambiarlos.
-- **Envío:** 4,99 € con 1 camiseta; gratis desde 2. Solo España (`ENVIO_CENT` y `ENVIO_GRATIS_DESDE` en `api/checkout.js`).
+- **Envío:** 4,99 € por pedido, siempre (sin envío gratis). Solo España (`ENVIO_CENT` en `api/checkout.js`).
 - **Activar:** en Vercel → proyecto → Settings → Environment Variables → `STRIPE_SECRET_KEY` = clave secreta de Stripe → Redeploy. Con una clave `sk_test_…` funciona en modo prueba (aviso amarillo en el carrito, tarjeta de prueba 4242 4242 4242 4242); con `sk_live_…`, cobra de verdad.
 - Sin la clave, el carrito no aparece y la web funciona como antes (botón "Comprar / Consultar").
 - Al pagar: el cliente recibe el recibo de Stripe; el equipo recibe el email "💳 PEDIDO PAGADO" con productos, tallas, dirección y teléfono, y lo ve en el panel de Stripe (Pagos). Recomendado: en Stripe → Ajustes → Notificaciones por email → activar "Pagos correctos".

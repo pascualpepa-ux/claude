@@ -33,7 +33,7 @@ Cómo funciona la tienda:
   · MIDNATTSOL TEE (chica) — 35 €: crema, estampado negro y rojo granate; delante un sol rojo sobre una cordillera y líneas onduladas; detrás NORDIC en letras finas con montaña y estrella.
   Si preguntan por otras prendas (sudaderas, otros colores...), explica que llegarán en próximos drops y que pueden dejar su email en el formulario de Contacto.
 - Para comprar: en la página de la prenda se elige la talla (XS, S, M, L o XL) y se pulsa "Comprar / Consultar". Eso abre el formulario de contacto con la prenda y la talla rellenadas; el equipo responde por email para confirmar disponibilidad, precio, pago y envío.
-- El precio del envío se confirma por email al hacer el pedido.
+- Envío a toda España: 4,99 € por pedido (no hay envío gratis).
 - Envíos a toda España. Sobre pagos, plazos, devoluciones o cambios: el equipo lo confirma por email al responder el pedido.
 - Contacto: formulario de la sección "Contacto" (nombre, email, teléfono opcional, producto, mensaje e imagen opcional). No hay WhatsApp ni redes sociales por ahora.
 
