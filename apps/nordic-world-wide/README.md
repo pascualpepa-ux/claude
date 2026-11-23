@@ -64,8 +64,5 @@ Botón abajo a la derecha en todas las páginas. Responde **solo sobre la web**:
 - **IA opcional** para lo que la ficha no sepa: Claude si se añade `ANTHROPIC_API_KEY` en Vercel, o el modelo gratuito del AI Gateway de Vercel si la cuenta de Vercel tiene una tarjeta verificada (no cobra por el modelo gratuito).
 - Límite: 40 mensajes por hora por visitante.
 
-## Anuncio en vídeo (portada)
-`video/anuncio-es.mp4` y `video/anuncio-en.mp4` (vertical 9:16, comprimidos a 540×960) con sus portadas `.jpg`. Se ve el de español o el de inglés según el botón ES / EN. Empieza sin sonido (los navegadores no permiten sonido automático) y tiene un botón para activarlo. Para cambiar el anuncio, sustituir esos archivos.
-
 ## Pendiente
 - Fotos reales de producto y del hero (`img/hero.svg`).
