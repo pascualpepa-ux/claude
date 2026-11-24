@@ -10,6 +10,8 @@
 const { findProduct } = require("./_catalog");
 const { readBody, send } = require("./_lib");
 
+// .trim(): si al pegar la clave en Vercel se coló un salto de línea o espacio, se quita.
+const SECRET = () => (process.env.STRIPE_SECRET_KEY || "").trim();
 const STRIPE = process.env.STRIPE_API_BASE || "https://api.stripe.com/v1";
 const SITE = process.env.SITE_URL || "https://nordicworldwide.vercel.app";
 const ENVIO_CENT = 499;           // 4,99 € por pedido
@@ -21,7 +23,7 @@ async function stripe(route, data) {
   const r = await fetch(STRIPE + route, {
     method: data ? "POST" : "GET",
     headers: Object.assign(
-      { Authorization: "Bearer " + process.env.STRIPE_SECRET_KEY },
+      { Authorization: "Bearer " + SECRET() },
       data ? { "Content-Type": "application/x-www-form-urlencoded" } : {}
     ),
     body
@@ -72,11 +74,11 @@ async function contarPago(sessionId, pedido) {
 }
 
 module.exports = async function handler(req, res) {
-  const active = !!process.env.STRIPE_SECRET_KEY;
+  const active = !!SECRET();
   const q = req.query || {};
 
   if (req.method === "GET" && !q.session_id) {
-    return send(res, 200, { active, test: active && process.env.STRIPE_SECRET_KEY.startsWith("sk_test_") });
+    return send(res, 200, { active, test: active && SECRET().startsWith("sk_test_") });
   }
   if (!active) return send(res, 503, { error: "NOT_CONFIGURED" });
 
@@ -149,6 +151,7 @@ module.exports = async function handler(req, res) {
     return send(res, 200, { url: session.url });
   } catch (err) {
     console.error(err);
-    return send(res, 502, { error: "STRIPE", message: err.message });
+    // Nunca devolver el mensaje interno (podría contener datos sensibles); solo al log del servidor.
+    return send(res, 502, { error: "STRIPE" });
   }
 };
