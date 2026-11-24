@@ -29,7 +29,12 @@ async function stripe(route, data) {
     body
   });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error("Stripe " + r.status + ": " + ((j.error && j.error.message) || "error"));
+  if (!r.ok) {
+    const e = new Error("Stripe " + r.status + ": " + ((j.error && j.error.message) || "error"));
+    e.code = (j.error && (j.error.code || j.error.type)) || String(r.status);
+    e.param = (j.error && j.error.param) || "";
+    throw e;
+  }
   return j;
 }
 
@@ -152,6 +157,6 @@ module.exports = async function handler(req, res) {
   } catch (err) {
     console.error(err);
     // Nunca devolver el mensaje interno (podría contener datos sensibles); solo al log del servidor.
-    return send(res, 502, { error: "STRIPE" });
+    return send(res, 502, { error: "STRIPE", code: err.code || "", param: err.param || "" });
   }
 };
