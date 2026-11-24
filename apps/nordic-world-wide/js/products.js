@@ -76,6 +76,42 @@ window.PRODUCTS = [
     etiqueta: "CHICO",
     etiqueta_en: "MEN"
   },
+  {
+    id: "nordstjerne-tee",
+    nombre: "NORDSTJERNE TEE",
+    precio: 36,
+    reservadas: 0,
+    tallas: ["XS", "S", "M", "L", "XL"],
+    fotos: ["img/products/nordstjerne-tee-frente.jpg", "img/products/nordstjerne-tee-espalda.jpg"],
+    descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE con una línea y estrella, gran estrella polar en el pecho, franjas diagonales y estrella en una manga y el planeta en la otra. Detrás: gran NORDIC atravesado por una línea vertical con la estrella polar. «Nordstjerne» es la estrella polar en noruego.",
+    descripcion_en: "White oversized tee with navy print. Front: NORDIC WORLDWIDE logo with a line and star, a large north star on the chest, diagonal stripes and a star on one sleeve and the globe on the other. Back: large NORDIC crossed by a vertical line with the north star. «Nordstjerne» is the north star in Norwegian.",
+    etiqueta: "CHICO",
+    etiqueta_en: "MEN"
+  },
+  {
+    id: "kosmos-tee",
+    nombre: "KOSMOS TEE",
+    precio: 36,
+    reservadas: 0,
+    tallas: ["XS", "S", "M", "L", "XL"],
+    fotos: ["img/products/kosmos-tee-frente.jpg", "img/products/kosmos-tee-espalda.jpg"],
+    descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE y estrella polar, con el planeta y una franja ancha en una manga y un parche de montaña en la otra. Detrás: gran logo NORDIC WORLDWIDE rodeado por una órbita, con la estrella polar arriba y el planeta abajo.",
+    descripcion_en: "White oversized tee with navy print. Front: NORDIC WORLDWIDE logo and north star, with the globe and a wide stripe on one sleeve and a mountain patch on the other. Back: large NORDIC WORLDWIDE logo wrapped in an orbit, with the north star above and the globe below.",
+    etiqueta: "CHICO",
+    etiqueta_en: "MEN"
+  },
+  {
+    id: "horisont-tee",
+    nombre: "HORISONT TEE",
+    precio: 35,
+    reservadas: 0,
+    tallas: ["XS", "S", "M", "L", "XL"],
+    fotos: ["img/products/horisont-tee-frente.jpg", "img/products/horisont-tee-espalda.jpg"],
+    descripcion: "Camiseta oversized blanca con estampado azul marino. Delante: logo NORDIC WORLDWIDE y estrella polar, con franjas diagonales en una manga y el planeta en la otra. Detrás: gran logo NORDIC WORLDWIDE sobre una línea de horizonte con la estrella polar. «Horisont» significa horizonte en noruego.",
+    descripcion_en: "White oversized tee with navy print. Front: NORDIC WORLDWIDE logo and north star, with diagonal stripes on one sleeve and the globe on the other. Back: large NORDIC WORLDWIDE logo over a horizon line with the north star. «Horisont» means horizon in Norwegian.",
+    etiqueta: "CHICO",
+    etiqueta_en: "MEN"
+  },
 
   /* ---------- CHICA ---------- */
   {

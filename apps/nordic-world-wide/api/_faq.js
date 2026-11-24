@@ -19,8 +19,8 @@ const FAQ = [
   {
     id: "precio",
     k: ["precio", "precios", "cuesta", "cuestan", "vale", "valen", "coste", "euros", "barato", "caro", "price", "prices", "cost", "how much"],
-    es: "Precios: chico — NORDIC ORIGINAL 36 €, FJELL TEE 36 €, SUMMIT TEE 35 € y MERIDIAN TEE 35 €; chica — ALPENGLOW TEE 36 €, NORDLYS TEE 35 € y MIDNATTSOL TEE 35 €. El envío cuesta 4,99 € por pedido.",
-    en: "Prices: men's — NORDIC ORIGINAL €36, FJELL TEE €36, SUMMIT TEE €35 and MERIDIAN TEE €35; women's — ALPENGLOW TEE €36, NORDLYS TEE €35 and MIDNATTSOL TEE €35. Shipping is €4.99 per order."
+    es: "Precios: chico — NORDIC ORIGINAL 36 €, FJELL TEE 36 €, NORDSTJERNE TEE 36 €, KOSMOS TEE 36 €, SUMMIT TEE 35 €, MERIDIAN TEE 35 € y HORISONT TEE 35 €; chica — ALPENGLOW TEE 36 €, NORDLYS TEE 35 € y MIDNATTSOL TEE 35 €. El envío cuesta 4,99 € por pedido.",
+    en: "Prices: men's — NORDIC ORIGINAL €36, FJELL TEE €36, NORDSTJERNE TEE €36, KOSMOS TEE €36, SUMMIT TEE €35, MERIDIAN TEE €35 and HORISONT TEE €35; women's — ALPENGLOW TEE €36, NORDLYS TEE €35 and MIDNATTSOL TEE €35. Shipping is €4.99 per order."
   },
   {
     id: "envio",
@@ -43,8 +43,8 @@ const FAQ = [
   {
     id: "producto",
     k: ["camiseta", "camisetas", "producto", "productos", "prenda", "prendas", "original", "nordic original", "polaris", "summit", "meridian", "fjell", "alpenglow", "nordlys", "midnattsol", "chico", "chica", "chicos", "chicas", "hombre", "mujer", "explore", "tee", "coleccion", "catalogo", "ropa", "diseno", "estampado", "shirt", "tshirt", "collection", "product", "products", "design"],
-    es: "En el DROP 01 tenemos 7 camisetas oversized. Para chico: NORDIC ORIGINAL (estrella polar y planeta, 36 €), SUMMIT TEE (montañas, 35 €), MERIDIAN TEE (líneas y montañas, 35 €) y FJELL TEE (cordillera, 36 €). Para chica: ALPENGLOW TEE (detalles rojos, 36 €), NORDLYS TEE (crema, 35 €) y MIDNATTSOL TEE (crema con sol rojo, 35 €). Tallas XS a XL. Las ves en el Shop.",
-    en: "DROP 01 has 7 oversized tees. Men's: NORDIC ORIGINAL (north star and planet, €36), SUMMIT TEE (mountains, €35), MERIDIAN TEE (lines and mountains, €35) and FJELL TEE (mountain range, €36). Women's: ALPENGLOW TEE (red details, €36), NORDLYS TEE (cream, €35) and MIDNATTSOL TEE (cream with a red sun, €35). Sizes XS to XL. See them in the Shop.",
+    es: "En el DROP 01 tenemos 10 camisetas oversized. Para chico: NORDIC ORIGINAL (estrella polar y planeta, 36 €), SUMMIT TEE (montañas, 35 €), MERIDIAN TEE (líneas y montañas, 35 €) FJELL TEE (cordillera, 36 €), NORDSTJERNE TEE (estrella polar, 36 €), KOSMOS TEE (órbita y planeta, 36 €) y HORISONT TEE (línea de horizonte, 35 €). Para chica: ALPENGLOW TEE (detalles rojos, 36 €), NORDLYS TEE (crema, 35 €) y MIDNATTSOL TEE (crema con sol rojo, 35 €). Tallas XS a XL. Las ves en el Shop.",
+    en: "DROP 01 has 10 oversized tees. Men's: NORDIC ORIGINAL (north star and planet, €36), SUMMIT TEE (mountains, €35), MERIDIAN TEE (lines and mountains, €35) FJELL TEE (mountain range, €36), NORDSTJERNE TEE (north star, €36), KOSMOS TEE (orbit and globe, €36) and HORISONT TEE (horizon line, €35). Women's: ALPENGLOW TEE (red details, €36), NORDLYS TEE (cream, €35) and MIDNATTSOL TEE (cream with a red sun, €35). Sizes XS to XL. See them in the Shop.",
   },
   {
     id: "otras",
@@ -55,8 +55,8 @@ const FAQ = [
   {
     id: "drop",
     k: ["drop", "drops", "proximo", "nuevo", "nueva", "nuevos", "lanzamiento", "sale", "salen", "cuando", "limitado", "limitada", "next", "new", "release", "when", "limited"],
-    es: "Trabajamos por drops limitados: cuando una pieza se agota, no vuelve. El DROP 01 ya está disponible en el Shop (7 camisetas: Nordic Original, Summit, Meridian, Fjell, Alpenglow, Nordlys y Midnattsol). Para enterarte del próximo antes que nadie, déjanos tu email en el formulario de Contacto.",
-    en: "We work in limited drops: once a piece sells out, it doesn't come back. DROP 01 is out now in the Shop (7 tees: Nordic Original, Summit, Meridian, Fjell, Alpenglow, Nordlys and Midnattsol). To hear about the next one first, leave your email in the Contact form.",
+    es: "Trabajamos por drops limitados: cuando una pieza se agota, no vuelve. El DROP 01 ya está disponible en el Shop (10 camisetas: Nordic Original, Summit, Meridian, Fjell, Nordstjerne, Kosmos, Horisont, Alpenglow, Nordlys y Midnattsol). Para enterarte del próximo antes que nadie, déjanos tu email en el formulario de Contacto.",
+    en: "We work in limited drops: once a piece sells out, it doesn't come back. DROP 01 is out now in the Shop (10 tees: Nordic Original, Summit, Meridian, Fjell, Nordstjerne, Kosmos, Horisont, Alpenglow, Nordlys and Midnattsol). To hear about the next one first, leave your email in the Contact form.",
   },
   {
     id: "stock",
