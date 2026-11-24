@@ -490,7 +490,7 @@ function init(data) {
   [mapCanvas] = cnv(TEX); drawMap2D(mapCanvas.getContext('2d'));
   try { build3D(); } catch (e) { console.error(e); $('loading').hidden = true; const er = $('err'); er.hidden = false; er.textContent = 'Tu navegador no pudo iniciar los gráficos 3D. Probá con Chrome o Edge actualizados.'; return; }
   buildMapUI();
-  buildTraffic(); buildParked(); buildPeds(); spawnArmored();
+  buildTraffic(); buildParked(); buildPeds(); spawnArmored(); buildPort();
   $('loading').hidden = true;
   showLogin();
   requestAnimationFrame(loop);
@@ -501,17 +501,35 @@ function placeStores() {
   for (const s of G.data.stores) {
     let { x, y } = s.position;
     if (s.zone !== 'coral-keys') {
-      const bx = Math.round(x / 100) * 100, by = Math.round(y / 100) * 100;
-      const opts = QUADS.map(([dx, dy]) => [bx + dx, by + dy]).sort((a, b) => Math.hypot(a[0]-x, a[1]-y) - Math.hypot(b[0]-x, b[1]-y));
-      const free = opts.find(([px, py]) => !taken.some(([tx, ty]) => Math.hypot(tx-px, ty-py) < 20) && blockFull(bx, by)) || opts[0];
-      [x, y] = free;
+      // la manzana completa más cercana que tenga un lugar libre (nunca sobre la calle ni en terreno suelto)
+      const cands = [];
+      for (let bx = 100; bx < 1000; bx += 100) for (let by = 100; by < 1000; by += 100) if (blockFull(bx, by)) for (const [dx, dy] of QUADS) cands.push([bx + dx, by + dy]);
+      cands.sort((a, b) => Math.hypot(a[0] - x, a[1] - y) - Math.hypot(b[0] - x, b[1] - y));
+      [x, y] = cands.find(([px, py]) => !taken.some(([tx, ty]) => Math.hypot(tx - px, ty - py) < 20)) || cands[0];
+    } else {
+      // en su isla, lejos de los puentes y de los otros locales
+      const isl = ISLANDS.slice().sort((a, b) => Math.hypot(a[0] - x, a[1] - y) - Math.hypot(b[0] - x, b[1] - y))[0];
+      let best = null, bs = -1e9;
+      for (let k = 0; k < 24; k++) for (const rf of [0.25, 0.4]) {
+        const a = k / 24 * Math.PI * 2, px = isl[0] + Math.cos(a) * isl[2] * rf, py = isl[1] + Math.sin(a) * isl[2] * rf;
+        if (Math.hypot(px - isl[0], py + 14 - isl[1]) > isl[2] - 4) continue;   // la puerta tiene que quedar en la isla
+        const db = Math.min(...BRIDGES.map(([b1, b2]) => Math.min(segDist(px, py, b1, b2), segDist(px, py + 13, b1, b2))));
+        const dt = taken.length ? Math.min(...taken.map(([tx, ty]) => Math.hypot(tx - px, ty - py))) : 99;
+        const score = Math.min(db, 18) * 2 + Math.min(dt, 26) - Math.hypot(px - x, py - y) * 0.05;
+        if (score > bs) { bs = score; best = [px, py]; }
+      }
+      if (best) [x, y] = best;
     }
     taken.push([x, y]);
     G.stores.push(Object.assign({}, s, { mx: x, my: y }));
   }
 }
 const blockFull = (bx, by) => [[-42,-42],[42,-42],[-42,42],[42,42]].every(([dx, dy]) => inPoly(bx + dx, by + dy, LAND)) && !PUDDLES.some(([x, y, r]) => Math.hypot(bx - x, by - y) < r + 40);
+const PIERS = [];
+const onPier = (x, z) => PIERS.find(p => x > p.x0 && x < p.x1 && z > p.z0 && z < p.z1);
+const inWater = (x, z) => { const { mx, my } = M2W(x, z); return !isLand(mx, my) && !onPier(x, z); };
 function groundY(x, z) {
+  const pr = onPier(x, z); if (pr) return pr.y;
   const { mx, my } = M2W(x, z);
   const bx = Math.round(mx / 100) * 100, by = Math.round(my / 100) * 100;
   if (Math.abs(mx - bx) < 42.5 && Math.abs(my - by) < 42.5 && blocks.some(b => b.bx === bx && b.by === by)) return WALKY;
@@ -556,7 +574,7 @@ function build3D() {
 
   // mar con reflejos (alto) y mar simple (medio)
   const wn = waterNormals();
-  water = new THREE.Water(new THREE.PlaneGeometry(4000, 4000), { textureWidth: 512, textureHeight: 512, waterNormals: wn, sunDirection: new THREE.Vector3(0.5, 0.6, 0.3), sunColor: 0xffffff, waterColor: 0x0c4a6e, distortionScale: 2.6, fog: true });
+  water = new THREE.Water(new THREE.PlaneGeometry(4000, 4000), { textureWidth: 512, textureHeight: 512, waterNormals: wn, sunDirection: new THREE.Vector3(0.5, 0.6, 0.3), sunColor: 0x6a6a6a, waterColor: 0x0c4a6e, distortionScale: 2.6, fog: true });
   water.rotation.x = -Math.PI / 2; water.material.uniforms.size.value = 6; scene.add(water);
   waterLow = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshStandardMaterial({ color: 0x0f5a80, roughness: 0.15, metalness: 0.2, normalMap: wn, normalScale: new THREE.Vector2(0.4, 0.4) }));
   wn.repeat.set(200, 200); waterLow.rotation.x = -Math.PI / 2; waterLow.visible = false; waterLow.receiveShadow = true; scene.add(waterLow);
@@ -701,7 +719,7 @@ function build3D() {
       add('office', p.x, p.z, (22 + rnd() * 6) * S, (22 + rnd() * 6) * S, 10 + rnd() * 18, new THREE.Color().setHSL(0.08 + rnd() * 0.1, 0.15, 0.85 + rnd() * 0.15));
     }
   }
-  ISLANDS.forEach(([x, y, r]) => { for (let i = 0; i < 4; i++) { const a = rnd() * 6.28, rr = r * 0.62, mx = x + Math.cos(a) * rr, my = y + Math.sin(a) * rr; if (G.stores.some(s => Math.hypot(s.mx - mx, s.my - my) < 24)) continue; const p = W2M(mx, my); add('stucco', p.x, p.z, 9 + rnd() * 3, 8 + rnd() * 3, 5 + rnd() * 5, new THREE.Color(pastel[i % pastel.length]), ROADY); } });
+  ISLANDS.forEach(([x, y, r]) => { for (let i = 0; i < 4; i++) { const a = rnd() * 6.28, rr = r * 0.62, mx = x + Math.cos(a) * rr, my = y + Math.sin(a) * rr; if (G.stores.some(s => Math.hypot(s.mx - mx, s.my - my) < 24 || Math.hypot(s.mx - mx, s.my + 12 - my) < 14)) continue; if (BRIDGES.some(([b1, b2]) => segDist(mx, my, b1, b2) < 14)) continue; const p = W2M(mx, my); add('stucco', p.x, p.z, 9 + rnd() * 3, 8 + rnd() * 3, 5 + rnd() * 5, new THREE.Color(pastel[i % pastel.length]), ROADY); } });
 
   for (const k in styles) {
     if (!B[k].v) continue;
@@ -739,12 +757,13 @@ function build3D() {
   for (let k = 50; k < 1000; k += 100) for (let j = 0; j < 1000; j += 22) {
     for (const [mx, my] of [[k - 10.5, j], [j, k - 10.5], [k + 10.5, j + 11], [j + 11, k + 10.5]]) {
       const z = zoneAt(mx, my); if (!z || !(z.id === 'sunset-strip' || z.id === 'coral-keys')) continue;
-      if (!isLand(mx, my) || Math.abs(((mx - 50) % 100 + 100) % 100 - 50) < 9 && Math.abs(((my - 50) % 100 + 100) % 100 - 50) < 9) continue;
+      const rd = v => { const d = ((v - 50) % 100 + 100) % 100; return Math.min(d, 100 - d); };
+      if (z.id === 'coral-keys' || !inPoly(mx, my, LAND) || rd(mx) < 9.5 || rd(my) < 9.5) continue;
       if (G.stores.some(s => Math.hypot(s.mx - mx, s.my - my - 12) < 14)) continue;
       palms.push(W2M(mx, my));
     }
   }
-  ISLANDS.forEach(([x, y, r]) => { for (let i = 0; i < 10; i++) { const a = i / 10 * 6.28, p = W2M(x + Math.cos(a) * (r + 1), y + Math.sin(a) * (r + 1)); palms.push(p); } });
+  ISLANDS.forEach(([x, y, r]) => { for (let i = 0; i < 10; i++) { const a = i / 10 * 6.28, mx = x + Math.cos(a) * (r + 1), my = y + Math.sin(a) * (r + 1); if (BRIDGES.some(([b1, b2]) => segDist(mx, my, b1, b2) < 9)) continue; palms.push(W2M(mx, my)); } });
   const palmMesh = new THREE.InstancedMesh(palmG, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, side: THREE.DoubleSide }), palms.length);
   palms.forEach((p, i) => { const s = 0.85 + rnd() * 0.4; m4.compose(new THREE.Vector3(p.x, groundY(p.x, p.z), p.z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rnd() * 6.28), new THREE.Vector3(s, s, s)); palmMesh.setMatrixAt(i, m4); colliders.push({ x: p.x, z: p.z, hw: 0.3, hd: 0.3 }); });
   palmMesh.castShadow = true; scene.add(palmMesh);
@@ -947,6 +966,9 @@ const MODELS = {
     top: [['q', 2.74, 0.55, 2.72, 0.85], ['q', 2.68, 1.12, 2.3, 1.16], [1.2, 1.22], ['q', 0.95, 1.76, 0.7, 1.84], [-0.75, 1.86], [-0.8, 1.2], [-2.6, 1.2], ['q', -2.7, 1.15, -2.68, 0.7]],
     glass: [[1.25, 1.23], [0.72, 1.8], [-0.72, 1.82], [-0.85, 1.25]], belt: 1.22 },
   rizzo:   { brand: 'Rizzo', name: 'Strada 650', label: 'moto', kind: 'bike', W: 0.8, L: 2.1, wr: 0.32, wb: 1.42, seat: 0.84 },
+  jetski:  { brand: 'Wave', name: 'Rider 300', label: 'jet ski', kind: 'boat', L: 3.1, W: 1.15, H: 0.6, draft: 0.2, max: 30, turn: 1.9, sit: true, seat: 0.62, cam: [6.5, 1.8] },
+  lancha:  { brand: 'Marlin', name: '28 Sport', label: 'lancha', kind: 'boat', L: 8.5, W: 2.8, H: 1.15, draft: 0.45, max: 34, turn: 1.1, helm: [0, 0.75, -0.6], cam: [12, 3] },
+  yate:    { brand: 'Azure', name: '52 Fly', label: 'yate', kind: 'boat', L: 16, W: 4.8, H: 2.0, draft: 0.8, max: 19, turn: 0.55, helm: [0, 2.9, 1.0], cam: [22, 5] },
   hayate:  { brand: 'Hayate', name: 'R6 Kaze', label: 'moto deportiva', kind: 'bike', W: 0.75, L: 2.05, wr: 0.31, wb: 1.4, seat: 0.88, fairing: true }
 };
 for (const k in MODELS) if (MODELS[k].same) MODELS[k] = Object.assign({}, MODELS[MODELS[k].same], MODELS[k]);
@@ -976,6 +998,7 @@ function vehicleGeos(key) {
   if (VGEO[key]) return VGEO[key];
   const M = MODELS[key];
   if (M.kind === 'bike') return VGEO[key] = bikeGeos(M);
+  if (M.kind === 'boat') return VGEO[key] = boatGeos(M);
   // carrocería: perfil lateral con pasos de rueda
   const R = M.wr + 0.08, fz = M.wb / 2, rz = -M.wb / 2;
   const sh = new THREE.Shape();
@@ -1011,6 +1034,38 @@ function vehicleGeos(key) {
   if (M.sign) lights.push(at(colorize(new THREE.BoxGeometry(0.7, 0.2, 0.28), 0xffe27a), 0, 1.53, -0.3));
   return VGEO[key] = { paint, detail: merge(parts), lights: merge(lights), wheel: wheelGeo(M.wr, 0.25), wheels: [[W2 - 0.08, fz], [-W2 + 0.08, fz], [W2 - 0.08, rz], [-W2 + 0.08, rz]], wr: M.wr };
 }
+function hullShape(L, W) {
+  const sh = new THREE.Shape();
+  sh.moveTo(-L / 2, -W / 2 * 0.86); sh.lineTo(L * 0.12, -W / 2); sh.quadraticCurveTo(L * 0.42, -W * 0.44, L / 2, 0);
+  sh.quadraticCurveTo(L * 0.42, W * 0.44, L * 0.12, W / 2); sh.lineTo(-L / 2, W / 2 * 0.86); sh.closePath(); return sh;
+}
+function flatExtrude(L, W, h, y) { const g = new THREE.ExtrudeGeometry(hullShape(L, W), { depth: h, bevelEnabled: false, curveSegments: 10 }); g.rotateX(-Math.PI / 2); g.rotateY(-Math.PI / 2); g.translate(0, y, 0); return g; }
+function boatGeos(M) {
+  const hull = new THREE.ExtrudeGeometry(hullShape(M.L, M.W), { depth: M.H, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: 2, curveSegments: 12 });
+  hull.rotateX(-Math.PI / 2); hull.rotateY(-Math.PI / 2); hull.translate(0, -M.draft, 0);
+  const top = M.H - M.draft, paint = merge([colorize(hull, 0xffffff)]);
+  const det = [colorize(flatExtrude(M.L * 0.96, M.W * 0.92, 0.06, top), 0xf2efe8)];
+  const lights = [at(colorize(new THREE.SphereGeometry(0.07, 8, 6), 0xff2020), -M.W / 2 + 0.05, top + 0.1, M.L * 0.3), at(colorize(new THREE.SphereGeometry(0.07, 8, 6), 0x20ff40), M.W / 2 - 0.05, top + 0.1, M.L * 0.3), at(colorize(new THREE.SphereGeometry(0.08, 8, 6), 0xffffff), 0, top + 0.3, -M.L / 2 + 0.2)];
+  if (M.sit) {
+    det.push(at(colorize(new THREE.BoxGeometry(0.42, 0.24, 1.3), 0x161616), 0, top + 0.12, -0.35));
+    det.push(at(colorize(new THREE.BoxGeometry(0.5, 0.4, 0.45), 0xffffff), 0, top + 0.2, 0.55));
+    det.push(at(colorize(new THREE.CylinderGeometry(0.02, 0.02, 0.75, 8), 0x222222), 0, top + 0.45, 0.62, 0, 0, Math.PI / 2));
+  } else if (M.name === '28 Sport') {
+    det.push(at(colorize(new THREE.BoxGeometry(1.1, 0.9, 0.9), 0xffffff), 0, top + 0.45, -0.4));
+    det.push(at(colorize(new THREE.BoxGeometry(2.3, 0.6, 0.06), 0x10161e), 0, top + 0.95, 0.15, -0.6));
+    det.push(at(colorize(new THREE.BoxGeometry(2.2, 0.45, 1.5), 0xd8cfbf), 0, top + 0.22, -2.6));
+    det.push(at(colorize(new THREE.BoxGeometry(0.5, 0.6, 0.5), 0x2a2a2a), 0, top + 0.05, -M.L / 2 + 0.1));
+  } else {
+    const cab = M.L * 0.5;
+    det.push(at(colorize(new THREE.BoxGeometry(M.W * 0.8, 1.6, cab), 0xffffff), 0, top + 0.8, -0.6));
+    det.push(at(colorize(new THREE.BoxGeometry(M.W * 0.82, 0.55, cab * 0.92), 0x0d141c), 0, top + 1.05, -0.6));
+    det.push(at(colorize(new THREE.BoxGeometry(M.W * 0.62, 0.9, M.L * 0.22), 0xffffff), 0, top + 2.05, 0.2));
+    det.push(at(colorize(new THREE.BoxGeometry(M.W * 0.64, 0.35, M.L * 0.2), 0x0d141c), 0, top + 2.15, 0.2));
+    det.push(at(colorize(new THREE.CylinderGeometry(0.06, 0.06, 2.4, 8), 0xdddddd), 0, top + 3.5, -0.4));
+    det.push(at(colorize(new THREE.BoxGeometry(M.W * 0.7, 0.1, 2.5), 0xb08a5a), 0, top + 0.06, -M.L / 2 + 1.4));
+  }
+  return { paint, detail: merge(det), lights: merge(lights), wheel: null, wheels: [], wr: 0 };
+}
 function bikeGeos(M) {
   const tank = new THREE.SphereGeometry(0.2, 14, 10); tank.scale(0.95, 0.75, 1.6); at(tank, 0, 0.98, 0.12);
   const tail = at(new THREE.BoxGeometry(0.22, 0.12, 0.5), 0, 0.92, -0.55, 0.25);
@@ -1027,6 +1082,7 @@ function bikeGeos(M) {
   const lights = [at(colorize(new THREE.CylinderGeometry(0.08, 0.08, 0.06, 12), 0xfff8e6), 0, 0.98, 0.74, Math.PI / 2), at(colorize(new THREE.BoxGeometry(0.14, 0.06, 0.04), 0xff1a1a), 0, 0.92, -0.81)];
   return { paint: merge(paintParts), detail: merge(detail), lights: merge(lights), wheel: wheelGeo(M.wr, 0.12), wheels: [[0, M.wb / 2], [0, -M.wb / 2]], wr: M.wr };
 }
+const BOAT_MAT = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.45, metalness: 0.1 });
 const DETAIL_MAT = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.3, metalness: 0.55, envMapIntensity: 1 });
 const LIGHT_MAT = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
 const WHEEL_MAT = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, metalness: 0.5 });
@@ -1035,6 +1091,12 @@ function sitPose(ud) {
   ud.shL.rotation.x = ud.shR.rotation.x = -1.05; ud.elL.rotation.x = ud.elR.rotation.x = -0.35;
   ud.body.rotation.x = 0.28; ud.body.position.y = 0;
 }
+function swimAnim(ud, ph, idle) {
+  ud.body.rotation.x = idle ? 0.25 : 1.4; ud.body.position.y = 0;
+  if (idle) { ud.shL.rotation.x = ud.shR.rotation.x = -0.4 + Math.sin(ph) * 0.3; ud.hipL.rotation.x = Math.sin(ph) * 0.3; ud.hipR.rotation.x = -Math.sin(ph) * 0.3; return; }
+  ud.shL.rotation.x = -(ph % (Math.PI * 2)); ud.shR.rotation.x = -((ph + Math.PI) % (Math.PI * 2)); ud.elL.rotation.x = ud.elR.rotation.x = -0.15;
+  ud.hipL.rotation.x = Math.sin(ph * 2) * 0.35; ud.hipR.rotation.x = -Math.sin(ph * 2) * 0.35; ud.kneeL.rotation.x = ud.kneeR.rotation.x = 0.2;
+}
 function standPose(ud) { ['hipL', 'hipR', 'kneeL', 'kneeR', 'shL', 'shR', 'elL', 'elR'].forEach(k => ud[k].rotation.x = 0); ud.body.rotation.x = 0; }
 function makeCar(color, isPlayer, key = 'sakura', opts = {}) {
   const M = MODELS[key] || MODELS.sakura, V = vehicleGeos(key in MODELS ? key : 'sakura');
@@ -1042,10 +1104,10 @@ function makeCar(color, isPlayer, key = 'sakura', opts = {}) {
   const g = new THREE.Group();
   const paint = new THREE.MeshPhysicalMaterial({ color, metalness: 0.55, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 0.6 });
   const body = new THREE.Mesh(V.paint, paint); body.castShadow = true; body.receiveShadow = true;
-  const det = new THREE.Mesh(V.detail, DETAIL_MAT); det.castShadow = true;
+  const det = new THREE.Mesh(V.detail, M.kind === 'boat' ? BOAT_MAT : DETAIL_MAT); det.castShadow = true;
   g.add(body, det, new THREE.Mesh(V.lights, LIGHT_MAT));
   const wheels = V.wheels.map(([x, z]) => { const wg = new THREE.Group(); wg.position.set(x, V.wr, z); const t = new THREE.Mesh(V.wheel, WHEEL_MAT); t.castShadow = true; wg.add(t); g.add(wg); return wg; });
-  g.userData = { paint, wheels, speed: 0, health: 100, vx: 0, vz: 0, spin: 0, wrecked: false, isPlayer, model: key, bike: M.kind === 'bike', brand: M.brand, name: M.name, label: M.label, type: `${M.brand} ${M.name}` };
+  g.userData = { paint, wheels, speed: 0, health: 100, vx: 0, vz: 0, spin: 0, wrecked: false, isPlayer, model: key, bike: M.kind === 'bike', boat: M.kind === 'boat', brand: M.brand, name: M.name, label: M.label, type: `${M.brand} ${M.name}` };
   if (M.kind === 'bike' && opts.rider) {
     const r = makeHuman({ skin: SKINS[Math.floor(Math.random() * SKINS.length)], top: TOPS[Math.floor(Math.random() * TOPS.length)], pants: 0x222222, shoes: 0x111111, hair: 0x15121c });
     const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), new THREE.MeshPhysicalMaterial({ color: TRAFFIC_COLORS[Math.floor(Math.random() * TRAFFIC_COLORS.length)], clearcoat: 1, roughness: 0.3 }));
@@ -1110,16 +1172,17 @@ function crashSound(power) {
 }
 
 // ---------- colisiones ----------
-function hitCollider(x, z, r) {
+function hitCollider(x, z, r, swim) {
+  if (Math.abs(x) > 560 || Math.abs(z) > 560) return { water: true, edge: true };
   const { mx, my } = M2W(x, z);
-  if (!isLand(mx, my)) return { water: true };
+  if (!isLand(mx, my) && !onPier(x, z) && !swim) return { water: true };
   for (const c of colliders) if (Math.abs(x - c.x) < c.hw + r && Math.abs(z - c.z) < c.hd + r) return c;
   return null;
 }
-function moveWithCollision(obj, dx, dz, r) {
+function moveWithCollision(obj, dx, dz, r, swim) {
   let hit = null;
-  const hx = hitCollider(obj.position.x + dx, obj.position.z, r); if (!hx) obj.position.x += dx; else hit = hx;
-  const hz = hitCollider(obj.position.x, obj.position.z + dz, r); if (!hz) obj.position.z += dz; else hit = hit || hz;
+  const hx = hitCollider(obj.position.x + dx, obj.position.z, r, swim); if (!hx) obj.position.x += dx; else hit = hx;
+  const hz = hitCollider(obj.position.x, obj.position.z + dz, r, swim); if (!hz) obj.position.z += dz; else hit = hit || hz;
   return hit;
 }
 
@@ -1265,11 +1328,12 @@ function explodeCar() {
   burst(p.x, 1, p.z, 120, 22); for (let i = 0; i < 12; i++) puff(p.x + (Math.random() - 0.5) * 3, 1 + Math.random() * 2, p.z + (Math.random() - 0.5) * 3, i < 5 ? 0xff7a1a : 0x222222, 3 + Math.random() * 3);
   u.paint.color.set(0x1c1c1c); u.paint.clearcoat = 0;
   G.shake = 1.4; crashSound(30); flashScreen(0.9);
-  if (G.inCar) { exitCar(true); } else { removeCarCollider(car); addParkedCollider(car); }
+  if (G.inCar) { exitCar(true); } else if (!car.userData.boat) { removeCarCollider(car); addParkedCollider(car); }
   toast('¡Tu auto explotó! Te dejamos uno nuevo cerca en 10 segundos.', 4500);
-  const wreck = car; if (!parked.includes(wreck)) parked.push(wreck);
+  const wreck = car; if (!wreck.userData.boat && !parked.includes(wreck)) parked.push(wreck);
   setTimeout(() => {
     if (car !== wreck) return;   // ya robaste otro auto
+    if (wreck.userData.boat) { const i = boats.indexOf(wreck); if (i >= 0) boats.splice(i, 1); }
     const cs = findCarSpot(player.position), nc = makeCar(G.carColor, false, G.carModel === 'moretti' ? 'sakura' : G.carModel);
     nc.position.set(cs.x, ROADY, cs.z); nc.rotation.y = cs.rot; scene.add(nc);
     moveHeadlight(wreck, nc); car = nc; addParkedCollider(nc);
@@ -1302,6 +1366,93 @@ function carVsTraffic() {
     u.speed *= Math.max(0.1, 1 - vn / 30);
     if (vn > 3) { crashFX(car.position.x + nx * 1.7, car.position.z + nz * 1.7, vn); damageCar(vn * 1.6); }
   }
+}
+// ---------- puerto, muelles y barcos ----------
+const boats = [], aiBoats = [];
+const BOAT_COLORS = ['#1e4fa3', '#b3122e', '#0f4c5c', '#f2c230', '#1d1d1d', '#ff7a3d', '#e8e8e8'];
+const PIER_MAT = new THREE.MeshStandardMaterial({ color: 0x8a6a4a, roughness: 0.9 }), POST_MAT = new THREE.MeshStandardMaterial({ color: 0x5a4330, roughness: 0.9 }), POST_GEO = new THREE.CylinderGeometry(0.18, 0.18, 3, 8);
+function addPier(x0, x1, z0, z1, y) {
+  PIERS.push({ x0, x1, z0, z1, y });
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, 0.3, z1 - z0), PIER_MAT); deck.position.set((x0 + x1) / 2, y - 0.15, (z0 + z1) / 2); deck.receiveShadow = true; deck.castShadow = true; scene.add(deck);
+  const along = (x1 - x0) > (z1 - z0), len = along ? x1 - x0 : z1 - z0;
+  for (let d = 0; d <= len + 0.01; d += 4) for (const sd of [0, 1]) {
+    const post = new THREE.Mesh(POST_GEO, POST_MAT);
+    post.position.set(along ? x0 + d : (sd ? x1 : x0), y - 1.4, along ? (sd ? z1 : z0) : z0 + d); scene.add(post);
+  }
+}
+function mooredBoat(key, x, z, rot, color) {
+  const g = makeCar(color || BOAT_COLORS[Math.floor(Math.random() * BOAT_COLORS.length)], false, key);
+  g.position.set(x, 0, z); g.rotation.y = rot; g.userData.bobOff = Math.random() * 6; scene.add(g); boats.push(g); return g;
+}
+function buildPort() {
+  // Puerto de Port Sable, sobre la costa este
+  const X0 = (1000 - 500) * S;
+  const pierZ = [150, 230, 310].map(my => (my - 500) * S);
+  addPier(X0 - 6, X0 + 2, pierZ[0] - 20, pierZ[2] + 20, 0.6);
+  pierZ.forEach(z => addPier(X0, X0 + 46, z - 2, z + 2, 0.6));
+  mooredBoat('jetski', X0 + 10, pierZ[0] - 3.6, Math.PI / 2); mooredBoat('jetski', X0 + 16, pierZ[0] - 3.6, Math.PI / 2); mooredBoat('jetski', X0 + 22, pierZ[0] + 3.6, Math.PI / 2);
+  mooredBoat('lancha', X0 + 16, pierZ[1] - 4.2, Math.PI / 2); mooredBoat('lancha', X0 + 30, pierZ[1] + 4.2, Math.PI / 2); mooredBoat('lancha', X0 + 36, pierZ[0] + 4.2, Math.PI / 2);
+  mooredBoat('yate', X0 + 24, pierZ[2] - 5.2, Math.PI / 2, '#f4f4f4'); mooredBoat('yate', X0 + 26, pierZ[2] + 5.2, Math.PI / 2, '#0f2a4a');
+  // grúas portuarias
+  [pierZ[0] - 12, pierZ[2] + 12].forEach(z => {
+    const red = new THREE.MeshStandardMaterial({ color: 0xc0392b, roughness: 0.6, metalness: 0.3 }), g = new THREE.Group();
+    [[-5, -4], [5, -4], [-5, 4], [5, 4]].forEach(([dx, dz]) => { const l = new THREE.Mesh(new THREE.BoxGeometry(0.8, 26, 0.8), red); l.position.set(dx, 13, dz); l.castShadow = true; g.add(l); });
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(46, 2, 9), red); beam.position.set(12, 26, 0); beam.castShadow = true; g.add(beam);
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 4), new THREE.MeshStandardMaterial({ color: 0xf2c230 })); cab.position.set(6, 23.5, 0); g.add(cab);
+    g.position.set(X0 - 14, WALKY, z); scene.add(g);
+    [[-5, -4], [5, -4], [-5, 4], [5, 4]].forEach(([dx, dz]) => colliders.push({ x: X0 - 14 + dx, z: z + dz, hw: 0.5, hd: 0.5 }));
+  });
+  // muelle del Keys Boat Club
+  const isl = ISLANDS.find(([x]) => x === 935);
+  const cx = (isl[0] - 500) * S, cz = (isl[1] + isl[2] - 500) * S;
+  addPier(cx - 2, cx + 2, cz - 3, cz + 30, 0.6);
+  mooredBoat('lancha', cx - 4.2, cz + 14, 0); mooredBoat('jetski', cx + 3.6, cz + 10, 0); mooredBoat('yate', cx + 6.5, cz + 24, 0, '#f4f4f4');
+  // barcos que navegan
+  [['yate', 800, 1110, 250, 55, 6], ['lancha', 1115, 280, 55, 200, 13], ['jetski', 450, 1060, 120, 32, 11], ['lancha', 700, -60, 300, 40, 12]].forEach(([key, cx2, cy2, rx, ry, v]) => {
+    const g = makeCar(BOAT_COLORS[Math.floor(Math.random() * BOAT_COLORS.length)], false, key); scene.add(g);
+    aiBoats.push({ g, cx: cx2, cy: cy2, rx, ry, v, a: Math.random() * 6.28 });
+  });
+}
+function boatBlocked(x, z, r) {
+  if (Math.abs(x) > 560 || Math.abs(z) > 560) return true;
+  for (const [ox, oz] of [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]]) {
+    const { mx, my } = M2W(x + ox, z + oz);
+    if (inPoly(mx, my, LAND) || ISLANDS.some(([ix, iy, ir]) => Math.hypot(mx - ix, my - iy) < ir + 5)) return true;
+  }
+  return PIERS.some(p => x > p.x0 - r && x < p.x1 + r && z > p.z0 - r && z < p.z1 + r);
+}
+function updateBoats(dt, now) {
+  for (const g of boats) if (g !== car || !G.inCar) { g.position.y = Math.sin(now / 700 + (g.userData.bobOff || 0)) * 0.08; g.rotation.z = Math.sin(now / 900 + (g.userData.bobOff || 0)) * 0.03; }
+  const fp = focusPos();
+  for (const b of aiBoats) {
+    b.a += b.v / ((b.rx + b.ry) / 2 * S) * dt;
+    const mx = b.cx + Math.cos(b.a) * b.rx, my = b.cy + Math.sin(b.a) * b.ry, p = W2M(mx, my);
+    const tx = -Math.sin(b.a) * b.rx, ty = Math.cos(b.a) * b.ry;
+    b.g.position.set(p.x, Math.sin(now / 600 + b.a * 3) * 0.12, p.z); b.g.rotation.y = Math.atan2(tx, ty); b.g.rotation.x = -0.06;
+    b.g.visible = b.g.position.distanceTo(fp) < 500;
+    const L = MODELS[b.g.userData.model].L;
+    if (b.g.visible && Math.random() < dt * 8) puff(p.x - Math.sin(b.g.rotation.y) * L / 2, 0.3, p.z - Math.cos(b.g.rotation.y) * L / 2, 0xffffff, 1.2);
+  }
+}
+function updatePlayerBoat(dt, ix, iy, run, brake, now) {
+  const c = car.userData, M = MODELS[c.model];
+  const max = M.max * (run ? 1.15 : 1);
+  if (iy > 0) c.speed += M.max * 0.5 * dt * iy; else if (iy < 0) c.speed += (c.speed > 0 ? M.max * 0.7 : M.max * 0.25) * dt * iy; else c.speed *= (1 - 0.7 * dt);
+  if (brake) c.speed *= (1 - 2 * dt);
+  c.speed = Math.max(-M.max * 0.3, Math.min(max, c.speed));
+  if (Math.abs(c.speed) > 0.3) car.rotation.y -= ix * dt * M.turn * Math.min(1, Math.abs(c.speed) / 5 + 0.2) * Math.sign(c.speed);
+  const nx = car.position.x + Math.sin(car.rotation.y) * c.speed * dt, nz = car.position.z + Math.cos(car.rotation.y) * c.speed * dt;
+  if (boatBlocked(nx, nz, M.W / 2)) { const imp = Math.abs(c.speed); c.speed = -c.speed * 0.3; if (imp > 7) { crashFX(nx, nz, imp); damageCar(imp * 0.8); } }
+  else { car.position.x = nx; car.position.z = nz; }
+  const sp = Math.abs(c.speed);
+  car.position.y = Math.sin(now / 500) * (0.1 + sp * 0.003);
+  car.rotation.x = -Math.min(0.14, sp / 200) + Math.sin(now / 430) * 0.015;
+  car.rotation.z += ((M.sit ? ix * Math.min(1, sp / 15) * 0.4 : ix * Math.min(1, sp / 20) * 0.08) - car.rotation.z) * Math.min(1, dt * 4);
+  if (sp > 3 && Math.random() < dt * (6 + sp)) puff(car.position.x - Math.sin(car.rotation.y) * M.L / 2, 0.25, car.position.z - Math.cos(car.rotation.y) * M.L / 2, 0xffffff, 0.8 + sp * 0.04);
+  const off = M.sit ? new THREE.Vector3(0, M.seat - 0.9, -0.35) : new THREE.Vector3(...M.helm);
+  off.applyEuler(car.rotation); player.position.copy(car.position).add(off); player.rotation.y = car.rotation.y; player.rotation.z = car.rotation.z;
+  if (engine) { engine.o.frequency.value = 55 + sp * 4; engine.g.gain.value = 0.05 + Math.min(0.08, sp / 350); }
+  if (sp > 2) markDirty();
 }
 function pedVsTraffic() {
   const ud = player.userData; if (ud.down > 0) return;
@@ -1442,16 +1593,16 @@ function gunSound(vol = 0.5) {
   src.connect(f).connect(g).connect(AC.destination); src.start();
 }
 function shoot() {
-  if (G.mode !== 'play' || G.inCar || player.userData.down > 0 || fireCd > 0) return;
+  if (G.mode !== 'play' || G.inCar || G.swimming || player.userData.down > 0 || fireCd > 0) return;
   const W = WEAPONS[G.weapon];
   if (!W.melee && !(G.weapons[G.weapon] > 0)) { toast('Sin balas. Comprá munición en una armería.'); G.weapon = 'fist'; setGunModel(); return; }
   fireCd = W.rate;
   const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
   const yaw = Math.atan2(dir.x, dir.z); player.rotation.y = yaw; G.aimT = 1.4;
   if (W.melee) {
-    G.punchT = 0.3;
+    G.punchT = 0.26; G.guardT = 2; G.punchSide = !G.punchSide;
     const fx = Math.sin(yaw), fz = Math.cos(yaw);
-    const hitP = peds.concat(officers.map(o => ({ g: o.g, state: o.state === 'dead' ? 'dead' : 'walk', officerRef: o }))).find(q => q.state !== 'dead' && q.g.visible && (() => { const dx = q.g.position.x - player.position.x, dz = q.g.position.z - player.position.z, d = Math.hypot(dx, dz); return d < 1.7 && (dx * fx + dz * fz) / (d || 1) > 0.4; })());
+    const hitP = peds.concat(officers.map(o => ({ g: o.g, state: o.state === 'dead' ? 'dead' : 'walk', officerRef: o }))).find(q => q.g !== player && q.state !== 'dead' && q.g.visible && (() => { const dx = q.g.position.x - player.position.x, dz = q.g.position.z - player.position.z, d = Math.hypot(dx, dz); return d < 1.7 && (dx * fx + dz * fz) / (d || 1) > 0.4; })());
     if (hitP) { damageTarget(hitP.officerRef ? { officer: hitP.officerRef } : { ped: hitP }, W.dmg, new THREE.Vector3(fx, 0, fz), true); crashSound(3); }
     return;
   }
@@ -1468,7 +1619,19 @@ function shoot() {
 }
 function applyAimPose(dt) {
   const ud = player.userData;
-  if (G.punchT > 0) { G.punchT -= dt; ud.shR.rotation.x = -1.4 * Math.sin(Math.max(0, G.punchT) / 0.3 * Math.PI); ud.elR.rotation.x = -0.2; }
+  if (G.swimming) { G.guardT = 0; G.punchT = 0; return; }
+  if (G.weapon === 'fist' && (G.punchT > 0 || G.guardT > 0)) {
+    // guardia: los dos puños arriba; la piña estira un brazo y vuelve
+    ud.shL.rotation.x = ud.shR.rotation.x = -1.05; ud.elL.rotation.x = ud.elR.rotation.x = -1.75; ud.shL.rotation.z = -0.25; ud.shR.rotation.z = 0.25;
+    if (G.punchT > 0) {
+      G.punchT -= dt; const k = Math.sin(Math.max(0, G.punchT) / 0.26 * Math.PI);
+      const sh = G.punchSide ? ud.shR : ud.shL, el = G.punchSide ? ud.elR : ud.elL;
+      sh.rotation.x = -1.05 - 0.5 * k; el.rotation.x = -1.75 + 1.65 * k; sh.rotation.z = (G.punchSide ? 0.25 : -0.25) * (1 - k);
+      ud.body.rotation.y = (G.punchSide ? -0.25 : 0.25) * k;
+    } else ud.body.rotation.y *= 0.8;
+    G.guardT -= dt;
+    if (G.guardT <= 0) { ud.shL.rotation.z = -0.07; ud.shR.rotation.z = 0.07; ud.body.rotation.y = 0; }
+  }
   else if (G.weapon !== 'fist' && G.aimT > 0) { ud.shR.rotation.x = -1.5; ud.elR.rotation.x = -0.05; if (G.weapon !== 'pistol') { ud.shL.rotation.x = -1.3; ud.elL.rotation.x = -0.5; } }
   if (G.aimT > 0) G.aimT -= dt;
 }
@@ -1738,7 +1901,9 @@ $('loginForm').addEventListener('submit', async e => {
   } else car.userData.health = 100;
   const cs = findCarSpot(spawn);
   removeCarCollider(car);
-  if (car.userData.model !== G.carModel) { const nc = makeCar(G.carColor, false, G.carModel); scene.add(nc); moveHeadlight(car, nc); const i = parked.indexOf(car); if (i >= 0) parked.splice(i, 1); scene.remove(car); car = nc; }
+  if (car.userData.boat) { if (!boats.includes(car)) boats.push(car); const nc = makeCar(G.carColor, false, G.carModel); scene.add(nc); moveHeadlight(car, nc); car = nc; }
+  else if (car.userData.model !== G.carModel) { const nc = makeCar(G.carColor, false, G.carModel); scene.add(nc); moveHeadlight(car, nc); const i = parked.indexOf(car); if (i >= 0) parked.splice(i, 1); scene.remove(car); car = nc; }
+  G.swimming = false;
   if (!data || typeof data.x !== 'number') spawn = { x: cs.x - Math.cos(cs.rot) * 3.4, z: cs.z + Math.sin(cs.rot) * 3.4 };
   player.position.set(spawn.x, groundY(spawn.x, spawn.z), spawn.z); player.visible = true; G.inCar = false; car.position.set(cs.x, ROADY, cs.z); car.rotation.set(0, cs.rot, 0); car.userData.speed = 0; car.userData.wrecked = false; car.userData.paint.color.set(G.carColor); addParkedCollider(car);
   G.stores.forEach(s => { if (s.unlock && s.door) s.door.material.color.set(locked(s) ? 0x222222 : 0xfff0c0); });
@@ -1767,11 +1932,19 @@ function tryEnter() {
 }
 function exitCar(forced) {
   G.inCar = false; if (!forced) car.userData.speed = 0;
-  removeCarCollider(car); addParkedCollider(car);
-  const side = new THREE.Vector3(-2.3, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), car.rotation.y);
-  let px = car.position.x + side.x, pz = car.position.z + side.z;
-  if (hitCollider(px, pz, 0.4)) { px = car.position.x - side.x; pz = car.position.z - side.z; }
-  player.position.set(px, groundY(px, pz), pz); player.visible = true; player.rotation.z = 0; standPose(player.userData);
+  let px, pz;
+  if (car.userData.boat) {
+    let spot = null; const BW = MODELS[car.userData.model].W / 2;
+    for (let r = 2; r <= 10 && !spot; r += 1.5) for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2, x = car.position.x + Math.cos(a) * (r + BW), z = car.position.z + Math.sin(a) * (r + BW); if (!inWater(x, z) && !hitCollider(x, z, 0.4)) { spot = [x, z]; break; } }
+    [px, pz] = spot || [car.position.x + Math.cos(car.rotation.y) * (BW + 1.2), car.position.z - Math.sin(car.rotation.y) * (BW + 1.2)];
+    if (!boats.includes(car)) boats.push(car);
+  } else {
+    removeCarCollider(car); addParkedCollider(car);
+    const side = new THREE.Vector3(-2.3, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), car.rotation.y);
+    px = car.position.x + side.x; pz = car.position.z + side.z;
+    if (hitCollider(px, pz, 0.4)) { px = car.position.x - side.x; pz = car.position.z - side.z; }
+  }
+  player.position.set(px, inWater(px, pz) ? -0.28 : groundY(px, pz), pz); player.visible = true; player.rotation.z = 0; standPose(player.userData);
   if (car.userData.headlight) car.userData.headlight.intensity = 0;
   if (engine) engine.g.gain.value = 0;
 }
@@ -1781,29 +1954,36 @@ function nearestCar() {
   consider(car, 'mine');
   parked.forEach(g => { if (g !== car) consider(g, 'parked'); });
   traffic.forEach(a => consider(a.g, 'traffic', a));
+  boats.forEach(g => { if (g === car) return; const d = Math.hypot(g.position.x - p.x, g.position.z - p.z) - MODELS[g.userData.model].L * 0.3; if (d < bd && !g.userData.wrecked) { bd = d; best = { g, kind: 'boat' }; } });
+  aiBoats.forEach(b => { const d = Math.hypot(b.g.position.x - p.x, b.g.position.z - p.z) - MODELS[b.g.userData.model].L * 0.3; if (d < bd) { bd = d; best = { g: b.g, kind: 'aiboat', b }; } });
+  if (car.userData.boat && !car.userData.wrecked) { const d = Math.hypot(car.position.x - p.x, car.position.z - p.z) - MODELS[car.userData.model].L * 0.3; if (d < bd) best = { g: car, kind: 'mine' }; }
   return best;
 }
 function moveHeadlight(from, to) { const hl = from.userData.headlight; if (!hl || from === to) return; from.remove(hl, hl.target); to.add(hl, hl.target); to.userData.headlight = hl; from.userData.headlight = null; hl.intensity = 0; }
 function toggleCar() {
   if (G.inCar) { if (Math.abs(car.userData.speed) > 4) return toast('Frená antes de bajarte'); exitCar(); return; }
   const n = nearestCar();
-  if (!n) return toast('No hay ningún auto cerca. Acercate a uno para robarlo (F).');
+  if (!n) return toast('No hay ningún vehículo cerca. Acercate a un auto, moto o barco (F).');
   if (n.kind !== 'mine') {
     const old = car;
-    if (!parked.includes(old)) parked.push(old);
-    if (!old.userData.collider) addParkedCollider(old);
+    if (old.userData.boat) { if (!boats.includes(old)) boats.push(old); }
+    else { if (!parked.includes(old)) parked.push(old); if (!old.userData.collider) addParkedCollider(old); }
     moveHeadlight(old, n.g);
     if (n.kind === 'traffic') { traffic.splice(traffic.indexOf(n.a), 1); spawnAI(); crime(1); if (n.g.userData.rider) { n.g.remove(n.g.userData.rider); n.g.userData.rider = null; } toast(n.g.userData.bike ? `Tiraste al piloto: ${carName(n.g)} robada.` : `Sacaste al conductor: ${carName(n.g)} robado.`); crashSound(4); }
+    else if (n.kind === 'boat') { boats.splice(boats.indexOf(n.g), 1); if (witnessNear()) crime(1); toast(`Te llevaste un ${carName(n.g)} (${n.g.userData.label}).`); }
+    else if (n.kind === 'aiboat') { aiBoats.splice(aiBoats.indexOf(n.b), 1); crime(1); toast(`Tiraste al capitán al agua: ${carName(n.g)} robado.`); }
     else if (cops.some(c => c.g === n.g)) { parked.splice(parked.indexOf(n.g), 1); cops.splice(cops.findIndex(c => c.g === n.g), 1); crime(2); toast('¡Te robaste un patrullero!'); }
     else { parked.splice(parked.indexOf(n.g), 1); if (witnessNear()) crime(1); toast(n.g.userData.bike ? `Hiciste un puente: ${carName(n.g)} robada.` : `Forzaste la puerta: ${carName(n.g)} robado.`); }
     car = n.g; Object.assign(car.userData, { isPlayer: true, speed: 0, wrecked: false, vx: 0, vz: 0, spin: 0 });
     if (!(car.userData.health > 0)) car.userData.health = 100;
-    car.rotation.x = car.rotation.z = 0; car.position.y = ROADY;
-    G.carColor = '#' + car.userData.paint.color.getHexString(); G.carModel = car.userData.model; markDirty();
+    car.rotation.x = car.rotation.z = 0; if (!car.userData.boat) { car.position.y = ROADY; G.carColor = '#' + car.userData.paint.color.getHexString(); G.carModel = car.userData.model; } markDirty();
   }
   removeCarCollider(car);
   G.inCar = true; G.camYaw = car.rotation.y + Math.PI;
-  if (car.userData.bike) { player.visible = true; sitPose(player.userData); } else player.visible = false;
+  G.swimming = false; player.userData.body.rotation.x = 0;
+  if (car.userData.bike || (car.userData.boat && MODELS[car.userData.model].sit)) { player.visible = true; sitPose(player.userData); }
+  else if (car.userData.boat) { player.visible = true; standPose(player.userData); }
+  else player.visible = false;
 }
 function wpTo(name, obj) { const o = { name, follow: obj, wx: obj.position.x, wz: obj.position.z }; const m = M2W(o.wx, o.wz); o.mx = m.mx; o.my = m.my; return o; }
 function setWaypoint(s) {
@@ -1926,7 +2106,7 @@ function updateLucy(dt, now) {
   const target = G.inCar ? car.position : player.position;
   const dx = target.x - g.position.x, dz = target.z - g.position.z, d = Math.hypot(dx, dz);
   if (G.inCar && d < 5.5) {
-    if (car.userData.bike) { if (!lucy.bikeWarn) { lucy.bikeWarn = true; toast('Lucy: "¿En moto? Conseguí un auto."'); } }
+    if (car.userData.bike || car.userData.boat) { if (!lucy.bikeWarn) { lucy.bikeWarn = true; toast(car.userData.boat ? 'Lucy: "¿En barco? Esperame en tierra."' : 'Lucy: "¿En moto? Conseguí un auto."'); } }
     else { lucy.inCar = true; toast('Lucy se subió al auto'); return; }
   } else lucy.bikeWarn = false;
   const keep = G.inCar ? 1 : 2.4;
@@ -2134,6 +2314,8 @@ function drawMapLayer(ctx, cx, cy, k, w, h, opts) {
     if (opts.labels && k > 1.6) { ctx.font = '600 11px Inter, sans-serif'; const tw = ctx.measureText(s.name).width + 10; ctx.fillStyle = 'rgba(15,11,30,0.85)'; ctx.fillRect(x - tw / 2, y + r + 3, tw, 16); ctx.fillStyle = '#f4ecff'; ctx.fillText(s.name, x, y + r + 11); }
   }
   const fp = M2W(focusPos().x, focusPos().z);
+  ctx.fillStyle = '#8a6a4a'; for (const pr of PIERS) { const a = M2W(pr.x0, pr.z0), b = M2W(pr.x1, pr.z1); ctx.fillRect(a.mx * k, a.my * k, Math.max(2, (b.mx - a.mx) * k), Math.max(2, (b.my - a.my) * k)); }
+  ctx.fillStyle = '#e8e8e8'; for (const g of boats.concat(aiBoats.map(b => b.g))) { if (g === car && G.inCar) continue; const bp = M2W(g.position.x, g.position.z); ctx.beginPath(); ctx.arc(bp.mx * k, bp.my * k, 3.5, 0, 7); ctx.fill(); }
   if (armored && !armored.ud.wrecked) { const ap = M2W(armored.g.position.x, armored.g.position.z); ctx.fillStyle = '#3ddc97'; ctx.beginPath(); ctx.arc(ap.mx * k, ap.my * k, 6, 0, 7); ctx.fill(); ctx.fillStyle = '#0f0b1e'; ctx.font = '700 9px Inter, sans-serif'; ctx.fillText('$', ap.mx * k, ap.my * k + 0.5); }
   for (const c of cashDrops) { const cp2 = M2W(c.m.position.x, c.m.position.z); ctx.fillStyle = '#3ddc97'; ctx.fillRect(cp2.mx * k - 4, cp2.my * k - 4, 8, 8); }
   if (lucy && !lucy.inCar) { const lp = M2W(lucy.g.position.x, lucy.g.position.z); ctx.fillStyle = '#b3122e'; ctx.beginPath(); ctx.arc(lp.mx * k, lp.my * k, 5, 0, 7); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke(); }
@@ -2200,7 +2382,7 @@ function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.05); last = now;
   if (G.mode === 'play' || G.mode === 'map' || G.mode === 'shop' || G.mode === 'dead') { G.minutes = (G.minutes + dt) % 1440; if (G.heistCooldown > 0) G.heistCooldown -= dt; }
   if (G.mode === 'play') update(dt);
-  if (G.mode !== 'boot') { updateTraffic(dt); updatePeds(dt, now); updateCombat(dt, now); if (G.mode === 'play') { checkMission(dt); updateHeist(dt); updateLucy(dt, now); updateCash(dt, now); if (G.waypoint && G.waypoint.follow) { const f = G.waypoint.follow.position; G.waypoint.wx = f.x; G.waypoint.wz = f.z; const mm = M2W(f.x, f.z); G.waypoint.mx = mm.mx; G.waypoint.my = mm.my; beam.position.set(f.x, 80, f.z); } } if (G.mode === 'play') { if (G.inCar) { carVsTraffic(); carVsPeds(); } else pedVsTraffic(); } }
+  if (G.mode !== 'boot') { updateTraffic(dt); updatePeds(dt, now); updateCombat(dt, now); if (G.mode === 'play') { checkMission(dt); updateHeist(dt); updateLucy(dt, now); updateCash(dt, now); updateBoats(dt, now); if (G.waypoint && G.waypoint.follow) { const f = G.waypoint.follow.position; G.waypoint.wx = f.x; G.waypoint.wz = f.z; const mm = M2W(f.x, f.z); G.waypoint.mx = mm.mx; G.waypoint.my = mm.my; beam.position.set(f.x, 80, f.z); } } if (G.mode === 'play') { if (G.inCar) { carVsTraffic(); carVsPeds(); } else pedVsTraffic(); } }
   updateSparks(dt); updateSmoke(dt);
   if ((skyTick += dt) > 0.5) { skyTick = 0; updateSky(false); }
   updateCamera(dt, now);
@@ -2221,7 +2403,8 @@ function inputVec() {
 }
 function update(dt) {
   const { ix, iy, run, brake } = inputVec();
-  if (G.inCar) {
+  if (G.inCar && car.userData.boat) updatePlayerBoat(dt, ix, iy, run, brake, performance.now());
+  else if (G.inCar) {
     const c = car.userData, max = run ? 52 : 36;
     if (iy > 0) c.speed += (run ? 24 : 17) * dt * iy; else if (iy < 0) c.speed += (c.speed > 0 ? 32 : 12) * dt * iy; else c.speed *= (1 - 0.9 * dt);
     if (brake) c.speed *= (1 - 3 * dt);
@@ -2251,23 +2434,25 @@ function update(dt) {
     const ud = player.userData;
     if (ud.down > 0) {
       ud.down -= dt; ud.body.rotation.x = Math.min(Math.PI / 2, ud.body.rotation.x + dt * 8); ud.body.position.y = 0.12 * Math.min(1, ud.body.rotation.x / 1.5);
-      moveWithCollision(player, ud.vx * dt, ud.vz * dt, 0.45); ud.vx *= Math.pow(0.05, dt); ud.vz *= Math.pow(0.05, dt);
+      moveWithCollision(player, ud.vx * dt, ud.vz * dt, 0.45, true); ud.vx *= Math.pow(0.05, dt); ud.vz *= Math.pow(0.05, dt);
       if (ud.down <= 0) { ud.body.rotation.x = 0; ud.body.position.y = 0; }
     } else {
-      const m = Math.hypot(ix, iy);
+      const m = Math.hypot(ix, iy), swimming = inWater(player.position.x, player.position.z);
+      if (swimming !== G.swimming) { G.swimming = swimming; if (swimming) { standPose(ud); if (!G.swamOnce) { G.swamOnce = true; toast('Estás nadando. Buscá un muelle o un barco.'); } } else { ud.body.rotation.x = 0; standPose(ud); } }
       if (m > 0.05) {
-        const n = Math.min(m, 1) / m, sp = (run ? 9 : 4.4) * Math.min(m, 1);
+        const n = Math.min(m, 1) / m, sp = (swimming ? (run ? 4.2 : 2.8) : run ? 9 : 4.4) * Math.min(m, 1);
         const fwdX = -Math.sin(G.camYaw), fwdZ = -Math.cos(G.camYaw), rX = -fwdZ, rZ = fwdX;
         const dx = (fwdX * iy + rX * ix) * n * sp * dt, dz = (fwdZ * iy + rZ * ix) * n * sp * dt;
-        moveWithCollision(player, dx, dz, 0.4); pushFromPeds();
+        moveWithCollision(player, dx, dz, 0.4, true); pushFromPeds();
         let diff = Math.atan2(dx, dz) - player.rotation.y; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
         player.rotation.y += diff * Math.min(1, dt * 12);
-        ud.phase += dt * (run ? 11 : 6.8);
-        animHuman(ud, ud.phase, run ? 1.5 : 0.85);
+        ud.phase += dt * (swimming ? (run ? 6 : 4.5) : run ? 11 : 6.8);
+        if (swimming) swimAnim(ud, ud.phase); else animHuman(ud, ud.phase, run ? 1.5 : 0.85);
         markDirty();
-      } else idleHuman(ud, performance.now());
+      } else if (swimming) { ud.phase += dt * 1.5; swimAnim(ud, ud.phase, true); } else idleHuman(ud, performance.now());
     }
-    player.position.y += (groundY(player.position.x, player.position.z) - player.position.y) * Math.min(1, dt * 15);
+    const gy = G.swimming ? (Math.hypot(ix, iy) > 0.05 ? -0.28 : -1.32) + Math.sin(performance.now() / 500) * 0.04 : groundY(player.position.x, player.position.z);
+    player.position.y += (gy - player.position.y) * Math.min(1, dt * 8);
     applyAimPose(dt);
   }
   nearStore = null; let bd = 4.5;
@@ -2285,7 +2470,8 @@ function updateCamera(dt, now) {
   const t = focusPos();
   if (G.inCar && !pointers.size) { let diff = (car.rotation.y + Math.PI) - G.camYaw; diff = Math.atan2(Math.sin(diff), Math.cos(diff)); G.camYaw += diff * Math.min(1, dt * 3); }
   const spd = G.inCar ? Math.abs(car.userData.speed) : 0;
-  const dist = G.inCar ? (car.userData.bike ? 5.5 : 9) + spd * 0.06 : 5.4, hgt = G.inCar ? (car.userData.bike ? 1.6 : 2) : 1.6;
+  const bm = G.inCar && car.userData.boat ? MODELS[car.userData.model].cam : null;
+  const dist = bm ? bm[0] + spd * 0.05 : G.inCar ? (car.userData.bike ? 5.5 : 9) + spd * 0.06 : 5.4, hgt = bm ? bm[1] : G.inCar ? (car.userData.bike ? 1.6 : 2) : 1.6;
   camera.fov += ((G.inCar ? 60 + spd * 0.35 : 60) - camera.fov) * Math.min(1, dt * 3); camera.updateProjectionMatrix();
   v3.set(t.x + Math.sin(G.camYaw) * Math.cos(G.camPitch) * dist, t.y + hgt + Math.sin(G.camPitch) * dist, t.z + Math.cos(G.camYaw) * Math.cos(G.camPitch) * dist);
   // que la cámara no atraviese edificios
@@ -2303,11 +2489,11 @@ function updateHUD() {
   const st = $('stars'); st.innerHTML = '<b>' + '★'.repeat(G.wanted) + '</b>' + '★'.repeat(5 - G.wanted); st.classList.toggle('blink', G.wanted > 0 && performance.now() - G.lastSeen > 2500);
   $('hpBar').firstElementChild.style.width = Math.max(0, G.hp) + '%'; $('hpBar').firstElementChild.style.background = G.hp > 50 ? 'var(--ok)' : G.hp > 25 ? 'var(--gold)' : 'var(--bad)'; $('hpBar').lastElementChild.style.width = (G.armor || 0) + '%';
   $('weaponChip').innerHTML = WEAPON_ORDER.map((w, i) => (w === 'fist' || G.weapons[w] > 0) ? `<span class="wslot${w === G.weapon ? ' on' : ''}"><kbd>${i + 1}</kbd>${esc(WEAPONS[w].name)}${w === 'fist' ? '' : ` <small>${G.weapons[w]}</small>`}</span>` : '').join('');
-  const ch = $('crosshair'); ch.hidden = !(G.mode === 'play' && !G.inCar); ch.classList.toggle('dot', G.weapon === 'fist');
+  const ch = $('crosshair'); ch.hidden = !(G.mode === 'play' && !G.inCar && !G.swimming); ch.classList.toggle('dot', G.weapon === 'fist');
   const fp = M2W(focusPos().x, focusPos().z), z = zoneAt(fp.mx, fp.my);
   $('zone').textContent = z ? z.name.toUpperCase() : 'AFUERAS';
   $('carHud').hidden = !G.inCar;
-  if (G.inCar) { const hp = car.userData.health; $('speed').textContent = Math.round(Math.abs(car.userData.speed) * 3.6) + ' km/h'; const bar = $('carBar').firstElementChild; bar.style.width = hp + '%'; bar.style.background = hp > 50 ? 'var(--ok)' : hp > 20 ? 'var(--gold)' : 'var(--bad)'; }
+  if (G.inCar) { const hp = car.userData.health; $('speed').textContent = car.userData.boat ? Math.round(Math.abs(car.userData.speed) * 1.94) + ' nudos' : Math.round(Math.abs(car.userData.speed) * 3.6) + ' km/h'; const bar = $('carBar').firstElementChild; bar.style.width = hp + '%'; bar.style.background = hp > 50 ? 'var(--ok)' : hp > 20 ? 'var(--gold)' : 'var(--bad)'; }
   const pr = $('prompt');
   if (G.mode !== 'play') pr.hidden = true;
   else if (nearStore) { pr.innerHTML = locked(nearStore) ? `${esc(nearStore.name)} · Todavía no podés entrar` : `<kbd>E</kbd>Entrar a ${esc(nearStore.name)}`; pr.hidden = false; }
