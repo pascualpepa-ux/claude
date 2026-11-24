@@ -25,7 +25,8 @@
 
   function productUrl(p) { return "producto.html?id=" + encodeURIComponent(p.id); }
 
-  function payOn() { return !!(window.NWW_CART && window.NWW_CART.active); }
+  // El pago con tarjeta solo se muestra con la clave REAL de Stripe (sk_live_). En modo prueba: "Reservar" con el formulario.
+  function payOn() { return !!(window.NWW_CART && window.NWW_CART.active && !window.NWW_CART.test); }
 
   /* ---------- Reservas (máximo window.MAX_RESERVAS por camiseta) ---------- */
   var MAXRES = window.MAX_RESERVAS || 5;
