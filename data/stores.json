@@ -181,8 +181,9 @@
       },
       "icon": "pistol",
       "hours": {
-        "open": "09:00",
-        "close": "21:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Pistolas",
@@ -203,8 +204,9 @@
       },
       "icon": "rifle",
       "hours": {
-        "open": "08:00",
-        "close": "22:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Rifles de asalto",
@@ -225,8 +227,9 @@
       },
       "icon": "bullet",
       "hours": {
-        "open": "07:00",
-        "close": "20:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Rifles de caza",
@@ -247,8 +250,9 @@
       },
       "icon": "sneaker",
       "hours": {
-        "open": "10:00",
-        "close": "22:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Streetwear",
@@ -269,8 +273,9 @@
       },
       "icon": "diamond",
       "hours": {
-        "open": "11:00",
-        "close": "20:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Trajes de diseñador",
@@ -291,8 +296,9 @@
       },
       "icon": "hanger",
       "hours": {
-        "open": "09:00",
-        "close": "19:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Ropa de segunda mano",
@@ -313,8 +319,9 @@
       },
       "icon": "boot",
       "hours": {
-        "open": "07:00",
-        "close": "19:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Botas",
@@ -335,8 +342,9 @@
       },
       "icon": "sports-car",
       "hours": {
-        "open": "09:00",
-        "close": "21:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Superdeportivos",
@@ -356,8 +364,9 @@
       },
       "icon": "wrench",
       "hours": {
-        "open": "10:00",
-        "close": "02:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Tuning",
@@ -365,7 +374,7 @@
         "Motores",
         "Blindaje de vehículos"
       ],
-      "description": "Taller de tuning escondido entre chatarra; abre hasta tarde."
+      "description": "Taller de tuning escondido entre chatarra; repara y modifica a cualquier hora."
     },
     {
       "id": "keys-boat-club",
@@ -378,8 +387,9 @@
       },
       "icon": "speedboat",
       "hours": {
-        "open": "08:00",
-        "close": "20:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Lanchas rápidas",
@@ -400,8 +410,9 @@
       },
       "icon": "helicopter",
       "hours": {
-        "open": "06:00",
-        "close": "22:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Avionetas",
@@ -422,15 +433,16 @@
       },
       "icon": "tattoo-machine",
       "hours": {
-        "open": "12:00",
-        "close": "03:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Tatuajes",
         "Piercings",
         "Remoción láser"
       ],
-      "description": "Estudio de tatuajes en el paseo marítimo; abierto hasta la madrugada."
+      "description": "Estudio de tatuajes en el paseo marítimo."
     },
     {
       "id": "fade-kings-barber",
@@ -443,8 +455,9 @@
       },
       "icon": "scissors",
       "hours": {
-        "open": "09:00",
-        "close": "21:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Cortes",
@@ -465,8 +478,9 @@
       },
       "icon": "burger",
       "hours": {
-        "open": "10:00",
-        "close": "02:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Hamburguesas",
@@ -486,8 +500,9 @@
       },
       "icon": "taco",
       "hours": {
-        "open": "11:00",
-        "close": "01:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Tacos de pescado",
@@ -508,8 +523,9 @@
       },
       "icon": "coffee",
       "hours": {
-        "open": "06:00",
-        "close": "23:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Café cubano",
@@ -530,8 +546,9 @@
       },
       "icon": "pizza",
       "hours": {
-        "open": "11:00",
-        "close": "03:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Pizzas",
@@ -539,7 +556,7 @@
         "Alitas",
         "Delivery"
       ],
-      "description": "Pizzería con horno de lava y delivery hasta las 3 AM."
+      "description": "Pizzería con horno de lava y delivery a toda hora."
     },
     {
       "id": "smoothie-shack",
@@ -552,8 +569,9 @@
       },
       "icon": "smoothie",
       "hours": {
-        "open": "07:00",
-        "close": "20:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Smoothies",
@@ -620,8 +638,9 @@
       },
       "icon": "disco",
       "hours": {
-        "open": "22:00",
-        "close": "06:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Entradas",
@@ -629,7 +648,7 @@
         "Cócteles",
         "Botellas"
       ],
-      "description": "Club nocturno insignia de la ciudad; solo abre de noche."
+      "description": "Club nocturno insignia de la ciudad; la fiesta no para nunca."
     },
     {
       "id": "the-rusty-anchor",
@@ -642,8 +661,9 @@
       },
       "icon": "anchor",
       "hours": {
-        "open": "16:00",
-        "close": "04:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Cerveza",
@@ -664,8 +684,9 @@
       },
       "icon": "cocktail",
       "hours": {
-        "open": "18:00",
-        "close": "03:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Cócteles",
@@ -685,8 +706,9 @@
       },
       "icon": "house-key",
       "hours": {
-        "open": "09:00",
-        "close": "18:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Departamentos",
@@ -710,8 +732,9 @@
       },
       "icon": "smartphone",
       "hours": {
-        "open": "10:00",
-        "close": "21:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Celulares",
@@ -732,8 +755,9 @@
       },
       "icon": "dumbbell",
       "hours": {
-        "open": "05:00",
-        "close": "23:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Membresías",
@@ -753,8 +777,9 @@
       },
       "icon": "bank",
       "hours": {
-        "open": "09:00",
-        "close": "17:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Cuentas",
@@ -780,8 +805,9 @@
       },
       "icon": "pawn-ring",
       "hours": {
-        "open": "10:00",
-        "close": "22:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Joyas",
@@ -847,8 +873,9 @@
       },
       "icon": "heels",
       "hours": {
-        "open": "21:00",
-        "close": "06:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Shows",
@@ -873,8 +900,9 @@
       },
       "icon": "heels",
       "hours": {
-        "open": "20:00",
-        "close": "05:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Shows",
@@ -900,8 +928,9 @@
       },
       "icon": "heels",
       "hours": {
-        "open": "19:00",
-        "close": "04:00"
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
       },
       "sells": [
         "Shows",
