@@ -1,0 +1,420 @@
+<title>Heat City</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700&display=swap">
+<style>
+/* Layout: canvas a pantalla completa, HUD flotante en las esquinas, panel de tienda abajo. Estética única: noche neón de costa. */
+:root {
+  --night: #0f0b1e;
+  --panel: rgba(22, 16, 44, 0.92);
+  --line: #3a2f63;
+  --text: #f4ecff;
+  --muted: #a99cc9;
+  --sun: #ff7a3d;
+  --pink: #ff3d8b;
+  --gold: #ffd23f;
+  --ok: #3ddc97;
+  --bad: #ff5a5a;
+  --display: "Bungee", "Impact", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--night); color: var(--text); font-family: var(--body); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hud { position: fixed; font-variant-numeric: tabular-nums; pointer-events: none; }
+.tl { top: calc(12px + env(safe-area-inset-top, 0px)); left: calc(12px + env(safe-area-inset-left, 0px)); }
+.tr { top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.brand { font-family: var(--display); font-size: 22px; letter-spacing: 0.02em; background: linear-gradient(90deg, var(--sun), var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; }
+.chip { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 13px; display: flex; gap: 10px; align-items: center; }
+.chip b { font-weight: 700; }
+#zone { font-family: var(--display); font-size: 13px; color: var(--gold); letter-spacing: 0.04em; margin-top: 6px; }
+#money { color: var(--ok); }
+.btn { pointer-events: auto; font: 600 12px var(--body); color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; cursor: pointer; }
+.btn:hover { border-color: var(--sun); }
+.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn.on { border-color: var(--pink); color: var(--pink); }
+#legend { pointer-events: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; gap: 4px; max-height: 52vh; overflow-y: auto; width: 210px; }
+#legend label { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; }
+#legend .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+#legend .count { margin-left: auto; color: var(--muted); }
+#legendWrap[hidden] { display: none; }
+#prompt { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); background: var(--panel); border: 1px solid var(--sun); border-radius: 999px; padding: 8px 16px; font-size: 13px; pointer-events: auto; cursor: pointer; white-space: nowrap; }
+#prompt kbd { font-family: var(--display); color: var(--sun); }
+#card { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: min(440px, calc(100% - 24px)); background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; display: grid; gap: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+#card h2 { font-family: var(--display); font-size: 20px; font-weight: 400; margin: 0; line-height: 1.1; text-wrap: balance; }
+#card .meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; }
+.pill { border-radius: 999px; padding: 3px 9px; border: 1px solid var(--line); color: var(--muted); }
+.pill.open { color: var(--ok); border-color: var(--ok); }
+.pill.closed { color: var(--bad); border-color: var(--bad); }
+.pill.heist { color: var(--night); background: var(--gold); border-color: var(--gold); font-weight: 700; }
+#card p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.45; }
+#card ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+#card li { font-size: 12px; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 4px 8px; }
+#card .row { display: flex; gap: 8px; flex-wrap: wrap; }
+#card .act { pointer-events: auto; font: 700 13px var(--body); border: none; border-radius: 10px; padding: 9px 14px; cursor: pointer; background: var(--sun); color: var(--night); }
+#card .act.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+#card .act:disabled { opacity: 0.4; cursor: not-allowed; }
+#toast { position: fixed; top: calc(70px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--night); font-weight: 700; font-size: 13px; padding: 8px 14px; border-radius: 10px; pointer-events: none; }
+#help { position: fixed; left: calc(12px + env(safe-area-inset-left, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); font-size: 11px; color: var(--muted); pointer-events: none; }
+[hidden] { display: none !important; }
+#err { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; }
+@media (max-width: 600px) {
+  #legend { width: 180px; max-height: 40vh; }
+  #help { display: none; }
+  .brand { font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<canvas id="game" aria-label="Mapa de Heat City"></canvas>
+
+<div class="hud tl">
+  <div class="brand">HEAT CITY</div>
+  <div id="zone">—</div>
+</div>
+
+<div class="hud tr">
+  <div class="chip"><span id="clock">08:00</span><b id="money">$2,500</b></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+    <button class="btn" id="btnLegend" type="button">Filtros</button>
+    <button class="btn" id="btnMap" type="button">Mapa (M)</button>
+    <button class="btn" id="btnStory" type="button">Completar misión</button>
+  </div>
+  <div id="legendWrap" hidden><div id="legend"></div></div>
+</div>
+
+<div id="prompt" hidden></div>
+<div id="card" hidden></div>
+<div id="toast" hidden></div>
+<div id="help">WASD / flechas para moverte · Shift para correr · E para entrar · M mapa grande</div>
+<div id="err" hidden></div>
+
+<script>
+(() => {
+  const SCALE = 4;                       // 1 unidad de mapa = 4 px de mundo
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const $ = id => document.getElementById(id);
+
+  const ICON_GLYPH = {
+    armeria: '✦', ropa: '◆', autos: '▲', tatuajes: '✂', comida: '●', tienda24: '24',
+    bar: '♪', inmobiliaria: '⌂', tecnologia: '▣', gimnasio: '≡', banco: '$', empeno: '◎',
+    servicios: '+', club_adulto: '♥'
+  };
+  const ZONE_STYLE = {
+    'sunset-strip':   { fill: '#3b1f4a', road: '#5c3470', accent: '#ff3d8b' },
+    'downtown-blaze': { fill: '#2a2440', road: '#4a4070', accent: '#ff7a3d' },
+    'coral-keys':     { fill: '#1d4a52', road: '#2e6b72', accent: '#3ddcd0' },
+    'port-sable':     { fill: '#272b33', road: '#3d434f', accent: '#9aa7bd' },
+    'swamp-row':      { fill: '#22331f', road: '#34492f', accent: '#9bd46a' }
+  };
+
+  const state = {
+    data: null, zones: {}, cats: {},
+    player: { x: 470 * SCALE, y: 480 * SCALE, a: 0, speed: 0 },
+    cam: { x: 0, y: 0 },
+    keys: {}, minutes: 8 * 60, money: 2500, story: 0,
+    hidden: new Set(), bigMap: false, near: null, open: null, owned: new Set(),
+    joy: null
+  };
+
+  // ---------- Carga ----------
+  fetch('stores.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(init)
+    .catch(() => { const e = $('err'); e.hidden = false; e.textContent = 'No se pudo cargar stores.json. Recargá la página.'; });
+
+  function init(data) {
+    state.data = data;
+    data.zones.forEach(z => state.zones[z.id] = z);
+    data.categories.forEach(c => state.cats[c.id] = c);
+    buildLegend();
+    resize();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Utilidades ----------
+  const toMin = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+  const fmt = m => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(Math.floor(m % 60)).padStart(2, '0')}`;
+  function isOpen(store, minutes) {
+    const h = store.hours; if (h.always_open) return true;
+    const o = toMin(h.open), c = toMin(h.close), t = minutes % 1440;
+    return o < c ? (t >= o && t < c) : (t >= o || t < c);
+  }
+  const visible = s => !state.hidden.has(s.category) && !(s.unlock && s.unlock.locked_by_default && state.story < 1);
+  function zoneAt(mx, my) {
+    // Downtown primero: se superpone en los bordes con Sunset Strip.
+    const order = ['downtown-blaze', 'sunset-strip', 'port-sable', 'coral-keys', 'swamp-row'];
+    for (const id of order) { const b = state.zones[id]?.bounds; if (b && mx >= b.x[0] && mx <= b.x[1] && my >= b.y[0] && my <= b.y[1]) return state.zones[id]; }
+    return null;
+  }
+  function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
+
+  // ---------- Leyenda / filtros ----------
+  function buildLegend() {
+    const el = $('legend');
+    el.innerHTML = '';
+    state.data.categories.forEach(c => {
+      const n = state.data.stores.filter(s => s.category === c.id).length;
+      const id = 'f-' + c.id;
+      const lab = document.createElement('label');
+      lab.innerHTML = `<input type="checkbox" id="${id}" checked><span class="dot" style="background:${c.color}"></span>${c.name}<span class="count">${n}</span>`;
+      lab.querySelector('input').addEventListener('change', e => { e.target.checked ? state.hidden.delete(c.id) : state.hidden.add(c.id); });
+      el.appendChild(lab);
+    });
+  }
+  $('btnLegend').onclick = () => { const w = $('legendWrap'); w.hidden = !w.hidden; $('btnLegend').classList.toggle('on', !w.hidden); };
+  $('btnMap').onclick = () => toggleMap();
+  $('btnStory').onclick = () => {
+    if (state.story >= 1) return toast('Ya completaste la misión de esta demo');
+    state.story = 1; $('btnStory').disabled = true; $('btnStory').textContent = 'Misión completada';
+    const unlocked = state.data.stores.filter(s => s.unlock).map(s => s.name).join(', ');
+    toast('Desbloqueado: ' + unlocked);
+  };
+  function toggleMap() { state.bigMap = !state.bigMap; $('btnMap').classList.toggle('on', state.bigMap); closeCard(); }
+
+  // ---------- Panel de tienda ----------
+  function openCard(s) {
+    state.open = s;
+    const z = state.zones[s.zone], c = state.cats[s.category];
+    const open = isOpen(s, state.minutes);
+    const hrs = s.hours.always_open ? 'Abierto 24 h' : `${s.hours.open} – ${s.hours.close}`;
+    const card = $('card');
+    let actions = '';
+    if (s.special?.type === 'golpe') actions = `<button class="act" data-a="heist" type="button">Planear golpe</button>`;
+    else if (s.actions?.includes('comprar_propiedad')) actions = `<button class="act" data-a="buy" type="button" ${state.owned.has(s.id) ? 'disabled' : ''}>${state.owned.has(s.id) ? 'Propiedad comprada' : 'Comprar depto · $1,500'}</button>`;
+    else actions = `<button class="act" data-a="shop" type="button" ${open ? '' : 'disabled'}>${open ? 'Comprar' : 'Cerrado ahora'}</button>`;
+    card.innerHTML = `
+      <div class="meta"><span class="pill" style="color:${c.color};border-color:${c.color}">${c.name}</span>
+        <span class="pill">${z.name}</span>
+        <span class="pill ${open ? 'open' : 'closed'}">${open ? 'Abierto' : 'Cerrado'} · ${hrs}</span>
+        ${s.special ? `<span class="pill heist">${s.special.label}</span>` : ''}
+        ${c.age_rating ? `<span class="pill">${c.age_rating}</span>` : ''}</div>
+      <h2>${s.name}</h2>
+      <p>${s.description}</p>
+      <ul>${s.sells.map(x => `<li>${x}</li>`).join('')}</ul>
+      <div class="row">${actions}<button class="act ghost" data-a="close" type="button">Salir (E)</button></div>`;
+    card.hidden = false; $('prompt').hidden = true;
+    card.querySelectorAll('button[data-a]').forEach(b => b.onclick = () => act(b.dataset.a, s));
+  }
+  function closeCard() { state.open = null; $('card').hidden = true; }
+  function act(a, s) {
+    if (a === 'close') return closeCard();
+    if (a === 'shop') { const p = 50 + Math.floor(Math.random() * 200); if (state.money < p) return toast('No te alcanza la plata'); state.money -= p; toast(`Compraste en ${s.name} · -$${p}`); }
+    if (a === 'buy') { if (state.money < 1500) return toast('Necesitás $1,500'); state.money -= 1500; state.owned.add(s.id); toast('Nueva propiedad: depto en Heat City'); openCard(s); }
+    if (a === 'heist') { const t = state.minutes % 1440; if (t >= 540 && t < 1020) return toast('Demasiada gente. Volvé de noche (después de las 17:00)'); const loot = 8000 + Math.floor(Math.random() * 12000); state.money += loot; toast(`¡Golpe exitoso! +$${loot.toLocaleString('en-US')}`); closeCard(); }
+  }
+
+  // ---------- Input ----------
+  addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    state.keys[k] = true;
+    if (k === 'e') { if (state.open) closeCard(); else if (state.near) openCard(state.near); }
+    if (k === 'm') toggleMap();
+    if (k === 'escape') { closeCard(); if (state.bigMap) toggleMap(); }
+    if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+  });
+  addEventListener('keyup', e => { state.keys[e.key.toLowerCase()] = false; });
+  addEventListener('blur', () => state.keys = {});
+  $('prompt').onclick = () => state.near && openCard(state.near);
+
+  canvas.addEventListener('pointerdown', e => {
+    if (state.bigMap) return;
+    // Tocar un pin cercano abre su panel; si no, arranca el joystick.
+    const w = screenToWorld(e.clientX, e.clientY);
+    const hit = state.data?.stores.find(s => visible(s) && Math.hypot(s.position.x * SCALE - w.x, s.position.y * SCALE - w.y) < 28);
+    if (hit && Math.hypot(hit.position.x * SCALE - state.player.x, hit.position.y * SCALE - state.player.y) < 160) return openCard(hit);
+    state.joy = { id: e.pointerId, ox: e.clientX, oy: e.clientY, dx: 0, dy: 0 };
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', e => { if (state.joy?.id === e.pointerId) { state.joy.dx = e.clientX - state.joy.ox; state.joy.dy = e.clientY - state.joy.oy; } });
+  const endJoy = e => { if (state.joy?.id === e.pointerId) state.joy = null; };
+  canvas.addEventListener('pointerup', endJoy); canvas.addEventListener('pointercancel', endJoy);
+
+  // ---------- Loop ----------
+  let W = 0, H = 0, DPR = 1, last = performance.now();
+  function resize() { DPR = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; canvas.width = W * DPR; canvas.height = H * DPR; }
+  addEventListener('resize', resize);
+  const screenToWorld = (sx, sy) => ({ x: sx + state.cam.x - W / 2, y: sy + state.cam.y - H / 2 });
+
+  function loop(now) {
+    const dt = Math.min((now - last) / 1000, 0.05); last = now;
+    update(dt); draw();
+    requestAnimationFrame(loop);
+  }
+
+  function update(dt) {
+    state.minutes = (state.minutes + dt * 2) % 1440;   // 1 s real = 2 min de juego
+    const p = state.player, k = state.keys;
+    let ix = (k['d'] || k['arrowright'] ? 1 : 0) - (k['a'] || k['arrowleft'] ? 1 : 0);
+    let iy = (k['s'] || k['arrowdown'] ? 1 : 0) - (k['w'] || k['arrowup'] ? 1 : 0);
+    if (state.joy) { const m = Math.hypot(state.joy.dx, state.joy.dy); if (m > 8) { ix = state.joy.dx / Math.max(m, 50); iy = state.joy.dy / Math.max(m, 50); } }
+    const mag = Math.hypot(ix, iy);
+    if (state.open || state.bigMap) { ix = iy = 0; }
+    if (mag > 0 && !state.open && !state.bigMap) {
+      const n = Math.min(mag, 1) / mag;
+      const sp = (k['shift'] ? 520 : 300);
+      p.x += ix * n * sp * dt; p.y += iy * n * sp * dt; p.a = Math.atan2(iy, ix);
+    }
+    const max = 1000 * SCALE;
+    p.x = Math.max(20, Math.min(max - 20, p.x)); p.y = Math.max(20, Math.min(max - 20, p.y));
+    state.cam.x += (p.x - state.cam.x) * Math.min(1, dt * 8);
+    state.cam.y += (p.y - state.cam.y) * Math.min(1, dt * 8);
+
+    // tienda cercana
+    let best = null, bd = 70;
+    for (const s of state.data.stores) { if (!visible(s)) continue; const d = Math.hypot(s.position.x * SCALE - p.x, s.position.y * SCALE - p.y); if (d < bd) { bd = d; best = s; } }
+    if (best !== state.near) {
+      state.near = best;
+      const pr = $('prompt');
+      if (best && !state.open) { pr.innerHTML = `<kbd>E</kbd> Entrar a ${best.name}`; pr.hidden = false; } else pr.hidden = true;
+    }
+    if (state.open && state.near !== state.open) closeCard();
+
+    const z = zoneAt(p.x / SCALE, p.y / SCALE);
+    $('zone').textContent = z ? z.name.toUpperCase() : 'AFUERAS';
+    $('clock').textContent = fmt(state.minutes);
+    $('money').textContent = '$' + state.money.toLocaleString('en-US');
+  }
+
+  // ---------- Dibujo ----------
+  function darkness() {
+    const t = state.minutes / 60; // 0..24
+    if (t >= 7 && t < 18) return 0;
+    if (t >= 18 && t < 21) return (t - 18) / 3 * 0.55;
+    if (t >= 5 && t < 7) return (7 - t) / 2 * 0.55;
+    return 0.55;
+  }
+
+  function drawWorld(scale, ox, oy, detail, labels = true) {
+    const S = SCALE * scale;
+    // agua
+    ctx.fillStyle = '#123a5c'; ctx.fillRect(ox, oy, 1000 * S, 1000 * S);
+    // tierra firme (todo menos el mar del sureste)
+    ctx.fillStyle = '#2b2a3a';
+    ctx.beginPath();
+    ctx.moveTo(ox + 30 * S, oy); ctx.lineTo(ox + 1000 * S, oy); ctx.lineTo(ox + 1000 * S, oy + 560 * S);
+    ctx.lineTo(ox + 650 * S, oy + 640 * S); ctx.lineTo(ox + 600 * S, oy + 1000 * S); ctx.lineTo(ox, oy + 1000 * S); ctx.lineTo(ox, oy + 40 * S);
+    ctx.closePath(); ctx.fill();
+    // zonas
+    const order = ['swamp-row', 'port-sable', 'sunset-strip', 'downtown-blaze'];
+    for (const id of order) {
+      const z = state.zones[id]; if (!z) continue; const b = z.bounds, st = ZONE_STYLE[id];
+      ctx.fillStyle = st.fill; ctx.fillRect(ox + b.x[0] * S, oy + b.y[0] * S, (b.x[1] - b.x[0]) * S, (b.y[1] - b.y[0]) * S);
+      if (detail) {
+        ctx.strokeStyle = st.road; ctx.lineWidth = 10 * scale;
+        for (let x = b.x[0] + 50; x < b.x[1]; x += 100) { ctx.beginPath(); ctx.moveTo(ox + x * S, oy + b.y[0] * S); ctx.lineTo(ox + x * S, oy + b.y[1] * S); ctx.stroke(); }
+        for (let y = b.y[0] + 50; y < b.y[1]; y += 100) { ctx.beginPath(); ctx.moveTo(ox + b.x[0] * S, oy + y * S); ctx.lineTo(ox + b.x[1] * S, oy + y * S); ctx.stroke(); }
+      }
+    }
+    // pantano: charcos
+    ctx.fillStyle = '#1b3d33';
+    [[60, 700, 40], [250, 760, 55], [140, 880, 35], [320, 980, 30]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(ox + x * S, oy + y * S, r * S, 0, 7); ctx.fill(); });
+    // Coral Keys: islas
+    const isl = ZONE_STYLE['coral-keys'];
+    [[715, 700, 70], [810, 740, 60], [690, 840, 55], [870, 650, 50], [935, 900, 60], [670, 950, 40], [955, 770, 45]].forEach(([x, y, r]) => {
+      ctx.fillStyle = '#e9d6a4'; ctx.beginPath(); ctx.arc(ox + x * S, oy + y * S, (r + 6) * S, 0, 7); ctx.fill();
+      ctx.fillStyle = isl.fill; ctx.beginPath(); ctx.arc(ox + x * S, oy + y * S, r * S, 0, 7); ctx.fill();
+    });
+    // puentes a las islas
+    ctx.strokeStyle = '#6b5a7a'; ctx.lineWidth = 8 * scale;
+    [[[640, 620], [715, 700]], [[715, 700], [810, 740]], [[810, 740], [870, 650]], [[715, 700], [690, 840]], [[690, 840], [670, 950]], [[810, 740], [955, 770]], [[955, 770], [935, 900]]].forEach(([a, b]) => {
+      ctx.beginPath(); ctx.moveTo(ox + a[0] * S, oy + a[1] * S); ctx.lineTo(ox + b[0] * S, oy + b[1] * S); ctx.stroke();
+    });
+    // nombres de zona
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (labels) for (const z of state.data.zones) {
+      const b = z.bounds, cx = (b.x[0] + b.x[1]) / 2, cy = (b.y[0] + b.y[1]) / 2;
+      ctx.font = `${Math.max(11, 34 * scale)}px Bungee, Impact, sans-serif`;
+      ctx.fillStyle = ZONE_STYLE[z.id].accent; ctx.globalAlpha = detail ? 0.18 : 0.85;
+      ctx.fillText(z.name.toUpperCase(), ox + cx * S, oy + cy * S);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function drawPin(s, x, y, r, big) {
+    const c = state.cats[s.category];
+    const open = isOpen(s, state.minutes);
+    const heist = s.special?.type === 'golpe';
+    const color = heist ? s.special.pin_color : c.color;
+    if (heist) { ctx.fillStyle = 'rgba(255,210,63,0.25)'; ctx.beginPath(); ctx.arc(x, y, r * (1.8 + 0.3 * Math.sin(performance.now() / 300)), 0, 7); ctx.fill(); }
+    ctx.globalAlpha = open ? 1 : 0.5;
+    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y - r, r, Math.PI * 0.85, Math.PI * 2.15); ctx.lineTo(x, y + r * 0.4); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#0f0b1e'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = heist ? '#0f0b1e' : '#fff';
+    ctx.font = `700 ${Math.round(r * (ICON_GLYPH[s.category].length > 1 ? 0.8 : 1.1))}px Inter, system-ui, sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(heist ? '$' : ICON_GLYPH[s.category], x, y - r);
+    ctx.globalAlpha = 1;
+    if (big) {
+      ctx.font = '600 12px Inter, system-ui, sans-serif';
+      const w = ctx.measureText(s.name).width + 12;
+      ctx.fillStyle = 'rgba(15,11,30,0.85)'; ctx.fillRect(x - w / 2, y + r * 0.6, w, 18);
+      ctx.fillStyle = '#f4ecff'; ctx.fillText(s.name, x, y + r * 0.6 + 9);
+    }
+  }
+
+  function draw() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = '#0f0b1e'; ctx.fillRect(0, 0, W, H);
+    if (!state.data) return;
+
+    if (state.bigMap) {
+      const size = Math.min(W, H) - 120, ox = (W - size) / 2, oy = (H - size) / 2 + 20, sc = size / (1000 * SCALE);
+      drawWorld(sc, ox, oy, false);
+      for (const s of state.data.stores) if (visible(s)) drawPin(s, ox + s.position.x * SCALE * sc, oy + s.position.y * SCALE * sc, 8, false);
+      const px = ox + state.player.x * sc, py = oy + state.player.y * sc;
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ff3d8b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(px, py, 6, 0, 7); ctx.fill(); ctx.stroke();
+      return;
+    }
+
+    const ox = W / 2 - state.cam.x, oy = H / 2 - state.cam.y;
+    drawWorld(1, ox, oy, true);
+
+    // pines
+    for (const s of state.data.stores) {
+      if (!visible(s)) continue;
+      const x = ox + s.position.x * SCALE, y = oy + s.position.y * SCALE;
+      if (x < -60 || y < -60 || x > W + 60 || y > H + 60) continue;
+      drawPin(s, x, y, 16, true);
+    }
+
+    // jugador
+    const p = state.player, x = ox + p.x, y = oy + p.y;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(p.a);
+    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(2, 4, 13, 10, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = '#ff3d8b'; ctx.beginPath(); ctx.arc(0, 0, 11, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(5, -6); ctx.lineTo(5, 6); ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    // noche
+    const d = darkness();
+    if (d > 0) {
+      ctx.fillStyle = `rgba(10,6,30,${d})`; ctx.fillRect(0, 0, W, H);
+      const g = ctx.createRadialGradient(x, y, 10, x, y, 220);
+      g.addColorStop(0, `rgba(255,122,61,${d * 0.25})`); g.addColorStop(1, 'rgba(255,122,61,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+
+    // joystick táctil
+    if (state.joy) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(state.joy.ox, state.joy.oy, 50, 0, 7); ctx.stroke();
+      const m = Math.hypot(state.joy.dx, state.joy.dy), k = m > 50 ? 50 / m : 1;
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(state.joy.ox + state.joy.dx * k, state.joy.oy + state.joy.dy * k, 20, 0, 7); ctx.fill();
+    }
+
+    drawMinimap();
+  }
+
+  function drawMinimap() {
+    const size = Math.min(150, W * 0.3), ox = W - size - 12, oy = H - size - 12 - 0, sc = size / (1000 * SCALE);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(ox, oy, size, size); ctx.clip();
+    drawWorld(sc, ox, oy, false, false);
+    for (const s of state.data.stores) if (visible(s)) { ctx.fillStyle = s.special?.pin_color || state.cats[s.category].color; ctx.fillRect(ox + s.position.x * SCALE * sc - 2, oy + s.position.y * SCALE * sc - 2, 4, 4); }
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ox + state.player.x * sc, oy + state.player.y * sc, 3.5, 0, 7); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = '#3a2f63'; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, size, size);
+  }
+})();
+</script>
