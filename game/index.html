@@ -2,10 +2,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700&display=swap">
 <style>
-/* Layout: canvas a pantalla completa, HUD flotante en las esquinas, panel de tienda abajo. Estética única: noche neón de costa. */
+/* Layout: juego 3D a pantalla completa; HUD en las esquinas; mapa y locales como pantallas superpuestas. Look único: noche neón costera. */
 :root {
   --night: #0f0b1e;
-  --panel: rgba(22, 16, 44, 0.92);
+  --panel: rgba(20, 14, 40, 0.94);
   --line: #3a2f63;
   --text: #f4ecff;
   --muted: #a99cc9;
@@ -18,403 +18,735 @@
   --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: dark;
 }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body { background: var(--night); color: var(--text); font-family: var(--body); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
-#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
-.hud { position: fixed; font-variant-numeric: tabular-nums; pointer-events: none; }
-.tl { top: calc(12px + env(safe-area-inset-top, 0px)); left: calc(12px + env(safe-area-inset-left, 0px)); }
-.tr { top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-.brand { font-family: var(--display); font-size: 22px; letter-spacing: 0.02em; background: linear-gradient(90deg, var(--sun), var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; }
-.chip { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 13px; display: flex; gap: 10px; align-items: center; }
-.chip b { font-weight: 700; }
-#zone { font-family: var(--display); font-size: 13px; color: var(--gold); letter-spacing: 0.04em; margin-top: 6px; }
-#money { color: var(--ok); }
-.btn { pointer-events: auto; font: 600 12px var(--body); color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; cursor: pointer; }
+#view { position: fixed; inset: 0; }
+#view canvas { display: block; width: 100%; height: 100%; }
+.hud { position: fixed; pointer-events: none; font-variant-numeric: tabular-nums; }
+.tl { top: calc(12px + env(safe-area-inset-top, 0px)); left: calc(12px + env(safe-area-inset-left, 0px)); display: grid; gap: 6px; }
+.tr { top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); display: grid; gap: 6px; justify-items: end; }
+.brand { font-family: var(--display); font-size: 22px; line-height: 1; background: linear-gradient(90deg, var(--sun), var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+#zone { font-family: var(--display); font-size: 13px; color: var(--gold); letter-spacing: 0.04em; text-shadow: 0 1px 4px #000; }
+.chip { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 13px; display: flex; gap: 10px; }
+#money { color: var(--ok); font-weight: 700; }
+#mission { max-width: 260px; font-size: 12px; line-height: 1.4; }
+#mission b { color: var(--sun); display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+#gps { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--pink); border-radius: 999px; padding: 6px 14px 6px 8px; font-size: 13px; white-space: nowrap; pointer-events: none; }
+#gpsArrow { width: 22px; height: 22px; display: grid; place-items: center; color: var(--pink); font-weight: 700; font-size: 18px; }
+#minimap { position: fixed; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); width: 160px; height: 160px; border-radius: 50%; border: 3px solid var(--line); background: var(--night); pointer-events: auto; cursor: pointer; }
+#prompt { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(110px + env(safe-area-inset-bottom, 0px)); background: var(--panel); border: 1px solid var(--sun); border-radius: 999px; padding: 8px 16px; font-size: 14px; white-space: nowrap; pointer-events: none; }
+#prompt kbd { font-family: var(--display); color: var(--sun); margin-right: 6px; }
+#toast { position: fixed; top: calc(64px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--night); font-weight: 700; font-size: 14px; padding: 9px 16px; border-radius: 10px; pointer-events: none; max-width: calc(100% - 32px); text-align: center; }
+#help { position: fixed; left: calc(12px + env(safe-area-inset-left, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); font-size: 11px; color: var(--muted); pointer-events: none; text-shadow: 0 1px 3px #000; line-height: 1.6; }
+#help kbd { font-family: var(--display); color: var(--text); font-size: 10px; }
+.touch { position: fixed; display: none; gap: 10px; right: calc(186px + env(safe-area-inset-right, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+.touch button { width: 58px; height: 58px; border-radius: 50%; border: 2px solid var(--line); background: var(--panel); color: var(--text); font: 700 11px var(--body); }
+@media (pointer: coarse) { .touch { display: flex; right: calc(146px + env(safe-area-inset-right, 0px)); } #help { display: none; } #minimap { width: 120px; height: 120px; } }
+
+/* Pantallas superpuestas */
+.screen { position: fixed; inset: 0; background: rgba(10, 6, 24, 0.97); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.screen header { display: flex; align-items: center; gap: 12px; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.screen header h1 { font-family: var(--display); font-weight: 400; font-size: 20px; margin: 0; }
+.screen header .sp { flex: 1; }
+.btn { font: 600 13px var(--body); color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; cursor: pointer; }
 .btn:hover { border-color: var(--sun); }
-.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.btn.on { border-color: var(--pink); color: var(--pink); }
-#legend { pointer-events: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; gap: 4px; max-height: 52vh; overflow-y: auto; width: 210px; }
-#legend label { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; }
-#legend .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
-#legend .count { margin-left: auto; color: var(--muted); }
-#legendWrap[hidden] { display: none; }
-#prompt { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); background: var(--panel); border: 1px solid var(--sun); border-radius: 999px; padding: 8px 16px; font-size: 13px; pointer-events: auto; cursor: pointer; white-space: nowrap; }
-#prompt kbd { font-family: var(--display); color: var(--sun); }
-#card { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: min(440px, calc(100% - 24px)); background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; display: grid; gap: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-#card h2 { font-family: var(--display); font-size: 20px; font-weight: 400; margin: 0; line-height: 1.1; text-wrap: balance; }
-#card .meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; }
+.btn:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn.primary { background: var(--sun); color: var(--night); border-color: var(--sun); font-weight: 700; }
+.btn.gold { background: var(--gold); color: var(--night); border-color: var(--gold); font-weight: 700; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+#mapBody { flex: 1; display: grid; grid-template-columns: 1fr 320px; min-height: 0; }
+#mapWrap { position: relative; min-width: 0; min-height: 0; }
+#bigmap { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; }
+#bigmap:active { cursor: grabbing; }
+#zoomCtl { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 6px; }
+#side { border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+#search { margin: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #1a1333; color: var(--text); font: 14px var(--body); }
+#cats { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 10px; }
+#cats button { font: 600 11px var(--body); border-radius: 999px; padding: 4px 9px; background: transparent; color: var(--text); border: 1px solid var(--line); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+#cats button .d { width: 8px; height: 8px; border-radius: 50%; }
+#cats button.off { opacity: 0.35; }
+#list { flex: 1; overflow-y: auto; padding: 0 8px 12px; }
+#list .it { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 8px; border-radius: 10px; border: none; background: transparent; color: var(--text); cursor: pointer; font: 13px var(--body); }
+#list .it:hover, #list .it.sel { background: rgba(255,255,255,0.07); }
+#list .it .d { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+#list .it small { color: var(--muted); display: block; font-size: 11px; }
+#list .it .dist { margin-left: auto; color: var(--muted); font-size: 11px; white-space: nowrap; }
+#detail { border-top: 1px solid var(--line); padding: 12px; display: grid; gap: 8px; }
+#detail h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 16px; }
+#detail p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; }
 .pill { border-radius: 999px; padding: 3px 9px; border: 1px solid var(--line); color: var(--muted); }
 .pill.open { color: var(--ok); border-color: var(--ok); }
 .pill.closed { color: var(--bad); border-color: var(--bad); }
-.pill.heist { color: var(--night); background: var(--gold); border-color: var(--gold); font-weight: 700; }
-#card p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.45; }
-#card ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
-#card li { font-size: 12px; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 4px 8px; }
-#card .row { display: flex; gap: 8px; flex-wrap: wrap; }
-#card .act { pointer-events: auto; font: 700 13px var(--body); border: none; border-radius: 10px; padding: 9px 14px; cursor: pointer; background: var(--sun); color: var(--night); }
-#card .act.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
-#card .act:disabled { opacity: 0.4; cursor: not-allowed; }
-#toast { position: fixed; top: calc(70px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--night); font-weight: 700; font-size: 13px; padding: 8px 14px; border-radius: 10px; pointer-events: none; }
-#help { position: fixed; left: calc(12px + env(safe-area-inset-left, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); font-size: 11px; color: var(--muted); pointer-events: none; }
-[hidden] { display: none !important; }
+.pill.heist { background: var(--gold); color: var(--night); border-color: var(--gold); font-weight: 700; }
+
+#shop .inner { flex: 1; overflow-y: auto; display: grid; place-items: start center; padding-block: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+#shopCard { width: min(560px, 100%); display: grid; gap: 14px; }
+#shopCard h2 { font-family: var(--display); font-weight: 400; font-size: clamp(24px, 6vw, 36px); margin: 0; line-height: 1.05; text-wrap: balance; }
+#shopCard > p { margin: 0; color: var(--muted); line-height: 1.5; }
+.items { display: grid; gap: 8px; }
+.item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(255,255,255,0.05); border-radius: 12px; }
+.item .n { flex: 1; min-width: 0; }
+.item .p { color: var(--ok); font-weight: 700; font-variant-numeric: tabular-nums; }
+.closedNote { padding: 14px; border: 1px dashed var(--bad); border-radius: 12px; color: var(--bad); }
+.special { padding: 14px; border-radius: 12px; border: 1px solid var(--gold); display: grid; gap: 10px; }
+.special b { color: var(--gold); }
 #err { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; }
-@media (max-width: 600px) {
-  #legend { width: 180px; max-height: 40vh; }
+#loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 28px; color: var(--sun); background: var(--night); }
+
+@media (max-width: 760px) {
+  #mapBody { grid-template-columns: 1fr; grid-template-rows: 1fr 45%; }
+  #side { border-left: none; border-top: 1px solid var(--line); }
   #help { display: none; }
   .brand { font-size: 18px; }
+  #mission { max-width: 170px; }
+  #gps { top: auto; bottom: calc(170px + env(safe-area-inset-bottom, 0px)); }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
-<canvas id="game" aria-label="Mapa de Heat City"></canvas>
+<div id="view"></div>
 
 <div class="hud tl">
   <div class="brand">HEAT CITY</div>
   <div id="zone">—</div>
 </div>
-
 <div class="hud tr">
-  <div class="chip"><span id="clock">08:00</span><b id="money">$2,500</b></div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
-    <button class="btn" id="btnLegend" type="button">Filtros</button>
-    <button class="btn" id="btnMap" type="button">Mapa (M)</button>
-    <button class="btn" id="btnStory" type="button">Completar misión</button>
-  </div>
-  <div id="legendWrap" hidden><div id="legend"></div></div>
+  <div class="chip"><span id="clock">09:00</span><span id="money">$0</span></div>
+  <div class="chip" id="mission"></div>
 </div>
-
+<div id="gps" hidden><span id="gpsArrow">▲</span><span id="gpsText"></span></div>
 <div id="prompt" hidden></div>
-<div id="card" hidden></div>
 <div id="toast" hidden></div>
-<div id="help">WASD / flechas para moverte · Shift para correr · E para entrar · M mapa grande</div>
+<canvas id="minimap" width="320" height="320" aria-label="Minimapa. Tocá para abrir el mapa"></canvas>
+<div id="help"><kbd>WASD</kbd> moverse · <kbd>SHIFT</kbd> correr · arrastrá el mouse para girar la cámara<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir/bajar del auto · <kbd>M</kbd> mapa</div>
+<div class="touch"><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
+
+<section class="screen" id="mapScreen" hidden>
+  <header><h1>Mapa</h1><span class="sp"></span><span class="chip" id="mapClock"></span><button class="btn" id="mapClose" type="button">Volver al juego (M)</button></header>
+  <div id="mapBody">
+    <div id="mapWrap"><canvas id="bigmap"></canvas>
+      <div id="zoomCtl"><button class="btn" id="zIn" type="button">+</button><button class="btn" id="zOut" type="button">−</button><button class="btn" id="zMe" type="button">Centrar en mí</button></div>
+    </div>
+    <aside id="side">
+      <input id="search" type="search" placeholder="Buscar tienda, zona o producto…" autocomplete="off">
+      <div id="cats"></div>
+      <div id="list"></div>
+      <div id="detail" hidden></div>
+    </aside>
+  </div>
+</section>
+
+<section class="screen" id="shop" hidden>
+  <header><h1 id="shopTitle">Local</h1><span class="sp"></span><span class="chip" id="shopMoney"></span><button class="btn" id="shopClose" type="button">Salir (E)</button></header>
+  <div class="inner"><div id="shopCard"></div></div>
+</section>
+
+<div id="loading">HEAT CITY</div>
 <div id="err" hidden></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (() => {
-  const SCALE = 4;                       // 1 unidad de mapa = 4 px de mundo
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
-  const $ = id => document.getElementById(id);
+'use strict';
+const $ = id => document.getElementById(id);
+const S = 0.8;                                    // 1 unidad del mapa = 0.8 m
+const W2M = (mx, my) => ({ x: (mx - 500) * S, z: (my - 500) * S });
+const M2W = (x, z) => ({ mx: x / S + 500, my: z / S + 500 });
 
-  const ICON_GLYPH = {
-    armeria: '✦', ropa: '◆', autos: '▲', tatuajes: '✂', comida: '●', tienda24: '24',
-    bar: '♪', inmobiliaria: '⌂', tecnologia: '▣', gimnasio: '≡', banco: '$', empeno: '◎',
-    servicios: '+', club_adulto: '♥'
-  };
-  const ZONE_STYLE = {
-    'sunset-strip':   { fill: '#3b1f4a', road: '#5c3470', accent: '#ff3d8b' },
-    'downtown-blaze': { fill: '#2a2440', road: '#4a4070', accent: '#ff7a3d' },
-    'coral-keys':     { fill: '#1d4a52', road: '#2e6b72', accent: '#3ddcd0' },
-    'port-sable':     { fill: '#272b33', road: '#3d434f', accent: '#9aa7bd' },
-    'swamp-row':      { fill: '#22331f', road: '#34492f', accent: '#9bd46a' }
-  };
+const GLYPH = { armeria:'✦', ropa:'◆', autos:'▲', tatuajes:'✂', comida:'●', tienda24:'24', bar:'♪', inmobiliaria:'⌂', tecnologia:'▣', gimnasio:'≡', banco:'$', empeno:'◎', servicios:'+', club_adulto:'♥' };
+const ZONE = {
+  'sunset-strip':   { ground:'#4a2b58', bld:['#f2c1d1','#f7e3c4','#c9e7e2','#f6d2a8'], h:[8,22],  accent:'#ff3d8b' },
+  'downtown-blaze': { ground:'#2e2846', bld:['#5b5677','#6e6a8c','#45405e','#7d6f8f'], h:[24,80], accent:'#ff7a3d' },
+  'coral-keys':     { ground:'#2f7466', bld:['#fff3d6','#bfeee6','#ffd1c1'],          h:[6,14],  accent:'#3ddcd0' },
+  'port-sable':     { ground:'#30343d', bld:['#5a636f','#7a6f5f','#3f5566','#8a5a44'], h:[9,18],  accent:'#9aa7bd' },
+  'swamp-row':      { ground:'#2c3d26', bld:['#6b5a42','#4f5b3c','#7a6a52'],          h:[4,8],   accent:'#9bd46a' },
+  _:                { ground:'#33313f', bld:['#77708a','#8a8070','#5f6a74'],          h:[8,20],  accent:'#b9aed6' }
+};
+const LAND = [[30,0],[1000,0],[1000,560],[650,640],[600,1000],[0,1000],[0,40]];
+const ISLANDS = [[715,700,70],[810,740,60],[690,840,55],[870,650,50],[935,900,60],[670,950,40],[955,770,45]];
+const BRIDGES = [[[640,620],[715,700]],[[715,700],[810,740]],[[810,740],[870,650]],[[715,700],[690,840]],[[690,840],[670,950]],[[810,740],[955,770]],[[955,770],[935,900]]];
+const PUDDLES = [[60,700,40],[250,760,55],[140,880,35],[320,980,30]];
 
-  const state = {
-    data: null, zones: {}, cats: {},
-    player: { x: 470 * SCALE, y: 480 * SCALE, a: 0, speed: 0 },
-    cam: { x: 0, y: 0 },
-    keys: {}, minutes: 8 * 60, money: 2500, story: 0,
-    hidden: new Set(), bigMap: false, near: null, open: null, owned: new Set(),
-    joy: null
-  };
+// ---------- estado ----------
+const G = {
+  data:null, zones:{}, cats:{}, stores:[],
+  minutes: 9*60, money: 2500, story: 0, owned: [], mission: 0, heistCooldown: 0,
+  waypoint: null, hidden: new Set(), mode: 'play', inCar: false,
+  keys: {}, camYaw: Math.PI, camPitch: 0.35
+};
+try { const sv = JSON.parse(localStorage.getItem('heatcity-save') || 'null'); if (sv) Object.assign(G, { money: sv.money ?? 2500, story: sv.story || 0, owned: sv.owned || [], mission: sv.mission || 0 }); } catch (e) {}
+function save() { try { localStorage.setItem('heatcity-save', JSON.stringify({ money: G.money, story: G.story, owned: G.owned, mission: G.mission })); } catch (e) {} }
 
-  // ---------- Carga ----------
-  fetch('stores.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(init)
-    .catch(() => { const e = $('err'); e.hidden = false; e.textContent = 'No se pudo cargar stores.json. Recargá la página.'; });
+// ---------- utilidades ----------
+const toMin = s => { const [h, m] = s.split(':').map(Number); return h*60 + m; };
+const fmt = m => `${String(Math.floor(m/60)%24).padStart(2,'0')}:${String(Math.floor(m%60)).padStart(2,'0')}`;
+const money = n => '$' + Math.round(n).toLocaleString('en-US');
+function isOpen(s, t = G.minutes) { const h = s.hours; if (h.always_open) return true; const o = toMin(h.open), c = toMin(h.close); t %= 1440; return o < c ? (t >= o && t < c) : (t >= o || t < c); }
+const locked = s => s.unlock && s.unlock.locked_by_default && G.story < 1;
+function inPoly(x, y, P) { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const [xi, yi] = P[i], [xj, yj] = P[j]; if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) c = !c; } return c; }
+function segDist(px, py, [ax, ay], [bx, by]) { const dx = bx-ax, dy = by-ay, t = Math.max(0, Math.min(1, ((px-ax)*dx + (py-ay)*dy) / (dx*dx + dy*dy))); return Math.hypot(px - (ax + t*dx), py - (ay + t*dy)); }
+function isLand(mx, my) {
+  if (mx < 2 || my < 2 || mx > 998 || my > 998) return false;
+  if (inPoly(mx, my, LAND)) return true;
+  if (ISLANDS.some(([x, y, r]) => Math.hypot(mx - x, my - y) < r + 4)) return true;
+  return BRIDGES.some(([a, b]) => segDist(mx, my, a, b) < 7);
+}
+function zoneAt(mx, my) {
+  for (const id of ['downtown-blaze','sunset-strip','port-sable','coral-keys','swamp-row']) { const b = G.zones[id]?.bounds; if (b && mx >= b.x[0] && mx <= b.x[1] && my >= b.y[0] && my <= b.y[1]) return G.zones[id]; }
+  return null;
+}
+function hash(str) { let h = 2166136261; for (const c of str) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; }
+let rngSeed = 7; const rnd = () => (rngSeed = (rngSeed * 16807) % 2147483647) / 2147483647;
+function toast(msg, ms = 2600) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, ms); }
 
-  function init(data) {
-    state.data = data;
-    data.zones.forEach(z => state.zones[z.id] = z);
-    data.categories.forEach(c => state.cats[c.id] = c);
-    buildLegend();
-    resize();
-    requestAnimationFrame(loop);
+const PRICE = { armeria:[300,2500], ropa:[40,900], autos:[18000,240000], tatuajes:[60,400], comida:[6,30], tienda24:[3,40], bar:[10,300], inmobiliaria:[40000,900000], tecnologia:[150,2200], gimnasio:[40,300], banco:[0,0], empeno:[20,1500], servicios:[0,500], club_adulto:[20,800] };
+const priceOf = (s, item) => { const [a, b] = PRICE[s.category] || [10, 100], step = a > 1000 ? 100 : 1; return Math.round((a + (b - a) * hash(s.id + item)) / step) * step; };
+
+// ---------- carga ----------
+const fontsReady = document.fonts ? document.fonts.load('40px Bungee').catch(() => {}) : Promise.resolve();
+Promise.all([fetch('stores.json').then(r => { if (!r.ok) throw 0; return r.json(); }), fontsReady])
+  .then(([d]) => { if (!window.THREE) throw 0; init(d); $('loading').hidden = true; })
+  .catch(() => { $('loading').hidden = true; const e = $('err'); e.hidden = false; e.textContent = 'No se pudo cargar la ciudad. Recargá la página.'; });
+
+// ---------- textura del mapa (suelo 3D, minimapa y mapa grande) ----------
+const TEX = 2048, PX = TEX / 1000;
+function drawGround(ctx) {
+  ctx.fillStyle = '#16507a'; ctx.fillRect(0, 0, TEX, TEX);
+  ctx.save();
+  ctx.beginPath(); LAND.forEach(([x, y], i) => i ? ctx.lineTo(x*PX, y*PX) : ctx.moveTo(x*PX, y*PX)); ctx.closePath();
+  ctx.fillStyle = '#e8d3a0'; ctx.fill();
+  ctx.clip();
+  ctx.fillStyle = ZONE._.ground; ctx.fillRect(8, 8, TEX - 16, TEX - 16);
+  for (const z of G.data.zones) { if (z.id === 'coral-keys') continue; const b = z.bounds; ctx.fillStyle = ZONE[z.id].ground; ctx.fillRect(b.x[0]*PX, b.y[0]*PX, (b.x[1]-b.x[0])*PX, (b.y[1]-b.y[0])*PX); }
+  ctx.fillStyle = '#1f4a3c'; PUDDLES.forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(x*PX, y*PX, r*PX, 0, 7); ctx.fill(); });
+  ctx.fillStyle = '#26232f';
+  for (let k = 50; k < 1000; k += 100) { ctx.fillRect(k*PX - 7.5*PX, 0, 15*PX, TEX); ctx.fillRect(0, k*PX - 7.5*PX, TEX, 15*PX); }
+  ctx.strokeStyle = 'rgba(255,210,63,0.55)'; ctx.lineWidth = 1.2; ctx.setLineDash([8, 8]);
+  for (let k = 50; k < 1000; k += 100) { ctx.beginPath(); ctx.moveTo(k*PX, 0); ctx.lineTo(k*PX, TEX); ctx.moveTo(0, k*PX); ctx.lineTo(TEX, k*PX); ctx.stroke(); }
+  ctx.setLineDash([]);
+  ctx.restore();
+  ISLANDS.forEach(([x, y, r]) => { ctx.fillStyle = '#e8d3a0'; ctx.beginPath(); ctx.arc(x*PX, y*PX, (r+5)*PX, 0, 7); ctx.fill(); ctx.fillStyle = ZONE['coral-keys'].ground; ctx.beginPath(); ctx.arc(x*PX, y*PX, r*PX, 0, 7); ctx.fill(); });
+  ctx.strokeStyle = '#26232f'; ctx.lineWidth = 13*PX; ctx.lineCap = 'round';
+  BRIDGES.forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(a[0]*PX, a[1]*PX); ctx.lineTo(b[0]*PX, b[1]*PX); ctx.stroke(); });
+}
+
+// ---------- inicio ----------
+let groundCanvas, renderer, scene, camera, sun, hemi, player, car, beam, colliders = [];
+function init(data) {
+  G.data = data;
+  data.zones.forEach(z => G.zones[z.id] = z);
+  data.categories.forEach(c => G.cats[c.id] = c);
+  placeStores();
+  groundCanvas = document.createElement('canvas'); groundCanvas.width = groundCanvas.height = TEX;
+  drawGround(groundCanvas.getContext('2d'));
+  build3D();
+  buildMapUI();
+  const m = MISSIONS[Math.min(G.mission, 2)];
+  if (m.store) setWaypoint(G.stores.find(s => s.id === m.store));
+  updateMissionHUD();
+  requestAnimationFrame(loop);
+  toast('Bienvenido a Heat City. Abrí el mapa con M para buscar tiendas.', 4000);
+}
+
+// Las tiendas se ubican en la manzana más cercana para no quedar en medio de la calle.
+function placeStores() {
+  const taken = [];
+  for (const s of G.data.stores) {
+    let { x, y } = s.position;
+    if (s.zone !== 'coral-keys') {
+      const bx = Math.round(x / 100) * 100, by = Math.round(y / 100) * 100;
+      const opts = [[-21,-21],[21,-21],[-21,21],[21,21]].map(([dx, dy]) => [bx + dx, by + dy]).sort((a, b) => Math.hypot(a[0]-x, a[1]-y) - Math.hypot(b[0]-x, b[1]-y));
+      const free = opts.find(([px, py]) => !taken.some(([tx, ty]) => Math.hypot(tx-px, ty-py) < 20) && inPoly(px, py, LAND) && inPoly(px, py + 16, LAND)) || opts[0];
+      [x, y] = free;
+    }
+    taken.push([x, y]);
+    G.stores.push(Object.assign({}, s, { mx: x, my: y }));
   }
+}
 
-  // ---------- Utilidades ----------
-  const toMin = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
-  const fmt = m => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(Math.floor(m % 60)).padStart(2, '0')}`;
-  function isOpen(store, minutes) {
-    const h = store.hours; if (h.always_open) return true;
-    const o = toMin(h.open), c = toMin(h.close), t = minutes % 1440;
-    return o < c ? (t >= o && t < c) : (t >= o || t < c);
-  }
-  const visible = s => !state.hidden.has(s.category) && !(s.unlock && s.unlock.locked_by_default && state.story < 1);
-  function zoneAt(mx, my) {
-    // Downtown primero: se superpone en los bordes con Sunset Strip.
-    const order = ['downtown-blaze', 'sunset-strip', 'port-sable', 'coral-keys', 'swamp-row'];
-    for (const id of order) { const b = state.zones[id]?.bounds; if (b && mx >= b.x[0] && mx <= b.x[1] && my >= b.y[0] && my <= b.y[1]) return state.zones[id]; }
-    return null;
-  }
-  function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
+function makeLabel(text, sub, color, gold) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 160;
+  const x = c.getContext('2d');
+  x.fillStyle = gold ? '#ffd23f' : 'rgba(15,11,30,0.92)'; x.beginPath(); if (x.roundRect) x.roundRect(8, 8, 496, 144, 28); else x.rect(8, 8, 496, 144); x.fill();
+  x.lineWidth = 8; x.strokeStyle = color; x.stroke();
+  x.fillStyle = gold ? '#0f0b1e' : '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  let size = 54; x.font = `${size}px Bungee, Impact, sans-serif`;
+  while (x.measureText(text).width > 460 && size > 20) { size -= 2; x.font = `${size}px Bungee, Impact, sans-serif`; }
+  x.fillText(text, 256, sub ? 66 : 80);
+  if (sub) { x.font = '600 28px Inter, sans-serif'; x.fillStyle = gold ? '#0f0b1e' : color; x.fillText(sub, 256, 118); }
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthWrite: false }));
+  sp.scale.set(12, 3.75, 1);
+  return sp;
+}
 
-  // ---------- Leyenda / filtros ----------
-  function buildLegend() {
-    const el = $('legend');
-    el.innerHTML = '';
-    state.data.categories.forEach(c => {
-      const n = state.data.stores.filter(s => s.category === c.id).length;
-      const id = 'f-' + c.id;
-      const lab = document.createElement('label');
-      lab.innerHTML = `<input type="checkbox" id="${id}" checked><span class="dot" style="background:${c.color}"></span>${c.name}<span class="count">${n}</span>`;
-      lab.querySelector('input').addEventListener('change', e => { e.target.checked ? state.hidden.delete(c.id) : state.hidden.add(c.id); });
-      el.appendChild(lab);
-    });
-  }
-  $('btnLegend').onclick = () => { const w = $('legendWrap'); w.hidden = !w.hidden; $('btnLegend').classList.toggle('on', !w.hidden); };
-  $('btnMap').onclick = () => toggleMap();
-  $('btnStory').onclick = () => {
-    if (state.story >= 1) return toast('Ya completaste la misión de esta demo');
-    state.story = 1; $('btnStory').disabled = true; $('btnStory').textContent = 'Misión completada';
-    const unlocked = state.data.stores.filter(s => s.unlock).map(s => s.name).join(', ');
-    toast('Desbloqueado: ' + unlocked);
-  };
-  function toggleMap() { state.bigMap = !state.bigMap; $('btnMap').classList.toggle('on', state.bigMap); closeCard(); }
+function build3D() {
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.75));
+  renderer.setSize(innerWidth, innerHeight);
+  $('view').appendChild(renderer.domElement);
+  scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x9ec9e8, 60, 330);
+  camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.3, 900);
 
-  // ---------- Panel de tienda ----------
-  function openCard(s) {
-    state.open = s;
-    const z = state.zones[s.zone], c = state.cats[s.category];
-    const open = isOpen(s, state.minutes);
-    const hrs = s.hours.always_open ? 'Abierto 24 h' : `${s.hours.open} – ${s.hours.close}`;
-    const card = $('card');
-    let actions = '';
-    if (s.special?.type === 'golpe') actions = `<button class="act" data-a="heist" type="button">Planear golpe</button>`;
-    else if (s.actions?.includes('comprar_propiedad')) actions = `<button class="act" data-a="buy" type="button" ${state.owned.has(s.id) ? 'disabled' : ''}>${state.owned.has(s.id) ? 'Propiedad comprada' : 'Comprar depto · $1,500'}</button>`;
-    else actions = `<button class="act" data-a="shop" type="button" ${open ? '' : 'disabled'}>${open ? 'Comprar' : 'Cerrado ahora'}</button>`;
-    card.innerHTML = `
-      <div class="meta"><span class="pill" style="color:${c.color};border-color:${c.color}">${c.name}</span>
-        <span class="pill">${z.name}</span>
-        <span class="pill ${open ? 'open' : 'closed'}">${open ? 'Abierto' : 'Cerrado'} · ${hrs}</span>
-        ${s.special ? `<span class="pill heist">${s.special.label}</span>` : ''}
-        ${c.age_rating ? `<span class="pill">${c.age_rating}</span>` : ''}</div>
-      <h2>${s.name}</h2>
-      <p>${s.description}</p>
-      <ul>${s.sells.map(x => `<li>${x}</li>`).join('')}</ul>
-      <div class="row">${actions}<button class="act ghost" data-a="close" type="button">Salir (E)</button></div>`;
-    card.hidden = false; $('prompt').hidden = true;
-    card.querySelectorAll('button[data-a]').forEach(b => b.onclick = () => act(b.dataset.a, s));
-  }
-  function closeCard() { state.open = null; $('card').hidden = true; }
-  function act(a, s) {
-    if (a === 'close') return closeCard();
-    if (a === 'shop') { const p = 50 + Math.floor(Math.random() * 200); if (state.money < p) return toast('No te alcanza la plata'); state.money -= p; toast(`Compraste en ${s.name} · -$${p}`); }
-    if (a === 'buy') { if (state.money < 1500) return toast('Necesitás $1,500'); state.money -= 1500; state.owned.add(s.id); toast('Nueva propiedad: depto en Heat City'); openCard(s); }
-    if (a === 'heist') { const t = state.minutes % 1440; if (t >= 540 && t < 1020) return toast('Demasiada gente. Volvé de noche (después de las 17:00)'); const loot = 8000 + Math.floor(Math.random() * 12000); state.money += loot; toast(`¡Golpe exitoso! +$${loot.toLocaleString('en-US')}`); closeCard(); }
-  }
+  hemi = new THREE.HemisphereLight(0xcfe8ff, 0x3a2f40, 0.8); scene.add(hemi);
+  sun = new THREE.DirectionalLight(0xfff0d8, 0.9); sun.position.set(200, 300, 100); scene.add(sun);
 
-  // ---------- Input ----------
-  addEventListener('keydown', e => {
-    const k = e.key.toLowerCase();
-    state.keys[k] = true;
-    if (k === 'e') { if (state.open) closeCard(); else if (state.near) openCard(state.near); }
-    if (k === 'm') toggleMap();
-    if (k === 'escape') { closeCard(); if (state.bigMap) toggleMap(); }
-    if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+  const sea = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshLambertMaterial({ color: 0x16507a }));
+  sea.rotation.x = -Math.PI / 2; sea.position.y = -0.15; scene.add(sea);
+  const gtex = new THREE.CanvasTexture(groundCanvas); gtex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), new THREE.MeshLambertMaterial({ map: gtex }));
+  ground.rotation.x = -Math.PI / 2; scene.add(ground);
+
+  // edificios de relleno por manzana
+  const boxes = [];
+  for (let bx = 100; bx < 1000; bx += 100) for (let by = 100; by < 1000; by += 100) {
+    for (const [dx, dy] of [[-21,-21],[21,-21],[-21,21],[21,21]]) {
+      const mx = bx + dx, my = by + dy;
+      if (!inPoly(mx, my, LAND) || !inPoly(mx - 16, my - 16, LAND) || !inPoly(mx + 16, my + 16, LAND) || !inPoly(mx + 16, my - 16, LAND) || !inPoly(mx - 16, my + 16, LAND)) continue;
+      if (G.stores.some(s => Math.hypot(s.mx - mx, s.my - my) < 20)) continue;
+      if (PUDDLES.some(([x, y, r]) => Math.hypot(mx - x, my - y) < r + 10)) continue;
+      const z = zoneAt(mx, my), st = ZONE[z ? z.id : '_'];
+      if (z && z.id === 'swamp-row' && rnd() < 0.45) continue;
+      const wide = z && z.id === 'port-sable';
+      const w = (wide ? 30 : 22 + rnd() * 6) * S, d = (wide ? 26 : 22 + rnd() * 6) * S;
+      const h = st.h[0] + rnd() * (st.h[1] - st.h[0]);
+      boxes.push({ mx, my, w, d, h, color: st.bld[Math.floor(rnd() * st.bld.length)] });
+    }
+  }
+  ISLANDS.forEach(([x, y, r]) => { for (let i = 0; i < 3; i++) { const a = rnd() * 6.28, rr = r * 0.6; const mx = x + Math.cos(a) * rr, my = y + Math.sin(a) * rr; if (G.stores.some(s => Math.hypot(s.mx - mx, s.my - my) < 24)) continue; boxes.push({ mx, my, w: 9, d: 9, h: 5 + rnd() * 6, color: ZONE['coral-keys'].bld[i % 3] }); } });
+
+  const geo = new THREE.BoxGeometry(1, 1, 1); geo.translate(0, 0.5, 0);
+  const inst = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial(), boxes.length);
+  const m4 = new THREE.Matrix4(), col = new THREE.Color();
+  boxes.forEach((b, i) => {
+    const p = W2M(b.mx, b.my);
+    m4.makeScale(b.w, b.h, b.d); m4.setPosition(p.x, 0, p.z); inst.setMatrixAt(i, m4);
+    inst.setColorAt(i, col.set(b.color));
+    colliders.push({ x: p.x, z: p.z, hw: b.w / 2, hd: b.d / 2 });
   });
-  addEventListener('keyup', e => { state.keys[e.key.toLowerCase()] = false; });
-  addEventListener('blur', () => state.keys = {});
-  $('prompt').onclick = () => state.near && openCard(state.near);
+  scene.add(inst);
 
-  canvas.addEventListener('pointerdown', e => {
-    if (state.bigMap) return;
-    // Tocar un pin cercano abre su panel; si no, arranca el joystick.
-    const w = screenToWorld(e.clientX, e.clientY);
-    const hit = state.data?.stores.find(s => visible(s) && Math.hypot(s.position.x * SCALE - w.x, s.position.y * SCALE - w.y) < 28);
-    if (hit && Math.hypot(hit.position.x * SCALE - state.player.x, hit.position.y * SCALE - state.player.y) < 160) return openCard(hit);
-    state.joy = { id: e.pointerId, ox: e.clientX, oy: e.clientY, dx: 0, dy: 0 };
-    canvas.setPointerCapture(e.pointerId);
+  // ventanas que se encienden de noche
+  const winMat = new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0, depthWrite: false });
+  const tall = boxes.filter(b => b.h > 15);
+  const wins = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), winMat, Math.max(1, tall.length * 2));
+  const rotY = new THREE.Matrix4().makeRotationY(Math.PI);
+  tall.forEach((b, i) => {
+    const p = W2M(b.mx, b.my), sc = new THREE.Matrix4().makeScale(b.w * 0.8, b.h * 0.8, 1);
+    wins.setMatrixAt(i * 2, new THREE.Matrix4().makeTranslation(p.x, b.h * 0.5, p.z + b.d / 2 + 0.05).multiply(sc));
+    wins.setMatrixAt(i * 2 + 1, new THREE.Matrix4().makeTranslation(p.x, b.h * 0.5, p.z - b.d / 2 - 0.05).multiply(rotY).multiply(sc));
   });
-  canvas.addEventListener('pointermove', e => { if (state.joy?.id === e.pointerId) { state.joy.dx = e.clientX - state.joy.ox; state.joy.dy = e.clientY - state.joy.oy; } });
-  const endJoy = e => { if (state.joy?.id === e.pointerId) state.joy = null; };
-  canvas.addEventListener('pointerup', endJoy); canvas.addEventListener('pointercancel', endJoy);
+  wins.count = tall.length * 2;
+  scene.add(wins); G.winMat = winMat;
 
-  // ---------- Loop ----------
-  let W = 0, H = 0, DPR = 1, last = performance.now();
-  function resize() { DPR = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; canvas.width = W * DPR; canvas.height = H * DPR; }
-  addEventListener('resize', resize);
-  const screenToWorld = (sx, sy) => ({ x: sx + state.cam.x - W / 2, y: sy + state.cam.y - H / 2 });
-
-  function loop(now) {
-    const dt = Math.min((now - last) / 1000, 0.05); last = now;
-    update(dt); draw();
-    requestAnimationFrame(loop);
+  // palmeras en Sunset Strip y Coral Keys
+  const trunkG = new THREE.CylinderGeometry(0.25, 0.35, 7, 6); trunkG.translate(0, 3.5, 0);
+  const leafG = new THREE.ConeGeometry(2.6, 1.6, 7); leafG.translate(0, 7.4, 0);
+  const palms = [];
+  for (let k = 50; k < 1000; k += 100) for (let j = 0; j < 1000; j += 25) {
+    for (const [mx, my] of [[k - 10, j], [j, k - 10]]) { const z = zoneAt(mx, my); if (z && (z.id === 'sunset-strip' || z.id === 'coral-keys') && isLand(mx, my) && !G.stores.some(s => Math.hypot(s.mx - mx, s.my - my) < 16)) palms.push(W2M(mx, my)); }
   }
+  const trunks = new THREE.InstancedMesh(trunkG, new THREE.MeshLambertMaterial({ color: 0x8a6a48 }), Math.max(1, palms.length));
+  const leaves = new THREE.InstancedMesh(leafG, new THREE.MeshLambertMaterial({ color: 0x2f9a5a }), Math.max(1, palms.length));
+  palms.forEach((p, i) => { m4.makeTranslation(p.x, 0, p.z); trunks.setMatrixAt(i, m4); leaves.setMatrixAt(i, m4); });
+  trunks.count = leaves.count = palms.length;
+  scene.add(trunks, leaves);
 
-  function update(dt) {
-    state.minutes = (state.minutes + dt * 2) % 1440;   // 1 s real = 2 min de juego
-    const p = state.player, k = state.keys;
-    let ix = (k['d'] || k['arrowright'] ? 1 : 0) - (k['a'] || k['arrowleft'] ? 1 : 0);
-    let iy = (k['s'] || k['arrowdown'] ? 1 : 0) - (k['w'] || k['arrowup'] ? 1 : 0);
-    if (state.joy) { const m = Math.hypot(state.joy.dx, state.joy.dy); if (m > 8) { ix = state.joy.dx / Math.max(m, 50); iy = state.joy.dy / Math.max(m, 50); } }
-    const mag = Math.hypot(ix, iy);
-    if (state.open || state.bigMap) { ix = iy = 0; }
-    if (mag > 0 && !state.open && !state.bigMap) {
-      const n = Math.min(mag, 1) / mag;
-      const sp = (k['shift'] ? 520 : 300);
-      p.x += ix * n * sp * dt; p.y += iy * n * sp * dt; p.a = Math.atan2(iy, ix);
-    }
-    const max = 1000 * SCALE;
-    p.x = Math.max(20, Math.min(max - 20, p.x)); p.y = Math.max(20, Math.min(max - 20, p.y));
-    state.cam.x += (p.x - state.cam.x) * Math.min(1, dt * 8);
-    state.cam.y += (p.y - state.cam.y) * Math.min(1, dt * 8);
-
-    // tienda cercana
-    let best = null, bd = 70;
-    for (const s of state.data.stores) { if (!visible(s)) continue; const d = Math.hypot(s.position.x * SCALE - p.x, s.position.y * SCALE - p.y); if (d < bd) { bd = d; best = s; } }
-    if (best !== state.near) {
-      state.near = best;
-      const pr = $('prompt');
-      if (best && !state.open) { pr.innerHTML = `<kbd>E</kbd> Entrar a ${best.name}`; pr.hidden = false; } else pr.hidden = true;
-    }
-    if (state.open && state.near !== state.open) closeCard();
-
-    const z = zoneAt(p.x / SCALE, p.y / SCALE);
-    $('zone').textContent = z ? z.name.toUpperCase() : 'AFUERAS';
-    $('clock').textContent = fmt(state.minutes);
-    $('money').textContent = '$' + state.money.toLocaleString('en-US');
-  }
-
-  // ---------- Dibujo ----------
-  function darkness() {
-    const t = state.minutes / 60; // 0..24
-    if (t >= 7 && t < 18) return 0;
-    if (t >= 18 && t < 21) return (t - 18) / 3 * 0.55;
-    if (t >= 5 && t < 7) return (7 - t) / 2 * 0.55;
-    return 0.55;
-  }
-
-  function drawWorld(scale, ox, oy, detail, labels = true) {
-    const S = SCALE * scale;
-    // agua
-    ctx.fillStyle = '#123a5c'; ctx.fillRect(ox, oy, 1000 * S, 1000 * S);
-    // tierra firme (todo menos el mar del sureste)
-    ctx.fillStyle = '#2b2a3a';
-    ctx.beginPath();
-    ctx.moveTo(ox + 30 * S, oy); ctx.lineTo(ox + 1000 * S, oy); ctx.lineTo(ox + 1000 * S, oy + 560 * S);
-    ctx.lineTo(ox + 650 * S, oy + 640 * S); ctx.lineTo(ox + 600 * S, oy + 1000 * S); ctx.lineTo(ox, oy + 1000 * S); ctx.lineTo(ox, oy + 40 * S);
-    ctx.closePath(); ctx.fill();
-    // zonas
-    const order = ['swamp-row', 'port-sable', 'sunset-strip', 'downtown-blaze'];
-    for (const id of order) {
-      const z = state.zones[id]; if (!z) continue; const b = z.bounds, st = ZONE_STYLE[id];
-      ctx.fillStyle = st.fill; ctx.fillRect(ox + b.x[0] * S, oy + b.y[0] * S, (b.x[1] - b.x[0]) * S, (b.y[1] - b.y[0]) * S);
-      if (detail) {
-        ctx.strokeStyle = st.road; ctx.lineWidth = 10 * scale;
-        for (let x = b.x[0] + 50; x < b.x[1]; x += 100) { ctx.beginPath(); ctx.moveTo(ox + x * S, oy + b.y[0] * S); ctx.lineTo(ox + x * S, oy + b.y[1] * S); ctx.stroke(); }
-        for (let y = b.y[0] + 50; y < b.y[1]; y += 100) { ctx.beginPath(); ctx.moveTo(ox + b.x[0] * S, oy + y * S); ctx.lineTo(ox + b.x[1] * S, oy + y * S); ctx.stroke(); }
-      }
-    }
-    // pantano: charcos
-    ctx.fillStyle = '#1b3d33';
-    [[60, 700, 40], [250, 760, 55], [140, 880, 35], [320, 980, 30]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(ox + x * S, oy + y * S, r * S, 0, 7); ctx.fill(); });
-    // Coral Keys: islas
-    const isl = ZONE_STYLE['coral-keys'];
-    [[715, 700, 70], [810, 740, 60], [690, 840, 55], [870, 650, 50], [935, 900, 60], [670, 950, 40], [955, 770, 45]].forEach(([x, y, r]) => {
-      ctx.fillStyle = '#e9d6a4'; ctx.beginPath(); ctx.arc(ox + x * S, oy + y * S, (r + 6) * S, 0, 7); ctx.fill();
-      ctx.fillStyle = isl.fill; ctx.beginPath(); ctx.arc(ox + x * S, oy + y * S, r * S, 0, 7); ctx.fill();
-    });
-    // puentes a las islas
-    ctx.strokeStyle = '#6b5a7a'; ctx.lineWidth = 8 * scale;
-    [[[640, 620], [715, 700]], [[715, 700], [810, 740]], [[810, 740], [870, 650]], [[715, 700], [690, 840]], [[690, 840], [670, 950]], [[810, 740], [955, 770]], [[955, 770], [935, 900]]].forEach(([a, b]) => {
-      ctx.beginPath(); ctx.moveTo(ox + a[0] * S, oy + a[1] * S); ctx.lineTo(ox + b[0] * S, oy + b[1] * S); ctx.stroke();
-    });
-    // nombres de zona
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (labels) for (const z of state.data.zones) {
-      const b = z.bounds, cx = (b.x[0] + b.x[1]) / 2, cy = (b.y[0] + b.y[1]) / 2;
-      ctx.font = `${Math.max(11, 34 * scale)}px Bungee, Impact, sans-serif`;
-      ctx.fillStyle = ZONE_STYLE[z.id].accent; ctx.globalAlpha = detail ? 0.18 : 0.85;
-      ctx.fillText(z.name.toUpperCase(), ox + cx * S, oy + cy * S);
-      ctx.globalAlpha = 1;
-    }
-  }
-
-  function drawPin(s, x, y, r, big) {
-    const c = state.cats[s.category];
-    const open = isOpen(s, state.minutes);
+  // locales
+  for (const s of G.stores) {
+    const c = G.cats[s.category], p = W2M(s.mx, s.my);
     const heist = s.special?.type === 'golpe';
-    const color = heist ? s.special.pin_color : c.color;
-    if (heist) { ctx.fillStyle = 'rgba(255,210,63,0.25)'; ctx.beginPath(); ctx.arc(x, y, r * (1.8 + 0.3 * Math.sin(performance.now() / 300)), 0, 7); ctx.fill(); }
-    ctx.globalAlpha = open ? 1 : 0.5;
-    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y - r, r, Math.PI * 0.85, Math.PI * 2.15); ctx.lineTo(x, y + r * 0.4); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#0f0b1e'; ctx.lineWidth = 2; ctx.stroke();
-    ctx.fillStyle = heist ? '#0f0b1e' : '#fff';
-    ctx.font = `700 ${Math.round(r * (ICON_GLYPH[s.category].length > 1 ? 0.8 : 1.1))}px Inter, system-ui, sans-serif`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(heist ? '$' : ICON_GLYPH[s.category], x, y - r);
+    const w = 16, d = 16, h = s.category === 'servicios' ? 22 : s.category === 'banco' ? 18 : 9 + hash(s.id) * 5;
+    const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshLambertMaterial({ color: new THREE.Color(c.color).lerp(new THREE.Color(0x222222), 0.35) }));
+    body.position.set(p.x, h / 2, p.z); scene.add(body);
+    const awning = new THREE.Mesh(new THREE.BoxGeometry(w + 1, 0.4, 3), new THREE.MeshLambertMaterial({ color: heist ? 0xffd23f : c.color }));
+    awning.position.set(p.x, 4, p.z + d / 2 + 1.5); scene.add(awning);
+    const door = new THREE.Mesh(new THREE.PlaneGeometry(3, 3.6), new THREE.MeshBasicMaterial({ color: locked(s) ? 0x333333 : 0xfff0c0 }));
+    door.position.set(p.x, 1.8, p.z + d / 2 + 0.02); scene.add(door); s.door = door;
+    const label = makeLabel(s.name.toUpperCase(), c.name, heist ? '#ffd23f' : c.color, heist);
+    label.position.set(p.x, h + 3, p.z + d / 2 - 1); scene.add(label);
+    colliders.push({ x: p.x, z: p.z, hw: w / 2, hd: d / 2 });
+    s.wx = p.x; s.wz = p.z + d / 2 + 2.5;   // punto de entrada, frente a la puerta
+  }
+
+  beam = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 140, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0xff3d8b, transparent: true, opacity: 0.28, depthWrite: false, side: THREE.DoubleSide }));
+  beam.visible = false; scene.add(beam);
+
+  player = makePlayer();
+  const sp = W2M(450, 455); player.position.set(sp.x, 0, sp.z); scene.add(player);
+  car = makeCar(0xff3d8b);
+  const cp = W2M(455, 470); car.position.set(cp.x, 0, cp.z); car.userData.speed = 0; scene.add(car);
+
+  addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
+}
+
+function limb(w, h, d, color, y) { const g = new THREE.BoxGeometry(w, h, d); g.translate(0, -h / 2, 0); const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color })); const pivot = new THREE.Group(); pivot.position.y = y; pivot.add(m); return pivot; }
+function makePlayer() {
+  const g = new THREE.Group(), skin = 0xc68a5e;
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.75, 0.34), new THREE.MeshLambertMaterial({ color: 0xff7a3d })); torso.position.y = 1.32; g.add(torso);
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.38, 0.36), new THREE.MeshLambertMaterial({ color: skin })); head.position.y = 1.92; g.add(head);
+  const cap = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 0.5), new THREE.MeshLambertMaterial({ color: 0x1a1333 })); cap.position.set(0, 2.12, 0.05); g.add(cap);
+  const legL = limb(0.24, 0.95, 0.26, 0x2a3a6a, 0.95); legL.position.x = -0.15;
+  const legR = limb(0.24, 0.95, 0.26, 0x2a3a6a, 0.95); legR.position.x = 0.15;
+  const armL = limb(0.18, 0.7, 0.2, skin, 1.66); armL.position.x = -0.42;
+  const armR = limb(0.18, 0.7, 0.2, skin, 1.66); armR.position.x = 0.42;
+  g.add(legL, legR, armL, armR);
+  g.userData = { legL, legR, armL, armR, phase: 0 };
+  return g;
+}
+function makeCar(color) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(2, 0.7, 4.4), new THREE.MeshLambertMaterial({ color })); body.position.y = 0.75; g.add(body);
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.6, 2.1), new THREE.MeshLambertMaterial({ color: 0x1a1333 })); cab.position.set(0, 1.35, -0.2); g.add(cab);
+  const lightM = new THREE.MeshBasicMaterial({ color: 0xfff6d0 });
+  [-0.65, 0.65].forEach(x => { const l = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.05), lightM); l.position.set(x, 0.8, 2.21); g.add(l); });
+  const wg = new THREE.CylinderGeometry(0.38, 0.38, 0.3, 12); wg.rotateZ(Math.PI / 2);
+  const wm = new THREE.MeshLambertMaterial({ color: 0x111111 });
+  [[-1, 1.4], [1, 1.4], [-1, -1.4], [1, -1.4]].forEach(([x, z]) => { const w = new THREE.Mesh(wg, wm); w.position.set(x, 0.38, z); g.add(w); });
+  g.userData.body = body;
+  return g;
+}
+
+// ---------- colisiones ----------
+function blocked(x, z, r) {
+  const { mx, my } = M2W(x, z);
+  if (!isLand(mx, my)) return true;
+  for (const c of colliders) if (Math.abs(x - c.x) < c.hw + r && Math.abs(z - c.z) < c.hd + r) return true;
+  return false;
+}
+function moveWithCollision(obj, dx, dz, r) {
+  let hit = false;
+  if (!blocked(obj.position.x + dx, obj.position.z, r)) obj.position.x += dx; else hit = true;
+  if (!blocked(obj.position.x, obj.position.z + dz, r)) obj.position.z += dz; else hit = true;
+  return hit;
+}
+
+// ---------- input ----------
+addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (e.target.tagName === 'INPUT') { if (k === 'escape') e.target.blur(); return; }
+  if (!G.data) return;
+  G.keys[k] = true;
+  if (k === 'm' || k === 'tab') { e.preventDefault(); if (G.mode === 'map') closeMap(); else if (G.mode === 'play') openMap(); }
+  if (k === 'escape') { if (G.mode === 'map') closeMap(); else if (G.mode === 'shop') closeShop(); }
+  if (k === 'e') { if (G.mode === 'shop') closeShop(); else if (G.mode === 'play') tryEnter(); }
+  if (k === 'f' && G.mode === 'play') toggleCar();
+  if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+});
+addEventListener('keyup', e => { G.keys[e.key.toLowerCase()] = false; });
+addEventListener('blur', () => G.keys = {});
+$('tAct').onclick = () => G.mode === 'play' && tryEnter();
+$('tCar').onclick = () => G.mode === 'play' && toggleCar();
+$('tMap').onclick = () => G.mode === 'play' && openMap();
+$('minimap').onclick = () => G.mode === 'play' && openMap();
+$('shopClose').onclick = () => closeShop();
+
+const pointers = new Map(); let joy = null;
+$('view').addEventListener('pointerdown', e => {
+  $('view').setPointerCapture(e.pointerId);
+  if (e.pointerType === 'touch' && e.clientX < innerWidth / 2 && !joy) { joy = { id: e.pointerId, ox: e.clientX, oy: e.clientY, dx: 0, dy: 0 }; return; }
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+});
+$('view').addEventListener('pointermove', e => {
+  if (joy && joy.id === e.pointerId) { joy.dx = e.clientX - joy.ox; joy.dy = e.clientY - joy.oy; return; }
+  const p = pointers.get(e.pointerId); if (!p) return;
+  G.camYaw -= (e.clientX - p.x) * 0.006; G.camPitch = Math.max(0.05, Math.min(1.1, G.camPitch + (e.clientY - p.y) * 0.004));
+  p.x = e.clientX; p.y = e.clientY;
+});
+const pUp = e => { if (joy && joy.id === e.pointerId) joy = null; pointers.delete(e.pointerId); };
+$('view').addEventListener('pointerup', pUp); $('view').addEventListener('pointercancel', pUp);
+
+// ---------- acciones ----------
+let nearStore = null;
+function tryEnter() {
+  if (G.inCar) return toast('Bajate del auto para entrar (F)');
+  if (!nearStore) return toast('No hay ningún local cerca. Buscá uno en el mapa (M).');
+  if (locked(nearStore)) return toast(nearStore.unlock.hint);
+  openShop(nearStore);
+}
+function toggleCar() {
+  if (G.inCar) {
+    if (Math.abs(car.userData.speed) > 4) return toast('Frená antes de bajarte');
+    G.inCar = false; car.userData.speed = 0;
+    const side = new THREE.Vector3(-2.2, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), car.rotation.y);
+    player.position.set(car.position.x + side.x, 0, car.position.z + side.z);
+    if (blocked(player.position.x, player.position.z, 0.4)) player.position.set(car.position.x - side.x, 0, car.position.z - side.z);
+    player.visible = true;
+  } else if (player.position.distanceTo(car.position) < 6) {
+    G.inCar = true; player.visible = false; G.camYaw = car.rotation.y + Math.PI;
+  } else toast('Acercate al auto para subirte');
+}
+function setWaypoint(s) {
+  G.waypoint = s || null;
+  if (s) { s._arrived = false; beam.position.set(s.wx, 70, s.wz); }
+  beam.visible = !!s;
+  $('gps').hidden = !s;
+  renderDetail(); renderList();
+}
+
+// ---------- misiones ----------
+const MISSIONS = [
+  { title: 'Primer trabajo', text: 'Andá a Cuban Heatwave Café y hablá con Rafa.', store: 'cuban-heatwave-cafe' },
+  { title: 'El paquete', text: 'Llevá el paquete a The Rusty Anchor, en Coral Keys.', store: 'the-rusty-anchor' },
+  { title: 'Ciudad abierta', text: 'Silk & Smoke abrió en Port Sable. Explorá, comprá y planeá el golpe al banco de noche.', store: null }
+];
+function updateMissionHUD() { const m = MISSIONS[Math.min(G.mission, 2)]; $('mission').innerHTML = `<div><b>${m.title}</b>${m.text}</div>`; }
+function advanceMission() {
+  G.mission++;
+  if (G.mission === 1) { toast('Rafa: "Llevale esto a mi primo en The Rusty Anchor. No lo abras."', 4500); setWaypoint(G.stores.find(s => s.id === 'the-rusty-anchor')); }
+  if (G.mission === 2) { G.money += 1000; G.story = 1; G.stores.forEach(s => { if (s.unlock && s.door) s.door.material.color.set(0xfff0c0); }); toast('Misión completada · +$1,000 · Silk & Smoke desbloqueado', 4500); setWaypoint(null); }
+  updateMissionHUD(); save();
+}
+
+// ---------- interior del local ----------
+function openShop(s) { G.mode = 'shop'; G.keys = {}; $('shop').hidden = false; $('prompt').hidden = true; renderShop(s); }
+function renderShop(s) {
+  const c = G.cats[s.category], z = G.zones[s.zone], open = isOpen(s);
+  const hrs = s.hours.always_open ? 'Abierto 24 h' : `${s.hours.open} – ${s.hours.close}`;
+  $('shopTitle').textContent = z.name; $('shopMoney').textContent = money(G.money);
+  let html = `<div class="meta"><span class="pill" style="color:${c.color};border-color:${c.color}">${c.name}</span><span class="pill ${open ? 'open' : 'closed'}">${open ? 'Abierto' : 'Cerrado'} · ${hrs}</span>${c.age_rating ? `<span class="pill">${c.age_rating}</span>` : ''}${s.special ? `<span class="pill heist">${s.special.label}</span>` : ''}</div>
+    <h2>${s.name}</h2><p>${s.description}</p>`;
+  const m = MISSIONS[G.mission];
+  if (m && m.store === s.id) html += `<div class="special"><b>${m.title}</b><span>${G.mission === 0 ? 'Rafa te espera en la barra con un paquete envuelto en papel de diario.' : 'El primo de Rafa mira el paquete y asiente.'}</span><button class="btn gold" data-a="mission" type="button">${G.mission === 0 ? 'Agarrar el paquete' : 'Entregar el paquete'}</button></div>`;
+  if (s.special?.type === 'golpe') {
+    const t = G.minutes % 1440, night = t < 360 || t >= 1200, ready = night && G.heistCooldown <= 0;
+    const msg = G.heistCooldown > 0 ? 'La policía todavía está revisando la bóveda. Esperá a que se calme.' : night ? 'La bóveda está con guardia mínima. Es ahora o nunca.' : 'Hay demasiada gente y guardias. Volvé entre las 20:00 y las 06:00.';
+    html += `<div class="special"><b>Golpe al banco</b><span>${msg}</span><button class="btn gold" data-a="heist" type="button" ${ready ? '' : 'disabled'}>Dar el golpe</button></div>`;
+  }
+  if (!open && !s.special) html += `<div class="closedNote">Está cerrado. Abre a las ${s.hours.open}.</div>`;
+  else if (s.category !== 'banco') {
+    const isProp = s.actions?.includes('comprar_propiedad');
+    html += '<div class="items">' + s.sells.map((item, i) => {
+      const p = priceOf(s, item), have = isProp && G.owned.includes(s.id + ':' + item);
+      return `<div class="item"><span class="n">${item}</span><span class="p">${p ? money(p) : 'Gratis'}</span><button class="btn primary" data-a="buy" data-i="${i}" type="button" ${have ? 'disabled' : ''}>${have ? 'Tuya' : 'Comprar'}</button></div>`;
+    }).join('') + '</div>';
+  }
+  html += `<div><button class="btn" data-a="gps" type="button">Ver en el mapa</button></div>`;
+  const card = $('shopCard'); card.innerHTML = html;
+  card.querySelectorAll('button[data-a]').forEach(b => b.onclick = () => shopAction(s, b.dataset.a, +b.dataset.i));
+}
+function shopAction(s, a, i) {
+  if (a === 'mission') { advanceMission(); return closeShop(); }
+  if (a === 'gps') { closeShop(); openMap(s); return; }
+  if (a === 'heist') { const loot = 25000 + Math.floor(Math.random() * 50000); G.money += loot; G.heistCooldown = 720; save(); toast(`¡Golpe exitoso! +${money(loot)}. Salí rápido.`, 4000); return closeShop(); }
+  if (a === 'buy') {
+    const item = s.sells[i], p = priceOf(s, item);
+    if (G.money < p) return toast('No te alcanza la plata');
+    G.money -= p;
+    if (s.actions?.includes('comprar_propiedad')) G.owned.push(s.id + ':' + item);
+    if (s.category === 'autos' && /deportiv|convertible|suv/i.test(item)) { car.userData.body.material.color.set(['#ffd23f','#3ddcd0','#ff7a3d'][i % 3]); toast(`${item}: tu auto nuevo ya es tuyo`); }
+    else toast(`Compraste: ${item} · -${money(p)}`);
+    save(); renderShop(s);
+  }
+}
+function closeShop() { G.mode = 'play'; $('shop').hidden = true; }
+
+// ---------- mapa grande ----------
+const MV = { zoom: 1, cx: 500, cy: 500, sel: null, q: '' };
+function buildMapUI() {
+  const cats = $('cats');
+  G.data.categories.forEach(c => {
+    const b = document.createElement('button'); b.type = 'button';
+    b.innerHTML = `<span class="d" style="background:${c.color}"></span>${c.name}`;
+    b.onclick = () => { G.hidden.has(c.id) ? G.hidden.delete(c.id) : G.hidden.add(c.id); b.classList.toggle('off'); renderList(); };
+    cats.appendChild(b);
+  });
+  $('search').addEventListener('input', e => { MV.q = e.target.value.trim().toLowerCase(); renderList(); });
+  $('mapClose').onclick = closeMap;
+  $('zIn').onclick = () => { MV.zoom = Math.min(6, MV.zoom * 1.5); };
+  $('zOut').onclick = () => { MV.zoom = Math.max(1, MV.zoom / 1.5); };
+  $('zMe').onclick = () => { const p = M2W(focusPos().x, focusPos().z); MV.cx = p.mx; MV.cy = p.my; MV.zoom = Math.max(MV.zoom, 2.5); };
+  const cv = $('bigmap'); let drag = null, moved = false;
+  cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY }; moved = false; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 3) moved = true; const k = mapScale(); MV.cx -= dx / k; MV.cy -= dy / k; drag = { x: e.clientX, y: e.clientY }; });
+  cv.addEventListener('pointerup', e => {
+    drag = null; if (moved) return;
+    const r = cv.getBoundingClientRect(), p = screenToMap(e.clientX - r.left, e.clientY - r.top), k = mapScale();
+    let best = null, bd = 16 / k;
+    for (const s of visibleStores()) { const d = Math.hypot(s.mx - p.x, s.my - p.y); if (d < bd) { bd = d; best = s; } }
+    if (best) selectStore(best);
+  });
+  cv.addEventListener('wheel', e => { e.preventDefault(); MV.zoom = Math.max(1, Math.min(6, MV.zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15))); }, { passive: false });
+}
+const visibleStores = () => G.stores.filter(s => !G.hidden.has(s.category) && !locked(s));
+const focusPos = () => G.inCar ? car.position : player.position;
+function mapScale() { const cv = $('bigmap'); return Math.min(cv.clientWidth, cv.clientHeight) / 1000 * MV.zoom; }
+function screenToMap(sx, sy) { const cv = $('bigmap'), k = mapScale(); return { x: MV.cx + (sx - cv.clientWidth / 2) / k, y: MV.cy + (sy - cv.clientHeight / 2) / k }; }
+function openMap(sel) {
+  G.mode = 'map'; G.keys = {}; $('mapScreen').hidden = false; $('prompt').hidden = true;
+  if (sel) { MV.cx = sel.mx; MV.cy = sel.my; MV.zoom = 3; } else { MV.cx = 500; MV.cy = 500; MV.zoom = 1; }
+  MV.sel = sel || G.waypoint || null;
+  renderList(); renderDetail();
+}
+function closeMap() { G.mode = 'play'; $('mapScreen').hidden = true; $('search').blur(); }
+function selectStore(s) { MV.sel = s; renderList(); renderDetail(); }
+function renderList() {
+  if (G.mode !== 'map') return;
+  const fp = M2W(focusPos().x, focusPos().z);
+  const items = visibleStores().filter(s => !MV.q || [s.name, G.zones[s.zone].name, G.cats[s.category].name, ...s.sells].join(' ').toLowerCase().includes(MV.q))
+    .map(s => ({ s, d: Math.hypot(s.mx - fp.mx, s.my - fp.my) * S })).sort((a, b) => a.d - b.d);
+  $('list').innerHTML = items.length ? items.map(({ s, d }) => `<button class="it ${MV.sel === s ? 'sel' : ''}" data-id="${s.id}" type="button"><span class="d" style="background:${s.special?.pin_color || G.cats[s.category].color}"></span><span>${s.name}<small>${G.cats[s.category].name} · ${G.zones[s.zone].name}</small></span><span class="dist">${Math.round(d)} m</span></button>`).join('') : '<p style="color:var(--muted);padding:8px;font-size:13px">No hay tiendas que coincidan.</p>';
+  $('list').querySelectorAll('.it').forEach(b => b.onclick = () => { const s = G.stores.find(x => x.id === b.dataset.id); selectStore(s); MV.cx = s.mx; MV.cy = s.my; MV.zoom = Math.max(MV.zoom, 2.5); });
+}
+function renderDetail() {
+  const el = $('detail'), s = MV.sel;
+  if (!s || G.mode !== 'map') { el.hidden = true; return; }
+  const c = G.cats[s.category], open = isOpen(s);
+  el.hidden = false;
+  el.innerHTML = `<div class="meta"><span class="pill" style="color:${c.color};border-color:${c.color}">${c.name}</span><span class="pill">${G.zones[s.zone].name}</span><span class="pill ${open ? 'open' : 'closed'}">${open ? 'Abierto' : 'Cerrado'} · ${s.hours.always_open ? '24 h' : s.hours.open + '–' + s.hours.close}</span>${s.special ? `<span class="pill heist">${s.special.label}</span>` : ''}</div>
+    <h3>${s.name}</h3><p>${s.description}</p><p>Vende: ${s.sells.join(', ')}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${G.waypoint === s ? '<button class="btn" id="wpOff" type="button">Quitar ruta</button>' : '<button class="btn primary" id="wpOn" type="button">Marcar ruta e ir</button>'}</div>`;
+  const on = $('wpOn'), off = $('wpOff');
+  if (on) on.onclick = () => { setWaypoint(s); toast(`Ruta marcada a ${s.name}. Seguí la luz rosa.`); closeMap(); };
+  if (off) off.onclick = () => setWaypoint(null);
+}
+
+function drawMapLayer(ctx, cx, cy, k, w, h, opts) {
+  ctx.save();
+  ctx.fillStyle = '#16507a'; ctx.fillRect(0, 0, w, h);
+  ctx.translate(w / 2 - cx * k, h / 2 - cy * k);
+  ctx.drawImage(groundCanvas, 0, 0, 1000 * k, 1000 * k);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  if (opts.labels) {
+    for (const z of G.data.zones) { const b = z.bounds; ctx.font = `${Math.round(Math.max(12, Math.min(28, 22 * k / opts.base)))}px Bungee, Impact, sans-serif`; ctx.fillStyle = ZONE[z.id].accent; ctx.globalAlpha = 0.85; ctx.fillText(z.name.toUpperCase(), (b.x[0] + b.x[1]) / 2 * k, (b.y[0] + b.y[1]) / 2 * k); }
     ctx.globalAlpha = 1;
-    if (big) {
-      ctx.font = '600 12px Inter, system-ui, sans-serif';
-      const w = ctx.measureText(s.name).width + 12;
-      ctx.fillStyle = 'rgba(15,11,30,0.85)'; ctx.fillRect(x - w / 2, y + r * 0.6, w, 18);
-      ctx.fillStyle = '#f4ecff'; ctx.fillText(s.name, x, y + r * 0.6 + 9);
+  }
+  const r = opts.pin;
+  for (const s of visibleStores()) {
+    const x = s.mx * k, y = s.my * k, c = G.cats[s.category], heist = s.special?.type === 'golpe';
+    if (heist) { ctx.fillStyle = 'rgba(255,210,63,0.3)'; ctx.beginPath(); ctx.arc(x, y, r * (1.7 + 0.25 * Math.sin(performance.now() / 280)), 0, 7); ctx.fill(); }
+    ctx.globalAlpha = isOpen(s) ? 1 : 0.55;
+    ctx.fillStyle = heist ? '#ffd23f' : c.color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+    const sel = s === MV.sel && opts.labels;
+    ctx.lineWidth = sel ? 3 : 1.5; ctx.strokeStyle = sel ? '#fff' : '#0f0b1e'; ctx.stroke();
+    if (r >= 7) { ctx.fillStyle = heist ? '#0f0b1e' : '#fff'; ctx.font = `700 ${Math.round(r * (GLYPH[s.category].length > 1 ? 0.8 : 1.1))}px Inter, sans-serif`; ctx.fillText(heist ? '$' : GLYPH[s.category], x, y + 0.5); }
+    ctx.globalAlpha = 1;
+    if (opts.labels && k > 1.6) { ctx.font = '600 11px Inter, sans-serif'; const tw = ctx.measureText(s.name).width + 10; ctx.fillStyle = 'rgba(15,11,30,0.85)'; ctx.fillRect(x - tw / 2, y + r + 3, tw, 16); ctx.fillStyle = '#f4ecff'; ctx.fillText(s.name, x, y + r + 11); }
+  }
+  const fp = M2W(focusPos().x, focusPos().z);
+  if (G.waypoint) { ctx.strokeStyle = '#ff3d8b'; ctx.lineWidth = 3; ctx.setLineDash([6, 5]); ctx.beginPath(); ctx.moveTo(fp.mx * k, fp.my * k); ctx.lineTo(G.waypoint.mx * k, G.waypoint.my * k); ctx.stroke(); ctx.setLineDash([]); }
+  const heading = G.inCar ? car.rotation.y : player.rotation.y;
+  ctx.translate(fp.mx * k, fp.my * k); ctx.rotate(Math.PI - heading);
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ff3d8b'; ctx.lineWidth = 2.5;
+  const a = 10;
+  ctx.beginPath(); ctx.moveTo(0, -a); ctx.lineTo(a * 0.7, a * 0.8); ctx.lineTo(0, a * 0.4); ctx.lineTo(-a * 0.7, a * 0.8); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function drawBigMap() {
+  const cv = $('bigmap'), dpr = Math.min(devicePixelRatio || 1, 2), w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h) return;
+  if (cv.width !== w * dpr || cv.height !== h * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawMapLayer(ctx, MV.cx, MV.cy, mapScale(), w, h, { labels: true, pin: Math.max(7, 6 * Math.sqrt(MV.zoom)), base: MV.zoom });
+  $('mapClock').textContent = fmt(G.minutes);
+}
+function drawMinimap() {
+  const cv = $('minimap'), ctx = cv.getContext('2d'), fp = M2W(focusPos().x, focusPos().z);
+  ctx.save(); ctx.beginPath(); ctx.arc(160, 160, 160, 0, 7); ctx.clip();
+  drawMapLayer(ctx, fp.mx, fp.my, 1.6, 320, 320, { labels: false, pin: 9 });
+  ctx.restore();
+  if (G.waypoint) {
+    const dx = G.waypoint.mx - fp.mx, dy = G.waypoint.my - fp.my;
+    if (Math.hypot(dx, dy) * 1.6 > 150) { const a = Math.atan2(dy, dx); ctx.fillStyle = '#ff3d8b'; ctx.beginPath(); ctx.arc(160 + Math.cos(a) * 140, 160 + Math.sin(a) * 140, 10, 0, 7); ctx.fill(); }
+  }
+}
+
+// ---------- loop ----------
+let last = performance.now(), hudTick = 0;
+const v3 = new THREE.Vector3(), skyDay = new THREE.Color(0x9ec9e8), skyDusk = new THREE.Color(0xff8a5c), skyNight = new THREE.Color(0x120c2a);
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.05); last = now;
+  G.minutes = (G.minutes + dt) % 1440;                     // 1 s real = 1 min de juego
+  if (G.heistCooldown > 0) G.heistCooldown -= dt;
+  if (G.mode === 'play') update(dt);
+  updateLighting();
+  updateCamera(dt);
+  renderer.render(scene, camera);
+  if (G.mode === 'map') drawBigMap();
+  if ((hudTick += dt) > 0.05) { hudTick = 0; drawMinimap(); updateHUD(); }
+  requestAnimationFrame(loop);
+}
+
+function inputVec() {
+  const k = G.keys;
+  let ix = (k['d'] || k['arrowright'] ? 1 : 0) - (k['a'] || k['arrowleft'] ? 1 : 0);
+  let iy = (k['w'] || k['arrowup'] ? 1 : 0) - (k['s'] || k['arrowdown'] ? 1 : 0);
+  let run = !!k['shift'];
+  if (joy) { const m = Math.hypot(joy.dx, joy.dy); if (m > 10) { ix = joy.dx / Math.max(m, 60); iy = -joy.dy / Math.max(m, 60); run = m > 55; } }
+  return { ix, iy, run };
+}
+
+function update(dt) {
+  const { ix, iy, run } = inputVec();
+  if (G.inCar) {
+    const c = car.userData, max = run ? 46 : 32;
+    if (iy > 0) c.speed += 18 * dt * iy; else if (iy < 0) c.speed += (c.speed > 0 ? 34 : 12) * dt * iy; else c.speed *= (1 - 1.2 * dt);
+    c.speed = Math.max(-10, Math.min(max, c.speed));
+    if (Math.abs(c.speed) > 0.3) car.rotation.y -= ix * dt * 1.9 * Math.min(1, Math.abs(c.speed) / 8) * Math.sign(c.speed);
+    if (moveWithCollision(car, Math.sin(car.rotation.y) * c.speed * dt, Math.cos(car.rotation.y) * c.speed * dt, 1.6)) c.speed *= -0.25;
+    player.position.copy(car.position);
+  } else {
+    const ud = player.userData, m = Math.hypot(ix, iy);
+    if (m > 0.05) {
+      const n = Math.min(m, 1) / m, sp = (run ? 9.5 : 4.6) * Math.min(m, 1);
+      const fwdX = -Math.sin(G.camYaw), fwdZ = -Math.cos(G.camYaw), rX = -fwdZ, rZ = fwdX;
+      const dx = (fwdX * iy + rX * ix) * n * sp * dt, dz = (fwdZ * iy + rZ * ix) * n * sp * dt;
+      moveWithCollision(player, dx, dz, 0.45);
+      let diff = Math.atan2(dx, dz) - player.rotation.y; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+      player.rotation.y += diff * Math.min(1, dt * 12);
+      ud.phase += dt * (run ? 13 : 8);
+      const sw = Math.sin(ud.phase) * (run ? 0.9 : 0.6);
+      ud.legL.rotation.x = sw; ud.legR.rotation.x = -sw; ud.armL.rotation.x = -sw * 0.8; ud.armR.rotation.x = sw * 0.8;
+      player.position.y = Math.abs(Math.sin(ud.phase)) * (run ? 0.08 : 0.04);
+    } else {
+      ['legL','legR','armL','armR'].forEach(l => ud[l].rotation.x *= 0.8); player.position.y = 0;
     }
   }
+  nearStore = null; let bd = 5.5;
+  if (!G.inCar) for (const s of G.stores) { const d = Math.hypot(s.wx - player.position.x, s.wz - player.position.z); if (d < bd) { bd = d; nearStore = s; } }
+  const w = G.waypoint;
+  if (w && !w._arrived && Math.hypot(w.wx - focusPos().x, w.wz - focusPos().z) < 10) { w._arrived = true; toast(`Llegaste a ${w.name}. ${G.inCar ? 'Bajate (F) y entrá' : 'Entrá'} con E.`); }
+}
 
-  function draw() {
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.fillStyle = '#0f0b1e'; ctx.fillRect(0, 0, W, H);
-    if (!state.data) return;
+function updateCamera(dt) {
+  const t = focusPos();
+  if (G.inCar && !pointers.size) { let diff = (car.rotation.y + Math.PI) - G.camYaw; diff = Math.atan2(Math.sin(diff), Math.cos(diff)); G.camYaw += diff * Math.min(1, dt * 3); }
+  const dist = G.inCar ? 11 : 6.2, hgt = G.inCar ? 2.2 : 1.7;
+  v3.set(t.x + Math.sin(G.camYaw) * Math.cos(G.camPitch) * dist, hgt + Math.sin(G.camPitch) * dist, t.z + Math.cos(G.camYaw) * Math.cos(G.camPitch) * dist);
+  camera.position.lerp(v3, Math.min(1, dt * 10));
+  camera.lookAt(t.x, hgt, t.z);
+  beam.material.opacity = 0.18 + 0.1 * Math.sin(performance.now() / 300);
+}
 
-    if (state.bigMap) {
-      const size = Math.min(W, H) - 120, ox = (W - size) / 2, oy = (H - size) / 2 + 20, sc = size / (1000 * SCALE);
-      drawWorld(sc, ox, oy, false);
-      for (const s of state.data.stores) if (visible(s)) drawPin(s, ox + s.position.x * SCALE * sc, oy + s.position.y * SCALE * sc, 8, false);
-      const px = ox + state.player.x * sc, py = oy + state.player.y * sc;
-      ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ff3d8b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(px, py, 6, 0, 7); ctx.fill(); ctx.stroke();
-      return;
-    }
+function updateLighting() {
+  const t = G.minutes / 60;
+  const day = t >= 7 && t < 18 ? 1 : t >= 18 && t < 21 ? 1 - (t - 18) / 3 : t >= 5 && t < 7 ? (t - 5) / 2 : 0;
+  const dusk = (t >= 17 && t < 21) || (t >= 5 && t < 7) ? 1 - Math.abs(day - 0.5) * 2 : 0;
+  const sky = skyNight.clone().lerp(skyDay, day).lerp(skyDusk, dusk * 0.5);
+  renderer.setClearColor(sky); scene.fog.color.copy(sky);
+  sun.intensity = 0.15 + 0.85 * day; hemi.intensity = 0.35 + 0.55 * day;
+  sun.color.set(dusk > 0.3 ? 0xffb07a : 0xfff0d8);
+  G.winMat.opacity = (1 - day) * 0.75;
+}
 
-    const ox = W / 2 - state.cam.x, oy = H / 2 - state.cam.y;
-    drawWorld(1, ox, oy, true);
-
-    // pines
-    for (const s of state.data.stores) {
-      if (!visible(s)) continue;
-      const x = ox + s.position.x * SCALE, y = oy + s.position.y * SCALE;
-      if (x < -60 || y < -60 || x > W + 60 || y > H + 60) continue;
-      drawPin(s, x, y, 16, true);
-    }
-
-    // jugador
-    const p = state.player, x = ox + p.x, y = oy + p.y;
-    ctx.save(); ctx.translate(x, y); ctx.rotate(p.a);
-    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(2, 4, 13, 10, 0, 0, 7); ctx.fill();
-    ctx.fillStyle = '#ff3d8b'; ctx.beginPath(); ctx.arc(0, 0, 11, 0, 7); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(5, -6); ctx.lineTo(5, 6); ctx.closePath(); ctx.fill();
-    ctx.restore();
-
-    // noche
-    const d = darkness();
-    if (d > 0) {
-      ctx.fillStyle = `rgba(10,6,30,${d})`; ctx.fillRect(0, 0, W, H);
-      const g = ctx.createRadialGradient(x, y, 10, x, y, 220);
-      g.addColorStop(0, `rgba(255,122,61,${d * 0.25})`); g.addColorStop(1, 'rgba(255,122,61,0)');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-    }
-
-    // joystick táctil
-    if (state.joy) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(state.joy.ox, state.joy.oy, 50, 0, 7); ctx.stroke();
-      const m = Math.hypot(state.joy.dx, state.joy.dy), k = m > 50 ? 50 / m : 1;
-      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(state.joy.ox + state.joy.dx * k, state.joy.oy + state.joy.dy * k, 20, 0, 7); ctx.fill();
-    }
-
-    drawMinimap();
+function updateHUD() {
+  $('clock').textContent = fmt(G.minutes);
+  $('money').textContent = money(G.money);
+  const fp = M2W(focusPos().x, focusPos().z), z = zoneAt(fp.mx, fp.my);
+  $('zone').textContent = z ? z.name.toUpperCase() : 'AFUERAS';
+  const pr = $('prompt');
+  if (G.mode !== 'play') pr.hidden = true;
+  else if (nearStore) { pr.innerHTML = locked(nearStore) ? `${nearStore.name} · Cerrado por ahora` : `<kbd>E</kbd>Entrar a ${nearStore.name}`; pr.hidden = false; }
+  else if (!G.inCar && player.position.distanceTo(car.position) < 6) { pr.innerHTML = '<kbd>F</kbd>Subir al auto'; pr.hidden = false; }
+  else pr.hidden = true;
+  if (G.waypoint) {
+    const w = G.waypoint, dx = w.wx - focusPos().x, dz = w.wz - focusPos().z, d = Math.hypot(dx, dz);
+    const camFwd = Math.atan2(-Math.sin(G.camYaw), -Math.cos(G.camYaw)), ang = Math.atan2(dx, dz);
+    $('gpsArrow').style.transform = `rotate(${Math.atan2(Math.sin(camFwd - ang), Math.cos(camFwd - ang))}rad)`;
+    $('gpsText').textContent = `${w.name} · ${Math.round(d)} m`;
   }
-
-  function drawMinimap() {
-    const size = Math.min(150, W * 0.3), ox = W - size - 12, oy = H - size - 12 - 0, sc = size / (1000 * SCALE);
-    ctx.save();
-    ctx.beginPath(); ctx.rect(ox, oy, size, size); ctx.clip();
-    drawWorld(sc, ox, oy, false, false);
-    for (const s of state.data.stores) if (visible(s)) { ctx.fillStyle = s.special?.pin_color || state.cats[s.category].color; ctx.fillRect(ox + s.position.x * SCALE * sc - 2, oy + s.position.y * SCALE * sc - 2, 4, 4); }
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ox + state.player.x * sc, oy + state.player.y * sc, 3.5, 0, 7); ctx.fill();
-    ctx.restore();
-    ctx.strokeStyle = '#3a2f63'; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, size, size);
-  }
+}
 })();
 </script>
