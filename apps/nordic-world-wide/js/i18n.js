@@ -32,6 +32,7 @@
       "res.leftOne": "¡Última reserva! Queda 1 de {max}",
       "res.full": "RESERVAS COMPLETAS",
       "res.fullBtn": "Reservas completas",
+      "res.pay": "Reservar y pagar",
       "res.fullMsg": "Lo sentimos: esta camiseta ya tiene sus {max} reservas. Escríbenos si quieres apuntarte a la lista de espera.",
       "price.tbd": "Precio a consultar",
 
@@ -97,7 +98,7 @@
       "cart.toShop": "Ir al Shop",
       "cart.test": "Modo de prueba: no se cobra dinero real.",
       "product.ask": "Consultar antes de comprar",
-      "pay.ok": "¡Pago recibido! Te llegará la confirmación por email. Gracias por tu pedido.",
+      "pay.ok": "¡Pago recibido! Tu reserva está hecha. Te llegará la confirmación por email.",
       "pay.cancel": "Pago cancelado. Tu carrito sigue guardado.",
       "product.sizeError": "Elige una talla para continuar.",
       "product.note1": "Envíos a toda España",
@@ -150,6 +151,7 @@
       "res.leftOne": "Last one! 1 of {max} left",
       "res.full": "FULLY RESERVED",
       "res.fullBtn": "Fully reserved",
+      "res.pay": "Reserve & pay",
       "res.fullMsg": "Sorry: this tee already has its {max} reservations. Write to us to join the waiting list.",
       "price.tbd": "Price on request",
 
@@ -215,7 +217,7 @@
       "cart.toShop": "Go to the Shop",
       "cart.test": "Test mode: no real money is charged.",
       "product.ask": "Ask before buying",
-      "pay.ok": "Payment received! You'll get a confirmation by email. Thanks for your order.",
+      "pay.ok": "Payment received! Your reservation is done. You'll get a confirmation by email.",
       "pay.cancel": "Payment cancelled. Your cart is still saved.",
       "product.sizeError": "Choose a size to continue.",
       "product.note1": "Shipping across Spain",

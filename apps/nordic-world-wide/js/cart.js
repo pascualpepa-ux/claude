@@ -11,7 +11,7 @@
   var KEY = "nww-cart";
   var ENVIO = 4.99;
 
-  var api = { active: false, test: false, add: add, ready: false };
+  var api = { active: false, test: false, add: add, buyNow: buyNow, ready: false };
   window.NWW_CART = api;
 
   function $(s, c) { return (c || document).querySelector(s); }
@@ -112,6 +112,16 @@
       });
   }
 
+  // Reservar y pagar una camiseta directamente (sin carrito): va a la página de pago de Stripe.
+  function buyNow(id, talla) {
+    return fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: [{ id: id, talla: talla, cantidad: 1 }], lang: I18N.getLang() }) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) {
+        if (r.status === 409) throw new Error("FULL");
+        if (!r.ok || !d.url) throw new Error(d.message || d.error || r.status);
+        location.href = d.url;
+      }); });
+  }
+
   /* ---------- Vuelta desde Stripe ---------- */
   function banner(msg, ok) {
     var d = document.createElement("div");
@@ -125,8 +135,8 @@
   // Avisa al equipo de un pedido PAGADO (mismos caminos que el formulario de contacto).
   function notifyTeam(o) {
     var lines = o.items.map(function (i) { return "• " + i.cantidad + " × " + i.nombre + " — " + i.importe.toFixed(2).replace(".", ",") + " €"; });
-    var asunto = "💳 PEDIDO PAGADO – " + o.total.toFixed(2).replace(".", ",") + " € – " + (o.nombre || o.email);
-    var texto = ["PEDIDO PAGADO CON TARJETA (Stripe)", "", lines.join("\n"), "", "Envío: " + (o.envio ? o.envio.toFixed(2).replace(".", ",") + " €" : "gratis"), "Total cobrado: " + o.total.toFixed(2).replace(".", ",") + " €", "",
+    var asunto = "💳 RESERVA PAGADA – " + o.total.toFixed(2).replace(".", ",") + " € – " + (o.nombre || o.email);
+    var texto = ["RESERVA PAGADA CON TARJETA (Stripe) — ya cuenta como 1 de las 5 reservas", "", lines.join("\n"), "", "Envío: " + (o.envio ? o.envio.toFixed(2).replace(".", ",") + " €" : "gratis"), "Total cobrado: " + o.total.toFixed(2).replace(".", ",") + " €", "",
       "Cliente: " + o.nombre, "Email: " + o.email, o.telefono ? "Teléfono: " + o.telefono : null, "Dirección de envío: " + o.direccion, "", "Referencia Stripe: " + o.id].filter(function (x) { return x !== null; }).join("\n");
     var jobs = [];
     if (CFG.destinatario) {
@@ -158,7 +168,6 @@
     var sid = params.get("session_id");
     if (estado !== "ok" || !sid) return;
     history.replaceState(null, "", clean);
-    cart = []; save(); render();
     banner(t("pay.ok"), true);
     var flag = "nww-notified-" + sid;
     try { if (localStorage.getItem(flag)) return; } catch (e) {}
@@ -172,13 +181,13 @@
   }
 
   /* ---------- Arranque: ¿hay pagos activos? ---------- */
-  // Ahora se vende por reservas (máx. 5 por camiseta): el carrito con tarjeta queda apagado.
-  // Para volver a activarlo: CFG.pagosConTarjeta = true en js/config.js.
+  // Pago con tarjeta: solo si CFG.pagosConTarjeta (js/config.js) y el servidor tiene la clave de Stripe.
   (CFG.pagosConTarjeta ? fetch("/api/checkout") : Promise.reject()).then(function (r) { return r.ok ? r.json() : { active: false }; })
     .catch(function () { return { active: false }; })
     .then(function (s) {
       api.active = !!s.active; api.test = !!s.test; api.ready = true;
-      if (api.active) { build(); render(); handleReturn(); }
+      // Sin carrito: cada camiseta se reserva y paga desde su página (botón "Reservar y pagar").
+      if (api.active) handleReturn();
       document.dispatchEvent(new CustomEvent("nww:cart-ready", { detail: { active: api.active } }));
     });
 })();

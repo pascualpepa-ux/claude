@@ -25,6 +25,8 @@
 
   function productUrl(p) { return "producto.html?id=" + encodeURIComponent(p.id); }
 
+  function payOn() { return !!(window.NWW_CART && window.NWW_CART.active); }
+
   /* ---------- Reservas (máximo window.MAX_RESERVAS por camiseta) ---------- */
   var MAXRES = window.MAX_RESERVAS || 5;
   var RES = {};
@@ -312,7 +314,8 @@
           "</fieldset>" +
           resLine(p) +
           (resLeft(p)
-            ? '<button class="btn btn-dark" id="buy-btn" type="button">' + esc(t("product.buy")) + "</button>"
+            ? '<button class="btn btn-dark" id="buy-btn" type="button">' + esc(t(payOn() ? "res.pay" : "product.buy")) + "</button>" +
+              '<p class="pay-error" id="pay-error" role="alert"></p>'
             : '<button class="btn btn-dark is-full" id="buy-btn" type="button" disabled>' + esc(t("res.fullBtn")) + "</button>") +
           '<p class="size-error" id="size-error" role="alert"></p>' +
           '<ul class="product-notes"><li>' + esc(t("product.note1")) + "</li><li>" + esc(t("product.note2")) + "</li><li>" + esc(t("product.note3")) + "</li></ul>" +
@@ -337,6 +340,15 @@
       $("#buy-btn").addEventListener("click", function () {
         if (!resLeft(p)) return;
         var size = pickSize(); if (!size) return;
+        if (payOn()) {
+          var b = $("#buy-btn"); b.disabled = true; b.textContent = t("cart.paying");
+          window.NWW_CART.buyNow(p.id, size).catch(function (e) {
+            b.disabled = false; b.textContent = t("res.pay");
+            if (e && e.message === "FULL") { RES[p.id] = MAXRES; renderProduct(); return; }
+            $("#pay-error").textContent = t("cart.error");
+          });
+          return;
+        }
         location.href = "index.html?producto=" + encodeURIComponent(p.nombre) + "&talla=" + encodeURIComponent(size) + "&id=" + encodeURIComponent(p.id) + "#contacto";
       });
       $$('input[name="talla"]', productEl).forEach(function (r) {
@@ -346,6 +358,7 @@
     renderProduct();
     onLangChange.push(renderProduct);
     document.addEventListener("nww:res", renderProduct);
+    document.addEventListener("nww:cart-ready", function () { if (payOn()) renderProduct(); });
   }
 
   /* ---------- Email directo en Contacto (js/config.js → emailPublico) ---------- */

@@ -20,7 +20,7 @@ Abre `js/products.js`, copia un bloque `{ ... }` y cambia los datos. Con `precio
 Los botones dicen «Reservar». Cada camiseta admite `MAX_RESERVAS` (5) reservas; el Shop muestra «Quedan X de 5» y, al llenarse, «RESERVAS COMPLETAS» (ya no deja reservar).
 - Reservas hechas fuera de la web: campo `reservadas` de cada camiseta en `js/products.js`.
 - Contador automático: `api/reserve.js` suma las reservas de la web en la base de datos (Upstash, ver Panel admin). **Sin base de datos** el contador no sube solo: el email de la reserva lo avisa («actualizar reservadas») y hay que sumar 1 a mano en `js/products.js`.
-- El carrito con tarjeta está apagado (`pagosConTarjeta: false` en `js/config.js`).
+- Con la clave de Stripe en Vercel, el botón pasa a «Reservar y pagar»: se paga con tarjeta y el pago cuenta como 1 de las 5 reservas (si la camiseta está completa, no deja pagar). Sin la clave: «Reservar» con el formulario.
 
 ## Emails
 Cada envío llega a la vez a pascualpepa@icloud.com (principal) y en copia a guillermogg24@icloud.com y pelayocc@icloud.com (lista en `js/config.js`).

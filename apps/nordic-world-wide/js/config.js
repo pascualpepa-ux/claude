@@ -1,7 +1,8 @@
 /* Ajustes generales de la web — editar aquí */
 window.SITE_CONFIG = {
-  // Pago con tarjeta (carrito Stripe). Apagado: ahora se vende por reservas (máx. 5 por camiseta).
-  pagosConTarjeta: false,
+  // Pago con tarjeta (Stripe): "Reservar y pagar" en cada camiseta. Cada pago cuenta como 1 de las 5 reservas.
+  // Necesita STRIPE_SECRET_KEY en Vercel; sin ella, el botón vuelve a ser "Reservar" con el formulario.
+  pagosConTarjeta: true,
 
   // EMAILS DEL FORMULARIO — cada mensaje sale por DOS caminos a la vez, por si uno falla:
   //   1. FormSubmit (formsubmit.co): gratis, sin cuenta. La primera vez hay que pulsar
