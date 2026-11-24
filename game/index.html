@@ -59,11 +59,22 @@ body { background: var(--night); color: var(--text); font-family: var(--body); o
 .wslot.on { background: var(--sun); color: var(--night); }
 .wslot.on small { color: var(--night); }
 #weaponChip small { color: var(--muted); font-weight: 600; }
-#crosshair { position: fixed; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; pointer-events: none; }
-#crosshair::before, #crosshair::after { content: ""; position: absolute; background: rgba(255,255,255,0.9); box-shadow: 0 0 2px #000; }
-#crosshair::before { left: 10px; top: 0; width: 2px; height: 22px; }
-#crosshair::after { top: 10px; left: 0; height: 2px; width: 22px; }
-#crosshair.dot::before, #crosshair.dot::after { opacity: 0.45; }
+#crosshair { position: fixed; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; --g: 6px; --c: rgba(255,255,255,0.95); }
+#crosshair i { position: absolute; background: var(--c); box-shadow: 0 0 2px rgba(0,0,0,0.9); transition: transform 0.08s; }
+#crosshair i:nth-child(1) { width: 2px; height: 8px; left: -1px; top: calc(-8px - var(--g)); }
+#crosshair i:nth-child(2) { width: 2px; height: 8px; left: -1px; top: var(--g); }
+#crosshair i:nth-child(3) { width: 8px; height: 2px; top: -1px; left: calc(-8px - var(--g)); }
+#crosshair i:nth-child(4) { width: 8px; height: 2px; top: -1px; left: var(--g); }
+#crosshair b { position: absolute; width: 3px; height: 3px; left: -1.5px; top: -1.5px; border-radius: 50%; background: var(--c); box-shadow: 0 0 2px #000; }
+#crosshair.hit { --c: #ff4a4a; }
+#crosshair.aim { --g: 3px; }
+/* elegir personaje */
+.chars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.char { display: grid; justify-items: center; gap: 2px; padding: 6px 4px 8px; border-radius: 12px; border: 2px solid var(--line); background: rgba(0,0,0,0.3); color: var(--text); cursor: pointer; font: 700 12px var(--body); }
+.char img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 8px; background: linear-gradient(180deg, #2a1d4a, #120c2a); }
+.char small { color: var(--muted); font-weight: 600; font-size: 10px; }
+.char.on { border-color: var(--sun); background: rgba(255,122,61,0.15); }
+@media (max-width: 420px) { .chars { grid-template-columns: repeat(2, 1fr); } }
 #phone { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 300px; height: min(580px, calc(100% - 32px)); border-radius: 38px; background: #0b0912; border: 2px solid rgba(255,255,255,0.14); box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 0 0 6px #17131f; padding: 10px; z-index: 20; }
 #phoneScreen { width: 100%; height: 100%; border-radius: 30px; overflow: hidden; background: linear-gradient(170deg, #ff9a5a 0%, #ff3d8b 38%, #3b1f6e 78%, #120c2a 100%); color: #fff; display: flex; flex-direction: column; font-size: 13px; position: relative; }
 .ph-status { display: flex; justify-content: space-between; padding: 12px 20px 6px; font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; }
@@ -210,8 +221,8 @@ body { background: var(--night); color: var(--text); font-family: var(--body); o
   <div id="gps" hidden><span id="gpsArrow">▲</span><span id="gpsText"></span></div>
   <div id="prompt" hidden></div>
   <canvas id="minimap" width="340" height="340" aria-label="Minimapa. Tocá para abrir el mapa"></canvas>
-  <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>Q</kbd>/<kbd>1-5</kbd>/ruedita cambiar arma · <kbd>P</kbd> teléfono · hacé clic en el juego para apuntar con el mouse</div>
-  <div id="crosshair" class="dot" hidden></div>
+  <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>CLIC DER</kbd> apuntar · <kbd>Q</kbd>/<kbd>1-5</kbd>/ruedita cambiar arma · <kbd>P</kbd> teléfono · hacé clic en el juego para apuntar con el mouse</div>
+  <div id="crosshair" hidden><i></i><i></i><i></i><i></i><b></b></div>
   <div class="touch"><button id="tPhone" type="button" style="position:relative">TEL<span id="phoneBadge" hidden>0</span></button><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
 </div>
 <div id="toast" hidden></div>
@@ -224,6 +235,8 @@ body { background: var(--night); color: var(--text); font-family: var(--body); o
     <h1>HEAT<br>CITY</h1>
     <p>Elegí tu nombre. Tu plata, tus propiedades y tu progreso se guardan con ese nombre.</p>
     <form id="loginForm" autocomplete="off">
+      <label>Elegí tu personaje</label>
+      <div class="chars" id="charPick"></div>
       <label for="username">Username</label>
       <input id="username" maxlength="20" placeholder="Pascual" required>
       <div class="row"><label for="quality" style="text-transform:none;letter-spacing:0;font-weight:600">Gráficos</label>
@@ -328,7 +341,7 @@ const dbReady = (window.claude && window.claude.use) ? window.claude.use('db').t
 const slugOf = name => name.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
 function profileData() {
   const p = focusPos();
-  return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, mission: G.mission, mstep: G.mstep, sms: (G.sms || []).slice(0, 30), weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
+  return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, char: G.char, mission: G.mission, mstep: G.mstep, sms: (G.sms || []).slice(0, 30), weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
 }
 function setSaveState(t) { $('saveState').textContent = t; }
 let saving = false, saveAgain = false;
@@ -984,10 +997,41 @@ function idleHuman(ud, t) {
   ud.elL.rotation.x = ud.elR.rotation.x = -0.12; ud.body.position.y = 0; ud.body.rotation.x = 0;
   ud.shL.rotation.z = -0.07 - Math.sin(t / 900) * 0.015; ud.shR.rotation.z = 0.07 + Math.sin(t / 900) * 0.015;
 }
-function makePlayer() {
-  const g = makeHuman({ skin: 0xc68a5e, topMap: tex(shirtTex()), pants: 0x2b3f6b, shoes: 0xf2f2f2, hair: 0x15121c, stubble: true });
+const CHARACTERS = [
+  { id: 'mateo', name: 'Mateo', desc: 'Camisa floreada', opts: () => ({ skin: 0xc68a5e, topMap: tex(shirtTex()), pants: 0x2b3f6b, shoes: 0xf2f2f2, hair: 0x15121c, stubble: true }) },
+  { id: 'dante', name: 'Dante', desc: 'Musculosa y cadena', opts: () => ({ skin: 0x6b4428, top: 0xf4f1e8, pants: 0xc8b89a, shoes: 0x1a1a1a, hair: 0x0e0b09, sleeves: false, wide: 1.08, eye: '#3b2616' }), chain: true },
+  { id: 'valeria', name: 'Valeria', desc: 'Top rosa y jean blanco', opts: () => ({ skin: 0xe8b48a, top: 0xff8fb1, pants: 0xf4f1e8, shoes: 0xffffff, hair: 0x3b2616, long: true, wide: 0.9, sleeves: false, eye: '#4d6b3a' }), female: true },
+  { id: 'nina', name: 'Nina', desc: 'Campera turquesa', opts: () => ({ skin: 0x9c6640, top: 0x0f8c8c, pants: 0x1f2f55, shoes: 0xf2f2f2, hair: 0x5a1e12, long: true, wide: 0.9, eye: '#3b2616' }), female: true }
+];
+function makePlayer(id = G.char || 'mateo') {
+  const c = CHARACTERS.find(x => x.id === id) || CHARACTERS[0];
+  const g = makeHuman(c.opts());
+  if (c.female) g.scale.setScalar(0.96);
+  if (c.chain) { const ch = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.012, 6, 20), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.25 })); ch.rotation.x = Math.PI / 2 - 0.35; ch.position.set(0, 1.52, 0.05); g.userData.body.add(ch); }
   return g;
 }
+function setCharacter(id) {
+  G.char = id;
+  const pos = player.position.clone(), rot = player.rotation.y, vis = player.visible;
+  scene.remove(player); player = makePlayer(id); player.position.copy(pos); player.rotation.y = rot; player.visible = vis; scene.add(player);
+  gunMesh = null; setGunModel();
+}
+// retratos para elegir personaje (render aparte)
+function buildCharPicker() {
+  const pick = $('charPick'); let urls = {};
+  try {
+    const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    r.setSize(180, 240); r.outputEncoding = THREE.sRGBEncoding; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.1;
+    const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(28, 180 / 240, 0.1, 20);
+    sc.add(new THREE.HemisphereLight(0xffe6d0, 0x3a2f63, 0.9)); const dl = new THREE.DirectionalLight(0xffffff, 1.4); dl.position.set(1.5, 3, 3); sc.add(dl); const rim = new THREE.DirectionalLight(0xff3d8b, 0.8); rim.position.set(-2, 2, -2); sc.add(rim);
+    cam.position.set(0, 1.35, 4.2); cam.lookAt(0, 1.05, 0);
+    for (const c of CHARACTERS) { const m = makePlayer(c.id); m.rotation.y = 0.35; idleHuman(m.userData, 0); sc.add(m); r.render(sc, cam); urls[c.id] = r.domElement.toDataURL('image/png'); sc.remove(m); }
+    r.dispose(); r.forceContextLoss && r.forceContextLoss();
+  } catch (e) { urls = {}; }
+  pick.innerHTML = CHARACTERS.map(c => `<button type="button" class="char" data-c="${c.id}">${urls[c.id] ? `<img src="${urls[c.id]}" alt="">` : '<img alt="">'}${esc(c.name)}<small>${esc(c.desc)}</small></button>`).join('');
+  pick.querySelectorAll('.char').forEach(b => b.onclick = () => selectPick(b.dataset.c));
+}
+function selectPick(id) { G.pickChar = id; $('charPick').querySelectorAll('.char').forEach(b => b.classList.toggle('on', b.dataset.c === id)); try { localStorage.setItem('heatcity:char', id); } catch (e) {} }
 function shirtTex() { const [c, x] = cnv(128); x.fillStyle = '#ff7a3d'; x.fillRect(0, 0, 128, 128); x.fillStyle = '#ffd23f'; for (let i = 0; i < 18; i++) { x.beginPath(); x.ellipse(Math.random() * 128, Math.random() * 128, 10, 4, Math.random() * 3, 0, 7); x.fill(); } x.fillStyle = '#2f9a5a'; for (let i = 0; i < 10; i++) { x.beginPath(); x.ellipse(Math.random() * 128, Math.random() * 128, 12, 3, Math.random() * 3, 0, 7); x.fill(); } return c; }
 
 // ---------- vehículos (marcas inventadas) ----------
@@ -1527,7 +1571,8 @@ let firing = false, fireCd = 0, lockFailed = false;
 const cops = [], tracers = [], officers = [];
 document.addEventListener('pointerlockerror', () => { lockFailed = true; });
 document.addEventListener('mousemove', e => { if (document.pointerLockElement === $('view') && G.mode === 'play') { G.camYaw -= e.movementX * 0.0028; G.camPitch = Math.max(0.03, Math.min(1.1, G.camPitch + e.movementY * 0.002)); } });
-document.addEventListener('mouseup', () => { firing = false; });
+document.addEventListener('mouseup', e => { if (e.button === 2) G.aiming = false; else firing = false; });
+$('view').addEventListener('contextmenu', e => e.preventDefault());
 $('tShoot').addEventListener('pointerdown', e => { e.preventDefault(); firing = true; shoot(); });
 $('tShoot').addEventListener('pointerup', () => { firing = false; });
 $('tShoot').addEventListener('pointercancel', () => { firing = false; });
@@ -1597,6 +1642,7 @@ function blowVehicle(g) {
   const a = traffic.find(t => t.g === g); if (a) { a.state = 'crash'; a.timer = 0; a.ud.vx = a.ud.vz = 0; a.ud.health = -1; }
 }
 function damageTarget(t, dmg, dir, melee) {
+  G.hitUntil = performance.now() + 180;
   if (t.officer) { hitOfficer(t.officer, dmg, dir, melee); return; }
   if (t.ped) {
     const p = t.ped; p.hp -= dmg; burst(p.g.position.x, p.g.position.y + 1.1, p.g.position.z, 5, 2, false);
@@ -1646,7 +1692,15 @@ function shoot() {
   if (!W.melee && !(G.weapons[G.weapon] > 0)) { toast('Sin balas. Comprá munición en una armería.'); G.weapon = 'fist'; setGunModel(); return; }
   fireCd = W.rate;
   const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
-  const yaw = Math.atan2(dir.x, dir.z); player.rotation.y = yaw; G.aimT = 1.4;
+  let yaw = Math.atan2(dir.x, dir.z);
+  if (W.melee) {
+    // la piña busca sola a quien esté más cerca adelante tuyo
+    const cand = peds.filter(q => q.state !== 'dead' && q.g.visible).map(q => q.g).concat(officers.filter(o => o.state !== 'dead').map(o => o.g));
+    let best = null, bd = 2.6;
+    for (const g of cand) { const dx = g.position.x - player.position.x, dz = g.position.z - player.position.z, d = Math.hypot(dx, dz); if (d < bd && (dx * dir.x + dz * dir.z) / (d || 1) > -0.2) { bd = d; best = g; } }
+    if (best) { yaw = Math.atan2(best.position.x - player.position.x, best.position.z - player.position.z); if (bd > 1.4) { player.position.x += Math.sin(yaw) * (bd - 1.3); player.position.z += Math.cos(yaw) * (bd - 1.3); } }
+  }
+  player.rotation.y = yaw; G.aimT = 1.4;
   if (W.melee) {
     G.punchT = 0.26; G.guardT = 2; G.punchSide = !G.punchSide;
     const fx = Math.sin(yaw), fz = Math.cos(yaw);
@@ -2038,6 +2092,7 @@ $('view').addEventListener('pointerdown', e => {
   audio();
   if (G.mode !== 'play') return;
   if (e.pointerType === 'mouse' && !lockFailed) {
+    if (e.button === 2) { G.aiming = true; }
     if (document.pointerLockElement === $('view')) { if (e.button === 0) { firing = true; shoot(); } return; }
     try { const r = $('view').requestPointerLock(); if (r && r.catch) r.catch(() => { lockFailed = true; }); } catch (err) { lockFailed = true; }
   }
@@ -2051,7 +2106,7 @@ $('view').addEventListener('pointermove', e => {
   G.camYaw -= (e.clientX - p.x) * 0.006; G.camPitch = Math.max(0.03, Math.min(1.1, G.camPitch + (e.clientY - p.y) * 0.004));
   p.x = e.clientX; p.y = e.clientY;
 });
-const pUp = e => { firing = false; if (joy && joy.id === e.pointerId) joy = null; const p = pointers.get(e.pointerId); if (p && lockFailed && e.pointerType === 'mouse' && Math.hypot(e.clientX - p.sx, e.clientY - p.sy) < 6 && performance.now() - p.t < 350) shoot(); pointers.delete(e.pointerId); };
+const pUp = e => { if (e.button === 2) G.aiming = false; firing = false; if (joy && joy.id === e.pointerId) joy = null; const p = pointers.get(e.pointerId); if (p && lockFailed && e.pointerType === 'mouse' && Math.hypot(e.clientX - p.sx, e.clientY - p.sy) < 6 && performance.now() - p.t < 350) shoot(); pointers.delete(e.pointerId); };
 $('view').addEventListener('pointerup', pUp); $('view').addEventListener('pointercancel', pUp);
 
 // ---------- calidad ----------
@@ -2070,6 +2125,9 @@ function setQuality(q) {
 // ---------- login ----------
 function showLogin() {
   G.mode = 'login'; $('login').hidden = false;
+  if (!$('charPick').children.length) buildCharPicker();
+  let lc = null; try { lc = localStorage.getItem('heatcity:char'); } catch (e) {}
+  selectPick(CHARACTERS.some(c => c.id === lc) ? lc : 'mateo');
   try { const last = localStorage.getItem('heatcity:last'); if (last) $('username').value = last; } catch (e) {}
   $('quality').value = matchMedia('(pointer: coarse)').matches ? 'medio' : 'alto';
   setTimeout(() => $('username').focus(), 50);
@@ -2084,6 +2142,7 @@ $('loginForm').addEventListener('submit', async e => {
   try { localStorage.setItem('heatcity:last', name); } catch (e) {}
   Object.assign(G, { sms: [], heist: null, robbed: {}, mstep: 0, money: 10000, story: 0, owned: [], mission: 0, carColor: '#ff3d8b', carModel: 'sakura', minutes: 10 * 60, weapons: {}, weapon: 'fist', hp: 100, armor: 0, wanted: 0 });
   clearCops();
+  if ((G.pickChar || 'mateo') !== G.char) setCharacter(G.pickChar || 'mateo');
   let spawn = W2M(450, 460);
   if (data) {
     G.money = Number(data.money) || 0; G.story = data.story || 0; G.owned = Array.isArray(data.owned) ? data.owned : []; G.sms = Array.isArray(data.sms) ? data.sms.filter(m => m && typeof m.text === 'string').slice(0, 30) : []; G.mission = data.mission || 0; G.mstep = data.mstep || 0; if (data.mstep === undefined && G.mission >= 1) { G.mstep = G.mission === 1 ? 1 : 0; G.mission = G.mission === 1 ? 0 : 1; } G.carColor = data.carColor || '#ff3d8b'; G.carModel = MODELS[data.carModel] ? data.carModel : 'sakura';
@@ -2641,7 +2700,7 @@ function update(dt) {
         const fwdX = -Math.sin(G.camYaw), fwdZ = -Math.cos(G.camYaw), rX = -fwdZ, rZ = fwdX;
         const dx = (fwdX * iy + rX * ix) * n * sp * dt, dz = (fwdZ * iy + rZ * ix) * n * sp * dt;
         moveWithCollision(player, dx, dz, 0.4, true); pushFromPeds();
-        let diff = Math.atan2(dx, dz) - player.rotation.y; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+        let diff = (G.aiming && G.weapon !== 'fist' && !swimming ? Math.atan2(fwdX, fwdZ) : Math.atan2(dx, dz)) - player.rotation.y; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
         player.rotation.y += diff * Math.min(1, dt * 12);
         ud.phase += dt * (swimming ? (run ? 6 : 4.5) : run ? 11 : 6.8);
         if (swimming) swimAnim(ud, ud.phase); else animHuman(ud, ud.phase, run ? 1.5 : 0.85);
@@ -2650,6 +2709,7 @@ function update(dt) {
     }
     const gy = G.swimming ? (Math.hypot(ix, iy) > 0.05 ? -0.28 : -1.32) + Math.sin(performance.now() / 500) * 0.04 : groundY(player.position.x, player.position.z);
     player.position.y += (gy - player.position.y) * Math.min(1, dt * 8);
+    if (G.aiming && G.weapon !== 'fist' && !G.swimming) { const fy = Math.atan2(-Math.sin(G.camYaw), -Math.cos(G.camYaw)); let d2 = fy - player.rotation.y; d2 = Math.atan2(Math.sin(d2), Math.cos(d2)); player.rotation.y += d2 * Math.min(1, dt * 14); G.aimT = Math.max(G.aimT, 0.2); }
     applyAimPose(dt);
   }
   nearStore = null; let bd = 4.5;
@@ -2668,14 +2728,18 @@ function updateCamera(dt, now) {
   if (G.inCar && !pointers.size) { let diff = (car.rotation.y + Math.PI) - G.camYaw; diff = Math.atan2(Math.sin(diff), Math.cos(diff)); G.camYaw += diff * Math.min(1, dt * 3); }
   const spd = G.inCar ? Math.abs(car.userData.speed) : 0;
   const bm = G.inCar && car.userData.boat ? MODELS[car.userData.model].cam : null;
-  const dist = bm ? bm[0] + spd * 0.05 : G.inCar ? (car.userData.bike ? 5.5 : 9) + spd * 0.06 : 5.4, hgt = bm ? bm[1] : G.inCar ? (car.userData.bike ? 1.6 : 2) : 1.6;
-  camera.fov += ((G.inCar ? 60 + spd * 0.35 : 60) - camera.fov) * Math.min(1, dt * 3); camera.updateProjectionMatrix();
-  v3.set(t.x + Math.sin(G.camYaw) * Math.cos(G.camPitch) * dist, t.y + hgt + Math.sin(G.camPitch) * dist, t.z + Math.cos(G.camYaw) * Math.cos(G.camPitch) * dist);
+  const gunOut = !G.inCar && !G.swimming && G.weapon !== 'fist' && G.mode === 'play';
+  G.aimK = (G.aimK || 0) + (((gunOut ? (G.aiming ? 1 : 0.55) : 0)) - (G.aimK || 0)) * Math.min(1, dt * 9);
+  const ak = G.aimK, side = 0.8 * Math.min(1, ak / 0.55);
+  const dist = bm ? bm[0] + spd * 0.05 : G.inCar ? (car.userData.bike ? 5.5 : 9) + spd * 0.06 : 5.4 - 3 * ak, hgt = bm ? bm[1] : G.inCar ? (car.userData.bike ? 1.6 : 2) : 1.6 + 0.08 * ak;
+  camera.fov += ((G.inCar ? 60 + spd * 0.35 : 60 - 20 * Math.max(0, ak - 0.55) / 0.45) - camera.fov) * Math.min(1, dt * 6); camera.updateProjectionMatrix();
+  const rx = Math.cos(G.camYaw) * side, rz = -Math.sin(G.camYaw) * side;   // a la derecha de la cámara
+  v3.set(t.x + rx + Math.sin(G.camYaw) * Math.cos(G.camPitch) * dist, t.y + hgt + Math.sin(G.camPitch) * dist, t.z + rz + Math.cos(G.camYaw) * Math.cos(G.camPitch) * dist);
   // que la cámara no atraviese edificios
   for (let k = 0; k < 6 && hitCollider(v3.x, v3.z, 0.3) && !hitCollider(v3.x, v3.z, 0.3).water; k++) v3.lerp(new THREE.Vector3(t.x, v3.y, t.z), 0.25);
   camera.position.lerp(v3, Math.min(1, dt * 10));
   if (G.shake > 0) { camera.position.x += (Math.random() - 0.5) * G.shake; camera.position.y += (Math.random() - 0.5) * G.shake; G.shake = Math.max(0, G.shake - dt * 2.5); }
-  camera.lookAt(t.x, t.y + hgt, t.z);
+  camera.lookAt(t.x + rx, t.y + hgt, t.z + rz);
   sun.position.set(t.x, 0, t.z).addScaledVector(sunDir, 250); sun.target.position.set(t.x, 0, t.z);
   beam.material.opacity = 0.16 + 0.08 * Math.sin(now / 300);
 }
@@ -2686,7 +2750,7 @@ function updateHUD() {
   const st = $('stars'); st.innerHTML = '<b>' + '★'.repeat(G.wanted) + '</b>' + '★'.repeat(5 - G.wanted); st.classList.toggle('blink', G.wanted > 0 && performance.now() - G.lastSeen > 2500);
   $('hpBar').firstElementChild.style.width = Math.max(0, G.hp) + '%'; $('hpBar').firstElementChild.style.background = G.hp > 50 ? 'var(--ok)' : G.hp > 25 ? 'var(--gold)' : 'var(--bad)'; $('hpBar').lastElementChild.style.width = (G.armor || 0) + '%';
   $('weaponChip').innerHTML = WEAPON_ORDER.map((w, i) => (w === 'fist' || G.weapons[w] > 0) ? `<span class="wslot${w === G.weapon ? ' on' : ''}"><kbd>${i + 1}</kbd>${esc(WEAPONS[w].name)}${w === 'fist' ? '' : ` <small>${G.weapons[w]}</small>`}</span>` : '').join('');
-  const ch = $('crosshair'); ch.hidden = !(G.mode === 'play' && !G.inCar && !G.swimming); ch.classList.toggle('dot', G.weapon === 'fist');
+  const ch = $('crosshair'); ch.hidden = !(G.mode === 'play' && !G.inCar && !G.swimming && G.weapon !== 'fist'); ch.classList.toggle('aim', !!G.aiming); ch.classList.toggle('hit', performance.now() < (G.hitUntil || 0));
   const fp = M2W(focusPos().x, focusPos().z), z = zoneAt(fp.mx, fp.my);
   $('zone').textContent = z ? z.name.toUpperCase() : 'AFUERAS';
   $('carHud').hidden = !G.inCar;
