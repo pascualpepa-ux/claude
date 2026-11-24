@@ -64,6 +64,50 @@ body { background: var(--night); color: var(--text); font-family: var(--body); o
 #crosshair::before { left: 10px; top: 0; width: 2px; height: 22px; }
 #crosshair::after { top: 10px; left: 0; height: 2px; width: 22px; }
 #crosshair.dot::before, #crosshair.dot::after { opacity: 0.45; }
+#phone { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 300px; height: min(580px, calc(100% - 32px)); border-radius: 38px; background: #0b0912; border: 2px solid rgba(255,255,255,0.14); box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 0 0 6px #17131f; padding: 10px; z-index: 20; }
+#phoneScreen { width: 100%; height: 100%; border-radius: 30px; overflow: hidden; background: linear-gradient(170deg, #ff9a5a 0%, #ff3d8b 38%, #3b1f6e 78%, #120c2a 100%); color: #fff; display: flex; flex-direction: column; font-size: 13px; position: relative; }
+.ph-status { display: flex; justify-content: space-between; padding: 12px 20px 6px; font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; }
+.ph-bat { display: inline-block; width: 20px; height: 9px; border: 1.5px solid #fff; border-radius: 2px; margin-left: 4px; vertical-align: -1px; background: linear-gradient(90deg, #fff 70%, transparent 70%); }
+.ph-home { flex: 1; display: flex; flex-direction: column; align-items: center; padding-top: 34px; }
+.ph-clock { font-family: var(--display); font-size: 54px; line-height: 1; text-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+.ph-date { opacity: 0.85; margin-top: 4px; font-weight: 600; }
+.ph-apps { margin-top: auto; margin-bottom: 26px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 14px; background: rgba(255,255,255,0.16); border-radius: 26px; backdrop-filter: blur(8px); }
+.ph-app { display: grid; justify-items: center; gap: 6px; background: none; border: none; color: #fff; font: 600 11px var(--body); cursor: pointer; }
+.ph-app span { width: 50px; height: 50px; border-radius: 14px; display: grid; place-items: center; font-size: 24px; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+.ph-app span b { position: absolute; top: -5px; right: -5px; background: var(--bad); color: #fff; font: 700 11px var(--body); border-radius: 999px; min-width: 18px; height: 18px; display: grid; place-items: center; padding: 0 4px; }
+.ph-head { display: flex; align-items: center; gap: 8px; padding: 6px 14px 10px; font: 400 18px var(--display); background: rgba(10,6,24,0.55); }
+.ph-back { background: none; border: none; color: #fff; font-size: 26px; line-height: 1; cursor: pointer; padding: 0 6px 0 0; }
+.ph-list, .ph-chat, .ph-bank { flex: 1; overflow-y: auto; background: rgba(10,6,24,0.82); }
+.ph-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.07); color: #fff; text-align: left; cursor: pointer; font: 13px var(--body); }
+.ph-row:hover { background: rgba(255,255,255,0.06); }
+.ph-row > span:nth-child(2) { flex: 1; min-width: 0; }
+.ph-row small { display: block; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-row.unread b::after { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #3a7bd5; margin-left: 6px; }
+.ph-av { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 700 13px var(--body); color: #fff; flex: none; }
+.ph-av.big { width: 84px; height: 84px; font-size: 28px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
+.ph-dial { color: var(--ok); font-size: 18px; }
+.ph-time { color: var(--muted); font-size: 11px; }
+.ph-empty { color: var(--muted); padding: 20px; text-align: center; }
+.ph-chat { padding: 16px; }
+.ph-bubble { background: #2a2540; border-radius: 16px 16px 16px 4px; padding: 10px 12px; line-height: 1.45; max-width: 90%; }
+.ph-bubble small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+.ph-bank { padding: 18px; display: grid; align-content: start; gap: 6px; }
+.ph-money { font-family: var(--display); font-size: 32px; color: var(--ok); }
+.ph-bank dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; margin: 14px 0 0; }
+.ph-bank dt { color: var(--muted); } .ph-bank dd { margin: 0; text-align: right; }
+.ph-call { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 26px 16px 18px; background: rgba(10,6,24,0.6); text-align: center; min-height: 0; }
+.ph-call > b { font-size: 20px; margin-top: 8px; } .ph-call > small { color: rgba(255,255,255,0.75); }
+.ph-lines { flex: 1; overflow-y: auto; width: 100%; display: grid; align-content: start; gap: 8px; margin-top: 10px; text-align: left; min-height: 0; }
+.ph-lines p { margin: 0; background: rgba(0,0,0,0.35); border-radius: 12px; padding: 8px 10px; line-height: 1.4; }
+.ph-opts { display: grid; gap: 6px; width: 100%; }
+.ph-opt { background: #fff; color: #1a1030; border: none; border-radius: 999px; padding: 10px; font: 700 13px var(--body); cursor: pointer; }
+.ph-opt:disabled { opacity: 0.4; cursor: not-allowed; }
+.ph-hang { margin-top: 8px; background: var(--bad); color: #fff; border: none; border-radius: 999px; padding: 10px 26px; font: 700 13px var(--body); cursor: pointer; }
+#callNote { position: fixed; top: calc(110px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--ok); border-radius: 16px; padding: 10px 16px; font-size: 13px; z-index: 15; animation: ringpulse 1.4s ease-in-out infinite; }
+#callNote kbd { font-family: var(--display); color: var(--ok); }
+@keyframes ringpulse { 50% { box-shadow: 0 0 0 6px rgba(61,220,151,0.25); } }
+#phoneBadge { position: absolute; top: -4px; right: -4px; background: var(--bad); color: #fff; font: 700 10px var(--body); border-radius: 999px; min-width: 16px; height: 16px; display: grid; place-items: center; }
+@media (max-width: 600px) { #phone { left: 50%; right: auto; transform: translateX(-50%); width: min(320px, calc(100% - 32px)); } }
 #overlay { position: fixed; inset: 0; display: grid; place-items: center; align-content: center; gap: 10px; background: radial-gradient(circle, rgba(0,0,0,0.35), rgba(0,0,0,0.85)); pointer-events: none; text-align: center; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 #overlay h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(44px, 12vw, 96px); color: var(--bad); letter-spacing: 0.04em; }
 #overlay p { margin: 0; color: var(--text); font-size: 16px; }
@@ -154,7 +198,7 @@ body { background: var(--night); color: var(--text); font-family: var(--body); o
     <div class="brand">HEAT CITY</div>
     <div id="zone">—</div>
     <div class="chip" id="carHud" hidden><span id="speed">0 km/h</span><span id="carBar"><i></i></span></div>
-    <div class="hudBtns"><button class="btn" id="qBtn" type="button">Gráficos: Alto</button><button class="btn" id="logoutBtn" type="button">Salir</button></div>
+    <div class="hudBtns"><button class="btn" id="phBtn" type="button">Teléfono (P)</button><button class="btn" id="qBtn" type="button">Gráficos: Alto</button><button class="btn" id="logoutBtn" type="button">Salir</button></div>
   </div>
   <div class="hud tr">
     <div class="chip"><span id="who"></span><span id="clock">10:00</span><span id="money">$0</span></div>
@@ -166,11 +210,13 @@ body { background: var(--night); color: var(--text); font-family: var(--body); o
   <div id="gps" hidden><span id="gpsArrow">▲</span><span id="gpsText"></span></div>
   <div id="prompt" hidden></div>
   <canvas id="minimap" width="340" height="340" aria-label="Minimapa. Tocá para abrir el mapa"></canvas>
-  <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>Q</kbd>/<kbd>1-5</kbd>/ruedita cambiar arma · hacé clic en el juego para apuntar con el mouse</div>
+  <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>Q</kbd>/<kbd>1-5</kbd>/ruedita cambiar arma · <kbd>P</kbd> teléfono · hacé clic en el juego para apuntar con el mouse</div>
   <div id="crosshair" class="dot" hidden></div>
-  <div class="touch"><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
+  <div class="touch"><button id="tPhone" type="button" style="position:relative">TEL<span id="phoneBadge" hidden>0</span></button><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
 </div>
 <div id="toast" hidden></div>
+<div id="phone" hidden><div id="phoneScreen"></div></div>
+<div id="callNote" hidden></div>
 <div id="overlay" hidden><h2 id="ovTitle"></h2><p id="ovText"></p></div>
 
 <section id="login" hidden>
@@ -282,7 +328,7 @@ const dbReady = (window.claude && window.claude.use) ? window.claude.use('db').t
 const slugOf = name => name.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
 function profileData() {
   const p = focusPos();
-  return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, mission: G.mission, mstep: G.mstep, weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
+  return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, mission: G.mission, mstep: G.mstep, sms: (G.sms || []).slice(0, 30), weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
 }
 function setSaveState(t) { $('saveState').textContent = t; }
 let saving = false, saveAgain = false;
@@ -1486,6 +1532,8 @@ $('tShoot').addEventListener('pointerdown', e => { e.preventDefault(); firing = 
 $('tShoot').addEventListener('pointerup', () => { firing = false; });
 $('tShoot').addEventListener('pointercancel', () => { firing = false; });
 $('tGun').onclick = () => G.mode === 'play' && cycleWeapon();
+$('phBtn').onclick = () => { if (PH.incoming) answerCall(); else if (PH.open) closePhone(); else openPhone(); };
+$('tPhone').onclick = () => { if (PH.incoming) answerCall(); else if (PH.open) closePhone(); else openPhone(); };
 $('view').addEventListener('wheel', e => { if (G.mode !== 'play' || G.inCar) return; e.preventDefault(); const owned = WEAPON_ORDER.filter(w => w === 'fist' || G.weapons[w] > 0); G.weapon = owned[(owned.indexOf(G.weapon) + (e.deltaY > 0 ? 1 : owned.length - 1)) % owned.length]; setGunModel(); }, { passive: false });
 
 function selectWeapon(w) { if (!w) return; if (w !== 'fist' && !(G.weapons[w] > 0)) return toast(`No tenés ${WEAPONS[w].name.toLowerCase()}. Comprala en una armería.`); G.weapon = w; setGunModel(); }
@@ -1643,6 +1691,7 @@ function hurtPlayer(d) {
 }
 function clearCops() { for (const c of cops) { if (c.deployed) { removeCarCollider(c.g); const i = parked.indexOf(c.g); if (i >= 0) parked.splice(i, 1); } scene.remove(c.g); } cops.length = 0; for (const o of officers) { scene.remove(o.g); if (o.decal) scene.remove(o.decal); } officers.length = 0; }
 function endState(kind) {
+  if (PH.open) closePhone();
   G.mode = 'dead'; firing = false; if (document.pointerLockElement) document.exitPointerLock();
   if (G.inCar) exitCar(true);
   if (G.heist) { toast('Perdiste el botín.'); G.heist = null; }
@@ -1753,7 +1802,7 @@ function updateCombat(dt, now) {
   if (fireCd > 0) fireCd -= dt;
   if (firing && WEAPONS[G.weapon].auto) shoot();
   for (let i = tracers.length - 1; i >= 0; i--) { const t = tracers[i]; t.t -= dt; t.l.material.opacity = Math.max(0, t.t / 0.08); if (t.t <= 0) { scene.remove(t.l); t.l.geometry.dispose(); t.l.material.dispose(); tracers.splice(i, 1); } }
-  if (G.mode !== 'play' && G.mode !== 'map' && G.mode !== 'shop') return;
+  if (G.mode !== 'play' && G.mode !== 'map' && G.mode !== 'shop' && G.mode !== 'phone') return;
   if (G.wanted === 0 && G.hp < 100) G.hp = Math.min(100, G.hp + dt * 2.5);
   const want = [0, 1, 2, 3, 5, 7][G.wanted];
   G.copSpawnT = (G.copSpawnT || 0) - dt;
@@ -1813,6 +1862,149 @@ function updateCombat(dt, now) {
   }
 }
 
+// ---------- teléfono ----------
+const CONTACTS = [
+  { id: 'rafa', name: 'Rafa', role: 'Cuban Heatwave Café', color: '#ff7a3d', avail: () => true },
+  { id: 'lucy', name: 'Lucy Vargas', role: 'Socia', color: '#b3122e', avail: () => G.mission >= 4 },
+  { id: 'meca', name: 'Rust & Chrome', role: 'Mecánico', color: '#2980b9', avail: () => true },
+  { id: 'taxi', name: 'Taxi Sakura', role: 'Taxi 24 h', color: '#d4a20a', avail: () => true },
+  { id: 'abog', name: 'Dr. Ortega', role: 'Abogado', color: '#7d3c98', avail: () => true },
+  { id: 'pizza', name: 'Pizza Volcano', role: 'Delivery', color: '#e67e22', avail: () => true },
+  { id: '911', name: 'Emergencias', role: 'Ambulancia', color: '#c0392b', avail: () => true }
+];
+const PH = { open: false, screen: 'home', call: null, msg: null, ring: null, incoming: null, timers: [] };
+const initials = n => n.split(' ').filter(w => /^[\p{L}0-9]/u.test(w)).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+function pushSMS(from, text) { G.sms = G.sms || []; G.sms.unshift({ from, text, t: Math.round(G.minutes), read: false }); G.sms = G.sms.slice(0, 30); updatePhoneBadge(); markDirty(); }
+function updatePhoneBadge() { const n = (G.sms || []).filter(m => !m.read).length; $('phoneBadge').textContent = n; $('phoneBadge').hidden = !n; $('phBtn').textContent = n ? `Teléfono (P) · ${n} nuevo${n > 1 ? 's' : ''}` : 'Teléfono (P)'; $('phBtn').classList.toggle('on', n > 0); }
+function openPhone(screen = 'home') {
+  if (G.mode !== 'play' && G.mode !== 'phone') return;
+  if (document.pointerLockElement) document.exitPointerLock(); firing = false;
+  PH.open = true; PH.screen = screen; G.mode = 'phone'; G.keys = {}; $('phone').hidden = false; $('prompt').hidden = true; renderPhone();
+}
+function closePhone() { PH.open = false; PH.timers.forEach(clearTimeout); PH.timers = []; PH.call = null; $('phone').hidden = true; if (G.mode === 'phone') G.mode = 'play'; }
+function phoneGo(screen) { PH.screen = screen; renderPhone(); }
+function renderPhone() {
+  const el = $('phoneScreen'), top = `<div class="ph-status"><span>${fmt(G.minutes)}</span><span>HeatNet <i class="ph-bat"></i></span></div>`;
+  let body = '';
+  if (PH.screen === 'home') {
+    const unread = (G.sms || []).filter(m => !m.read).length;
+    body = `<div class="ph-home"><div class="ph-clock">${fmt(G.minutes)}</div><div class="ph-date">Heat City</div>
+      <div class="ph-apps">
+        <button class="ph-app" data-go="contacts" type="button"><span style="background:#3ddc97">☎</span>Contactos</button>
+        <button class="ph-app" data-go="msgs" type="button"><span style="background:#3a7bd5">✉${unread ? `<b>${unread}</b>` : ''}</span>Mensajes</button>
+        <button class="ph-app" data-go="map" type="button"><span style="background:#ff7a3d">⌖</span>Mapa</button>
+        <button class="ph-app" data-go="bank" type="button"><span style="background:#ffd23f;color:#1a1000">$</span>Cuenta</button>
+      </div></div>`;
+  } else if (PH.screen === 'contacts') {
+    body = `<div class="ph-head"><button class="ph-back" data-go="home" type="button">‹</button>Contactos</div><div class="ph-list">` +
+      CONTACTS.filter(c => c.avail()).map(c => `<button class="ph-row" data-call="${c.id}" type="button"><span class="ph-av" style="background:${c.color}">${initials(c.name)}</span><span><b>${esc(c.name)}</b><small>${esc(c.role)}</small></span><span class="ph-dial">☎</span></button>`).join('') + '</div>';
+  } else if (PH.screen === 'msgs') {
+    const list = G.sms || [];
+    body = `<div class="ph-head"><button class="ph-back" data-go="home" type="button">‹</button>Mensajes</div><div class="ph-list">` +
+      (list.length ? list.map((m, i) => `<button class="ph-row ${m.read ? '' : 'unread'}" data-msg="${i}" type="button"><span class="ph-av" style="background:${(CONTACTS.find(c => c.name === m.from) || {}).color || '#555'}">${initials(m.from)}</span><span><b>${esc(m.from)}</b><small>${esc(m.text.slice(0, 46))}${m.text.length > 46 ? '…' : ''}</small></span><span class="ph-time">${fmt(m.t)}</span></button>`).join('') : '<p class="ph-empty">No tenés mensajes.</p>') + '</div>';
+  } else if (PH.screen === 'msg') {
+    const m = (G.sms || [])[PH.msg]; if (m) m.read = true; updatePhoneBadge();
+    body = `<div class="ph-head"><button class="ph-back" data-go="msgs" type="button">‹</button>${esc(m ? m.from : '')}</div><div class="ph-chat"><div class="ph-bubble">${esc(m ? m.text : '')}<small>${m ? fmt(m.t) : ''}</small></div></div>`;
+  } else if (PH.screen === 'bank') {
+    const props = G.owned.length, guns = WEAPON_ORDER.filter(w => w !== 'fist' && G.weapons[w] > 0).map(w => `${WEAPONS[w].name} (${G.weapons[w]})`);
+    body = `<div class="ph-head"><button class="ph-back" data-go="home" type="button">‹</button>Cuenta</div><div class="ph-bank"><small>Saldo</small><div class="ph-money">${money(G.money)}</div>
+      <dl><dt>Propiedades</dt><dd>${props}</dd><dt>Vehículo</dt><dd>${esc(carName(car))}</dd><dt>Armas</dt><dd>${guns.length ? esc(guns.join(', ')) : 'Ninguna'}</dd><dt>Búsqueda</dt><dd>${G.wanted ? '★'.repeat(G.wanted) : 'Limpio'}</dd></dl></div>`;
+  } else if (PH.screen === 'call') {
+    const c = CONTACTS.find(x => x.id === PH.call.id);
+    body = `<div class="ph-call"><span class="ph-av big" style="background:${c.color}">${initials(c.name)}</span><b>${esc(c.name)}</b><small>${PH.call.done ? 'En llamada' : 'Llamando…'}</small>
+      <div class="ph-lines">${PH.call.shown.map(l => `<p>${esc(l)}</p>`).join('')}</div>
+      <div class="ph-opts">${PH.call.done ? PH.call.opts.map((o, i) => `<button class="ph-opt" data-opt="${i}" type="button" ${o.disabled ? 'disabled' : ''}>${esc(o.label)}</button>`).join('') : ''}</div>
+      <button class="ph-hang" data-hang="1" type="button">Cortar</button></div>`;
+  }
+  el.innerHTML = top + body;
+  el.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { if (b.dataset.go === 'map') { closePhone(); openMap(); } else phoneGo(b.dataset.go); });
+  el.querySelectorAll('[data-call]').forEach(b => b.onclick = () => startCall(b.dataset.call));
+  el.querySelectorAll('[data-msg]').forEach(b => b.onclick = () => { PH.msg = +b.dataset.msg; phoneGo('msg'); });
+  el.querySelectorAll('[data-opt]').forEach(b => b.onclick = () => { const o = PH.call.opts[+b.dataset.opt]; const r = o.run(); closePhone(); if (r) toast(r, 4000); });
+  el.querySelectorAll('[data-hang]').forEach(b => b.onclick = () => { closePhone(); });
+}
+function dialog(id) {
+  const st = curStep(), m = STORY[G.mission];
+  const fee = n => G.money >= n;
+  switch (id) {
+    case 'rafa': return {
+      lines: m && st ? ['Rafa: "¿Qué hacés? Escuchame bien."', `Rafa: "${st.text}"`, m.title === 'La fuga de Lucy' ? 'Rafa: "Lucy cuenta con vos. No la dejes tirada."' : 'Rafa: "Te marco el lugar en el GPS."'] : ['Rafa: "Ya sos de la familia."', 'Rafa: "Si andás corto de plata, el camión blindado pasa seguido por la ciudad. Y las cajas de los locales no se vacían solas."'],
+      opts: [{ label: 'Marcame el objetivo', disabled: !st, run: () => { startStep(); return 'Objetivo marcado en el GPS'; } }] };
+    case 'lucy': return {
+      lines: lucy ? ['Lucy: "Estoy acá al lado, ¿qué pasa?"'] : ['Lucy: "¿Qué onda, socio? ¿Salimos a hacer ruido?"'],
+      opts: lucy ? [{ label: 'Volvé al escondite', run: () => { removeLucy(); return 'Lucy se fue al escondite'; } }] : [{ label: 'Vení a buscarme', disabled: G.inCar, run: () => { spawnLucy(player.position.x + 2, player.position.z + 2); return 'Lucy llegó: te sigue y te cubre'; } }] };
+    case 'meca': return {
+      lines: ['Mecánico: "Rust & Chrome, ¿qué necesitás?"', 'Mecánico: "Te llevo tu auto a donde estés. Si querés, sale arreglado."'],
+      opts: [{ label: 'Traeme el auto · $250', disabled: G.inCar || !fee(250) || car.userData.boat, run: () => { deliverCar(false); G.money -= 250; return 'Tu auto te espera en la esquina más cercana'; } },
+             { label: 'Traémelo arreglado · $600', disabled: G.inCar || !fee(600) || car.userData.boat, run: () => { deliverCar(true); G.money -= 600; return 'Auto reparado y entregado en la esquina'; } }] };
+    case 'taxi': {
+      const w = G.waypoint, d = w ? Math.round(Math.hypot(w.wx - player.position.x, w.wz - player.position.z)) : 0, cost = 20 + Math.round(d * 0.6);
+      return { lines: ['Taxi Sakura: "Buenas, ¿a dónde lo llevo?"', w ? `Taxi Sakura: "${w.name}, ${d} metros. Le sale ${money(cost)}."` : 'Taxi Sakura: "Marque un destino en el mapa y me vuelve a llamar."'],
+        opts: [{ label: w ? `Llevame · ${money(cost)}` : 'Sin destino', disabled: !w || G.wanted > 0 || !fee(cost) || G.inCar || G.swimming, run: () => { taxiTo(w, cost); return null; } }],
+        note: G.wanted > 0 ? 'Taxi Sakura: "Con la policía atrás no lo llevo."' : null };
+    }
+    case 'abog': {
+      const cost = 1500 * G.wanted;
+      return { lines: ['Dr. Ortega: "Estudio Ortega, hablemos rápido."', G.wanted ? `Dr. Ortega: "Tenés ${G.wanted} estrella${G.wanted > 1 ? 's' : ''}. Lo arreglo por ${money(cost)}."` : 'Dr. Ortega: "No tenés causas abiertas. Llamame cuando te metas en problemas."'],
+        opts: [{ label: G.wanted ? `Arreglalo · ${money(cost)}` : 'Nada por ahora', disabled: !G.wanted || !fee(cost), run: () => { G.money -= cost; G.wanted = 0; return 'Dr. Ortega: "Listo. Nadie te está buscando."'; } }] };
+    }
+    case 'pizza': return {
+      lines: ['Pizza Volcano: "¡Pizza Volcano, recién salida del horno de lava!"'],
+      opts: [{ label: 'Una grande de pepperoni · $25', disabled: !fee(25), run: () => { G.money -= 25; setTimeout(() => { G.hp = 100; toast('Llegó el delivery de Pizza Volcano: salud al máximo'); }, 8000); return 'Pedido en camino (8 segundos)'; } }] };
+    case '911': return {
+      lines: ['Emergencias: "Emergencias de Heat City, ¿cuál es su emergencia?"'],
+      opts: [{ label: 'Necesito una ambulancia · $300', disabled: G.hp >= 100 || !fee(300), run: () => { G.money -= 300; setTimeout(() => { G.hp = 100; toast('Te atendieron los paramédicos: salud al máximo'); }, 5000); return 'La ambulancia está en camino'; } },
+             { label: 'Reportar un crimen', run: () => 'Emergencias: "Gracias por avisar. Ya mandamos una patrulla."' }] };
+  }
+}
+function startCall(id, incoming) {
+  PH.timers.forEach(clearTimeout); PH.timers = [];
+  const d = dialog(id), lines = incoming ? incoming.lines : d.lines.concat(d.note ? [d.note] : []);
+  PH.call = { id, shown: [], opts: incoming ? (incoming.opts || []) : d.opts, done: false };
+  PH.screen = 'call'; if (!PH.open) openPhone('call'); else renderPhone();
+  let t = incoming ? 300 : 1300;
+  if (!incoming) PH.timers.push(setTimeout(() => ringOnce(), 100));
+  lines.forEach(l => { PH.timers.push(setTimeout(() => { if (!PH.call) return; PH.call.shown.push(l); renderPhone(); }, t)); t += 1300; });
+  PH.timers.push(setTimeout(() => { if (!PH.call) return; PH.call.done = true; renderPhone(); }, t));
+}
+function ringOnce() { if (!AC) return; [0, 0.25].forEach(d => { const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = 880; g.gain.value = 0.05; o.connect(g).connect(AC.destination); o.start(AC.currentTime + d); o.stop(AC.currentTime + d + 0.15); }); }
+function incomingCall(id, lines, opts) {
+  if (!G.user) return;
+  if (PH.incoming) return;
+  const c = CONTACTS.find(x => x.id === id);
+  PH.incoming = { id, lines, opts };
+  $('callNote').innerHTML = `<span class="ph-av" style="background:${c.color}">${initials(c.name)}</span><span><b>${esc(c.name)}</b> te está llamando<br><small><kbd>T</kbd> atender · <kbd>X</kbd> rechazar</small></span>`;
+  $('callNote').hidden = false;
+  let n = 0; PH.ring = setInterval(() => { ringOnce(); if (++n > 8) declineCall(); }, 1400); ringOnce();
+}
+function answerCall() { if (!PH.incoming) return; const inc = PH.incoming; stopRing(); if (G.mode !== 'play' && G.mode !== 'phone') return; startCall(inc.id, inc); }
+function declineCall() { if (!PH.incoming) return; const c = CONTACTS.find(x => x.id === PH.incoming.id); pushSMS(c.name, PH.incoming.lines.map(l => l.replace(/^[^:]+: /, '').replace(/^"|"$/g, '')).join(' ')); stopRing(); toast(`Llamada perdida de ${c.name}. Te dejó un mensaje.`); }
+function stopRing() { clearInterval(PH.ring); PH.ring = null; PH.incoming = null; $('callNote').hidden = true; }
+function deliverCar(fix) {
+  const cs = findCarSpot(player.position);
+  if (car.userData.wrecked) { const nc = makeCar(G.carColor, false, G.carModel); scene.add(nc); moveHeadlight(car, nc); car = nc; }
+  removeCarCollider(car); const pi = parked.indexOf(car); if (pi < 0) parked.push(car);
+  car.position.set(cs.x, ROADY, cs.z); car.rotation.set(0, cs.rot, 0); car.userData.speed = 0; addParkedCollider(car);
+  if (fix) { car.userData.health = 100; car.userData.paint.color.set(G.carColor); }
+  setWaypoint(wpTo('Tu auto', car));
+}
+function taxiTo(w, cost) {
+  G.money -= cost; G.mode = 'dead';
+  $('ovTitle').textContent = 'TAXI'; $('ovText').textContent = `Viajando a ${w.name}…`; $('overlay').hidden = false;
+  setTimeout(() => {
+    let x = w.wx, z = w.wz + 2; if (hitCollider(x, z, 0.5)) { x = w.wx + 3; }
+    player.position.set(x, groundY(x, z), z); G.minutes = (G.minutes + 12) % 1440;
+    $('overlay').hidden = true; G.mode = 'play'; toast(`Llegaste a ${w.name}. Pagaste ${money(cost)}.`); saveNow();
+  }, 1800);
+}
+function missionCall() {
+  const m = STORY[G.mission], st = curStep(); if (!m || !st) return;
+  const intro = { 0: 'Rafa: "Bienvenido a Heat City. Pasá por el café, tengo un trabajito para vos."', 1: 'Rafa: "Vení al café. Te cuento cómo vamos a sacar a Lucy."', 2: 'Rafa: "Antes de ir por Lucy necesitás fierros. Pasá por Sable Arms Depot."', 3: 'Rafa: "Es esta noche. Andá en auto a la Precinct 7 y sacá a Lucy."', 4: 'Lucy: "Socio, tengo el plan para el Solara National Bank. Traé un arma."' }[G.mission];
+  if (!intro) return;
+  pushSMS(G.mission === 4 ? 'Lucy Vargas' : 'Rafa', `${m.title}: ${st.text}`);
+  setTimeout(() => incomingCall(G.mission === 4 ? 'lucy' : 'rafa', [intro, `${G.mission === 4 ? 'Lucy' : 'Rafa'}: "${st.text}"`], [{ label: 'Dale, voy', run: () => { startStep(); return 'Objetivo marcado en el GPS'; } }]), 2500);
+}
+
 // ---------- input ----------
 addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
@@ -1821,10 +2013,13 @@ addEventListener('keydown', e => {
   audio();
   G.keys[k] = true;
   if (k === 'm' || k === 'tab') { e.preventDefault(); if (G.mode === 'map') closeMap(); else if (G.mode === 'play') openMap(); }
-  if (k === 'escape') { if (G.mode === 'map') closeMap(); else if (G.mode === 'shop') closeShop(); }
+  if (k === 'escape') { if (G.mode === 'map') closeMap(); else if (G.mode === 'shop') closeShop(); else if (G.mode === 'phone') closePhone(); }
   if (k === 'e') { if (G.mode === 'shop') closeShop(); else if (G.mode === 'play') tryEnter(); }
   if (k === 'f' && G.mode === 'play') toggleCar();
   if (k === 'q' && G.mode === 'play') cycleWeapon();
+  if (k === 'p' && (G.mode === 'play' || G.mode === 'phone')) { if (PH.open) closePhone(); else openPhone(); }
+  if (k === 't' && PH.incoming) answerCall();
+  if (k === 'x' && PH.incoming) declineCall();
   if (/^[1-5]$/.test(k) && G.mode === 'play') selectWeapon(WEAPON_ORDER[+k - 1]);
   if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
 });
@@ -1887,11 +2082,11 @@ $('loginForm').addEventListener('submit', async e => {
   const data = await loadProfile(slug);
   G.user = { name, slug };
   try { localStorage.setItem('heatcity:last', name); } catch (e) {}
-  Object.assign(G, { heist: null, robbed: {}, mstep: 0, money: 10000, story: 0, owned: [], mission: 0, carColor: '#ff3d8b', carModel: 'sakura', minutes: 10 * 60, weapons: {}, weapon: 'fist', hp: 100, armor: 0, wanted: 0 });
+  Object.assign(G, { sms: [], heist: null, robbed: {}, mstep: 0, money: 10000, story: 0, owned: [], mission: 0, carColor: '#ff3d8b', carModel: 'sakura', minutes: 10 * 60, weapons: {}, weapon: 'fist', hp: 100, armor: 0, wanted: 0 });
   clearCops();
   let spawn = W2M(450, 460);
   if (data) {
-    G.money = Number(data.money) || 0; G.story = data.story || 0; G.owned = Array.isArray(data.owned) ? data.owned : []; G.mission = data.mission || 0; G.mstep = data.mstep || 0; if (data.mstep === undefined && G.mission >= 1) { G.mstep = G.mission === 1 ? 1 : 0; G.mission = G.mission === 1 ? 0 : 1; } G.carColor = data.carColor || '#ff3d8b'; G.carModel = MODELS[data.carModel] ? data.carModel : 'sakura';
+    G.money = Number(data.money) || 0; G.story = data.story || 0; G.owned = Array.isArray(data.owned) ? data.owned : []; G.sms = Array.isArray(data.sms) ? data.sms.filter(m => m && typeof m.text === 'string').slice(0, 30) : []; G.mission = data.mission || 0; G.mstep = data.mstep || 0; if (data.mstep === undefined && G.mission >= 1) { G.mstep = G.mission === 1 ? 1 : 0; G.mission = G.mission === 1 ? 0 : 1; } G.carColor = data.carColor || '#ff3d8b'; G.carModel = MODELS[data.carModel] ? data.carModel : 'sakura';
     if (data.weapons && typeof data.weapons === 'object') for (const k in data.weapons) if (WEAPONS[k]) G.weapons[k] = Math.max(0, Number(data.weapons[k]) || 0);
     G.armor = Math.min(100, Number(data.armor) || 0);
     if (Array.isArray(data.weapons)) G.weapons = {};
@@ -1912,7 +2107,8 @@ $('loginForm').addEventListener('submit', async e => {
   $('who').textContent = name; $('login').hidden = true; $('hudWrap').hidden = false; $('playBtn').disabled = false; $('loginMsg').textContent = '';
   if (!WEAPON_ORDER.some(w => w !== 'fist' && G.weapons[w] > 0)) G.weapons.pistol = 48;
   G.weapon = WEAPON_ORDER.find(w => w !== 'fist' && G.weapons[w] > 0) || 'fist';
-  G.mode = 'play'; G.camYaw = Math.PI; setGunModel();
+  G.mode = 'play'; G.camYaw = Math.PI; setGunModel(); updatePhoneBadge(); closePhone(); stopRing();
+  if (G.mstep === 0 && (!data || G.mission === 0)) setTimeout(missionCall, 2500);
   toast(data ? `Bienvenido de nuevo, ${name}. Tenés ${money(G.money)}.` : `Bienvenido a Heat City, ${name}. Arrancás con ${money(G.money)}.`, 4000);
   saveNow();
 });
@@ -2055,6 +2251,7 @@ function completeStep() {
     setTimeout(() => toast(`Misión completada: ${m.title}${m.reward ? ' · +' + money(m.reward) : ''}${m.unlock ? ' · Silk & Smoke desbloqueado' : ''}`, 4500), st.after ? 5200 : 0);
     if (m.lucy || m.steps.some(x => x.lucy)) removeLucy();
     G.mission++; G.mstep = 0;
+    setTimeout(missionCall, st.after ? 6000 : 3000);
   }
   startStep(); saveNow();
 }
@@ -2380,7 +2577,7 @@ let last = performance.now(), hudTick = 0, skyTick = 0;
 const v3 = new THREE.Vector3();
 function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.05); last = now;
-  if (G.mode === 'play' || G.mode === 'map' || G.mode === 'shop' || G.mode === 'dead') { G.minutes = (G.minutes + dt) % 1440; if (G.heistCooldown > 0) G.heistCooldown -= dt; }
+  if (G.mode === 'play' || G.mode === 'map' || G.mode === 'shop' || G.mode === 'dead' || G.mode === 'phone') { G.minutes = (G.minutes + dt) % 1440; if (G.heistCooldown > 0) G.heistCooldown -= dt; }
   if (G.mode === 'play') update(dt);
   if (G.mode !== 'boot') { updateTraffic(dt); updatePeds(dt, now); updateCombat(dt, now); if (G.mode === 'play') { checkMission(dt); updateHeist(dt); updateLucy(dt, now); updateCash(dt, now); updateBoats(dt, now); if (G.waypoint && G.waypoint.follow) { const f = G.waypoint.follow.position; G.waypoint.wx = f.x; G.waypoint.wz = f.z; const mm = M2W(f.x, f.z); G.waypoint.mx = mm.mx; G.waypoint.my = mm.my; beam.position.set(f.x, 80, f.z); } } if (G.mode === 'play') { if (G.inCar) { carVsTraffic(); carVsPeds(); } else pedVsTraffic(); } }
   updateSparks(dt); updateSmoke(dt);
@@ -2390,7 +2587,7 @@ function loop(now) {
   storeRings.forEach(r => { r.rotation.z += dt; r.material.opacity = 0.55 + 0.3 * Math.sin(now / 250); });
   composer.render();
   if (G.mode === 'map') drawBigMap();
-  if ((hudTick += dt) > 0.05 && G.user) { hudTick = 0; drawMinimap(); updateHUD(); if (G.heist) updateMissionHUD(); }
+  if ((hudTick += dt) > 0.05 && G.user) { hudTick = 0; drawMinimap(); updateHUD(); if (G.heist) updateMissionHUD(); if (PH.open && PH.screen === 'home' && (G.phoneMin !== Math.floor(G.minutes))) { G.phoneMin = Math.floor(G.minutes); renderPhone(); } }
   requestAnimationFrame(loop);
 }
 function inputVec() {
