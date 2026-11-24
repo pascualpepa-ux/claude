@@ -315,6 +315,7 @@
           resLine(p) +
           (resLeft(p)
             ? '<button class="btn btn-dark" id="buy-btn" type="button">' + esc(t(payOn() ? "res.pay" : "product.buy")) + "</button>" +
+              (payOn() && window.NWW_CART.test ? '<p class="pay-test">' + esc(t("res.test")) + "</p>" : "") +
               '<p class="pay-error" id="pay-error" role="alert"></p>'
             : '<button class="btn btn-dark is-full" id="buy-btn" type="button" disabled>' + esc(t("res.fullBtn")) + "</button>") +
           '<p class="size-error" id="size-error" role="alert"></p>' +

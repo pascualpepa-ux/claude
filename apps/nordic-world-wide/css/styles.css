@@ -422,3 +422,4 @@ a { color: inherit; }
 .res-left.last { color: #b3261e; opacity: 1; font-weight: 600; }
 .res-left.full { color: #b3261e; opacity: 1; font-weight: 700; }
 .btn.is-full, .btn[disabled] { opacity: .45; cursor: not-allowed; }
+.pay-test { margin: 10px 0 0; padding: 10px 12px; background: #fff4d6; border: 2px solid #e0a800; color: #5c4400; font-size: .85rem; font-weight: 600; line-height: 1.4; }

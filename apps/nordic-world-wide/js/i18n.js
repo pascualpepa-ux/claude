@@ -33,6 +33,8 @@
       "res.full": "RESERVAS COMPLETAS",
       "res.fullBtn": "Reservas completas",
       "res.pay": "Reservar y pagar",
+      "res.test": "⚠️ MODO PRUEBA: los pagos NO son reales, no se cobra nada y no cuentan como reserva.",
+      "pay.okTest": "Pago de PRUEBA completado: no es real, no se cobró nada y no cuenta como reserva.",
       "res.fullMsg": "Lo sentimos: esta camiseta ya tiene sus {max} reservas. Escríbenos si quieres apuntarte a la lista de espera.",
       "price.tbd": "Precio a consultar",
 
@@ -152,6 +154,8 @@
       "res.full": "FULLY RESERVED",
       "res.fullBtn": "Fully reserved",
       "res.pay": "Reserve & pay",
+      "res.test": "⚠️ TEST MODE: payments are NOT real, nothing is charged and they don't count as reservations.",
+      "pay.okTest": "TEST payment completed: it's not real, nothing was charged and it doesn't count as a reservation.",
       "res.fullMsg": "Sorry: this tee already has its {max} reservations. Write to us to join the waiting list.",
       "price.tbd": "Price on request",
 

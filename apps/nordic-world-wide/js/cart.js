@@ -135,7 +135,7 @@
   // Avisa al equipo de un pedido PAGADO (mismos caminos que el formulario de contacto).
   function notifyTeam(o) {
     var lines = o.items.map(function (i) { return "• " + i.cantidad + " × " + i.nombre + " — " + i.importe.toFixed(2).replace(".", ",") + " €"; });
-    var asunto = "💳 RESERVA PAGADA – " + o.total.toFixed(2).replace(".", ",") + " € – " + (o.nombre || o.email);
+    var asunto = (o.test ? "🧪 PRUEBA (no es real) · " : "") + "💳 RESERVA PAGADA – " + o.total.toFixed(2).replace(".", ",") + " € – " + (o.nombre || o.email);
     var texto = ["RESERVA PAGADA CON TARJETA (Stripe) — ya cuenta como 1 de las 5 reservas", "", lines.join("\n"), "", "Envío: " + (o.envio ? o.envio.toFixed(2).replace(".", ",") + " €" : "gratis"), "Total cobrado: " + o.total.toFixed(2).replace(".", ",") + " €", "",
       "Cliente: " + o.nombre, "Email: " + o.email, o.telefono ? "Teléfono: " + o.telefono : null, "Dirección de envío: " + o.direccion, "", "Referencia Stripe: " + o.id].filter(function (x) { return x !== null; }).join("\n");
     var jobs = [];
@@ -168,7 +168,7 @@
     var sid = params.get("session_id");
     if (estado !== "ok" || !sid) return;
     history.replaceState(null, "", clean);
-    banner(t("pay.ok"), true);
+    banner(t(api.test ? "pay.okTest" : "pay.ok"), true);
     var flag = "nww-notified-" + sid;
     try { if (localStorage.getItem(flag)) return; } catch (e) {}
     fetch("/api/checkout?session_id=" + encodeURIComponent(sid))

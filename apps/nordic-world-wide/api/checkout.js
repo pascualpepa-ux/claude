@@ -95,9 +95,10 @@ module.exports = async function handler(req, res) {
       const s = await stripe("/checkout/sessions/" + encodeURIComponent(id) + "?expand[]=line_items");
       const ship = (s.collected_information && s.collected_information.shipping_details) || s.shipping_details || {};
       const a = ship.address || {};
-      if (s.payment_status === "paid") await contarPago(s.id, s.metadata && s.metadata.pedido);
+      if (s.payment_status === "paid" && s.livemode) await contarPago(s.id, s.metadata && s.metadata.pedido);
       return send(res, 200, {
         paid: s.payment_status === "paid",
+        test: !s.livemode,
         id: s.id,
         total: (s.amount_total || 0) / 100,
         envio: ((s.total_details && s.total_details.amount_shipping) || 0) / 100,
@@ -136,6 +137,12 @@ module.exports = async function handler(req, res) {
       "shipping_options[0][shipping_rate_data][fixed_amount][currency]": "eur",
       "shipping_options[0][shipping_rate_data][display_name]": lang === "en" ? "Standard shipping (Spain)" : "Envío estándar (España)",
       "payment_intent_data[description]": "NORDIC WORLD WIDE",
+      // Modo prueba (clave sk_test_): se avisa bien claro en la página de pago.
+      ...(SECRET().startsWith("sk_test_") ? {
+        "custom_text[submit][message]": lang === "en"
+          ? "⚠️ TEST MODE — this is NOT a real payment: nothing is charged and it does NOT count as a reservation."
+          : "⚠️ MODO PRUEBA — este pago NO es real: no se cobra nada y NO cuenta como reserva."
+      } : {}),
       "payment_intent_data[statement_descriptor_suffix]": "NORDIC",
       "metadata[tienda]": "nordicworldwide",
       "payment_intent_data[metadata][pedido]": items.map((i) => i.qty + "x " + i.p.id + " " + i.talla).join(", ").slice(0, 490),
@@ -146,7 +153,7 @@ module.exports = async function handler(req, res) {
       data[pre + "[quantity]"] = i.qty;
       data[pre + "[price_data][currency]"] = "eur";
       data[pre + "[price_data][unit_amount]"] = Math.round(i.p.precio * 100);
-      data[pre + "[price_data][product_data][name]"] = i.p.nombre + " — " + (lang === "en" ? "Size " : "Talla ") + i.talla;
+      data[pre + "[price_data][product_data][name]"] = (SECRET().startsWith("sk_test_") ? (lang === "en" ? "[TEST – NOT REAL] " : "[PRUEBA – NO ES REAL] ") : "") + i.p.nombre + " — " + (lang === "en" ? "Size " : "Talla ") + i.talla;
       const foto = (i.p.fotos || [])[0];
       if (foto) data[pre + "[price_data][product_data][images][0]"] = SITE + "/" + foto.replace(/^\//, "");
     });
