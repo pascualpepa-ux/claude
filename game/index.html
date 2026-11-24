@@ -340,7 +340,7 @@ let DB = null;
 const dbReady = (window.claude && window.claude.use) ? window.claude.use('db').then(d => (DB = d)).catch(() => null) : Promise.resolve(null);
 const slugOf = name => name.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
 function profileData() {
-  const p = focusPos();
+  const p = G.inside ? { x: G.inside.wx, z: G.inside.wz + 1.5 } : focusPos();
   return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, char: G.char, mission: G.mission, mstep: G.mstep, sms: (G.sms || []).slice(0, 30), weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
 }
 function setSaveState(t) { $('saveState').textContent = t; }
@@ -586,8 +586,9 @@ function placeStores() {
 const blockFull = (bx, by) => [[-42,-42],[42,-42],[-42,42],[42,42]].every(([dx, dy]) => inPoly(bx + dx, by + dy, LAND)) && !PUDDLES.some(([x, y, r]) => Math.hypot(bx - x, by - y) < r + 40);
 const PIERS = [];
 const onPier = (x, z) => PIERS.find(p => x > p.x0 && x < p.x1 && z > p.z0 && z < p.z1);
-const inWater = (x, z) => { const { mx, my } = M2W(x, z); return !isLand(mx, my) && !onPier(x, z); };
+const inWater = (x, z) => { if (x > 2000) return false; const { mx, my } = M2W(x, z); return !isLand(mx, my) && !onPier(x, z); };
 function groundY(x, z) {
+  if (x > 2000) return 0;
   const pr = onPier(x, z); if (pr) return pr.y;
   const { mx, my } = M2W(x, z);
   const bx = Math.round(mx / 100) * 100, by = Math.round(my / 100) * 100;
@@ -625,6 +626,7 @@ function build3D() {
   sky = new THREE.Sky(); sky.scale.setScalar(10000); scene.add(sky);
   const su = sky.material.uniforms; su.turbidity.value = 6; su.rayleigh.value = 1.6; su.mieCoefficient.value = 0.004; su.mieDirectionalG.value = 0.85;
   hemi = new THREE.HemisphereLight(0xcfe8ff, 0x4a3b33, 0.6); scene.add(hemi);
+  for (let i = 0; i < 2; i++) { const l = new THREE.PointLight(0xfff0dc, 0, 22, 1.5); l.position.set(3000, 3, 3000); scene.add(l); inLights.push(l); }
   sun = new THREE.DirectionalLight(0xfff0d8, 2.2);
   sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
   const sc = sun.shadow.camera; sc.left = -90; sc.right = 90; sc.top = 90; sc.bottom = -90; sc.near = 10; sc.far = 600;
@@ -1263,6 +1265,7 @@ function crashSound(power) {
 
 // ---------- colisiones ----------
 function hitCollider(x, z, r, swim) {
+  if (x > 2000) return interiorHit(x, z, r);
   if (Math.abs(x) > 560 || Math.abs(z) > 560) return { water: true, edge: true };
   const { mx, my } = M2W(x, z);
   if (!isLand(mx, my) && !onPier(x, z) && !swim) return { water: true };
@@ -1746,6 +1749,7 @@ function hurtPlayer(d) {
 function clearCops() { for (const c of cops) { if (c.deployed) { removeCarCollider(c.g); const i = parked.indexOf(c.g); if (i >= 0) parked.splice(i, 1); } scene.remove(c.g); } cops.length = 0; for (const o of officers) { scene.remove(o.g); if (o.decal) scene.remove(o.decal); } officers.length = 0; }
 function endState(kind) {
   if (PH.open) closePhone();
+  if (G.inside) exitInterior(true);
   G.mode = 'dead'; firing = false; if (document.pointerLockElement) document.exitPointerLock();
   if (G.inCar) exitCar(true);
   if (G.heist) { toast('Perdiste el botín.'); G.heist = null; }
@@ -1764,7 +1768,7 @@ function endState(kind) {
 }
 const COP_RED = new THREE.MeshBasicMaterial({ color: 0xff0000, toneMapped: false }), COP_BLUE = new THREE.MeshBasicMaterial({ color: 0x0040ff, toneMapped: false });
 function spawnCop() {
-  const fp = focusPos(), usable = nodes.filter(n => n.nb.length && Math.hypot(n.x - fp.x, n.z - fp.z) > 70 && Math.hypot(n.x - fp.x, n.z - fp.z) < 160);
+  const fp = aiFocus(), usable = nodes.filter(n => n.nb.length && Math.hypot(n.x - fp.x, n.z - fp.z) > 70 && Math.hypot(n.x - fp.x, n.z - fp.z) < 160);
   const n = usable.length ? usable[Math.floor(Math.random() * usable.length)] : nodes[0];
   const g = makeCar('#0f1a2e', false, 'kessler');
   const white = new THREE.MeshStandardMaterial({ color: 0x9a9a9a, roughness: 0.6 });
@@ -1805,7 +1809,7 @@ function hitOfficer(o, dmg, dir, melee) {
   } else if (melee) { o.down = 1.2; o.vx = dir.x * 2.5; o.vz = dir.z * 2.5; }
 }
 function updateOfficers(dt, now) {
-  const fp = focusPos();
+  const fp = aiFocus();
   for (let i = officers.length - 1; i >= 0; i--) {
     const o = officers[i], g = o.g, ud = o.ud;
     const dx = fp.x - g.position.x, dz = fp.z - g.position.z, dist = Math.hypot(dx, dz);
@@ -1853,6 +1857,7 @@ function clearLine(ax, az, bx, bz) {
 }
 let siren = null;
 function updateCombat(dt, now) {
+  const focusPos = aiFocus;
   if (fireCd > 0) fireCd -= dt;
   if (firing && WEAPONS[G.weapon].auto) shoot();
   for (let i = tracers.length - 1; i >= 0; i--) { const t = tracers[i]; t.t -= dt; t.l.material.opacity = Math.max(0, t.t / 0.08); if (t.t <= 0) { scene.remove(t.l); t.l.geometry.dispose(); t.l.material.dispose(); tracers.splice(i, 1); } }
@@ -2043,6 +2048,7 @@ function deliverCar(fix) {
   setWaypoint(wpTo('Tu auto', car));
 }
 function taxiTo(w, cost) {
+  if (G.inside) exitInterior(true);
   G.money -= cost; G.mode = 'dead';
   $('ovTitle').textContent = 'TAXI'; $('ovText').textContent = `Viajando a ${w.name}…`; $('overlay').hidden = false;
   setTimeout(() => {
@@ -2058,6 +2064,194 @@ function missionCall() {
   pushSMS(G.mission === 4 ? 'Lucy Vargas' : 'Rafa', `${m.title}: ${st.text}`);
   setTimeout(() => incomingCall(G.mission === 4 ? 'lucy' : 'rafa', [intro, `${G.mission === 4 ? 'Lucy' : 'Rafa'}: "${st.text}"`], [{ label: 'Dale, voy', run: () => { startStep(); return 'Objetivo marcado en el GPS'; } }]), 2500);
 }
+
+// ---------- interiores (se arman al entrar, lejos de la ciudad) ----------
+const IN_X = 3000, IN_Z = 3000;
+let interior = null;
+const inLights = [];
+const IMAT = {};
+function imats() {
+  if (IMAT.floor) return IMAT;
+  const T = (draw, rep, w = 512, h = 512) => { const [c, x] = cnv(w, h); draw(x, w, h); return tex(c, rep[0], rep[1]); };
+  IMAT.floor = new THREE.MeshStandardMaterial({ map: T((x) => { for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) { x.fillStyle = (i + j) % 2 ? '#d9d2c5' : '#c9c0b0'; x.fillRect(i * 64, j * 64, 64, 64); } x.strokeStyle = 'rgba(0,0,0,0.15)'; for (let i = 0; i <= 8; i++) { x.beginPath(); x.moveTo(i * 64, 0); x.lineTo(i * 64, 512); x.moveTo(0, i * 64); x.lineTo(512, i * 64); x.stroke(); } }, [1, 1]), roughness: 0.35, metalness: 0.05, envMapIntensity: 0.5 });
+  IMAT.marble = new THREE.MeshStandardMaterial({ map: T((x) => { x.fillStyle = '#ece8e1'; x.fillRect(0, 0, 512, 512); x.strokeStyle = 'rgba(120,110,100,0.25)'; for (let i = 0; i < 40; i++) { x.beginPath(); let px = Math.random() * 512, py = Math.random() * 512; x.moveTo(px, py); for (let k = 0; k < 8; k++) { px += (Math.random() - 0.5) * 70; py += (Math.random() - 0.5) * 70; x.lineTo(px, py); } x.stroke(); } }, [1, 1]), roughness: 0.15, metalness: 0.1, envMapIntensity: 0.8 });
+  IMAT.wall = new THREE.MeshStandardMaterial({ map: T((x) => { noise(x, 512, 512, '#efe9df', 0.05, 4000); x.fillStyle = '#7a6a58'; x.fillRect(0, 480, 512, 32); }, [1, 1]), roughness: 0.9 });
+  IMAT.ceil = new THREE.MeshStandardMaterial({ map: T((x) => { x.fillStyle = '#f4f2ee'; x.fillRect(0, 0, 512, 512); x.strokeStyle = 'rgba(0,0,0,0.12)'; for (let i = 0; i <= 512; i += 128) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 512); x.moveTo(0, i); x.lineTo(512, i); x.stroke(); } }, [1, 1]), roughness: 0.95 });
+  IMAT.light = new THREE.MeshBasicMaterial({ color: 0xfff6e8, toneMapped: false });
+  IMAT.wood = new THREE.MeshStandardMaterial({ map: T((x) => { for (let i = 0; i < 512; i += 4) { x.fillStyle = `hsl(28,${35 + Math.random() * 10}%,${30 + Math.random() * 8}%)`; x.fillRect(0, i, 512, 4); } }, [1, 1]), roughness: 0.6 });
+  IMAT.metal = new THREE.MeshStandardMaterial({ color: 0x9aa0a8, metalness: 0.85, roughness: 0.3 });
+  IMAT.dark = new THREE.MeshStandardMaterial({ color: 0x1b1c20, roughness: 0.5, metalness: 0.3 });
+  IMAT.glass = new THREE.MeshStandardMaterial({ color: 0xbfe3ff, transparent: true, opacity: 0.18, roughness: 0.05, metalness: 0.2, depthWrite: false });
+  IMAT.products = new THREE.MeshStandardMaterial({ map: T((x) => { x.fillStyle = '#2b2b2b'; x.fillRect(0, 0, 512, 512); for (let r = 0; r < 4; r++) for (let i = 0; i < 12; i++) { const h = 60 + Math.random() * 50; x.fillStyle = `hsl(${Math.random() * 360},${55 + Math.random() * 30}%,${40 + Math.random() * 25}%)`; x.fillRect(i * 42 + 3, r * 128 + 124 - h, 36, h); x.fillStyle = 'rgba(255,255,255,0.7)'; x.fillRect(i * 42 + 8, r * 128 + 124 - h + 12, 26, 6); } x.fillStyle = '#c8c2b8'; for (let r = 0; r < 4; r++) x.fillRect(0, r * 128 + 122, 512, 6); }, [1, 1]), roughness: 0.6 });
+  IMAT.fridge = new THREE.MeshBasicMaterial({ map: T((x) => { x.fillStyle = '#dff3ff'; x.fillRect(0, 0, 512, 512); for (let r = 0; r < 4; r++) for (let i = 0; i < 10; i++) { x.fillStyle = `hsl(${[0, 30, 120, 200, 280][i % 5]},70%,45%)`; x.fillRect(i * 50 + 10, r * 128 + 40, 26, 80); x.fillRect(i * 50 + 17, r * 128 + 26, 12, 16); } x.fillStyle = '#9ab'; for (let r = 0; r < 4; r++) x.fillRect(0, r * 128 + 122, 512, 6); x.fillRect(250, 0, 8, 512); }, [1, 1]), toneMapped: false });
+  IMAT.bottles = new THREE.MeshBasicMaterial({ map: T((x) => { x.fillStyle = '#1b1222'; x.fillRect(0, 0, 512, 256); for (let r = 0; r < 2; r++) for (let i = 0; i < 16; i++) { x.fillStyle = `hsl(${[30, 45, 120, 200, 340][i % 5]},70%,${45 + Math.random() * 20}%)`; x.fillRect(i * 32 + 8, r * 128 + 40, 16, 80); x.fillRect(i * 32 + 13, r * 128 + 20, 6, 22); } x.fillStyle = '#ffb35a'; for (let r = 0; r < 2; r++) x.fillRect(0, r * 128 + 120, 512, 4); }, [1, 1], 512, 256), toneMapped: false });
+  IMAT.carpet = new THREE.MeshStandardMaterial({ color: 0x3a2a4a, roughness: 1 });
+  return IMAT;
+}
+function ibox(g, col, w, h, d, x, y, z, mat, solid = true) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y + h / 2, z); m.castShadow = false; m.receiveShadow = true; g.add(m);
+  if (solid) col.push({ x: IN_X + x, z: IN_Z + z, hw: w / 2, hd: d / 2 });
+  return m;
+}
+function inPerson(o, x, z, ry) { const h = makeHuman(o); h.position.set(x, 0, z); h.rotation.y = ry; return h; }
+const pickR = a => a[Math.floor(Math.random() * a.length)];
+function randomPerson(top) { const f = Math.random() < 0.5; return { skin: pickR(SKINS), top: top ?? pickR(TOPS), pants: pickR(PANTS), shoes: pickR([0xf2f2f2, 0x1a1a1a]), hair: pickR(HAIRS), long: f && Math.random() < 0.8, wide: f ? 0.92 : 1.02, stubble: !f && Math.random() < 0.4 }; }
+function buildInterior(s) {
+  const M = imats(), g = new THREE.Group(), col = [], npcs = [], dyn = [];
+  const cat = s.category;
+  const kind = s.id === 'hcpd-precinct-7' ? 'police' : s.id === 'heat-city-general' ? 'hospital' : cat === 'banco' ? 'bank' : cat === 'autos' ? 'showroom' : ['comida', 'bar', 'club_adulto'].includes(cat) ? 'venue' : 'shop';
+  const W = { bank: 22, showroom: 24, police: 20, venue: 18, hospital: 18, shop: 16 }[kind], D = { bank: 16, showroom: 16, police: 16, venue: 14, hospital: 14, shop: 12 }[kind], H = kind === 'showroom' || kind === 'bank' ? 6 : 4.2;
+  const floorMat = kind === 'bank' || kind === 'showroom' ? M.marble : kind === 'venue' && cat !== 'comida' ? M.wood : M.floor;
+  const fl = new THREE.Mesh(new THREE.PlaneGeometry(W, D), floorMat); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; fl.material.map.repeat && fl.material.map.repeat.set(W / 4, D / 4); g.add(fl);
+  const ce = new THREE.Mesh(new THREE.PlaneGeometry(W, D), M.ceil); ce.rotation.x = Math.PI / 2; ce.position.y = H; g.add(ce);
+  // paredes (con puerta al frente)
+  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
+  ibox(g, col, W, H, 0.3, 0, 0, -D / 2 - 0.15, wallMat);
+  ibox(g, col, 0.3, H, D, -W / 2 - 0.15, 0, 0, wallMat); ibox(g, col, 0.3, H, D, W / 2 + 0.15, 0, 0, wallMat);
+  ibox(g, col, (W - 3) / 2, H, 0.3, -(W + 3) / 4, 0, D / 2 + 0.15, wallMat); ibox(g, col, (W - 3) / 2, H, 0.3, (W + 3) / 4, 0, D / 2 + 0.15, wallMat);
+  ibox(g, col, 3, H - 2.8, 0.3, 0, 2.8, D / 2 + 0.15, wallMat, false);
+  const door = new THREE.Mesh(new THREE.PlaneGeometry(3, 2.8), new THREE.MeshBasicMaterial({ color: 0xfff4dc, toneMapped: false })); door.position.set(0, 1.4, D / 2 + 0.31); door.rotation.y = Math.PI; g.add(door);
+  // luces de techo
+  for (let x = -W / 2 + 3; x < W / 2 - 1; x += 4) for (let z = -D / 2 + 3; z < D / 2 - 1; z += 4) { const l = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.5), M.light); l.rotation.x = Math.PI / 2; l.position.set(x, H - 0.02, z); g.add(l); }
+  // cartel con el nombre en la pared del fondo
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(W - 4, 9), 2.2), new THREE.MeshBasicMaterial({ map: makeSign(s.name.toUpperCase(), G.cats[s.category].name, G.cats[s.category].color, s.special?.type === 'golpe'), toneMapped: false }));
+  sign.position.set(0, H - 1.5, -D / 2 + 0.02); g.add(sign);
+  let counter = { x: 0, z: -D / 2 + 3.6 }, cell = null, clerkTop = 0x1d1d1d;
+  if (kind === 'shop') {
+    clerkTop = { tienda24: 0x2fa36b, armeria: 0x4d5a3a, ropa: 0x111111, tecnologia: 0x3a7bd5, empeno: 0x7a4a2a, tatuajes: 0x222222, gimnasio: 0xe94b3c, inmobiliaria: 0x1f2f55 }[cat] || 0x1d1d1d;
+    ibox(g, col, 4.2, 1.05, 1, -W / 2 + 3.2, 0, -D / 2 + 2.8, M.wood); ibox(g, col, 0.5, 0.3, 0.4, -W / 2 + 2.4, 1.05, -D / 2 + 2.8, M.dark, false);
+    counter = { x: -W / 2 + 3.2, z: -D / 2 + 4.2 };
+    npcs.push(inPerson(randomPerson(clerkTop), -W / 2 + 3.2, -D / 2 + 1.8, 0));
+    if (cat === 'tienda24' || cat === 'empeno') {
+      for (let i = 0; i < 3; i++) { const sh = ibox(g, col, 0.9, 1.8, 4.2, -0.5 + i * 3, 0, 0.4, M.products); }
+      const fr = new THREE.Mesh(new THREE.PlaneGeometry(D - 3, 2.4), M.fridge); fr.position.set(W / 2 - 0.05, 1.3, 0); fr.rotation.y = -Math.PI / 2; g.add(fr); col.push({ x: IN_X + W / 2 - 0.5, z: IN_Z, hw: 0.5, hd: (D - 3) / 2 });
+    } else if (cat === 'ropa') {
+      for (let i = 0; i < 4; i++) { ibox(g, col, 0.06, 1.6, 2.6, -1.5 + i * 2.4, 0, 0.8, M.metal); for (let k = 0; k < 9; k++) { const sh = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.75, 0.08), new THREE.MeshStandardMaterial({ color: new THREE.Color().setHSL(Math.random(), 0.5, 0.5), roughness: 0.9 })); sh.position.set(-1.5 + i * 2.4, 1.15, -0.3 + k * 0.28); sh.rotation.y = Math.PI / 2; g.add(sh); } }
+      const mir = new THREE.Mesh(new THREE.PlaneGeometry(2, 2.6), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.02 })); mir.position.set(W / 2 - 0.05, 1.4, -2); mir.rotation.y = -Math.PI / 2; g.add(mir);
+    } else if (cat === 'armeria') {
+      const peg = ibox(g, col, W - 6, 2.6, 0.15, 2, 0.6, -D / 2 + 0.1, M.wood, false);
+      for (let i = 0; i < 10; i++) for (let r = 0; r < 3; r++) ibox(g, col, 0.9 + Math.random() * 0.4, 0.14, 0.08, -1.5 + i * 0.85, 1 + r * 0.7, -D / 2 + 0.25, M.dark, false);
+      ibox(g, col, 6, 1, 1, 2, 0, -1.5, M.glass); ibox(g, col, 6, 0.05, 1, 2, 1, -1.5, M.metal, false);
+    } else if (cat === 'tecnologia') {
+      for (let i = 0; i < 3; i++) { ibox(g, col, 2.4, 0.9, 1.2, -1 + i * 3.2, 0, 0.5, M.wood); for (let k = 0; k < 4; k++) { const ph = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.02, 0.3), M.dark); ph.position.set(-1.8 + i * 3.2 + k * 0.5, 0.92, 0.5); g.add(ph); const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 0.27), new THREE.MeshBasicMaterial({ color: new THREE.Color().setHSL(0.55 + Math.random() * 0.3, 0.7, 0.55), toneMapped: false })); scr.rotation.x = -Math.PI / 2; scr.position.set(-1.8 + i * 3.2 + k * 0.5, 0.935, 0.5); g.add(scr); } }
+      for (let k = 0; k < 4; k++) { const tv = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1), new THREE.MeshBasicMaterial({ color: new THREE.Color().setHSL(k / 4, 0.6, 0.5), toneMapped: false })); tv.position.set(W / 2 - 0.05, 1.8, -3 + k * 2.1); tv.rotation.y = -Math.PI / 2; g.add(tv); dyn.push(tv); }
+    } else if (cat === 'gimnasio') {
+      for (let i = 0; i < 4; i++) { ibox(g, col, 0.5, 0.45, 1.5, -1 + i * 2.2, 0, 1, M.dark); ibox(g, col, 1.8, 0.05, 0.05, -1 + i * 2.2, 1.1, 0.6, M.metal, false); }
+      for (let i = 0; i < 3; i++) ibox(g, col, 0.9, 1.4, 1.9, 4.5, 0, -3 + i * 2.4, M.dark);
+      const mir = new THREE.Mesh(new THREE.PlaneGeometry(W - 6, 2.4), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.02 })); mir.position.set(2, 1.4, -D / 2 + 0.05); g.add(mir);
+    } else {
+      for (let i = 0; i < 2; i++) { ibox(g, col, 2, 0.78, 1, 0 + i * 3.5, 0, 0, M.wood); const mon = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.4, 0.05), M.dark); mon.position.set(i * 3.5, 1.05, -0.3); g.add(mon); }
+      ibox(g, col, 2.6, 0.8, 0.9, 3, 0, 3.5, new THREE.MeshStandardMaterial({ color: 0x5a3a6a, roughness: 0.9 }));
+      for (let k = 0; k < 4; k++) { const fr = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.8), new THREE.MeshStandardMaterial({ color: new THREE.Color().setHSL(Math.random(), 0.5, 0.6) })); fr.position.set(-W / 2 + 0.06, 1.8, -3 + k * 2); fr.rotation.y = Math.PI / 2; g.add(fr); }
+    }
+    for (let i = 0; i < 2; i++) { const c = inPerson(randomPerson(), 1 + i * 3, 2.5 - i * 2, Math.random() * 6); npcs.push(c); }
+  } else if (kind === 'venue') {
+    const club = cat === 'club_adulto' || s.id === 'club-ember';
+    ibox(g, col, W * 0.55, 1.1, 0.9, 0, 0, -D / 2 + 2.2, M.wood);
+    const bot = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.55, 1.6), M.bottles); bot.position.set(0, 1.9, -D / 2 + 0.05); g.add(bot);
+    npcs.push(inPerson(randomPerson(0x111111), 0, -D / 2 + 1.3, 0));
+    counter = { x: 0, z: -D / 2 + 3.5 };
+    for (let i = 0; i < 5; i++) ibox(g, col, 0.4, 0.75, 0.4, -W * 0.22 + i * W * 0.11, 0, -D / 2 + 3.0, M.metal, false);
+    if (club) {
+      const tiles = []; for (let i = 0; i < 6; i++) for (let j = 0; j < 4; j++) { const t = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.15), new THREE.MeshBasicMaterial({ color: 0xff3d8b, toneMapped: false })); t.rotation.x = -Math.PI / 2; t.position.set(-3.5 + i * 1.2, 0.01, 1 + j * 1.2); g.add(t); tiles.push(t); }
+      dyn.push({ tiles });
+      ibox(g, col, 2.4, 1.1, 1, W / 2 - 2, 0, 1.5, M.dark); npcs.push(inPerson(randomPerson(0xff3d8b), W / 2 - 2, 0.5, -Math.PI / 2));
+      for (let i = 0; i < 5; i++) { const d = inPerson(randomPerson(), -3 + Math.random() * 6, 1.5 + Math.random() * 3, Math.random() * 6); d.userData.dance = Math.random() * 6; npcs.push(d); }
+    } else {
+      for (let i = 0; i < 4; i++) { const tx = -W / 2 + 3 + (i % 2) * 5, tz = 0.5 + Math.floor(i / 2) * 3.5; ibox(g, col, 1.2, 0.75, 1.2, tx, 0, tz, M.wood); for (const [dx, dz] of [[0.95, 0], [-0.95, 0]]) ibox(g, col, 0.45, 0.45, 0.45, tx + dx, 0, tz + dz, M.dark, false); if (Math.random() < 0.7) npcs.push(inPerson(randomPerson(), tx + 0.95, tz, -Math.PI / 2)); }
+    }
+  } else if (kind === 'showroom') {
+    const keys = s.id === 'keys-boat-club' ? ['lancha', 'jetski'] : ['moretti', 'valor'];
+    keys.forEach((k, i) => { const plat = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 0.2, 40), M.metal); plat.position.set(-5 + i * 10, 0.1, 0); g.add(plat); const v = makeCar(['#ffd23f', '#b3122e'][i], false, k); v.position.set(-5 + i * 10, MODELS[k].kind === 'boat' ? 0.7 : 0.2, 0); v.rotation.y = 0.6; g.add(v); dyn.push({ spin: v }); col.push({ x: IN_X - 5 + i * 10, z: IN_Z, hw: 3, hd: 3 }); });
+    ibox(g, col, 3, 0.8, 1.2, 0, 0, -D / 2 + 2.5, M.wood); counter = { x: 0, z: -D / 2 + 4 };
+    npcs.push(inPerson(randomPerson(0x1f2f55), 0, -D / 2 + 1.6, 0));
+  } else if (kind === 'bank') {
+    ibox(g, col, W - 4, 1.1, 0.8, 0, 0, -2, M.wood);
+    for (let i = 0; i < 4; i++) { const gl = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1.4), M.glass); gl.position.set(-6 + i * 4, 1.8, -2); g.add(gl); }
+    for (let i = 0; i < 3; i++) npcs.push(inPerson(randomPerson(0x1f2f55), -4 + i * 4, -3.2, 0));
+    const vault = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 0.4, 40), new THREE.MeshStandardMaterial({ color: 0xb8bcc2, metalness: 1, roughness: 0.2 })); vault.rotation.x = Math.PI / 2; vault.position.set(0, 2.3, -D / 2 + 0.25); g.add(vault);
+    const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.06, 8, 24), IMAT.metal); wheel.position.set(0, 2.3, -D / 2 + 0.5); g.add(wheel);
+    for (let i = 0; i < 6; i++) { const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 8), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.3 })); post.position.set(-5 + i * 2, 0.5, 1.5); g.add(post); }
+    counter = { x: 0, z: -0.6 };
+    for (let i = 0; i < 3; i++) npcs.push(inPerson(randomPerson(), -6 + i * 5, 3 + Math.random() * 2, Math.PI + (Math.random() - 0.5)));
+  } else if (kind === 'police') {
+    ibox(g, col, 4.5, 1.1, 1, -W / 2 + 3.5, 0, 2, M.wood); counter = { x: -W / 2 + 3.5, z: 3.4 };
+    npcs.push(inPerson({ skin: pickR(SKINS), top: 0x1b2b4d, pants: 0x121a2c, shoes: 0x0a0a0a, hair: 0x15121c }, -W / 2 + 3.5, 0.9, 0));
+    // dos celdas al fondo
+    const bars = new THREE.MeshStandardMaterial({ color: 0x5a6068, metalness: 0.9, roughness: 0.35 });
+    [-1, 1].forEach((sd, ci) => {
+      const cx = sd * 4.5, cz = -D / 2 + 2.5;
+      ibox(g, col, 0.2, H, 5, cx - sd * 2.6, 0, cz, wallMat);
+      for (let b = -1.9; b <= 1.9; b += 0.32) { if (Math.abs(b) < 0.5 && ci === 0) continue; const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, H, 6), bars); bar.position.set(cx + b, H / 2, cz + 2.5); g.add(bar); }
+      col.push({ x: IN_X + cx - 1.3, z: IN_Z + cz + 2.5, hw: 0.8, hd: 0.1 }, { x: IN_X + cx + 1.3, z: IN_Z + cz + 2.5, hw: 0.8, hd: 0.1 });
+      ibox(g, col, 0.9, 0.5, 2, cx + sd * 1.4, 0, cz - 1, M.metal, false);
+      if (ci === 0) { const cd = new THREE.Mesh(new THREE.BoxGeometry(1, H, 0.08), bars); cd.position.set(cx, H / 2, cz + 2.5); g.add(cd); g.userData.cellDoor = cd; col.push({ x: IN_X + cx, z: IN_Z + cz + 2.5, hw: 0.5, hd: 0.1, cellDoor: true }); cell = { x: cx, z: cz + 3.3, inside: { x: cx, z: cz } }; }
+    });
+  } else if (kind === 'hospital') {
+    ibox(g, col, 4, 1.1, 1, 0, 0, -D / 2 + 2.5, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 })); counter = { x: 0, z: -D / 2 + 3.9 };
+    npcs.push(inPerson(randomPerson(0x7fd6c9), 0, -D / 2 + 1.6, 0));
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 6; i++) ibox(g, col, 0.5, 0.45, 0.5, -W / 2 + 2 + i * 0.6, 0, 1 + r * 2, new THREE.MeshStandardMaterial({ color: 0x3a7bd5 }), i === 0);
+    ibox(g, col, 1, 0.6, 2.2, W / 2 - 2.5, 0, 0, new THREE.MeshStandardMaterial({ color: 0xe8e8e8 }));
+  }
+  npcs.forEach(n => g.add(n));
+  g.traverse(o => { if (o.material && o.material.isMeshStandardMaterial) o.material.envMapIntensity = o.material.metalness > 0.9 && o.material.roughness < 0.05 ? 0.8 : 0.12; });
+  g.position.set(IN_X, 0, IN_Z);
+  return { group: g, col, npcs, dyn, s, W, D, H, counter, cell, kind, exit: { x: 0, z: D / 2 - 0.8 } };
+}
+function interiorHit(x, z, r) {
+  if (!interior) return { wall: true };
+  const lx = x - IN_X, lz = z - IN_Z;
+  if (lz > interior.D / 2 - 0.3 && Math.abs(lx) < 1.4) return null;   // la puerta
+  if (Math.abs(lx) > interior.W / 2 - r || Math.abs(lz) > interior.D / 2 - r) return { wall: true };
+  for (const c of interior.col) if (Math.abs(x - c.x) < c.hw + r && Math.abs(z - c.z) < c.hd + r) return c;
+  return null;
+}
+function enterInterior(s) {
+  if (G.wanted > 0 && !(curStep() && curStep().store === s.id)) return toast('Con la policía atrás no podés esconderte en un local.');
+  G.mode = 'dead'; $('ovTitle').textContent = ''; $('ovText').textContent = ''; $('overlay').hidden = false; $('overlay').style.background = '#000';
+  setTimeout(() => {
+    if (interior) { scene.remove(interior.group); }
+    interior = buildInterior(s); scene.add(interior.group); G.inside = s;
+    const st = curStep();
+    if (interior.cell && G.mission === 3 && st && st.breakout && !lucy) { const c = interior.cell.inside; spawnLucy(IN_X + c.x, IN_Z + c.z); lucy.caged = true; }
+    player.position.set(IN_X, 0, IN_Z + interior.D / 2 - 1.6); player.rotation.y = Math.PI; G.camYaw = 0; G.camPitch = 0.25;
+    if (lucy && !lucy.caged && lucy.g.position.distanceTo(new THREE.Vector3(s.wx, lucy.g.position.y, s.wz)) < 30) lucy.g.position.set(IN_X + 1.2, 0, IN_Z + interior.D / 2 - 2);
+    $('minimap').style.visibility = 'hidden';
+    $('overlay').hidden = true; $('overlay').style.background = ''; G.mode = 'play';
+  }, 350);
+}
+function exitInterior(silent) {
+  const s = G.inside; if (!s) return;
+  const done = () => {
+    if (interior) { scene.remove(interior.group); interior.group.traverse(o => { if (o.geometry && !o.isSkinnedMesh) o.geometry.dispose(); }); interior = null; }
+    G.inside = null; $('minimap').style.visibility = '';
+    if (!silent) { player.position.set(s.wx, groundY(s.wx, s.wz + 1.5), s.wz + 1.5); player.rotation.y = 0; G.camYaw = Math.PI; }
+    if (lucy && lucy.g.position.x > 2000) { lucy.caged = false; lucy.g.position.set(s.wx + 1.5, groundY(s.wx + 1.5, s.wz + 2), s.wz + 2); }
+    inLights.forEach(l => l.intensity = 0);
+  };
+  if (silent) return done();
+  G.mode = 'dead'; $('ovTitle').textContent = ''; $('ovText').textContent = ''; $('overlay').hidden = false; $('overlay').style.background = '#000';
+  setTimeout(() => { done(); $('overlay').hidden = true; $('overlay').style.background = ''; G.mode = 'play'; }, 350);
+}
+function interiorPrompt() {
+  if (!interior) return null;
+  const lx = player.position.x - IN_X, lz = player.position.z - IN_Z;
+  if (Math.hypot(lx - interior.exit.x, lz - interior.exit.z) < 1.8) return { kind: 'exit', text: 'Salir a la calle' };
+  if (interior.cell && lucy && lucy.caged && Math.hypot(lx - interior.cell.x, lz - interior.cell.z) < 1.8) return { kind: 'cell', text: 'Abrir la celda de Lucy' };
+  if (Math.hypot(lx - interior.counter.x, lz - interior.counter.z) < 2.2) return { kind: 'counter', text: interior.kind === 'bank' ? 'Hablar con la cajera' : interior.kind === 'police' ? 'Hablar con el oficial' : interior.kind === 'venue' ? 'Pedir en la barra' : 'Hablar con el vendedor' };
+  return null;
+}
+function updateInterior(dt, now) {
+  const inside = player.position.x > 2000 && interior;
+  if (!inside) return;
+  sun.intensity = 0.02; hemi.intensity = 0.32; scene.fog.density = 0; finalPass.uniforms.exposure.value = 0.42; bloom.strength = 0.18; bloom.threshold = 0.95;
+  const alarm = G.wanted > 0 || (G.heist && G.heist.phase === 'fill');
+  inLights.forEach((l, i) => { l.position.set(IN_X + (i ? 4 : -4), interior.H - 0.5, IN_Z + (i ? 2 : -2)); l.intensity = 0.8; l.color.set(alarm && Math.floor(now / 300) % 2 ? 0xff2020 : 0xfff0dc); });
+  for (const n of interior.npcs) { if (n.userData.dance !== undefined) { n.userData.dance += dt * 6; const ud = n.userData; ud.shL.rotation.x = ud.shR.rotation.x = -2.4 + Math.sin(ud.dance) * 0.4; ud.body.position.y = Math.abs(Math.sin(ud.dance)) * 0.12; n.rotation.y += dt * 0.6; } else idleHuman(n.userData, now + n.id * 300); }
+  for (const d of interior.dyn) { if (d.tiles) d.tiles.forEach((t, i) => t.material.color.setHSL(((now / 1500) + i * 0.13) % 1, 0.9, 0.55)); else if (d.spin) d.spin.rotation.y += dt * 0.3; else if (d.material) d.material.color.setHSL(((now / 4000) + d.id * 0.1) % 1, 0.6, 0.5); }
+  if (lucy && lucy.caged) { lucy.g.visible = true; idleHuman(lucy.ud, now); }
+}
+const aiFocus = () => (G.inside ? { x: G.inside.wx, y: WALKY, z: G.inside.wz } : focusPos());
 
 // ---------- input ----------
 addEventListener('keydown', e => {
@@ -2181,9 +2375,16 @@ function findCarSpot(p) {
 let nearStore = null;
 function tryEnter() {
   if (G.inCar) return toast('Bajate del auto para entrar (F)');
+  if (G.inside) {
+    const ip = interiorPrompt();
+    if (!ip) return toast('Acercate al mostrador para comprar, o a la puerta para salir.');
+    if (ip.kind === 'exit') return exitInterior();
+    if (ip.kind === 'counter') return openShop(G.inside);
+    if (ip.kind === 'cell') { breakout(); return; }
+  }
   if (!nearStore) return toast('No hay ningún local cerca. Buscá uno en el mapa (M).');
   if (locked(nearStore)) return toast(nearStore.unlock.hint);
-  openShop(nearStore);
+  enterInterior(nearStore);
 }
 function exitCar(forced) {
   G.inCar = false; if (!forced) car.userData.speed = 0;
@@ -2358,6 +2559,7 @@ function updateLucy(dt, now) {
     if (!G.inCar) { lucy.inCar = false; g.visible = true; const side = new THREE.Vector3(2.3, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), car.rotation.y); g.position.set(car.position.x + side.x, groundY(car.position.x + side.x, car.position.z + side.z), car.position.z + side.z); }
     return;
   }
+  if (lucy.caged) return;
   g.visible = true;
   const target = G.inCar ? car.position : player.position;
   const dx = target.x - g.position.x, dz = target.z - g.position.z, d = Math.hypot(dx, dz);
@@ -2392,7 +2594,7 @@ function startHeist() {
 function updateHeist(dt) {
   const h = G.heist; if (!h) return;
   if (h.phase === 'fill') {
-    const d = Math.hypot(player.position.x - h.x, player.position.z - h.z);
+    const ap = aiFocus(), d = Math.hypot(ap.x - h.x, ap.z - h.z);
     if (d < 20) h.t += dt; else if (!h.warn) { h.warn = true; toast('Volvé al banco: los bolsos no se llenan solos.'); }
     if (d < 20) h.warn = false;
     if (h.t >= h.need) { h.phase = 'escape'; G.wanted = Math.max(G.wanted, 4); toast(`¡Bolsos llenos: ${money(h.loot)}! Ahora escapá y perdé a la policía.`, 4500); }
@@ -2473,8 +2675,10 @@ function shopAction(s, a, i) {
   }
 }
 function breakout() {
+  if (interior && interior.group.userData.cellDoor && interior.col.some(c => c.cellDoor)) { interior.group.userData.cellDoor.position.x += 1.1; interior.col = interior.col.filter(c => !c.cellDoor); crashSound(6); }
+  if (lucy) lucy.caged = false;
   const pc = G.stores.find(x => x.id === 'hcpd-precinct-7');
-  spawnLucy(pc.wx + 1.5, pc.wz + 1.5);
+  if (!lucy) spawnLucy(G.inside ? player.position.x + 1.2 : pc.wx + 1.5, G.inside ? player.position.z : pc.wz + 1.5);
   G.wanted = Math.max(G.wanted, 3); G.lastSeen = performance.now(); crime(1);
   [-1, 1].forEach(sd => { const o = makeOfficer(); o.position.set(pc.wx + sd * 7, WALKY, pc.wz + 6); scene.add(o); officers.push({ g: o, ud: o.userData, hp: 100, state: 'run', shootCd: 2, arrestT: 0, car: null }); });
   toast('Lucy: "¡Por fin! Vamos al auto, rápido."', 4500);
@@ -2641,6 +2845,7 @@ function loop(now) {
   if (G.mode !== 'boot') { updateTraffic(dt); updatePeds(dt, now); updateCombat(dt, now); if (G.mode === 'play') { checkMission(dt); updateHeist(dt); updateLucy(dt, now); updateCash(dt, now); updateBoats(dt, now); if (G.waypoint && G.waypoint.follow) { const f = G.waypoint.follow.position; G.waypoint.wx = f.x; G.waypoint.wz = f.z; const mm = M2W(f.x, f.z); G.waypoint.mx = mm.mx; G.waypoint.my = mm.my; beam.position.set(f.x, 80, f.z); } } if (G.mode === 'play') { if (G.inCar) { carVsTraffic(); carVsPeds(); } else pedVsTraffic(); } }
   updateSparks(dt); updateSmoke(dt);
   if ((skyTick += dt) > 0.5) { skyTick = 0; updateSky(false); }
+  if (G.inside) updateInterior(dt, now); else { scene.fog.density = 0.0016; if (inLights[0] && inLights[0].intensity) inLights.forEach(l => l.intensity = 0); }
   updateCamera(dt, now);
   water.material.uniforms.time.value += dt * 0.6;
   storeRings.forEach(r => { r.rotation.z += dt; r.material.opacity = 0.55 + 0.3 * Math.sin(now / 250); });
@@ -2737,6 +2942,7 @@ function updateCamera(dt, now) {
   v3.set(t.x + rx + Math.sin(G.camYaw) * Math.cos(G.camPitch) * dist, t.y + hgt + Math.sin(G.camPitch) * dist, t.z + rz + Math.cos(G.camYaw) * Math.cos(G.camPitch) * dist);
   // que la cámara no atraviese edificios
   for (let k = 0; k < 6 && hitCollider(v3.x, v3.z, 0.3) && !hitCollider(v3.x, v3.z, 0.3).water; k++) v3.lerp(new THREE.Vector3(t.x, v3.y, t.z), 0.25);
+  if (interior && t.x > 2000) { v3.y = Math.min(v3.y, interior.H - 0.35); for (let k = 0; k < 8 && interiorHit(v3.x, v3.z, 0.25); k++) v3.lerp(new THREE.Vector3(t.x, v3.y, t.z), 0.3); }
   camera.position.lerp(v3, Math.min(1, dt * 10));
   if (G.shake > 0) { camera.position.x += (Math.random() - 0.5) * G.shake; camera.position.y += (Math.random() - 0.5) * G.shake; G.shake = Math.max(0, G.shake - dt * 2.5); }
   camera.lookAt(t.x + rx, t.y + hgt, t.z + rz);
@@ -2752,16 +2958,17 @@ function updateHUD() {
   $('weaponChip').innerHTML = WEAPON_ORDER.map((w, i) => (w === 'fist' || G.weapons[w] > 0) ? `<span class="wslot${w === G.weapon ? ' on' : ''}"><kbd>${i + 1}</kbd>${esc(WEAPONS[w].name)}${w === 'fist' ? '' : ` <small>${G.weapons[w]}</small>`}</span>` : '').join('');
   const ch = $('crosshair'); ch.hidden = !(G.mode === 'play' && !G.inCar && !G.swimming && G.weapon !== 'fist'); ch.classList.toggle('aim', !!G.aiming); ch.classList.toggle('hit', performance.now() < (G.hitUntil || 0));
   const fp = M2W(focusPos().x, focusPos().z), z = zoneAt(fp.mx, fp.my);
-  $('zone').textContent = z ? z.name.toUpperCase() : 'AFUERAS';
+  $('zone').textContent = G.inside ? G.inside.name.toUpperCase() : z ? z.name.toUpperCase() : 'AFUERAS';
   $('carHud').hidden = !G.inCar;
   if (G.inCar) { const hp = car.userData.health; $('speed').textContent = car.userData.boat ? Math.round(Math.abs(car.userData.speed) * 1.94) + ' nudos' : Math.round(Math.abs(car.userData.speed) * 3.6) + ' km/h'; const bar = $('carBar').firstElementChild; bar.style.width = hp + '%'; bar.style.background = hp > 50 ? 'var(--ok)' : hp > 20 ? 'var(--gold)' : 'var(--bad)'; }
   const pr = $('prompt');
   if (G.mode !== 'play') pr.hidden = true;
+  else if (G.inside) { const ip = interiorPrompt(); if (ip) { pr.innerHTML = `<kbd>E</kbd>${esc(ip.text)}`; pr.hidden = false; } else pr.hidden = true; }
   else if (nearStore) { pr.innerHTML = locked(nearStore) ? `${esc(nearStore.name)} · Todavía no podés entrar` : `<kbd>E</kbd>Entrar a ${esc(nearStore.name)}`; pr.hidden = false; }
   else if (!G.inCar && (hudCar = nearestCar())) { pr.innerHTML = hudCar.kind === 'mine' ? `<kbd>F</kbd>Subir a tu ${esc(carName(hudCar.g))}` : `<kbd>F</kbd>Robar ${esc(carName(hudCar.g))} <span style="color:var(--muted)">(${esc(hudCar.g.userData.label)})</span>`; pr.hidden = false; }
   else pr.hidden = true;
   if (G.waypoint) {
-    const w = G.waypoint, dx = w.wx - focusPos().x, dz = w.wz - focusPos().z, d = Math.hypot(dx, dz);
+    const w = G.waypoint, fpw = aiFocus(), dx = w.wx - fpw.x, dz = w.wz - fpw.z, d = Math.hypot(dx, dz);
     const camFwd = Math.atan2(-Math.sin(G.camYaw), -Math.cos(G.camYaw)), ang = Math.atan2(dx, dz);
     $('gpsArrow').style.transform = `rotate(${Math.atan2(Math.sin(camFwd - ang), Math.cos(camFwd - ang))}rad)`;
     $('gpsText').textContent = `${w.name} · ${Math.round(d)} m`;
