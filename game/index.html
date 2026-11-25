@@ -393,7 +393,7 @@ function hash(str) { let h = 2166136261; for (const c of str) { h ^= c.charCodeA
 let rngSeed = 11; const rnd = () => (rngSeed = (rngSeed * 16807) % 2147483647) / 2147483647;
 function toast(msg, ms = 2600) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, ms); }
 
-const PRICE = { armeria:[300,2500], ropa:[40,900], autos:[18000,240000], tatuajes:[60,400], comida:[6,30], tienda24:[3,40], bar:[10,300], inmobiliaria:[40000,900000], tecnologia:[150,2200], gimnasio:[40,300], banco:[0,0], empeno:[20,1500], servicios:[0,500], club_adulto:[20,800] };
+const PRICE = { armeria:[300,2500], ropa:[40,900], autos:[18000,240000], tatuajes:[60,400], comida:[6,30], tienda24:[3,40], bar:[10,300], inmobiliaria:[4000,90000], tecnologia:[150,2200], gimnasio:[40,300], banco:[0,0], empeno:[20,1500], servicios:[0,500], club_adulto:[20,800] };
 const priceOf = (s, item) => { if (s.prices && s.prices[item] != null) return s.prices[item]; const [a, b] = PRICE[s.category] || [10, 100], step = a > 1000 ? 100 : 1; return Math.round((a + (b - a) * hash(s.id + item)) / step) * step; };
 
 // ---------- guardado por username ----------

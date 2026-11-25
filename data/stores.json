@@ -963,11 +963,11 @@
         "Mansión frente al mar"
       ],
       "prices": {
-        "Departamento en Downtown Blaze": 95000,
-        "Loft en Port Sable": 140000,
-        "Casa con pileta en Coral Keys": 320000,
-        "Villa en Sunset Strip": 650000,
-        "Mansión frente al mar": 1500000
+        "Departamento en Downtown Blaze": 6000,
+        "Loft en Port Sable": 12000,
+        "Casa con pileta en Coral Keys": 30000,
+        "Villa en Sunset Strip": 65000,
+        "Mansión frente al mar": 150000
       },
       "description": "Inmobiliaria de lujo: departamentos, villas y mansiones listas para mudarse. Lo que comprás queda marcado en tu mapa.",
       "actions": [
