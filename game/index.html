@@ -270,7 +270,7 @@ body.driving .touch, body.driving #help { display: none !important; }
     <div class="brand">HEAT CITY</div>
     <div id="zone">—</div>
     <div class="chip" id="carHud" hidden><span id="speed">0 km/h</span><span id="carBar"><i></i></span></div>
-    <div class="hudBtns"><button class="btn" id="phBtn" type="button">Teléfono (P)</button><button class="btn" id="qBtn" type="button">Gráficos: Alto</button><button class="btn" id="logoutBtn" type="button">Salir</button></div>
+    <div class="hudBtns"><button class="btn" id="phBtn" type="button">Teléfono (P)</button><button class="btn" id="qBtn" type="button">Gráficos: Alto</button><button class="btn" id="sndBtn" type="button">Sonido: Sí</button><button class="btn" id="logoutBtn" type="button">Salir</button></div>
   </div>
   <div class="hud tr">
     <div class="chip"><span id="who"></span><span id="clock">10:00</span><span id="money">$0</span></div>
@@ -292,7 +292,7 @@ body.driving .touch, body.driving #help { display: none !important; }
     <path d="M -80 6 L -26 14 L -16 34 L 16 34 L 26 14 L 80 6" fill="none" stroke="#2a2533" stroke-width="16" stroke-linejoin="round"/><path d="M 0 34 L 0 82" stroke="#2a2533" stroke-width="16"/>
     <circle r="30" fill="#1c1826" stroke="#ff7a3d" stroke-width="3"/><text y="6" text-anchor="middle" font-family="Bungee, Impact, sans-serif" font-size="15" fill="#ff7a3d">HC</text>
     <rect x="-5" y="-98" width="10" height="16" rx="3" fill="#ff7a3d"/></svg></div>
-  <div id="pedals"><div class="dsmall"><button id="dExit" type="button">BAJAR</button><button id="dHand" type="button">FRENO DE MANO</button></div><button id="pBrake" class="pedal" type="button">FRENO</button><button id="pGas" class="pedal" type="button">ACELERAR</button></div>
+  <div id="pedals"><div class="dsmall"><button id="dExit" type="button">BAJAR</button><button id="dRadio" type="button">RADIO</button><button id="dHand" type="button">FRENO DE MANO</button></div><button id="pBrake" class="pedal" type="button">FRENO</button><button id="pGas" class="pedal" type="button">ACELERAR</button></div>
 </div>
 <div id="toast" hidden></div>
 <div id="phone" hidden><div id="phoneScreen"></div></div>
@@ -1333,8 +1333,101 @@ function updateSmoke(dt) { for (const p of smoke.list) { if (p.life <= 0) { p.sp
 let AC = null, engine = null;
 function audio() {
   if (AC) return AC;
-  try { AC = new (window.AudioContext || window.webkitAudioContext)(); const o = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain(); o.type = 'sawtooth'; o.frequency.value = 50; f.type = 'lowpass'; f.frequency.value = 400; g.gain.value = 0; o.connect(f).connect(g).connect(AC.destination); o.start(); engine = { o, g }; } catch (e) { AC = null; }
+  try { AC = new (window.AudioContext || window.webkitAudioContext)(); const o = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain(); o.type = 'sawtooth'; o.frequency.value = 50; f.type = 'lowpass'; f.frequency.value = 400; g.gain.value = 0; o.connect(f).connect(g).connect(audioBus() || AC.destination); o.start(); engine = { o, g }; } catch (e) { AC = null; }
   return AC;
+}
+// ---------- sonido: bus maestro, efectos, ambiente y radio ----------
+let MASTER = null, NOISE = null;
+let soundOn = (() => { try { return localStorage.getItem('hc_sound') !== 'off'; } catch (e) { return true; } })();
+function audioBus() {
+  if (MASTER || !AC) return MASTER;
+  const comp = AC.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.connect(AC.destination);
+  MASTER = AC.createGain(); MASTER.gain.value = soundOn ? 1 : 0; MASTER.connect(comp);
+  NOISE = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate); const d = NOISE.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  return MASTER;
+}
+function setSound(on) { soundOn = on; try { localStorage.setItem('hc_sound', on ? 'on' : 'off'); } catch (e) {} if (MASTER) MASTER.gain.setTargetAtTime(on ? 1 : 0, AC.currentTime, 0.05); $('sndBtn').textContent = 'Sonido: ' + (on ? 'Sí' : 'No'); }
+function noiseHit(t, dur, type, freq, vol, q = 1, dest) {
+  if (!AC || !audioBus()) return; const s = AC.createBufferSource(); s.buffer = NOISE; const f = AC.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; const g = AC.createGain();
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); s.connect(f).connect(g).connect(dest || MASTER); s.start(t, Math.random() * 1.5); s.stop(t + dur + 0.02);
+}
+function tone(t, freq, dur, type, vol, dest, slideTo) {
+  if (!AC || !audioBus()) return; const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(freq, t); if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(g).connect(dest || MASTER); o.start(t); o.stop(t + dur + 0.05);
+}
+const SFX = {
+  step(run) { if (!AC) return; const t = AC.currentTime; noiseHit(t, run ? 0.07 : 0.06, 'bandpass', 700 + Math.random() * 500, run ? 0.07 : 0.045, 1.2); },
+  jump() { if (!AC) return; noiseHit(AC.currentTime, 0.18, 'bandpass', 1200, 0.05, 0.8); },
+  land() { if (!AC) return; noiseHit(AC.currentTime, 0.12, 'lowpass', 400, 0.12); },
+  whoosh() { if (!AC) return; noiseHit(AC.currentTime, 0.14, 'bandpass', 2200, 0.05, 2); },
+  splash() { if (!AC) return; const t = AC.currentTime; noiseHit(t, 0.6, 'lowpass', 1600, 0.18); noiseHit(t + 0.05, 0.35, 'highpass', 3000, 0.06); },
+  door() { if (!AC) return; const t = AC.currentTime; noiseHit(t, 0.08, 'lowpass', 900, 0.12); tone(t, 180, 0.12, 'triangle', 0.05); },
+  cash() { if (!AC) return; const t = AC.currentTime; tone(t, 1318, 0.25, 'triangle', 0.08); tone(t + 0.08, 1760, 0.35, 'triangle', 0.08); },
+  buy() { if (!AC) return; const t = AC.currentTime; noiseHit(t, 0.05, 'highpass', 4000, 0.08); tone(t + 0.04, 2093, 0.4, 'sine', 0.07); tone(t + 0.04, 2637, 0.5, 'sine', 0.05); },
+  mission() { if (!AC) return; const t = AC.currentTime; [523, 659, 784, 1047].forEach((f, i) => tone(t + i * 0.12, f, 0.45, 'square', 0.04)); tone(t + 0.5, 1047, 0.8, 'triangle', 0.06); },
+  death() { if (!AC) return; const t = AC.currentTime; tone(t, 440, 1.4, 'sawtooth', 0.05, null, 70); noiseHit(t, 0.4, 'lowpass', 300, 0.2); },
+  busted() { if (!AC) return; const t = AC.currentTime; for (let i = 0; i < 4; i++) tone(t + i * 0.3, i % 2 ? 620 : 880, 0.28, 'square', 0.04); },
+  boom() { if (!AC) return; const t = AC.currentTime; noiseHit(t, 1.6, 'lowpass', 500, 0.5); tone(t, 90, 1.2, 'sine', 0.3, null, 30); }
+};
+// pasos: suena cada vez que un pie toca el piso
+let lastStep = 0;
+function stepSound(phase, run) { const k = Math.floor(phase / Math.PI); if (k !== lastStep) { lastStep = k; SFX.step(run); } }
+// ambiente: ciudad, olas, viento, pájaros de día y grillos de noche
+const AMB = { on: false };
+function ambLoop(type, freq, q) { const s = AC.createBufferSource(); s.buffer = NOISE; s.loop = true; const f = AC.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q || 0.7; const g = AC.createGain(); g.gain.value = 0; s.connect(f).connect(g).connect(MASTER); s.start(); return { g, f }; }
+function updateAmbience(dt, now) {
+  if (!AC || !audioBus()) return;
+  if (!AMB.on) { AMB.on = true; AMB.city = ambLoop('lowpass', 420); AMB.sea = ambLoop('bandpass', 500, 0.5); AMB.wind = ambLoop('bandpass', 900, 0.6); AMB.t = 0; }
+  const t = AC.currentTime, p = focusPos(), inside = !!G.inside, day = dayFactor();
+  let nearSea = 0; if (!inside) for (const [dx, dz] of [[0, 0], [25, 0], [-25, 0], [0, 25], [0, -25]]) if (inWater(p.x + dx, p.z + dz)) nearSea += 0.2;
+  const flying = G.plane && G.plane.userData.air, onLand = !inside && !inWater(p.x, p.z);
+  const set = (n, v) => n.g.gain.setTargetAtTime(v, t, 0.4);
+  set(AMB.city, inside ? 0.015 : onLand && Math.max(Math.abs(p.x), Math.abs(p.z)) < 420 ? 0.05 : 0.01);
+  set(AMB.sea, inside ? 0 : nearSea * 0.09 * (0.7 + 0.3 * Math.sin(now / 1800)));
+  set(AMB.wind, flying ? 0.05 + Math.abs(G.plane.userData.speed) / 1500 : G.swimming ? 0.02 : 0.004);
+  AMB.t -= dt;
+  if (AMB.t <= 0 && !inside && !flying) {
+    AMB.t = 0.6 + Math.random() * 2.5;
+    if (day > 0.5 && Math.random() < 0.55) { const f = 2400 + Math.random() * 1600; for (let i = 0; i < 2 + Math.random() * 3; i++) tone(t + i * 0.09, f, 0.07, 'sine', 0.012, null, f * (1.2 + Math.random() * 0.3)); }
+    else if (day < 0.2) { for (let i = 0; i < 6; i++) tone(t + i * 0.045, 4300, 0.03, 'square', 0.004); }
+  }
+}
+// radio del auto: tres emisoras generadas en vivo
+const STATIONS = [
+  { name: 'Neon 96.1', style: 'synthwave', bpm: 100, wave: 'sawtooth', chords: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], kick: [0, 4, 8, 12], snare: [4, 12], hat: [2, 6, 10, 14], bass: [0, 2, 4, 6, 8, 10, 12, 14], arp: true },
+  { name: 'Calor FM', style: 'dembow', bpm: 96, wave: 'square', chords: [[50, 53, 57], [46, 50, 53], [48, 52, 55], [45, 48, 52]], kick: [0, 4, 8, 12], snare: [3, 6, 11, 14], hat: [0, 2, 4, 6, 8, 10, 12, 14], bass: [0, 3, 6, 8, 11, 14], arp: false },
+  { name: 'Bahía Lo-Fi', style: 'lofi', bpm: 76, wave: 'triangle', chords: [[60, 64, 67, 71], [57, 60, 64, 67], [53, 57, 60, 64], [55, 59, 62, 65]], kick: [0, 7, 10], snare: [4, 12], hat: [0, 3, 6, 8, 11, 14], bass: [0, 6, 10], arp: false }
+];
+const RADIO = { on: (() => { try { return localStorage.getItem('hc_radio') !== 'off'; } catch (e) { return true; } })(), st: 0, next: 0, step: 0, out: null, playing: false };
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function radioStep(S, step, t, dest) {
+  const bar = Math.floor(step / 16) % 4, s = step % 16, ch = S.chords[bar], beat = 60 / S.bpm / 4;
+  if (S.kick.includes(s)) { const o = AC.createOscillator(), g = AC.createGain(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.18); g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.3); o.connect(g).connect(dest); o.start(t); o.stop(t + 0.32); }
+  if (S.snare.includes(s)) noiseHit(t, S.style === 'lofi' ? 0.18 : 0.14, 'bandpass', S.style === 'dembow' ? 2600 : 1800, S.style === 'lofi' ? 0.12 : 0.18, 0.9, dest);
+  if (S.hat.includes(s)) noiseHit(t, 0.04, 'highpass', 8000, S.style === 'lofi' ? 0.03 : 0.05, 1, dest);
+  if (S.bass.includes(s)) { const o = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain(); o.type = S.style === 'lofi' ? 'sine' : 'sawtooth'; o.frequency.value = mtof(ch[0] - 12); f.type = 'lowpass'; f.frequency.value = 500; g.gain.setValueAtTime(0.16, t); g.gain.exponentialRampToValueAtTime(0.001, t + beat * 1.8); o.connect(f).connect(g).connect(dest); o.start(t); o.stop(t + beat * 2); }
+  if (s === 0) for (const n of ch) { const o = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain(); o.type = S.wave; o.frequency.value = mtof(n + 12); o.detune.value = (Math.random() - 0.5) * 12; f.type = 'lowpass'; f.frequency.value = S.style === 'synthwave' ? 1400 : 900; const L = beat * 16; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.03, t + 0.15); g.gain.setValueAtTime(0.03, t + L - 0.2); g.gain.linearRampToValueAtTime(0.0001, t + L); o.connect(f).connect(g).connect(dest); o.start(t); o.stop(t + L + 0.05); }
+  if (S.arp && s % 2 === 0) tone(t, mtof(ch[(s / 2) % ch.length] + 24), beat * 1.6, 'square', 0.018, dest);
+  if (S.style === 'dembow' && s % 4 === 2) tone(t, mtof(ch[1] + 24), beat, 'triangle', 0.03, dest);
+}
+function updateRadio() {
+  if (!AC || !audioBus()) return;
+  const club = interior && (interior.kind === 'vip' || (interior.kind === 'venue' && G.inside && G.inside.category !== 'comida'));
+  const want = (RADIO.on && (G.inCar && !car.userData.boat || G.plane)) || club;
+  if (!RADIO.out) { RADIO.out = AC.createGain(); RADIO.out.gain.value = 0; const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 6000; RADIO.out.connect(f).connect(MASTER); RADIO.filter = f; }
+  RADIO.out.gain.setTargetAtTime(want ? (club ? 0.55 : 0.4) : 0, AC.currentTime, 0.2);
+  RADIO.filter.frequency.setTargetAtTime(club ? 2200 : 6000, AC.currentTime, 0.2);   // en el boliche suena "a través de la pared"
+  if (!want) { RADIO.playing = false; return; }
+  const S = STATIONS[club ? 1 : RADIO.st];
+  if (!RADIO.playing) { RADIO.playing = true; RADIO.next = AC.currentTime + 0.1; RADIO.step = 0; }
+  while (RADIO.next < AC.currentTime + 0.2) { radioStep(S, RADIO.step, RADIO.next, RADIO.out); RADIO.next += 60 / S.bpm / 4; RADIO.step++; }
+}
+function radioButton() {
+  if (!RADIO.on) { RADIO.on = true; RADIO.st = 0; } else if (RADIO.st < STATIONS.length - 1) RADIO.st++; else RADIO.on = false;
+  try { localStorage.setItem('hc_radio', RADIO.on ? 'on' : 'off'); } catch (e) {}
+  RADIO.playing = false; audio();
+  toast(RADIO.on ? `📻 ${STATIONS[RADIO.st].name}` : '📻 Radio apagada', 1800);
+  $('dRadio').textContent = RADIO.on ? STATIONS[RADIO.st].name.toUpperCase() : 'RADIO';
 }
 function crashSound(power) {
   if (!AC) return;
@@ -1342,7 +1435,7 @@ function crashSound(power) {
   for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
   const src = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
   src.buffer = buf; f.type = 'lowpass'; f.frequency.value = 600 + power * 80; g.gain.value = Math.min(1, 0.2 + power / 25);
-  src.connect(f).connect(g).connect(AC.destination); src.start();
+  src.connect(f).connect(g).connect(audioBus() || AC.destination); src.start();
 }
 
 // ---------- colisiones ----------
@@ -1505,7 +1598,7 @@ function explodeCar() {
   const p = car.position;
   burst(p.x, 1, p.z, 120, 22); for (let i = 0; i < 12; i++) puff(p.x + (Math.random() - 0.5) * 3, 1 + Math.random() * 2, p.z + (Math.random() - 0.5) * 3, i < 5 ? 0xff7a1a : 0x222222, 3 + Math.random() * 3);
   u.paint.color.set(0x1c1c1c); u.paint.clearcoat = 0;
-  G.shake = 1.4; crashSound(30); flashScreen(0.9);
+  G.shake = 1.4; crashSound(30); SFX.boom(); flashScreen(0.9);
   const wasIn = G.inCar;
   if (!wasIn && !car.userData.boat) { removeCarCollider(car); addParkedCollider(car); }
   if (wasIn) { setTimeout(() => { if (G.mode === 'play' || G.mode === 'phone') endState('dead'); }, 700); toast('¡El auto explotó con vos adentro!', 3000); }
@@ -1668,8 +1761,11 @@ $('tShoot').addEventListener('pointerdown', e => { e.preventDefault(); firing = 
 $('tShoot').addEventListener('pointerup', () => { firing = false; });
 $('tShoot').addEventListener('pointercancel', () => { firing = false; });
 $('tGun').onclick = () => G.mode === 'play' && cycleWeapon();
-function jump() { if (G.mode !== 'play' || G.inCar || G.swimming || (player.userData.down > 0) || G.jumpH > 0.01 || ELEV) return; G.jumpV = 7.2; G.jumpH = 0.001; }
+function jump() { if (G.mode !== 'play' || G.inCar || G.swimming || (player.userData.down > 0) || G.jumpH > 0.01 || ELEV) return; G.jumpV = 7.2; G.jumpH = 0.001; SFX.jump(); }
 $('tJump').addEventListener('pointerdown', e => { e.preventDefault(); audio(); jump(); });
+$('sndBtn').onclick = () => { audio(); setSound(!soundOn); };
+$('dRadio').addEventListener('pointerdown', e => { e.preventDefault(); radioButton(); });
+setTimeout(() => { $('sndBtn').textContent = 'Sonido: ' + (soundOn ? 'Sí' : 'No'); }, 0);
 $('tRun').onclick = () => { G.sprint = !G.sprint; $('tRun').classList.toggle('on', G.sprint); };
 $('phBtn').onclick = () => { if (PH.incoming) answerCall(); else if (PH.open) closePhone(); else openPhone(); };
 $('tPhone').onclick = () => { if (PH.incoming) answerCall(); else if (PH.open) closePhone(); else openPhone(); };
@@ -1780,7 +1876,7 @@ function gunSound(vol = 0.5) {
   const len = 0.18, buf = AC.createBuffer(1, AC.sampleRate * len, AC.sampleRate), dd = buf.getChannelData(0);
   for (let i = 0; i < dd.length; i++) dd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / dd.length, 6);
   const src = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); src.buffer = buf; f.type = 'bandpass'; f.frequency.value = 1400; f.Q.value = 0.6; g.gain.value = vol;
-  src.connect(f).connect(g).connect(AC.destination); src.start();
+  src.connect(f).connect(g).connect(audioBus() || AC.destination); src.start();
 }
 function shoot() {
   if (G.plane) return;
@@ -1799,7 +1895,7 @@ function shoot() {
   }
   player.rotation.y = yaw; G.aimT = 1.4;
   if (W.melee) {
-    G.punchT = 0.26; G.guardT = 2; G.punchSide = !G.punchSide;
+    G.punchT = 0.26; G.guardT = 2; G.punchSide = !G.punchSide; SFX.whoosh();
     const fx = Math.sin(yaw), fz = Math.cos(yaw);
     const hitP = peds.concat(victims.map(v => ({ g: v.g, state: v.mode === 'dead' ? 'dead' : 'walk', victimRef: v })), officers.map(o => ({ g: o.g, state: o.state === 'dead' ? 'dead' : 'walk', officerRef: o }))).find(q => q.g !== player && q.state !== 'dead' && q.g.visible && (() => { const dx = q.g.position.x - player.position.x, dz = q.g.position.z - player.position.z, d = Math.hypot(dx, dz); return d < 1.7 && (dx * fx + dz * fz) / (d || 1) > 0.4; })());
     if (hitP) { damageTarget(hitP.officerRef ? { officer: hitP.officerRef } : hitP.victimRef ? { victim: hitP.victimRef } : { ped: hitP }, rollDmg(W), new THREE.Vector3(fx, 0, fz), true); crashSound(3); }
@@ -1845,7 +1941,7 @@ function endState(kind) {
   if (PH.open) closePhone();
   if (G.inside) exitInterior(true);
   if (G.plane) { const pg = G.plane; G.plane = null; pg.userData.speed = 0; if (pg.userData.air) { pg.userData.air = false; pg.position.y = inWater(pg.position.x, pg.position.z) ? -1.5 : groundY(pg.position.x, pg.position.z); } player.visible = true; }
-  G.mode = 'dead'; firing = false; if (document.pointerLockElement) document.exitPointerLock();
+  G.mode = 'dead'; firing = false; if (document.pointerLockElement) document.exitPointerLock(); if (kind === 'dead') SFX.death(); else SFX.busted();
   if (G.inCar) exitCar(true);
   if (G.heist) { toast('Perdiste el botín.'); G.heist = null; }
   failMission(kind === 'dead' ? 'te hirieron' : 'te arrestaron');
@@ -2053,7 +2149,7 @@ function updateCombat(dt, now) {
   }
   // sirena
   if (AC) {
-    if (!siren) { const o = AC.createOscillator(), l = AC.createOscillator(), lg = AC.createGain(), g = AC.createGain(); o.type = 'square'; o.frequency.value = 700; l.frequency.value = 1.4; lg.gain.value = 250; l.connect(lg).connect(o.frequency); g.gain.value = 0; const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1800; o.connect(f).connect(g).connect(AC.destination); o.start(); l.start(); siren = g; }
+    if (!siren) { const o = AC.createOscillator(), l = AC.createOscillator(), lg = AC.createGain(), g = AC.createGain(); o.type = 'square'; o.frequency.value = 700; l.frequency.value = 1.4; lg.gain.value = 250; l.connect(lg).connect(o.frequency); g.gain.value = 0; const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1800; o.connect(f).connect(g).connect(audioBus() || AC.destination); o.start(); l.start(); siren = g; }
     const nearest = cops.reduce((m, c) => Math.min(m, c.g.position.distanceTo(fp)), 999);
     siren.gain.value = G.wanted > 0 && G.mode === 'play' ? Math.max(0, 0.05 * (1 - nearest / 140)) : 0;
   }
@@ -2177,8 +2273,8 @@ function startCall(id, incoming) {
   lines.forEach(l => { PH.timers.push(setTimeout(() => { if (!PH.call) return; PH.call.shown.push(l); renderPhone(); }, t)); t += 1300; });
   PH.timers.push(setTimeout(() => { if (!PH.call) return; PH.call.done = true; renderPhone(); }, t));
 }
-function beep(freq, dur, type = 'sine', vol = 0.04) { if (!AC) return; try { const o = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter(); o.type = type; o.frequency.value = freq; f.type = 'lowpass'; f.frequency.value = 600; g.gain.setValueAtTime(vol, AC.currentTime); g.gain.linearRampToValueAtTime(0, AC.currentTime + dur); o.connect(f).connect(g).connect(AC.destination); o.start(); o.stop(AC.currentTime + dur); } catch (e) {} }
-function ringOnce() { if (!AC) return; [0, 0.25].forEach(d => { const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = 880; g.gain.value = 0.05; o.connect(g).connect(AC.destination); o.start(AC.currentTime + d); o.stop(AC.currentTime + d + 0.15); }); }
+function beep(freq, dur, type = 'sine', vol = 0.04) { if (!AC) return; try { const o = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter(); o.type = type; o.frequency.value = freq; f.type = 'lowpass'; f.frequency.value = 600; g.gain.setValueAtTime(vol, AC.currentTime); g.gain.linearRampToValueAtTime(0, AC.currentTime + dur); o.connect(f).connect(g).connect(audioBus() || AC.destination); o.start(); o.stop(AC.currentTime + dur); } catch (e) {} }
+function ringOnce() { if (!AC) return; [0, 0.25].forEach(d => { const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = 880; g.gain.value = 0.05; o.connect(g).connect(audioBus() || AC.destination); o.start(AC.currentTime + d); o.stop(AC.currentTime + d + 0.15); }); }
 function incomingCall(id, lines, opts) {
   if (!G.user) return;
   if (PH.incoming) return;
@@ -2486,6 +2582,7 @@ function enterVIP(s) {
 }
 function enterInterior(s) {
   if (G.wanted > 0 && !(curStep() && curStep().store === s.id)) return toast('Con la policía atrás no podés esconderte en un local.');
+  SFX.door();
   G.mode = 'dead'; $('ovTitle').textContent = ''; $('ovText').textContent = ''; $('overlay').hidden = false; $('overlay').style.background = '#000';
   setTimeout(() => {
     if (interior) { scene.remove(interior.group); }
@@ -2508,6 +2605,7 @@ function exitInterior(silent) {
     inLights.forEach(l => l.intensity = 0);
   };
   if (silent) return done();
+  SFX.door();
   G.mode = 'dead'; $('ovTitle').textContent = ''; $('ovText').textContent = ''; $('overlay').hidden = false; $('overlay').style.background = '#000';
   setTimeout(() => { done(); $('overlay').hidden = true; $('overlay').style.background = ''; G.mode = 'play'; }, 350);
 }
@@ -2872,7 +2970,7 @@ function updateDog(dt, now) {
 }
 function openDogChest() {
   DOG.phase = 'done'; setWaypoint(null);
-  G.money += 100000;
+  G.money += 100000; SFX.cash(); setTimeout(SFX.mission, 300);
   const add = { pistol: 300, shotgun: 150, smg: 900, rifle: 600 };
   for (const k in add) G.weapons[k] = (G.weapons[k] || 0) + add[k];
   G.armor = 100; G.hp = 100; G.weapon = 'rifle'; setGunModel(); G.dogDone = true;
@@ -3006,7 +3104,7 @@ function exitPlane() {
 function planeCrash(g, why) {
   const u = g.userData, water = inWater(g.position.x, g.position.z);
   u.wrecked = true; u.air = false; G.plane = null;
-  burst(g.position.x, g.position.y + 1, g.position.z, 80, 18); crashFX(g.position.x, g.position.z, 30); crashSound(10); G.shake = 1.2;
+  burst(g.position.x, g.position.y + 1, g.position.z, 80, 18); crashFX(g.position.x, g.position.z, 30); crashSound(10); SFX.boom(); G.shake = 1.2;
   g.traverse(o => { if (o.material && o.material.color) { o.material = o.material.clone(); o.material.color.multiplyScalar(0.25); } });
   const px = g.position.x + 4, pz = g.position.z + 4;
   player.visible = true; player.rotation.set(0, 0, 0); standPose(player.userData);
@@ -3210,6 +3308,7 @@ addEventListener('keydown', e => {
   if (k === 'm' || k === 'tab') { e.preventDefault(); if (G.mode === 'map') closeMap(); else if (G.mode === 'play') openMap(); }
   if (k === 'escape') { if (G.mode === 'map') closeMap(); else if (G.mode === 'shop') closeShop(); else if (G.mode === 'phone') closePhone(); }
   if (k === ' ' && !G.inCar && G.mode === 'play' && !e.repeat) jump();
+  if (k === 'r' && G.mode === 'play' && (G.inCar || G.plane)) radioButton();
   if (k === 'e') { if (G.mode === 'shop') closeShop(); else if (G.mode === 'play') tryEnter(); }
   if (k === 'f' && G.mode === 'play') toggleCar();
   if (k === 'q' && G.mode === 'play') cycleWeapon();
@@ -3462,7 +3561,7 @@ function completeStep() {
   if (st.give === 'kit') { G.weapons.shotgun = (G.weapons.shotgun || 0) + 24; G.weapons.pistol = (G.weapons.pistol || 0) + 48; G.armor = 100; G.weapon = 'shotgun'; setGunModel(); }
   G.mstep++;
   if (G.mstep >= m.steps.length) {
-    if (m.reward) G.money += m.reward;
+    if (m.reward) G.money += m.reward; SFX.mission();
     if (m.unlock) { G.story = 1; G.stores.forEach(x => { if (x.unlock && x.door) x.door.material.color.set(0xfff0c0); }); }
     setTimeout(() => toast(`Misión completada: ${m.title}${m.reward ? ' · +' + money(m.reward) : ''}${m.unlock ? ' · Silk & Smoke desbloqueado' : ''}`, 4500), st.after ? 5200 : 0);
     if (m.lucy || m.steps.some(x => x.lucy)) removeLucy();
@@ -3556,13 +3655,13 @@ function updateHeist(dt) {
     if (h.t >= h.need) { h.phase = 'escape'; G.wanted = Math.max(G.wanted, 4); toast(`¡Bolsos llenos: ${money(h.loot)}! Ahora escapá y perdé a la policía.`, 4500); }
   } else if (G.wanted === 0 && !(curStep() && curStep().type === 'escape')) cashHeist();
 }
-function cashHeist() { const h = G.heist; if (!h || h.phase !== 'escape') return; G.money += h.loot; toast(`Te quedaste con el botín: +${money(h.loot)}`, 4500); G.heist = null; saveNow(); }
+function cashHeist() { const h = G.heist; if (!h || h.phase !== 'escape') return; G.money += h.loot; SFX.cash(); toast(`Te quedaste con el botín: +${money(h.loot)}`, 4500); G.heist = null; saveNow(); }
 function robRegister(s) {
   if (!hasGun()) return toast('Para asaltar la caja necesitás un arma.');
   const last = G.robbed[s.id]; if (last !== undefined && Math.abs(G.minutes - last) < 240) return toast('Acá ya robaste hace poco. Probá en otro local.');
   const range = { tienda24: [800, 2500], empeno: [2000, 6000], armeria: [1500, 4000], tecnologia: [1500, 4500], club_adulto: [1500, 4000], bar: [800, 3000] }[s.category] || [500, 2500];
   const loot = range[0] + Math.floor(Math.random() * (range[1] - range[0]));
-  G.robbed[s.id] = G.minutes; G.money += loot; closeShop(); crime(2); alarmPeds(player.position, 50);
+  G.robbed[s.id] = G.minutes; G.money += loot; SFX.cash(); closeShop(); crime(2); alarmPeds(player.position, 50);
   toast(`Vaciaste la caja de ${s.name}: +${money(loot)}. Sonó la alarma.`, 4000); saveNow();
 }
 // camión blindado: si lo destruís, suelta plata
@@ -3577,7 +3676,7 @@ function dropCash(x, z, amount) { const m = new THREE.Mesh(new THREE.BoxGeometry
 function updateCash(dt, now) {
   for (let i = cashDrops.length - 1; i >= 0; i--) {
     const c = cashDrops[i]; c.m.rotation.y += dt * 2; c.m.position.y = 0.9 + Math.sin(now / 300) * 0.15;
-    if (c.m.position.distanceTo(focusPos()) < 3) { G.money += c.amount; toast(`Agarraste la plata del blindado: +${money(c.amount)}`); scene.remove(c.m); cashDrops.splice(i, 1); crime(1); saveNow(); }
+    if (c.m.position.distanceTo(focusPos()) < 3) { G.money += c.amount; SFX.cash(); toast(`Agarraste la plata del blindado: +${money(c.amount)}`); scene.remove(c.m); cashDrops.splice(i, 1); crime(1); saveNow(); }
   }
   if (armored && armored.ud.wrecked && !armored.dropped) { armored.dropped = true; dropCash(armored.g.position.x + 2, armored.g.position.z, 4000 + Math.floor(Math.random() * 6000)); toast('¡El blindado reventó! Agarrá la plata.'); setTimeout(() => { if (armored && armored.dropped) { scene.remove(armored.g); const k = traffic.indexOf(armored); if (k >= 0) traffic.splice(k, 1); armored = null; spawnArmored(); } }, 120000); }
 }
@@ -3622,7 +3721,7 @@ function shopAction(s, a, i) {
   if (a === 'buy') {
     const item = s.sells[i], p = priceOf(s, item);
     if (G.money < p) return toast('No te alcanza la plata');
-    G.money -= p;
+    G.money -= p; SFX.buy();
     if (s.actions?.includes('comprar_propiedad')) { G.owned.push(s.id + ':' + item); const pr = refreshProps().find(x => x.key === s.id + ':' + item); if (pr) { saveNow(); closeShop(); setWaypoint(wpTo(item, pr.anchor)); toast(`¡Compraste ${item}! Te marqué la entrada en el GPS.`, 4500); return; } }
     const buyModel = /superdeportiv/i.test(item) ? 'moretti' : /convertible/i.test(item) ? 'valor' : /suv/i.test(item) ? 'brennan' : /lancha|jet|yate|avioneta|helic|hangar|licencia|amarre/i.test(item) ? null : s.category === 'autos' && /tuning|motor|pintura|blindaje/i.test(item) ? null : null;
     if (buyModel) { giveCar(buyModel, ['#ffd23f', '#1e4fa3', '#e8e8e8', '#b3122e'][Math.floor(Math.random() * 4)]); toast(`Tu ${MODELS[buyModel].brand} ${MODELS[buyModel].name} nuevo te espera afuera`); }
@@ -3818,7 +3917,7 @@ function loop(now) {
   if (G.mode === 'play' || G.mode === 'map' || G.mode === 'shop' || G.mode === 'dead' || G.mode === 'phone') { G.minutes = (G.minutes + dt) % 1440; if (G.heistCooldown > 0) G.heistCooldown -= dt; }
   if (G.mode === 'play') update(dt);
   if (G.mode !== 'boot') { updateTraffic(dt); updatePeds(dt, now); updateCombat(dt, now); if (G.mode === 'play') { checkMission(dt); updateHeist(dt); updateLucy(dt, now); updateVictims(dt, now); updateCash(dt, now); updateBoats(dt, now); updateDog(dt, now); if (ESC) updateEscape(dt); if (G.waypoint && G.waypoint.follow) { const f = G.waypoint.follow.position; G.waypoint.wx = f.x; G.waypoint.wz = f.z; const mm = M2W(f.x, f.z); G.waypoint.mx = mm.mx; G.waypoint.my = mm.my; beam.position.set(f.x, 80, f.z); } } if (G.mode === 'play') { if (G.inCar) { carVsTraffic(); carVsPeds(); } else if (!G.plane) pedVsTraffic(); } }
-  updateSparks(dt); updateSmoke(dt);
+  updateSparks(dt); updateSmoke(dt); if (AC && G.user) { updateAmbience(dt, now); updateRadio(); }
   if ((skyTick += dt) > 0.5) { skyTick = 0; updateSky(false); }
   if (G.inside) updateInterior(dt, now); else { scene.fog.density = 0.0016; if (inLights[0] && inLights[0].intensity) inLights.forEach(l => l.intensity = 0); }
   updateCamera(dt, now);
@@ -3905,7 +4004,7 @@ function update(dt) {
       if (ud.down <= 0) { ud.body.rotation.x = 0; ud.body.position.y = 0; }
     } else {
       const m = Math.hypot(ix, iy), swimming = inWater(player.position.x, player.position.z);
-      if (swimming !== G.swimming) { G.swimming = swimming; if (swimming) { standPose(ud); if (!G.swamOnce) { G.swamOnce = true; toast('Estás nadando. Buscá un muelle o un barco.'); } } else { ud.body.rotation.x = 0; standPose(ud); } }
+      if (swimming !== G.swimming) { G.swimming = swimming; if (swimming) { SFX.splash(); standPose(ud); if (!G.swamOnce) { G.swamOnce = true; toast('Estás nadando. Buscá un muelle o un barco.'); } } else { ud.body.rotation.x = 0; standPose(ud); } }
       if (m > 0.05) {
         const n = Math.min(m, 1) / m, sp = (swimming ? (run ? 4.2 : 2.8) : run ? 9 : 4.4) * Math.min(m, 1);
         const fwdX = -Math.sin(G.camYaw), fwdZ = -Math.cos(G.camYaw), rX = -fwdZ, rZ = fwdX;
@@ -3914,14 +4013,14 @@ function update(dt) {
         let diff = (G.aiming && G.weapon !== 'fist' && !swimming ? Math.atan2(fwdX, fwdZ) : Math.atan2(dx, dz)) - player.rotation.y; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
         player.rotation.y += diff * Math.min(1, dt * 12);
         ud.phase += dt * (swimming ? (run ? 6 : 4.5) : run ? 11 : 6.8);
-        if (swimming) swimAnim(ud, ud.phase); else animHuman(ud, ud.phase, run ? 1.5 : 0.85);
+        if (swimming) swimAnim(ud, ud.phase); else { animHuman(ud, ud.phase, run ? 1.5 : 0.85); if (!(G.jumpH > 0)) stepSound(ud.phase, run); }
         markDirty();
       } else if (swimming) { ud.phase += dt * 1.5; swimAnim(ud, ud.phase, true); } else idleHuman(ud, performance.now());
     }
     const gy = G.swimming ? (Math.hypot(ix, iy) > 0.05 ? -0.28 : -1.32) + Math.sin(performance.now() / 500) * 0.04 : groundY(player.position.x, player.position.z);
     if (G.jumpH > 0) {   // salto: arco con gravedad, piernas recogidas
       G.jumpV -= 20 * dt; G.jumpH += G.jumpV * dt;
-      if (G.jumpH <= 0 || G.swimming) { G.jumpH = 0; G.jumpV = 0; } 
+      if (G.jumpH <= 0 || G.swimming) { G.jumpH = 0; G.jumpV = 0; SFX.land(); } 
       player.position.y = gy + G.jumpH;
       const t = Math.min(1, G.jumpH * 1.2); ud.hipL.rotation.x = -0.8 * t; ud.hipR.rotation.x = -0.35 * t; ud.kneeL.rotation.x = 1.3 * t; ud.kneeR.rotation.x = 0.9 * t; ud.shL.rotation.x = -1.1 * t; ud.shR.rotation.x = -1.1 * t;
     } else player.position.y += (gy - player.position.y) * Math.min(1, dt * 8);
