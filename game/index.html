@@ -155,6 +155,8 @@ body.driving .touch, body.driving #help { display: none !important; }
   #tCar { width: 56px; height: 56px; right: calc(40px + env(safe-area-inset-right, 0px)); bottom: calc(26vh + 104px + env(safe-area-inset-bottom, 0px)); }
   #tRun { width: 56px; height: 56px; right: calc(204px + env(safe-area-inset-right, 0px)); bottom: calc(26vh + 22px + env(safe-area-inset-bottom, 0px)); font-size: 9px; }
   #tRun.on { background: var(--sun); color: var(--night); border-color: var(--sun); }
+  #tJump { width: 56px; height: 56px; right: calc(204px + env(safe-area-inset-right, 0px)); bottom: calc(26vh + 88px + env(safe-area-inset-bottom, 0px)); font-size: 9px; background: rgba(61,220,151,0.25); border-color: rgba(61,220,151,0.8); }
+  #tJump:active { transform: scale(0.92); }
   #tMap, #tPhone { width: 48px; height: 48px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); font-size: 10px; }
   #tMap { right: calc(148px + env(safe-area-inset-right, 0px)); }
   #tPhone { right: calc(204px + env(safe-area-inset-right, 0px)); }
@@ -175,6 +177,7 @@ body.driving .touch, body.driving #help { display: none !important; }
   #tMap { right: calc(308px + env(safe-area-inset-right, 0px)); bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
   #tPhone { right: calc(308px + env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
   #tRun { right: calc(376px + env(safe-area-inset-right, 0px)); bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
+  #tJump { right: calc(376px + env(safe-area-inset-right, 0px)); bottom: calc(154px + env(safe-area-inset-bottom, 0px)); }
   body #prompt { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); max-width: 34vw; }
 }
 
@@ -271,9 +274,9 @@ body.driving .touch, body.driving #help { display: none !important; }
   <div id="gps" hidden><span id="gpsArrow">▲</span><span id="gpsText"></span></div>
   <div id="prompt" hidden></div>
   <canvas id="minimap" width="340" height="340" aria-label="Minimapa. Tocá para abrir el mapa"></canvas>
-  <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>CLIC DER</kbd> apuntar · <kbd>Q</kbd>/<kbd>1-5</kbd>/ruedita cambiar arma · <kbd>P</kbd> teléfono · hacé clic en el juego para apuntar con el mouse</div>
+  <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> saltar / freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>CLIC DER</kbd> apuntar · <kbd>Q</kbd>/<kbd>1-5</kbd>/ruedita cambiar arma · <kbd>P</kbd> teléfono · hacé clic en el juego para apuntar con el mouse</div>
   <div id="crosshair" hidden><i></i><i></i><i></i><i></i><b></b></div>
-  <div class="touch"><button id="tPhone" type="button">TEL<span id="phoneBadge" hidden>0</span></button><button id="tRun" type="button">CORRER</button><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
+  <div class="touch"><button id="tPhone" type="button">TEL<span id="phoneBadge" hidden>0</span></button><button id="tRun" type="button">CORRER</button><button id="tJump" type="button">SALTAR</button><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
 </div>
 <div id="drive" hidden>
   <div id="wheel" aria-label="Volante: arrastrá para girar"><svg viewBox="-100 -100 200 200" id="wheelSvg"><defs><radialGradient id="rimG" cx="0" cy="-30" r="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4a4458"/><stop offset="1" stop-color="#151219"/></radialGradient></defs>
@@ -1644,6 +1647,8 @@ $('tShoot').addEventListener('pointerdown', e => { e.preventDefault(); firing = 
 $('tShoot').addEventListener('pointerup', () => { firing = false; });
 $('tShoot').addEventListener('pointercancel', () => { firing = false; });
 $('tGun').onclick = () => G.mode === 'play' && cycleWeapon();
+function jump() { if (G.mode !== 'play' || G.inCar || G.swimming || (player.userData.down > 0) || G.jumpH > 0.01 || ELEV) return; G.jumpV = 7.2; G.jumpH = 0.001; }
+$('tJump').addEventListener('pointerdown', e => { e.preventDefault(); audio(); jump(); });
 $('tRun').onclick = () => { G.sprint = !G.sprint; $('tRun').classList.toggle('on', G.sprint); };
 $('phBtn').onclick = () => { if (PH.incoming) answerCall(); else if (PH.open) closePhone(); else openPhone(); };
 $('tPhone').onclick = () => { if (PH.incoming) answerCall(); else if (PH.open) closePhone(); else openPhone(); };
@@ -2725,6 +2730,7 @@ addEventListener('keydown', e => {
   G.keys[k] = true;
   if (k === 'm' || k === 'tab') { e.preventDefault(); if (G.mode === 'map') closeMap(); else if (G.mode === 'play') openMap(); }
   if (k === 'escape') { if (G.mode === 'map') closeMap(); else if (G.mode === 'shop') closeShop(); else if (G.mode === 'phone') closePhone(); }
+  if (k === ' ' && !G.inCar && G.mode === 'play' && !e.repeat) jump();
   if (k === 'e') { if (G.mode === 'shop') closeShop(); else if (G.mode === 'play') tryEnter(); }
   if (k === 'f' && G.mode === 'play') toggleCar();
   if (k === 'q' && G.mode === 'play') cycleWeapon();
@@ -3411,7 +3417,12 @@ function update(dt) {
       } else if (swimming) { ud.phase += dt * 1.5; swimAnim(ud, ud.phase, true); } else idleHuman(ud, performance.now());
     }
     const gy = G.swimming ? (Math.hypot(ix, iy) > 0.05 ? -0.28 : -1.32) + Math.sin(performance.now() / 500) * 0.04 : groundY(player.position.x, player.position.z);
-    player.position.y += (gy - player.position.y) * Math.min(1, dt * 8);
+    if (G.jumpH > 0) {   // salto: arco con gravedad, piernas recogidas
+      G.jumpV -= 20 * dt; G.jumpH += G.jumpV * dt;
+      if (G.jumpH <= 0 || G.swimming) { G.jumpH = 0; G.jumpV = 0; } 
+      player.position.y = gy + G.jumpH;
+      const t = Math.min(1, G.jumpH * 1.2); ud.hipL.rotation.x = -0.8 * t; ud.hipR.rotation.x = -0.35 * t; ud.kneeL.rotation.x = 1.3 * t; ud.kneeR.rotation.x = 0.9 * t; ud.shL.rotation.x = -1.1 * t; ud.shR.rotation.x = -1.1 * t;
+    } else player.position.y += (gy - player.position.y) * Math.min(1, dt * 8);
     if (G.aiming && G.weapon !== 'fist' && !G.swimming) { const fy = Math.atan2(-Math.sin(G.camYaw), -Math.cos(G.camYaw)); let d2 = fy - player.rotation.y; d2 = Math.atan2(Math.sin(d2), Math.cos(d2)); player.rotation.y += d2 * Math.min(1, dt * 14); G.aimT = Math.max(G.aimT, 0.2); }
     applyAimPose(dt);
   }
