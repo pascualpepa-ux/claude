@@ -422,3 +422,11 @@ a { color: inherit; }
 .pay-error:empty { display: none; }
 .pay-error { color: #b3261e; font-size: .85rem; margin: 8px 0 0; }
 .pay-test { margin: 10px 0 0; padding: 10px 12px; background: #fff4d6; border: 2px solid #e0a800; color: #5c4400; font-size: .85rem; font-weight: 600; line-height: 1.4; }
+
+/* Página Cambios y devoluciones */
+.legal { max-width: 720px; margin: 0 auto; padding: 120px 16px 64px; }
+.legal h1 { font-family: "Anton", sans-serif; font-weight: 400; font-size: clamp(2.2rem, 8vw, 3.6rem); line-height: 1; margin: 8px 0 32px; }
+.legal h2 { font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; margin: 28px 0 8px; }
+.legal p { line-height: 1.6; margin: 0; }
+.legal a { color: inherit; }
+.product-notes a { color: inherit; }

@@ -296,7 +296,7 @@
               '<button class="btn-link" id="buy-btn" type="button">' + esc(t("product.ask")) + "</button>"
             : '<button class="btn btn-dark" id="buy-btn" type="button">' + esc(t("product.buy")) + "</button>") +
           '<p class="size-error" id="size-error" role="alert"></p>' +
-          '<ul class="product-notes"><li>' + esc(t("product.note1")) + "</li><li>" + esc(t("product.note2")) + "</li><li>" + esc(t("product.note3")) + "</li></ul>" +
+          '<ul class="product-notes"><li>' + esc(t("product.note1")) + "</li><li>" + esc(t("product.note2")) + "</li><li>" + esc(t("product.note3")) + '</li><li><a href="devoluciones.html">' + esc(t("product.returns")) + "</a></li></ul>" +
         "</div>";
 
       var gallery = $("#gallery"), dots = $$("#dots span");

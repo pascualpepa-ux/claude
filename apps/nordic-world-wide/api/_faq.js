@@ -37,8 +37,8 @@ const FAQ = [
   {
     id: "devolucion",
     k: ["devolucion", "devolver", "cambio", "cambiar", "reembolso", "defecto", "return", "refund", "exchange"],
-    es: "Para cambios o devoluciones, escríbenos desde el formulario de Contacto con tu pedido y lo vemos contigo por email.",
-    en: "For exchanges or returns, write to us through the Contact form with your order and we'll sort it out by email."
+    es: "Tienes 14 días desde que recibes el pedido para devolverlo. La camiseta tiene que estar sin usar, sin lavar y con la etiqueta; el envío de vuelta lo pagas tú y te devolvemos el dinero a la misma tarjeta. Escríbenos desde Contacto para pedirlo. Todo en la página «Cambios y devoluciones» (abajo del todo en la web).",
+    en: "You have 14 days from receiving your order to return it. The tee must be unworn, unwashed and with its tag; you pay the return shipping and we refund the same card. Write to us through Contact to request it. Full details on the «Returns & exchanges» page (at the bottom of the site)."
   },
   {
     id: "producto",
