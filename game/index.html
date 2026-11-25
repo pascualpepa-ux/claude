@@ -2576,7 +2576,7 @@ function updateElev(dt) {
   if (E.car) { car.position.y = ROADY + y; player.position.copy(car.position); } else player.position.y = ROADY + 0.12 + y;
   if (k < 1) return;
   ELEV = null;
-  if (E.dir < 0) { if (E.car) storeCarInGarage(); else { G.wanted = 0; enterInterior(GARAGE_S); } setTimeout(() => { ISLE.plat.position.y = ROADY + 0.06; }, 400); }
+  if (E.dir < 0) { if (E.car) storeCarInGarage(true); else { G.wanted = 0; enterInterior(GARAGE_S); } setTimeout(() => { ISLE.plat.position.y = ROADY + 0.06; }, 400); }
   else { car.position.y = ROADY; toast('Listo. Salí marcha adelante por el portón.'); }
 }
 // propiedades compradas en Coastline Estates: entrada marcada en la ciudad + interior de casa
@@ -2626,11 +2626,11 @@ function islandPrompt() {
   if (!G.inCar && Math.hypot(p.x - 500.5, p.z - 327.5) < 3) return { kind: 'house', text: 'Entrar a tu mansión' };
   return null;
 }
-function storeCarInGarage() {
+function storeCarInGarage(arrived) {
   G.garage = G.garage || [];
   if (G.garage.length >= 8) return toast('El garaje está lleno (8 autos). Sacá uno primero.');
   if (Math.abs(car.userData.speed) > 3) return toast('Frená arriba del montacargas.');
-  if (!ELEV) return startElev(-1, true);
+  if (!arrived) return startElev(-1, true);
   G.garage.push({ model: car.userData.model, color: '#' + car.userData.paint.color.getHexString() });
   G.inCar = false; removeCarCollider(car); if (car.userData.headlight) car.userData.headlight.intensity = 0;
   car.visible = false; car.userData.stored = true; car.position.set(6000, -50, 6000);
