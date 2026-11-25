@@ -144,6 +144,36 @@ body.driving .touch, body.driving #help { display: none !important; }
 .touch { position: fixed; display: none; gap: 10px; right: calc(150px + env(safe-area-inset-right, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 .touch button { width: 58px; height: 58px; border-radius: 50%; border: 2px solid var(--line); background: var(--panel); color: var(--text); font: 700 11px var(--body); }
 @media (pointer: coarse) { .touch { display: flex; } #help { display: none; } #minimap { width: 124px; height: 124px; } }
+/* controles táctiles repartidos por el lado derecho (pulgar derecho) */
+@media (pointer: coarse) {
+  .touch { display: block; position: fixed; inset: 0; pointer-events: none; gap: 0; right: auto; bottom: auto; }
+  .touch button { position: fixed; pointer-events: auto; touch-action: none; box-shadow: 0 6px 16px rgba(0,0,0,0.45); backdrop-filter: blur(4px); }
+  #tShoot { width: 86px; height: 86px; right: calc(22px + env(safe-area-inset-right, 0px)); bottom: calc(26vh + env(safe-area-inset-bottom, 0px)); background: rgba(192,57,43,0.85); border-color: rgba(255,255,255,0.35); font-size: 14px; }
+  #tShoot:active { transform: scale(0.94); }
+  #tGun { width: 56px; height: 56px; right: calc(118px + env(safe-area-inset-right, 0px)); bottom: calc(26vh + 64px + env(safe-area-inset-bottom, 0px)); }
+  #tAct { width: 56px; height: 56px; right: calc(126px + env(safe-area-inset-right, 0px)); bottom: calc(26vh - 12px + env(safe-area-inset-bottom, 0px)); font-size: 10px; }
+  #tCar { width: 56px; height: 56px; right: calc(40px + env(safe-area-inset-right, 0px)); bottom: calc(26vh + 104px + env(safe-area-inset-bottom, 0px)); }
+  #tMap, #tPhone { width: 48px; height: 48px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); font-size: 10px; }
+  #tMap { right: calc(148px + env(safe-area-inset-right, 0px)); }
+  #tPhone { right: calc(204px + env(safe-area-inset-right, 0px)); }
+}
+/* el cartel de acción y el GPS van abajo a la izquierda (no tapan los botones) */
+@media (pointer: coarse) {
+  body #prompt { left: calc(16px + env(safe-area-inset-left, 0px)); transform: none; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); max-width: 46vw; white-space: normal; font-size: 13px; }
+}
+@media (pointer: coarse) and (orientation: portrait) {
+  body:not(.driving) #gps { left: calc(16px + env(safe-area-inset-left, 0px)); transform: none; top: auto; bottom: calc(132px + env(safe-area-inset-bottom, 0px)); max-width: 44vw; white-space: normal; font-size: 12px; }
+}
+/* teléfono acostado: los botones en fila a la izquierda del minimapa */
+@media (pointer: coarse) and (orientation: landscape) {
+  #tShoot { width: 78px; height: 78px; right: calc(148px + env(safe-area-inset-right, 0px)); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
+  #tGun { right: calc(240px + env(safe-area-inset-right, 0px)); bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+  #tAct { right: calc(240px + env(safe-area-inset-right, 0px)); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
+  #tCar { right: calc(376px + env(safe-area-inset-right, 0px)); bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
+  #tMap { right: calc(308px + env(safe-area-inset-right, 0px)); bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
+  #tPhone { right: calc(308px + env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  body #prompt { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); max-width: 34vw; }
+}
 
 .btn { font: 600 13px var(--body); color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; cursor: pointer; }
 .btn:hover { border-color: var(--sun); }
@@ -240,7 +270,7 @@ body.driving .touch, body.driving #help { display: none !important; }
   <canvas id="minimap" width="340" height="340" aria-label="Minimapa. Tocá para abrir el mapa"></canvas>
   <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>CLIC DER</kbd> apuntar · <kbd>Q</kbd>/<kbd>1-5</kbd>/ruedita cambiar arma · <kbd>P</kbd> teléfono · hacé clic en el juego para apuntar con el mouse</div>
   <div id="crosshair" hidden><i></i><i></i><i></i><i></i><b></b></div>
-  <div class="touch"><button id="tPhone" type="button" style="position:relative">TEL<span id="phoneBadge" hidden>0</span></button><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
+  <div class="touch"><button id="tPhone" type="button">TEL<span id="phoneBadge" hidden>0</span></button><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
 </div>
 <div id="drive" hidden>
   <div id="wheel" aria-label="Volante: arrastrá para girar"><svg viewBox="-100 -100 200 200" id="wheelSvg"><defs><radialGradient id="rimG" cx="0" cy="-30" r="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4a4458"/><stop offset="1" stop-color="#151219"/></radialGradient></defs>
