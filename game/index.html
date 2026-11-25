@@ -120,6 +120,14 @@ body { background: var(--night); color: var(--text); font-family: var(--body); o
 #phoneBadge { position: absolute; top: -4px; right: -4px; background: var(--bad); color: #fff; font: 700 10px var(--body); border-radius: 999px; min-width: 16px; height: 16px; display: grid; place-items: center; }
 @media (max-width: 600px) { #phone { left: 50%; right: auto; transform: translateX(-50%); width: min(320px, calc(100% - 32px)); } }
 #overlay { position: fixed; inset: 0; display: grid; place-items: center; align-content: center; gap: 10px; background: radial-gradient(circle, rgba(0,0,0,0.35), rgba(0,0,0,0.85)); pointer-events: none; text-align: center; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+#respawn { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: rgba(5, 3, 12, 0.72); padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+#respawn[hidden] { display: none; }
+.rsCard { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; width: min(760px, 100%); max-height: 100%; overflow: auto; display: grid; gap: 10px; }
+.rsCard h3 { margin: 0; font-family: var(--display); font-weight: 400; color: var(--sun); font-size: 22px; }
+.rsCard p { margin: 0; color: var(--muted); font-size: 13px; }
+#rsMap { width: 100%; aspect-ratio: 1.3; max-height: 56vh; border-radius: 12px; cursor: crosshair; touch-action: none; display: block; background: #16507a; }
+#rsList { display: flex; flex-wrap: wrap; gap: 6px; }
+#rsList .btn b { color: var(--gold); font-weight: 700; }
 #overlay h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(44px, 12vw, 96px); color: var(--bad); letter-spacing: 0.04em; }
 #overlay p { margin: 0; color: var(--text); font-size: 16px; }
 #wheel { position: fixed; left: calc(18px + env(safe-area-inset-left, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); width: 156px; height: 156px; touch-action: none; cursor: grab; z-index: 6; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.5)); }
@@ -290,6 +298,7 @@ body.driving .touch, body.driving #help { display: none !important; }
 <div id="phone" hidden><div id="phoneScreen"></div></div>
 <div id="callNote" hidden></div>
 <div id="overlay" hidden><h2 id="ovTitle"></h2><p id="ovText"></p></div>
+<div id="respawn" hidden><div class="rsCard"><h3>¿Dónde querés aparecer?</h3><p>Tocá cualquier punto del mapa o elegí uno de tus lugares.</p><canvas id="rsMap"></canvas><div id="rsList"></div></div></div>
 
 <section id="login" hidden>
   <div id="loginCard">
@@ -1844,14 +1853,57 @@ function endState(kind) {
   $('ovTitle').textContent = kind === 'dead' ? 'HERIDO' : 'ARRESTADO';
   $('ovText').textContent = kind === 'dead' ? `Te llevaron al Heat City General. Cuenta del hospital: ${money(fee)}.` : `Pasaste la noche en la HCPD Precinct 7. Multa: ${money(fee)}. Te quitaron las armas.`;
   $('overlay').hidden = false; $('crosshair').hidden = true;
-  setTimeout(() => {
+  const finish = (x, z, label) => {
+    $('respawn').hidden = true;
     G.money -= fee; G.hp = 100; G.wanted = 0; clearCops();
     if (kind !== 'dead') { G.weapons = {}; G.weapon = 'fist'; G.armor = 0; setGunModel(); }
-    const s = G.stores.find(x => x.id === (kind === 'dead' ? 'heat-city-general' : 'hcpd-precinct-7'));
-    player.position.set(s.wx, groundY(s.wx, s.wz), s.wz + 3); player.userData.down = 0; player.userData.body.rotation.x = 0; player.visible = true; standPose(player.userData);
+    player.position.set(x, groundY(x, z), z); player.userData.down = 0; player.userData.body.rotation.x = 0; player.visible = true; standPose(player.userData);
     $('overlay').hidden = true; G.mode = 'play'; saveNow();
-  }, 3500);
+    if (label) toast(`Apareciste en: ${label}`);
+  };
+  if (kind === 'dead') { $('ovText').textContent = `Cuenta del hospital: ${money(fee)}. Elegí dónde aparecer.`; setTimeout(() => openRespawn(finish), 1500); return; }
+  setTimeout(() => { const s = G.stores.find(x => x.id === 'hcpd-precinct-7'); finish(s.wx, s.wz + 3); }, 3500);
 }
+// ---------- elegir dónde reaparecer ----------
+function respawnSpots() {
+  const L = [];
+  const hosp = G.stores.find(x => x.id === 'heat-city-general'); L.push({ name: 'Hospital', x: hosp.wx, z: hosp.wz + 3, c: '#ff5a5a' });
+  for (const p of PROPS) if (p.owned && p.anchor) L.push({ name: p.free ? 'Tu casa' : p.item, x: p.wx + 1.5, z: p.wz + 1.5, c: '#3ddc97' });
+  L.push({ name: 'Tu isla', x: 499.5, z: 323, c: '#3ddcd0' });
+  L.push({ name: 'Aeropuerto', x: 447, z: -158, c: '#9fe8ff' });
+  L.push({ name: 'Tu auto', x: car.position.x + 2.5, z: car.position.z, c: '#ff7a3d', car: true });
+  return L.filter(sp => !sp.car || (!car.userData.stored && !car.userData.boat && Math.abs(car.position.x) < 600));
+}
+const RS = { cx: 535, cy: 430, k: 0.3, done: null };
+function drawRespawn() {
+  const cv = $('rsMap'), dpr = Math.min(devicePixelRatio || 1, 2), w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+  if (cv.width !== w * dpr || cv.height !== h * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  RS.k = Math.min(w / 1360, h / 1150); RS.w = w; RS.h = h;
+  drawMapLayer(ctx, RS.cx, RS.cy, RS.k, w, h, { labels: false, pin: 4 });
+  ctx.save(); ctx.translate(w / 2 - RS.cx * RS.k, h / 2 - RS.cy * RS.k); ctx.font = '700 12px Inter, sans-serif'; ctx.textAlign = 'center';
+  for (const sp of RS.spots) { const m = M2W(sp.x, sp.z), x = m.mx * RS.k, y = m.my * RS.k; ctx.fillStyle = sp.c; ctx.beginPath(); ctx.arc(x, y, 9, 0, 7); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke(); const tw = ctx.measureText(sp.name).width + 10; ctx.fillStyle = 'rgba(15,11,30,0.88)'; ctx.fillRect(x - tw / 2, y + 12, tw, 17); ctx.fillStyle = '#f6f0ff'; ctx.fillText(sp.name, x, y + 24); }
+  ctx.restore();
+}
+function openRespawn(done) {
+  RS.done = done; RS.spots = respawnSpots();
+  $('respawn').hidden = false;
+  $('rsList').innerHTML = RS.spots.map((sp, i) => `<button class="btn" type="button" data-i="${i}"><b>●</b> ${esc(sp.name)}</button>`).join('');
+  $('rsList').querySelectorAll('button').forEach(b => b.onclick = () => { const sp = RS.spots[+b.dataset.i]; RS.done(sp.x, sp.z, sp.name); });
+  requestAnimationFrame(drawRespawn);
+}
+$('rsMap').addEventListener('pointerup', e => {
+  if ($('respawn').hidden) return;
+  const r = $('rsMap').getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+  const mx = RS.cx + (px - RS.w / 2) / RS.k, my = RS.cy + (py - RS.h / 2) / RS.k;
+  for (const sp of RS.spots) { const m = M2W(sp.x, sp.z); if (Math.hypot(m.mx - mx, m.my - my) * RS.k < 16) return RS.done(sp.x, sp.z, sp.name); }
+  if (!isLand(mx, my) || (mx < -60 && my < -60)) return toast('Ahí es agua. Tocá tierra firme.');
+  const w = W2M(mx, my);
+  if (inPoly(mx, my, LAND)) { const n = nodes.filter(n => n.nb.length).sort((a, b) => Math.hypot(a.x - w.x, a.z - w.z) - Math.hypot(b.x - w.x, b.z - w.z))[0]; const m2 = n.nb[0], dx = m2.x - n.x, dz = m2.z - n.z, L = Math.hypot(dx, dz); return RS.done(n.x + dx / L * 10 - dz / L * 6.4, n.z + dz / L * 10 + dx / L * 6.4, zoneAt(mx, my)?.name || 'Heat City'); }
+  for (let k = 0; k < 30; k++) { const x = w.x + (Math.random() - 0.5) * k, z = w.z + (Math.random() - 0.5) * k; if (!hitCollider(x, z, 0.6)) return RS.done(x, z, 'una isla'); }
+  RS.done(w.x, w.z, 'una isla');
+});
+addEventListener('resize', () => { if (!$('respawn').hidden) drawRespawn(); });
 const COP_RED = new THREE.MeshBasicMaterial({ color: 0xff0000, toneMapped: false }), COP_BLUE = new THREE.MeshBasicMaterial({ color: 0x0040ff, toneMapped: false });
 function spawnCop() {
   const fp = aiFocus(), usable = nodes.filter(n => n.nb.length && Math.hypot(n.x - fp.x, n.z - fp.z) > 70 && Math.hypot(n.x - fp.x, n.z - fp.z) < 160);
