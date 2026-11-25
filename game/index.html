@@ -1446,8 +1446,10 @@ function explodeCar() {
   burst(p.x, 1, p.z, 120, 22); for (let i = 0; i < 12; i++) puff(p.x + (Math.random() - 0.5) * 3, 1 + Math.random() * 2, p.z + (Math.random() - 0.5) * 3, i < 5 ? 0xff7a1a : 0x222222, 3 + Math.random() * 3);
   u.paint.color.set(0x1c1c1c); u.paint.clearcoat = 0;
   G.shake = 1.4; crashSound(30); flashScreen(0.9);
-  if (G.inCar) { exitCar(true); } else if (!car.userData.boat) { removeCarCollider(car); addParkedCollider(car); }
-  toast('¡Tu auto explotó! Te dejamos uno nuevo cerca en 10 segundos.', 4500);
+  const wasIn = G.inCar;
+  if (!wasIn && !car.userData.boat) { removeCarCollider(car); addParkedCollider(car); }
+  if (wasIn) { setTimeout(() => { if (G.mode === 'play' || G.mode === 'phone') endState('dead'); }, 700); toast('¡El auto explotó con vos adentro!', 3000); }
+  else { const d = player.position.distanceTo(p); if (d < 7) hurtPlayer(80 * (1 - d / 7)); toast('¡Tu auto explotó! Te dejamos uno nuevo cerca en 10 segundos.', 4500); }
   const wreck = car; if (!wreck.userData.boat && !parked.includes(wreck)) parked.push(wreck);
   setTimeout(() => {
     if (car !== wreck) return;   // ya robaste otro auto
