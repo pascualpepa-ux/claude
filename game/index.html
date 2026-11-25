@@ -122,6 +122,22 @@ body { background: var(--night); color: var(--text); font-family: var(--body); o
 #overlay { position: fixed; inset: 0; display: grid; place-items: center; align-content: center; gap: 10px; background: radial-gradient(circle, rgba(0,0,0,0.35), rgba(0,0,0,0.85)); pointer-events: none; text-align: center; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 #overlay h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(44px, 12vw, 96px); color: var(--bad); letter-spacing: 0.04em; }
 #overlay p { margin: 0; color: var(--text); font-size: 16px; }
+#wheel { position: fixed; left: calc(18px + env(safe-area-inset-left, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); width: 156px; height: 156px; touch-action: none; cursor: grab; z-index: 6; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.5)); }
+#wheel svg { width: 100%; height: 100%; display: block; }
+#wheel:active { cursor: grabbing; }
+#pedals { position: fixed; right: calc(198px + env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 12px; align-items: flex-end; z-index: 6; }
+.pedal { touch-action: none; width: 76px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.2); background: linear-gradient(180deg, #3a3446, #1c1826); color: var(--text); font: 800 12px var(--body); letter-spacing: 0.04em; display: grid; place-items: end center; padding-bottom: 12px; cursor: pointer; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.35), 0 6px 16px rgba(0,0,0,0.45); background-image: repeating-linear-gradient(0deg, transparent 0 10px, rgba(255,255,255,0.06) 10px 13px), linear-gradient(180deg, #3a3446, #1c1826); user-select: none; -webkit-user-select: none; }
+#pGas { height: 150px; }
+#pBrake { height: 112px; }
+#pGas.on { background: linear-gradient(180deg, #3ddc97, #1a7a52); border-color: #3ddc97; transform: translateY(3px) scaleY(0.98); }
+#pBrake.on { background: linear-gradient(180deg, #ff5a5a, #8a1f1f); border-color: #ff5a5a; transform: translateY(3px) scaleY(0.98); }
+.dsmall { display: grid; gap: 8px; }
+.dsmall button { touch-action: none; width: 76px; height: 44px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.2); background: var(--panel); color: var(--text); font: 700 11px var(--body); cursor: pointer; }
+.dsmall button.on { border-color: var(--gold); color: var(--gold); }
+body.driving .touch, body.driving #help { display: none !important; }
+@media (max-width: 600px) { body.driving #gps { top: auto; bottom: calc(312px + env(safe-area-inset-bottom, 0px)); } body.driving #weaponChip, body.driving #saveState, body.driving .hudBtns { display: none !important; } body.driving #carHud { position: fixed; left: calc(18px + env(safe-area-inset-left, 0px)); bottom: calc(172px + env(safe-area-inset-bottom, 0px)); } body.driving #mission { font-size: 11px; } body.driving #carBar { width: 50px; } }
+@media (pointer: coarse) { #pedals { right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); } #wheel { width: 140px; height: 140px; } }
+@media (max-height: 460px) { #pedals { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); right: calc(150px + env(safe-area-inset-right, 0px)); } #pGas { height: 120px; } #pBrake { height: 90px; } }
 #flash { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,0) 40%, rgba(255,40,40,0.55)); opacity: 0; }
 #help { position: fixed; left: calc(12px + env(safe-area-inset-left, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); font-size: 11px; color: var(--muted); pointer-events: none; text-shadow: 0 1px 3px #000; line-height: 1.6; }
 #help kbd { font-family: var(--display); color: var(--text); font-size: 10px; }
@@ -137,7 +153,8 @@ body { background: var(--night); color: var(--text); font-family: var(--body); o
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* Login */
-#login { position: fixed; inset: 0; display: grid; place-items: center; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: linear-gradient(180deg, rgba(13,10,26,0.1) 0%, rgba(13,10,26,0.75) 70%); }
+#login { position: fixed; inset: 0; display: grid; place-items: center; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: linear-gradient(180deg, rgba(13,10,26,0.1) 0%, rgba(13,10,26,0.75) 70%); overflow-y: auto; padding-block: 16px; }
+@media (max-height: 760px) { #login { place-items: start center; } #loginCard h1 { font-size: clamp(36px, 10vw, 56px); } }
 #loginCard { width: min(420px, 100%); display: grid; gap: 16px; text-align: center; }
 #loginCard h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(48px, 13vw, 88px); line-height: 0.9; background: linear-gradient(180deg, var(--gold), var(--sun) 45%, var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 6px 18px rgba(255,61,139,0.45)); }
 #loginCard p { margin: 0; color: var(--muted); line-height: 1.5; text-shadow: 0 1px 4px #000; }
@@ -224,6 +241,14 @@ body { background: var(--night); color: var(--text); font-family: var(--body); o
   <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>CLIC DER</kbd> apuntar · <kbd>Q</kbd>/<kbd>1-5</kbd>/ruedita cambiar arma · <kbd>P</kbd> teléfono · hacé clic en el juego para apuntar con el mouse</div>
   <div id="crosshair" hidden><i></i><i></i><i></i><i></i><b></b></div>
   <div class="touch"><button id="tPhone" type="button" style="position:relative">TEL<span id="phoneBadge" hidden>0</span></button><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
+</div>
+<div id="drive" hidden>
+  <div id="wheel" aria-label="Volante: arrastrá para girar"><svg viewBox="-100 -100 200 200" id="wheelSvg"><defs><radialGradient id="rimG" cx="0" cy="-30" r="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4a4458"/><stop offset="1" stop-color="#151219"/></radialGradient></defs>
+    <circle r="88" fill="none" stroke="url(#rimG)" stroke-width="20"/><circle r="88" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+    <path d="M -80 6 L -26 14 L -16 34 L 16 34 L 26 14 L 80 6" fill="none" stroke="#2a2533" stroke-width="16" stroke-linejoin="round"/><path d="M 0 34 L 0 82" stroke="#2a2533" stroke-width="16"/>
+    <circle r="30" fill="#1c1826" stroke="#ff7a3d" stroke-width="3"/><text y="6" text-anchor="middle" font-family="Bungee, Impact, sans-serif" font-size="15" fill="#ff7a3d">HC</text>
+    <rect x="-5" y="-98" width="10" height="16" rx="3" fill="#ff7a3d"/></svg></div>
+  <div id="pedals"><div class="dsmall"><button id="dExit" type="button">BAJAR</button><button id="dHand" type="button">FRENO DE MANO</button></div><button id="pBrake" class="pedal" type="button">FRENO</button><button id="pGas" class="pedal" type="button">ACELERAR</button></div>
 </div>
 <div id="toast" hidden></div>
 <div id="phone" hidden><div id="phoneScreen"></div></div>
@@ -1283,7 +1308,7 @@ function moveWithCollision(obj, dx, dz, r, swim) {
 const TRAFFIC_COLORS = [0xe8e8e8, 0x1a1a1a, 0xb3122e, 0x1e4fa3, 0x8a8f98, 0xf2c230, 0x2e7d4f, 0xff7a3d, 0x6a2c91, 0x3ddcd0];
 function buildTraffic() {
   const usable = nodes.filter(n => n.nb.length);
-  for (let k = 0; k < 56; k++) spawnAI(usable, true);
+  for (let k = 0; k < 85; k++) spawnAI(usable, true);
 }
 function spawnAI(usable = nodes.filter(n => n.nb.length), anywhere = false) {
   const color = TRAFFIC_COLORS[Math.floor(Math.random() * TRAFFIC_COLORS.length)];
@@ -1754,7 +1779,7 @@ function endState(kind) {
   if (G.inCar) exitCar(true);
   if (G.heist) { toast('Perdiste el botín.'); G.heist = null; }
   failMission(kind === 'dead' ? 'te hirieron' : 'te arrestaron');
-  const fee = kind === 'dead' ? Math.min(500, G.money) : Math.min(1000, G.money);
+  const fee = kind === 'dead' ? Math.min(35, G.money) : Math.min(1000, G.money);
   $('ovTitle').textContent = kind === 'dead' ? 'HERIDO' : 'ARRESTADO';
   $('ovText').textContent = kind === 'dead' ? `Te llevaron al Heat City General. Cuenta del hospital: ${money(fee)}.` : `Pasaste la noche en la HCPD Precinct 7. Multa: ${money(fee)}. Te quitaron las armas.`;
   $('overlay').hidden = false; $('crosshair').hidden = true;
@@ -2854,13 +2879,39 @@ function loop(now) {
   if ((hudTick += dt) > 0.05 && G.user) { hudTick = 0; drawMinimap(); updateHUD(); if (G.heist) updateMissionHUD(); if (PH.open && PH.screen === 'home' && (G.phoneMin !== Math.floor(G.minutes))) { G.phoneMin = Math.floor(G.minutes); renderPhone(); } }
   requestAnimationFrame(loop);
 }
+// controles de manejo en pantalla
+const TD = { steer: 0, angle: 0, gas: false, brake: false, hand: false, id: null, base: 0, last: 0 };
+(function setupDrive() {
+  const wh = $('wheel'), ang = e => { const r = wh.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; };
+  wh.addEventListener('pointerdown', e => { e.preventDefault(); wh.setPointerCapture(e.pointerId); TD.id = e.pointerId; TD.last = ang(e); });
+  wh.addEventListener('pointermove', e => { if (TD.id !== e.pointerId) return; const a = ang(e); let d = a - TD.last; if (d > 180) d -= 360; if (d < -180) d += 360; TD.last = a; TD.angle = Math.max(-135, Math.min(135, TD.angle + d)); });
+  const up = e => { if (TD.id === e.pointerId) TD.id = null; };
+  wh.addEventListener('pointerup', up); wh.addEventListener('pointercancel', up);
+  const pedal = (el, key) => {
+    el.addEventListener('pointerdown', e => { e.preventDefault(); el.setPointerCapture(e.pointerId); TD[key] = true; el.classList.add('on'); audio(); });
+    const off = () => { TD[key] = false; el.classList.remove('on'); };
+    el.addEventListener('pointerup', off); el.addEventListener('pointercancel', off); el.addEventListener('lostpointercapture', off);
+  };
+  pedal($('pGas'), 'gas'); pedal($('pBrake'), 'brake'); pedal($('dHand'), 'hand');
+  $('dExit').addEventListener('click', () => { if (G.mode === 'play' && G.inCar) toggleCar(); });
+})();
+function updateDriveUI(dt) {
+  const show = G.inCar && G.mode === 'play';
+  $('drive').hidden = !show; document.body.classList.toggle('driving', show);
+  if (!show) { TD.gas = TD.brake = TD.hand = false; TD.angle = 0; return; }
+  if (TD.id === null) TD.angle *= Math.pow(0.0005, dt);
+  TD.steer = Math.max(-1, Math.min(1, TD.angle / 100));
+  $('wheelSvg').style.transform = `rotate(${TD.angle}deg)`;
+}
 function inputVec() {
   const k = G.keys;
   let ix = (k['d'] || k['arrowright'] ? 1 : 0) - (k['a'] || k['arrowleft'] ? 1 : 0);
   let iy = (k['w'] || k['arrowup'] ? 1 : 0) - (k['s'] || k['arrowdown'] ? 1 : 0);
   let run = !!k['shift'];
   if (joy) { const m = Math.hypot(joy.dx, joy.dy); if (m > 10) { ix = joy.dx / Math.max(m, 60); iy = -joy.dy / Math.max(m, 60); run = m > 55; } }
-  return { ix, iy, run, brake: !!k[' '] };
+  let brake = !!k[' '];
+  if (G.inCar) { if (Math.abs(TD.steer) > 0.03) ix = TD.steer; if (TD.gas) iy = 1; else if (TD.brake) iy = -1; if (TD.hand) brake = true; }
+  return { ix, iy, run, brake };
 }
 function update(dt) {
   const { ix, iy, run, brake } = inputVec();
@@ -2960,6 +3011,7 @@ function updateHUD() {
   const fp = M2W(focusPos().x, focusPos().z), z = zoneAt(fp.mx, fp.my);
   $('zone').textContent = G.inside ? G.inside.name.toUpperCase() : z ? z.name.toUpperCase() : 'AFUERAS';
   $('carHud').hidden = !G.inCar;
+  updateDriveUI(0.05);
   if (G.inCar) { const hp = car.userData.health; $('speed').textContent = car.userData.boat ? Math.round(Math.abs(car.userData.speed) * 1.94) + ' nudos' : Math.round(Math.abs(car.userData.speed) * 3.6) + ' km/h'; const bar = $('carBar').firstElementChild; bar.style.width = hp + '%'; bar.style.background = hp > 50 ? 'var(--ok)' : hp > 20 ? 'var(--gold)' : 'var(--bad)'; }
   const pr = $('prompt');
   if (G.mode !== 'play') pr.hidden = true;
