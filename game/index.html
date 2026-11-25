@@ -153,6 +153,8 @@ body.driving .touch, body.driving #help { display: none !important; }
   #tGun { width: 56px; height: 56px; right: calc(118px + env(safe-area-inset-right, 0px)); bottom: calc(26vh + 64px + env(safe-area-inset-bottom, 0px)); }
   #tAct { width: 56px; height: 56px; right: calc(126px + env(safe-area-inset-right, 0px)); bottom: calc(26vh - 12px + env(safe-area-inset-bottom, 0px)); font-size: 10px; }
   #tCar { width: 56px; height: 56px; right: calc(40px + env(safe-area-inset-right, 0px)); bottom: calc(26vh + 104px + env(safe-area-inset-bottom, 0px)); }
+  #tRun { width: 56px; height: 56px; right: calc(204px + env(safe-area-inset-right, 0px)); bottom: calc(26vh + 22px + env(safe-area-inset-bottom, 0px)); font-size: 9px; }
+  #tRun.on { background: var(--sun); color: var(--night); border-color: var(--sun); }
   #tMap, #tPhone { width: 48px; height: 48px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); font-size: 10px; }
   #tMap { right: calc(148px + env(safe-area-inset-right, 0px)); }
   #tPhone { right: calc(204px + env(safe-area-inset-right, 0px)); }
@@ -172,6 +174,7 @@ body.driving .touch, body.driving #help { display: none !important; }
   #tCar { right: calc(376px + env(safe-area-inset-right, 0px)); bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
   #tMap { right: calc(308px + env(safe-area-inset-right, 0px)); bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
   #tPhone { right: calc(308px + env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  #tRun { right: calc(376px + env(safe-area-inset-right, 0px)); bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
   body #prompt { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); max-width: 34vw; }
 }
 
@@ -270,7 +273,7 @@ body.driving .touch, body.driving #help { display: none !important; }
   <canvas id="minimap" width="340" height="340" aria-label="Minimapa. Tocá para abrir el mapa"></canvas>
   <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>CLIC DER</kbd> apuntar · <kbd>Q</kbd>/<kbd>1-5</kbd>/ruedita cambiar arma · <kbd>P</kbd> teléfono · hacé clic en el juego para apuntar con el mouse</div>
   <div id="crosshair" hidden><i></i><i></i><i></i><i></i><b></b></div>
-  <div class="touch"><button id="tPhone" type="button">TEL<span id="phoneBadge" hidden>0</span></button><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
+  <div class="touch"><button id="tPhone" type="button">TEL<span id="phoneBadge" hidden>0</span></button><button id="tRun" type="button">CORRER</button><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
 </div>
 <div id="drive" hidden>
   <div id="wheel" aria-label="Volante: arrastrá para girar"><svg viewBox="-100 -100 200 200" id="wheelSvg"><defs><radialGradient id="rimG" cx="0" cy="-30" r="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4a4458"/><stop offset="1" stop-color="#151219"/></radialGradient></defs>
@@ -1641,6 +1644,7 @@ $('tShoot').addEventListener('pointerdown', e => { e.preventDefault(); firing = 
 $('tShoot').addEventListener('pointerup', () => { firing = false; });
 $('tShoot').addEventListener('pointercancel', () => { firing = false; });
 $('tGun').onclick = () => G.mode === 'play' && cycleWeapon();
+$('tRun').onclick = () => { G.sprint = !G.sprint; $('tRun').classList.toggle('on', G.sprint); };
 $('phBtn').onclick = () => { if (PH.incoming) answerCall(); else if (PH.open) closePhone(); else openPhone(); };
 $('tPhone').onclick = () => { if (PH.incoming) answerCall(); else if (PH.open) closePhone(); else openPhone(); };
 $('view').addEventListener('wheel', e => { if (G.mode !== 'play' || G.inCar) return; e.preventDefault(); const owned = WEAPON_ORDER.filter(w => w === 'fist' || G.weapons[w] > 0); G.weapon = owned[(owned.indexOf(G.weapon) + (e.deltaY > 0 ? 1 : owned.length - 1)) % owned.length]; setGunModel(); }, { passive: false });
@@ -3050,8 +3054,8 @@ function inputVec() {
   const k = G.keys;
   let ix = (k['d'] || k['arrowright'] ? 1 : 0) - (k['a'] || k['arrowleft'] ? 1 : 0);
   let iy = (k['w'] || k['arrowup'] ? 1 : 0) - (k['s'] || k['arrowdown'] ? 1 : 0);
-  let run = !!k['shift'];
-  if (joy) { const m = Math.hypot(joy.dx, joy.dy); if (m > 10) { ix = joy.dx / Math.max(m, 60); iy = -joy.dy / Math.max(m, 60); run = m > 55; } }
+  let run = !!k['shift'] || !!G.sprint;
+  if (joy) { const m = Math.hypot(joy.dx, joy.dy); if (m > 10) { ix = joy.dx / Math.max(m, 60); iy = -joy.dy / Math.max(m, 60); run = run || m > 55; } }
   let brake = !!k[' '];
   if (G.inCar) { if (Math.abs(TD.steer) > 0.03) ix = TD.steer; if (TD.gas) iy = 1; else if (TD.brake) iy = -1; if (TD.hand) brake = true; }
   return { ix, iy, run, brake };
