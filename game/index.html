@@ -402,7 +402,7 @@ const dbReady = (window.claude && window.claude.use) ? window.claude.use('db').t
 const slugOf = name => name.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
 function profileData() {
   const p = G.inside ? { x: G.inside.wx, z: G.inside.wz + 1.5 } : focusPos();
-  return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, garage: (G.garage || []).slice(0, 8), job: !!G.job, dogDone: !!G.dogDone, char: G.char, mission: G.mission, mstep: G.mstep, sms: (G.sms || []).slice(0, 30), weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
+  return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, garage: (G.garage || []).slice(0, 8), job: !!G.job, dogDone: !!G.dogDone, airportIntro: !!G.airportIntro, char: G.char, mission: G.mission, mstep: G.mstep, sms: (G.sms || []).slice(0, 30), weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
 }
 function setSaveState(t) { $('saveState').textContent = t; }
 let saving = false, saveAgain = false;
@@ -3218,7 +3218,7 @@ $('loginForm').addEventListener('submit', async e => {
   if ((G.pickChar || 'mateo') !== G.char) setCharacter(G.pickChar || 'mateo');
   let spawn = W2M(450, 460);
   if (data) {
-    G.money = Number(data.money) || 0; G.story = data.story || 0; G.owned = Array.isArray(data.owned) ? data.owned : []; G.job = data.job !== undefined ? !!data.job : (data.mstep || 0) > 0; G.dogDone = !!data.dogDone; G.sms = Array.isArray(data.sms) ? data.sms.filter(m => m && typeof m.text === 'string').slice(0, 30) : []; G.mission = data.mission || 0; G.mstep = data.mstep || 0; if (data.mstep === undefined && G.mission >= 1) { G.mstep = G.mission === 1 ? 1 : 0; G.mission = G.mission === 1 ? 0 : 1; } G.carColor = data.carColor || '#ff3d8b'; G.carModel = MODELS[data.carModel] ? data.carModel : 'sakura';
+    G.money = Number(data.money) || 0; G.story = data.story || 0; G.owned = Array.isArray(data.owned) ? data.owned : []; G.job = data.job !== undefined ? !!data.job : (data.mstep || 0) > 0; G.dogDone = !!data.dogDone; G.airportIntro = !!data.airportIntro; G.sms = Array.isArray(data.sms) ? data.sms.filter(m => m && typeof m.text === 'string').slice(0, 30) : []; G.mission = data.mission || 0; G.mstep = data.mstep || 0; if (data.mstep === undefined && G.mission >= 1) { G.mstep = G.mission === 1 ? 1 : 0; G.mission = G.mission === 1 ? 0 : 1; } G.carColor = data.carColor || '#ff3d8b'; G.carModel = MODELS[data.carModel] ? data.carModel : 'sakura';
     if (data.weapons && typeof data.weapons === 'object') for (const k in data.weapons) if (WEAPONS[k]) G.weapons[k] = Math.max(0, Number(data.weapons[k]) || 0);
     G.armor = Math.min(100, Number(data.armor) || 0);
     G.garage = Array.isArray(data.garage) ? data.garage.filter(e => e && MODELS[e.model] && MODELS[e.model].kind !== 'boat' && /^#[0-9a-f]{6}$/i.test(e.color)).slice(0, 8) : [];
@@ -3234,6 +3234,7 @@ $('loginForm').addEventListener('submit', async e => {
   G.swimming = false;
   if (!data || typeof data.x !== 'number') spawn = { x: cs.x - Math.cos(cs.rot) * 3.4, z: cs.z + Math.sin(cs.rot) * 3.4 };
   player.position.set(spawn.x, groundY(spawn.x, spawn.z), spawn.z); player.visible = true; G.inCar = false; car.position.set(cs.x, ROADY, cs.z); car.rotation.set(0, cs.rot, 0); car.userData.speed = 0; car.userData.wrecked = false; car.visible = true; car.userData.stored = false; car.userData.paint.color.set(G.carColor); addParkedCollider(car); setIslandOwner(name); refreshProps();
+  if (!G.airportIntro) { G.airportIntro = true; removeCarCollider(car); car.position.set(436, ROADY, -163); car.rotation.set(0, Math.PI / 2, 0); addParkedCollider(car); player.position.set(447, ROADY, -158); player.rotation.y = Math.PI / 2; G.camYaw = -Math.PI / 2; setTimeout(() => toast('Bienvenido al aeropuerto de Heat City. Robá una avioneta o el jet (F) y despegá por la pista.', 6000), 4500); }
   G.stores.forEach(s => { if (s.unlock && s.door) s.door.material.color.set(locked(s) ? 0x222222 : 0xfff0c0); });
   removeLucy(); if (STORY[G.mission] && STORY[G.mission].retry !== undefined && G.mstep > STORY[G.mission].retry) G.mstep = STORY[G.mission].retry;
   startStep(); setQuality($('quality').value);
