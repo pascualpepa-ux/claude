@@ -381,9 +381,9 @@ function inPoly(x, y, P) { let c = false; for (let i = 0, j = P.length - 1; i < 
 function segDist(px, py, [ax, ay], [bx, by]) { const dx = bx-ax, dy = by-ay, t = Math.max(0, Math.min(1, ((px-ax)*dx + (py-ay)*dy) / (dx*dx + dy*dy))); return Math.hypot(px - (ax + t*dx), py - (ay + t*dy)); }
 function isLand(mx, my) {
   if (ISLANDS.some(([x, y, r]) => Math.hypot(mx - x, my - y) < r + 4)) return true;   // primero las islas (la privada está fuera del mapa)
+  if (BRIDGES.some(([a, b]) => segDist(mx, my, a, b) < 7)) return true;
   if (mx < 2 || my < 2 || mx > 998 || my > 998) return false;
-  if (inPoly(mx, my, LAND)) return true;
-  return BRIDGES.some(([a, b]) => segDist(mx, my, a, b) < 7);
+  return inPoly(mx, my, LAND);
 }
 function zoneAt(mx, my) {
   for (const id of ['downtown-blaze','sunset-strip','port-sable','coral-keys','swamp-row']) { const b = G.zones[id]?.bounds; if (b && mx >= b.x[0] && mx <= b.x[1] && my >= b.y[0] && my <= b.y[1]) return G.zones[id]; }
@@ -2901,7 +2901,7 @@ function buildAirport() {
   colliders.push({ x: 438, z: -192, hw: 8, hd: 6 });
   // hangar con techo curvo
   bx(metal, 0.4, 8, 16, 432.2, ROADY + 4, -128); bx(metal, 16, 8, 0.4, 440, ROADY + 4, -120.2); bx(metal, 16, 8, 0.4, 440, ROADY + 4, -135.8);
-  const roof = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 16, 24, 1, true, -Math.PI / 2, Math.PI), new THREE.MeshStandardMaterial({ color: 0xb8c0c8, metalness: 0.6, roughness: 0.35, side: THREE.DoubleSide })); roof.rotation.z = Math.PI / 2; roof.scale.set(1, 1, 0.45); roof.position.set(440, ROADY + 8, -128); scene.add(roof);
+  bx(new THREE.MeshStandardMaterial({ color: 0xb8c0c8, metalness: 0.6, roughness: 0.35 }), 17, 0.6, 17, 440, ROADY + 8.3, -128); bx(new THREE.MeshStandardMaterial({ color: 0x2a2d33, roughness: 0.7 }), 0.2, 6.5, 14, 447.9, ROADY + 3.25, -128);
   colliders.push({ x: 432.2, z: -128, hw: 0.3, hd: 8 }, { x: 440, z: -120.2, hw: 8, hd: 0.3 }, { x: 440, z: -135.8, hw: 8, hd: 0.3 });
   // torre de control
   bx(white, 3, 16, 3, 452, ROADY + 8, -212); bx(glass, 5.5, 2.6, 5.5, 452, ROADY + 17.3, -212); bx(white, 6.2, 0.4, 6.2, 452, ROADY + 18.8, -212);
@@ -3608,7 +3608,7 @@ function buildMapUI() {
   cv.addEventListener('wheel', e => { e.preventDefault(); MV.zoom = Math.max(1, Math.min(6, MV.zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15))); }, { passive: false });
 }
 const visibleStores = () => G.stores.filter(s => !G.hidden.has(s.category) && !locked(s));
-const focusPos = () => (G.inCar ? car.position : player.position);
+const focusPos = () => (G.inCar && !(ESC && ESC.phase === 'takeoff') ? car.position : player.position);
 function mapScale() { const cv = $('bigmap'); return Math.min(cv.clientWidth, cv.clientHeight) / 1000 * MV.zoom; }
 function screenToMap(sx, sy) { const cv = $('bigmap'), k = mapScale(); return { x: MV.cx + (sx - cv.clientWidth / 2) / k, y: MV.cy + (sy - cv.clientHeight / 2) / k }; }
 function openMap(sel) {
