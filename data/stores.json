@@ -939,6 +939,40 @@
       ],
       "description": "Cabaret rústico de madera sobre el pantano; el más barato de la ciudad.",
       "tier": "economico"
+    },
+    {
+      "id": "coastline-estates",
+      "name": "Coastline Estates",
+      "category": "inmobiliaria",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 530,
+        "y": 360
+      },
+      "icon": "house-key",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Departamento en Downtown Blaze",
+        "Loft en Port Sable",
+        "Casa con pileta en Coral Keys",
+        "Villa en Sunset Strip",
+        "Mansión frente al mar"
+      ],
+      "prices": {
+        "Departamento en Downtown Blaze": 95000,
+        "Loft en Port Sable": 140000,
+        "Casa con pileta en Coral Keys": 320000,
+        "Villa en Sunset Strip": 650000,
+        "Mansión frente al mar": 1500000
+      },
+      "description": "Inmobiliaria de lujo: departamentos, villas y mansiones listas para mudarse. Lo que comprás queda marcado en tu mapa.",
+      "actions": [
+        "comprar_propiedad"
+      ]
     }
   ]
 }

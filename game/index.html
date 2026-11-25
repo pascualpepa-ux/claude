@@ -377,9 +377,9 @@ const locked = s => s.unlock && s.unlock.locked_by_default && G.story < 1;
 function inPoly(x, y, P) { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const [xi, yi] = P[i], [xj, yj] = P[j]; if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) c = !c; } return c; }
 function segDist(px, py, [ax, ay], [bx, by]) { const dx = bx-ax, dy = by-ay, t = Math.max(0, Math.min(1, ((px-ax)*dx + (py-ay)*dy) / (dx*dx + dy*dy))); return Math.hypot(px - (ax + t*dx), py - (ay + t*dy)); }
 function isLand(mx, my) {
+  if (ISLANDS.some(([x, y, r]) => Math.hypot(mx - x, my - y) < r + 4)) return true;   // primero las islas (la privada está fuera del mapa)
   if (mx < 2 || my < 2 || mx > 998 || my > 998) return false;
   if (inPoly(mx, my, LAND)) return true;
-  if (ISLANDS.some(([x, y, r]) => Math.hypot(mx - x, my - y) < r + 4)) return true;
   return BRIDGES.some(([a, b]) => segDist(mx, my, a, b) < 7);
 }
 function zoneAt(mx, my) {
@@ -391,7 +391,7 @@ let rngSeed = 11; const rnd = () => (rngSeed = (rngSeed * 16807) % 2147483647) /
 function toast(msg, ms = 2600) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, ms); }
 
 const PRICE = { armeria:[300,2500], ropa:[40,900], autos:[18000,240000], tatuajes:[60,400], comida:[6,30], tienda24:[3,40], bar:[10,300], inmobiliaria:[40000,900000], tecnologia:[150,2200], gimnasio:[40,300], banco:[0,0], empeno:[20,1500], servicios:[0,500], club_adulto:[20,800] };
-const priceOf = (s, item) => { const [a, b] = PRICE[s.category] || [10, 100], step = a > 1000 ? 100 : 1; return Math.round((a + (b - a) * hash(s.id + item)) / step) * step; };
+const priceOf = (s, item) => { if (s.prices && s.prices[item] != null) return s.prices[item]; const [a, b] = PRICE[s.category] || [10, 100], step = a > 1000 ? 100 : 1; return Math.round((a + (b - a) * hash(s.id + item)) / step) * step; };
 
 // ---------- guardado por username ----------
 let DB = null;
@@ -2100,6 +2100,7 @@ function startCall(id, incoming) {
   lines.forEach(l => { PH.timers.push(setTimeout(() => { if (!PH.call) return; PH.call.shown.push(l); renderPhone(); }, t)); t += 1300; });
   PH.timers.push(setTimeout(() => { if (!PH.call) return; PH.call.done = true; renderPhone(); }, t));
 }
+function beep(freq, dur, type = 'sine', vol = 0.04) { if (!AC) return; try { const o = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter(); o.type = type; o.frequency.value = freq; f.type = 'lowpass'; f.frequency.value = 600; g.gain.setValueAtTime(vol, AC.currentTime); g.gain.linearRampToValueAtTime(0, AC.currentTime + dur); o.connect(f).connect(g).connect(AC.destination); o.start(); o.stop(AC.currentTime + dur); } catch (e) {} }
 function ringOnce() { if (!AC) return; [0, 0.25].forEach(d => { const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = 880; g.gain.value = 0.05; o.connect(g).connect(AC.destination); o.start(AC.currentTime + d); o.stop(AC.currentTime + d + 0.15); }); }
 function incomingCall(id, lines, opts) {
   if (!G.user) return;
@@ -2180,7 +2181,7 @@ function buildInterior(s, vip) {
   const fl = new THREE.Mesh(new THREE.PlaneGeometry(W, D), floorMat); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; fl.material.map && fl.material.map.repeat.set(W / 4, D / 4); g.add(fl);
   const ce = new THREE.Mesh(new THREE.PlaneGeometry(W, D), M.ceil); ce.rotation.x = Math.PI / 2; ce.position.y = H; g.add(ce);
   // paredes (con puerta al frente)
-  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'garage' ? 0x8e9096 : kind === 'house' ? 0xf4efe6 : kind === 'vip' ? 0x1e1030 : kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
+  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'garage' ? 0x8e9096 : kind === 'house' ? (s.wall || 0xf4efe6) : kind === 'vip' ? 0x1e1030 : kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
   ibox(g, col, W, H, 0.3, 0, 0, -D / 2 - 0.15, wallMat);
   ibox(g, col, 0.3, H, D, -W / 2 - 0.15, 0, 0, wallMat); ibox(g, col, 0.3, H, D, W / 2 + 0.15, 0, 0, wallMat);
   ibox(g, col, (W - 3) / 2, H, 0.3, -(W + 3) / 4, 0, D / 2 + 0.15, wallMat); ibox(g, col, (W - 3) / 2, H, 0.3, (W + 3) / 4, 0, D / 2 + 0.15, wallMat);
@@ -2456,35 +2457,86 @@ function updateVictims(dt, now) {
 
 // ---------- isla privada (escondida en el mar, una por usuario) ----------
 const ISL = { x: 500, z: 300 };
-const GARAGE_S = { id: 'garage', private: 'garage', name: 'Garaje', sub: 'Privado', color: '#ff7a3d', category: '_priv', zone: '_', wx: 500, wz: 296.5 };
-const HOUSE_S = { id: 'house', private: 'house', name: 'Tu casa', sub: 'Isla privada', color: '#3ddcd0', category: '_priv', zone: '_', wx: 498.5, wz: 328.5 };
+const GARAGE_S = { id: 'garage', private: 'garage', name: 'Garaje', sub: 'Privado', color: '#ff7a3d', category: '_priv', zone: '_', wx: 503.5, wz: 298.5 };
+const HOUSE_S = { id: 'house', private: 'house', name: 'Tu casa', sub: 'Isla privada', color: '#3ddcd0', category: '_priv', zone: '_', wx: 499.5, wz: 326 };
 const onIsland = () => { const p = aiFocus(); return Math.hypot(p.x - ISL.x, p.z - ISL.z) < 80 && !G.inside; };
-let islandSign = null;
+let islandSign = null, ISLE = null, ELEV = null; const ELEV_D = 3.8;
 function islandSignTex(name) { return makeSign(`ISLA DE ${name.toUpperCase()}`, 'Propiedad privada', '#3ddcd0', false); }
 function buildPrivateIsland() {
   addPier(427, 458, 298, 302, 0.6);
-  // calle del muelle al garaje
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(40, 7), new THREE.MeshStandardMaterial({ color: 0x2e2e33, roughness: 0.9 })); road.rotation.x = -Math.PI / 2; road.position.set(477, ROADY + 0.02, 300); road.receiveShadow = true; scene.add(road);
-  // montacargas
-  const plat = new THREE.Mesh(new THREE.BoxGeometry(5, 0.12, 7), new THREE.MeshStandardMaterial({ map: tex((() => { const [c, x] = cnv(256); x.fillStyle = '#3a3d42'; x.fillRect(0, 0, 256, 256); x.fillStyle = '#f2c230'; for (let i = -256; i < 512; i += 40) { x.save(); x.beginPath(); x.rect(0, 0, 256, 18); x.rect(0, 238, 256, 18); x.clip(); x.translate(i, 0); x.rotate(0.6); x.fillRect(0, -20, 18, 400); x.restore(); } return c; })()), metalness: 0.6, roughness: 0.4 }));
-  plat.position.set(500, ROADY + 0.06, 300); plat.receiveShadow = true; scene.add(plat);
-  // garaje
+  // calle del muelle hasta el portón del garaje
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(49, 7), new THREE.MeshStandardMaterial({ color: 0x2e2e33, roughness: 0.9 })); road.rotation.x = -Math.PI / 2; road.position.set(481.5, ROADY + 0.02, 300); road.receiveShadow = true; scene.add(road);
+  // garaje: paredes de verdad, portón enrollable y montacargas adentro
   const conc = new THREE.MeshStandardMaterial({ color: 0xd8d4cc, roughness: 0.8 }), dark = new THREE.MeshStandardMaterial({ color: 0x2a2a30, metalness: 0.5, roughness: 0.4 });
-  const gar = new THREE.Mesh(new THREE.BoxGeometry(12, 5, 10), conc); gar.position.set(512, ROADY + 2.5, 300); gar.castShadow = gar.receiveShadow = true; scene.add(gar);
-  const door = new THREE.Mesh(new THREE.PlaneGeometry(6, 3.6), dark); door.rotation.y = -Math.PI / 2; door.position.set(505.95, ROADY + 1.8, 300); scene.add(door);
-  for (let k = 0; k < 9; k++) { const sl = new THREE.Mesh(new THREE.PlaneGeometry(6, 0.05), new THREE.MeshBasicMaterial({ color: 0x55565c })); sl.rotation.y = -Math.PI / 2; sl.position.set(505.93, ROADY + 0.3 + k * 0.4, 300); scene.add(sl); }
+  const bx = (m, w, h, d, x, y, z, sh = true) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); if (sh) o.castShadow = o.receiveShadow = true; scene.add(o); return o; };
+  bx(conc, 12, 5, 0.3, 512, ROADY + 2.5, 295.15); bx(conc, 12, 5, 0.3, 512, ROADY + 2.5, 304.85); bx(conc, 0.3, 5, 10, 517.85, ROADY + 2.5, 300);
+  bx(conc, 0.3, 5, 2, 506.15, ROADY + 2.5, 296); bx(conc, 0.3, 5, 2, 506.15, ROADY + 2.5, 304); bx(conc, 0.3, 1.4, 6, 506.15, ROADY + 4.3, 300);
+  bx(conc, 12.4, 0.3, 10.4, 512, ROADY + 5.15, 300);
+  colliders.push({ x: 512, z: 295.15, hw: 6, hd: 0.2 }, { x: 512, z: 304.85, hw: 6, hd: 0.2 }, { x: 517.85, z: 300, hw: 0.2, hd: 5 }, { x: 506.15, z: 296, hw: 0.2, hd: 1 }, { x: 506.15, z: 304, hw: 0.2, hd: 1 });
+  const gfl = new THREE.MeshStandardMaterial({ color: 0x9a9ca2, roughness: 0.6 }), fpl = (w, d, x, z, m = gfl) => { const o = new THREE.Mesh(new THREE.PlaneGeometry(w, d), m); o.rotation.x = -Math.PI / 2; o.position.set(x, ROADY + 0.03, z); o.receiveShadow = true; scene.add(o); return o; };
+  fpl(11.4, 2.2, 512, 296.4); fpl(11.4, 2.2, 512, 303.6); fpl(2.7, 5, 507.65, 300); fpl(1.7, 5, 516.85, 300);
+  fpl(7, 5, 512.5, 300, new THREE.MeshBasicMaterial({ color: 0x050507 })).position.y = ROADY + 0.025;   // el foso
+  const stripe = tex((() => { const [c, x] = cnv(256); x.fillStyle = '#3a3d42'; x.fillRect(0, 0, 256, 256); x.fillStyle = '#f2c230'; for (let i = -256; i < 512; i += 40) { x.save(); x.beginPath(); x.rect(0, 0, 256, 18); x.rect(0, 238, 256, 18); x.clip(); x.translate(i, 0); x.rotate(0.6); x.fillRect(0, -20, 18, 400); x.restore(); } return c; })());
+  const plat = new THREE.Mesh(new THREE.BoxGeometry(7, 0.12, 5), new THREE.MeshStandardMaterial({ map: stripe, metalness: 0.6, roughness: 0.4 }));
+  plat.position.set(512.5, ROADY + 0.06, 300); plat.receiveShadow = true; scene.add(plat);
+  const lamp = new THREE.Mesh(new THREE.BoxGeometry(9, 0.06, 0.25), new THREE.MeshBasicMaterial({ color: 0xfff6e0, toneMapped: false })); lamp.position.set(512, ROADY + 4.95, 300); scene.add(lamp);
+  const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff7a3d, toneMapped: false })); beacon.position.set(506.4, ROADY + 3.75, 296.6); scene.add(beacon);
+  const door = new THREE.Group(); door.position.set(506.12, ROADY + 3.6, 300); scene.add(door);
+  const dpan = new THREE.Mesh(new THREE.BoxGeometry(0.1, 3.6, 6), dark); dpan.position.y = -1.8; door.add(dpan);
+  for (let k = 0; k < 9; k++) { const sl = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.05, 6), new THREE.MeshBasicMaterial({ color: 0x55565c })); sl.position.y = -0.3 - k * 0.4; door.add(sl); }
   const gl = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 6.4), new THREE.MeshBasicMaterial({ color: 0xff7a3d, toneMapped: false })); gl.position.set(505.9, ROADY + 3.8, 300); scene.add(gl);
-  colliders.push({ x: 512, z: 300, hw: 6, hd: 5 });
-  // casa: dos plantas blancas con vidrio, pileta
-  const white = new THREE.MeshStandardMaterial({ color: 0xf6f3ee, roughness: 0.7 }), glass = new THREE.MeshStandardMaterial({ color: 0x0d141c, metalness: 0.9, roughness: 0.05, envMapIntensity: 1.2 }), wood = new THREE.MeshStandardMaterial({ color: 0x8a6a4a, roughness: 0.6 });
-  const h1 = new THREE.Mesh(new THREE.BoxGeometry(16, 4, 10), white); h1.position.set(510, ROADY + 2, 330); h1.castShadow = h1.receiveShadow = true; scene.add(h1);
-  const h2 = new THREE.Mesh(new THREE.BoxGeometry(12, 3.4, 9), white); h2.position.set(512, ROADY + 5.7, 331); h2.castShadow = true; scene.add(h2);
-  const g1 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.6, 8), glass); g1.position.set(501.98, ROADY + 1.9, 331.5); scene.add(g1);
-  const g2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.2, 7), glass); g2.position.set(505.98, ROADY + 5.6, 331); scene.add(g2);
-  const hd = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 2.6), new THREE.MeshBasicMaterial({ color: 0xfff0c8, toneMapped: false })); hd.rotation.y = -Math.PI / 2; hd.position.set(501.9, ROADY + 1.3, 327); scene.add(hd);
-  const deck = new THREE.Mesh(new THREE.BoxGeometry(12, 0.2, 9), wood); deck.position.set(492, ROADY + 0.1, 338); deck.receiveShadow = true; scene.add(deck);
-  const pool = new THREE.Mesh(new THREE.BoxGeometry(7, 0.05, 4.5), new THREE.MeshStandardMaterial({ color: 0x2ec5e8, emissive: 0x0a6a8a, emissiveIntensity: 0.6, roughness: 0.05, metalness: 0.2 })); pool.position.set(491, ROADY + 0.23, 339); scene.add(pool);
-  colliders.push({ x: 510, z: 330, hw: 8, hd: 5 }, { x: 491, z: 339, hw: 3.5, hd: 2.25 });
+  const dcol = { x: 506.15, z: 300, hw: 0.2, hd: 3 }; colliders.push(dcol);
+  ISLE = { plat, door, dcol, beacon, open: 0 };
+
+  // mansión: tres volúmenes blancos, vidrio, voladizo y terraza en la azotea
+  const white = new THREE.MeshStandardMaterial({ color: 0xf6f3ee, roughness: 0.7 }), glass = new THREE.MeshStandardMaterial({ color: 0x0d141c, metalness: 0.9, roughness: 0.05, envMapIntensity: 1.2 }), wood = new THREE.MeshStandardMaterial({ color: 0x8a6a4a, roughness: 0.6 }), stone = new THREE.MeshStandardMaterial({ color: 0xe9e2d4, roughness: 0.85 });
+  bx(white, 18, 4.5, 14, 511, ROADY + 2.25, 327);
+  bx(white, 16.5, 0.35, 14.6, 508.5, ROADY + 4.65, 329);
+  bx(white, 16, 3.8, 13, 508.6, ROADY + 6.7, 329);
+  bx(white, 17, 0.3, 14, 508.6, ROADY + 8.75, 329);
+  bx(wood, 6.5, 2.6, 6, 513, ROADY + 10.2, 328); bx(white, 8, 0.25, 7.5, 513, ROADY + 11.6, 328);
+  bx(glass, 0.12, 3.2, 4.6, 501.98, ROADY + 1.9, 323.3, false); bx(glass, 0.12, 3.2, 4.2, 501.98, ROADY + 1.9, 331.6, false);
+  bx(glass, 0.12, 2.8, 12, 500.58, ROADY + 6.6, 329, false); bx(glass, 15, 2.8, 0.12, 508.6, ROADY + 6.6, 335.55, false); bx(glass, 16, 3, 0.12, 511, ROADY + 2, 334.05, false);
+  for (const z of [322.6, 335.4]) { bx(white, 0.45, 4.5, 0.45, 500.8, ROADY + 2.25, z); colliders.push({ x: 500.8, z, hw: 0.3, hd: 0.3 }); }
+  const rail = new THREE.MeshStandardMaterial({ color: 0x9fd8e8, transparent: true, opacity: 0.35, metalness: 0.5, roughness: 0.1 });
+  bx(rail, 17, 1, 0.08, 508.6, ROADY + 9.4, 335.95, false); bx(rail, 0.08, 1, 14, 500.1, ROADY + 9.4, 329, false);
+  const hd = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 3), new THREE.MeshBasicMaterial({ color: 0xfff0c8, toneMapped: false })); hd.rotation.y = -Math.PI / 2; hd.position.set(501.9, ROADY + 1.5, 327.5); scene.add(hd);
+  for (const z of [326, 329]) { const lt = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.5, 0.15), new THREE.MeshBasicMaterial({ color: 0xffe3a0, toneMapped: false })); lt.position.set(501.8, ROADY + 3.3, z); scene.add(lt); }
+  colliders.push({ x: 511, z: 327, hw: 9, hd: 7 });
+  // terraza con pileta infinita, jacuzzi y reposeras
+  bx(wood, 16, 0.2, 10.5, 492, ROADY + 0.1, 333.25);
+  const poolM = new THREE.MeshStandardMaterial({ color: 0x2ec5e8, emissive: 0x0a6a8a, emissiveIntensity: 0.6, roughness: 0.05, metalness: 0.2 });
+  bx(stone, 12.6, 0.3, 5.6, 491, ROADY + 0.15, 333); bx(poolM, 12, 0.05, 5, 491, ROADY + 0.31, 333, false);
+  const jac = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, 0.5, 28), stone); jac.position.set(497.5, ROADY + 0.25, 337.2); scene.add(jac);
+  const jw = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.45, 0.05, 28), new THREE.MeshBasicMaterial({ color: 0x7fe8ff, toneMapped: false })); jw.position.set(497.5, ROADY + 0.5, 337.2); scene.add(jw);
+  colliders.push({ x: 491, z: 333, hw: 6.3, hd: 2.8 }, { x: 497.5, z: 337.2, hw: 1.7, hd: 1.7 });
+  const towel = [0xff3d8b, 0x3ddcd0, 0xffd23f, 0xffffff];
+  for (let i = 0; i < 4; i++) { const lx = 486 + i * 2.6; bx(white, 0.8, 0.35, 1.9, lx, ROADY + 0.38, 337.3); bx(new THREE.MeshStandardMaterial({ color: towel[i] }), 0.7, 0.05, 1.2, lx, ROADY + 0.58, 337.0, false); }
+  // parque acuático al norte: laguna, torre y dos toboganes
+  const lagM = new THREE.MeshStandardMaterial({ color: 0x35d0f0, emissive: 0x0b7aa0, emissiveIntensity: 0.55, roughness: 0.05, metalness: 0.2 });
+  bx(stone, 17, 0.35, 8, 500, ROADY + 0.17, 281); bx(lagM, 16, 0.05, 7, 500, ROADY + 0.36, 281, false);
+  bx(stone, 6.8, 0.35, 5.8, 512.5, ROADY + 0.17, 276.5); bx(lagM, 6, 0.05, 5, 512.5, ROADY + 0.36, 276.5, false);
+  colliders.push({ x: 500, z: 281, hw: 8.5, hd: 4 }, { x: 512.5, z: 276.5, hw: 3.4, hd: 2.9 });
+  const steel = new THREE.MeshStandardMaterial({ color: 0xdfe3e8, metalness: 0.7, roughness: 0.3 });
+  for (const [dx, dz] of [[-1.4, -1.4], [1.4, -1.4], [-1.4, 1.4], [1.4, 1.4]]) { const lg = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 7.6, 8), steel); lg.position.set(487 + dx, ROADY + 3.8, 273 + dz); scene.add(lg); }
+  bx(new THREE.MeshStandardMaterial({ color: 0xff7a3d, roughness: 0.6 }), 3.6, 0.3, 3.6, 487, ROADY + 7.6, 273);
+  for (let k = 0; k < 6; k++) bx(new THREE.MeshStandardMaterial({ color: k % 2 ? 0xffd23f : 0x3ddcd0 }), 1.2, 0.15, 0.6, 485 + (k % 2) * 0.6, ROADY + 1 + k * 1.1, 271 + 0.1 * k);
+  const roof = new THREE.Mesh(new THREE.ConeGeometry(2.8, 1.8, 4), new THREE.MeshStandardMaterial({ color: 0xff3d8b, roughness: 0.5 })); roof.position.set(487, ROADY + 9.6, 273); roof.rotation.y = Math.PI / 4; scene.add(roof);
+  for (const [dx, dz] of [[-1.4, -1.4], [1.4, -1.4], [-1.4, 1.4], [1.4, 1.4]]) { const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.7, 6), steel); pl.position.set(487 + dx, ROADY + 8.6, 273 + dz); scene.add(pl); }
+  colliders.push({ x: 487, z: 273, hw: 1.8, hd: 1.8 });
+  const slide = (pts, color) => {
+    const curve = new THREE.CatmullRomCurve3(pts.map(([x, y, z]) => new THREE.Vector3(x, ROADY + y, z)));
+    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 90, 0.62, 12, false), new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.1, side: THREE.DoubleSide }));
+    tube.castShadow = true; scene.add(tube);
+    for (let i = 1; i < pts.length - 1; i++) { const [x, y, z] = pts[i]; const po = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, y, 6), steel); po.position.set(x, ROADY + y / 2, z); scene.add(po); }
+  };
+  slide([[488.4, 7.9, 273], [494, 6.8, 270], [502, 5.4, 269], [509, 4, 270.5], [513, 2.6, 273], [513.5, 1.4, 275.5], [512.5, 0.6, 277]], 0xffd23f);
+  slide([[486.6, 7.9, 274.5], [483, 6.4, 278], [484, 4.8, 283], [488, 3.3, 286.5], [492.5, 1.9, 287], [494.5, 1, 284.5], [496, 0.55, 282.5]], 0x3ddcd0);
+  for (let i = 0; i < 4; i++) {
+    const ux = 499 + i * 3.4, uz = 288.5; const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.6, 6), steel); pole.position.set(ux, ROADY + 1.3, uz); scene.add(pole);
+    const top = new THREE.Mesh(new THREE.ConeGeometry(1.4, 0.6, 10), new THREE.MeshStandardMaterial({ color: [0xff3d8b, 0xffd23f, 0x3ddcd0, 0xff7a3d][i], roughness: 0.7 })); top.position.set(ux, ROADY + 2.7, uz); scene.add(top);
+    bx(white, 0.8, 0.35, 1.9, ux + 1, ROADY + 0.38, uz + 0.3);
+  }
   // carguero amarrado
   const ship = new THREE.Group();
   const hull = new THREE.Mesh(new THREE.BoxGeometry(26, 3, 8), new THREE.MeshStandardMaterial({ color: 0xc0392b, roughness: 0.6 })); hull.position.y = 0.6; ship.add(hull);
@@ -2496,35 +2548,100 @@ function buildPrivateIsland() {
   islandSign = new THREE.Mesh(new THREE.PlaneGeometry(7, 1.75), new THREE.MeshBasicMaterial({ map: islandSignTex('tu nombre'), toneMapped: false, side: THREE.DoubleSide })); islandSign.position.set(462, ROADY + 4.6, 306); islandSign.rotation.y = -Math.PI / 2; scene.add(islandSign);
   colliders.push({ x: 462, z: 306, hw: 0.2, hd: 0.2 });
 }
+// portón: se enrolla solo cuando te acercás; montacargas: baja/sube con animación
+function updateIsland(dt) {
+  if (!ISLE) return;
+  const f = aiFocus(), near = ELEV || (!G.inside && Math.hypot(f.x - 507, f.z - 300) < 17);
+  const prev = ISLE.open; ISLE.open = Math.max(0, Math.min(1, ISLE.open + (near ? 1 : -1) * dt * 0.8));
+  if (ISLE.open !== prev || !updateIsland.init) {
+    updateIsland.init = true;
+    ISLE.door.scale.y = Math.max(0.04, 1 - ISLE.open);
+    const i = colliders.indexOf(ISLE.dcol);
+    if (ISLE.open > 0.75 && i >= 0) colliders.splice(i, 1); else if (ISLE.open <= 0.75 && i < 0) colliders.push(ISLE.dcol);
+    if ((prev === 0 && ISLE.open > 0) || (prev === 1 && ISLE.open < 1)) beep(near ? 180 : 140, 0.5, 'sawtooth', 0.03);
+  }
+  ISLE.beacon.visible = ISLE.open > 0 && ISLE.open < 1 || !!ELEV ? Math.floor(performance.now() / 250) % 2 === 0 : false;
+}
+function startElev(dir, withCar) {
+  if (dir < 0 && withCar) { car.userData.speed = 0; car.position.set(512.5, ROADY, 300); car.rotation.set(0, Math.PI / 2, 0); player.position.copy(car.position); G.camYaw = car.rotation.y + Math.PI; }
+  if (dir < 0 && !withCar) { player.position.set(512.5, ROADY + 0.12, 300); }
+  ELEV = { dir, t: 0, dur: 2.8, car: withCar };
+  beep(dir < 0 ? 90 : 110, 2.6, 'sawtooth', 0.025);
+  if (dir < 0) toast(withCar ? 'Bajando tu auto al garaje…' : 'Bajando al garaje…', 2600);
+}
+function updateElev(dt) {
+  const E = ELEV; E.t += dt;
+  const k = Math.min(1, E.t / E.dur), e = k * k * (3 - 2 * k), y = E.dir < 0 ? -ELEV_D * e : -ELEV_D * (1 - e);
+  ISLE.plat.position.y = ROADY + 0.06 + y;
+  if (E.car) { car.position.y = ROADY + y; player.position.copy(car.position); } else player.position.y = ROADY + 0.12 + y;
+  if (k < 1) return;
+  ELEV = null;
+  if (E.dir < 0) { if (E.car) storeCarInGarage(); else { G.wanted = 0; enterInterior(GARAGE_S); } setTimeout(() => { ISLE.plat.position.y = ROADY + 0.06; }, 400); }
+  else { car.position.y = ROADY; toast('Listo. Salí marcha adelante por el portón.'); }
+}
+// propiedades compradas en Coastline Estates: entrada marcada en la ciudad + interior de casa
+const PROPS = [
+  { item: 'Departamento en Downtown Blaze', at: [470, 385], wall: 0xf1ede4 },
+  { item: 'Loft en Port Sable', at: [800, 250], wall: 0xd9d4ce },
+  { item: 'Casa con pileta en Coral Keys', at: [760, 640], wall: 0xeaf6f4 },
+  { item: 'Villa en Sunset Strip', at: [160, 300], wall: 0xf6eadb },
+  { item: 'Mansión frente al mar', at: [70, 180], wall: 0xf4efe6 }
+].map(p => Object.assign(p, { key: 'coastline-estates:' + p.item }));
+function refreshProps() {
+  for (const p of PROPS) {
+    p.owned = (G.owned || []).includes(p.key);
+    if (p.owned && !p.anchor) {
+      const w = W2M(p.at[0], p.at[1]), n = nodes.filter(n => n.nb.length).sort((a, b) => Math.hypot(a.x - w.x, a.z - w.z) - Math.hypot(b.x - w.x, b.z - w.z))[0];
+      const m = n.nb[0], dx = m.x - n.x, dz = m.z - n.z, L = Math.hypot(dx, dz), ux = dx / L, uz = dz / L;
+      const x = n.x + ux * 20 + (-uz) * 6.4, z = n.z + uz * 20 + ux * 6.4, mm = M2W(x, z);
+      p.wx = x; p.wz = z; p.mx = mm.mx; p.my = mm.my;
+      const g = new THREE.Group(); g.position.set(x, groundY(x, z), z); scene.add(g); p.anchor = g;
+      const ring = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.5, 32), new THREE.MeshBasicMaterial({ color: 0x3ddc97, transparent: true, opacity: 0.8, toneMapped: false, side: THREE.DoubleSide })); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.05; g.add(ring); storeRings.push(ring);
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3, 8), new THREE.MeshStandardMaterial({ color: 0x2a2a30, metalness: 0.5 })); post.position.set(-1.8, 1.5, 0); g.add(post);
+      const sg = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), new THREE.MeshBasicMaterial({ map: makeSign('TU PROPIEDAD', p.item, '#3ddc97', false), toneMapped: false, side: THREE.DoubleSide })); sg.position.set(-1.8, 3.2, 0); sg.rotation.y = Math.atan2(ux, uz) + Math.PI / 2; g.add(sg);
+      p.s = { id: 'prop-' + PROPS.indexOf(p), private: 'house', name: p.item, sub: 'Tu propiedad', color: '#3ddc97', category: '_priv', zone: '_', wx: x, wz: z - 1.5, wall: p.wall };
+    }
+  }
+  return PROPS;
+}
+function propPrompt() {
+  if (G.inside || G.inCar) return null;
+  const pp = player.position;
+  for (const p of PROPS) if (p.owned && p.anchor && Math.hypot(pp.x - p.wx, pp.z - p.wz) < 2) return { kind: 'prop', s: p.s, text: `Entrar: ${p.item}` };
+  return null;
+}
 function setIslandOwner(name) {
   GARAGE_S.name = `Garaje de ${name}`; HOUSE_S.name = `Casa de ${name}`;
   if (islandSign) { islandSign.material.map.dispose(); islandSign.material.map = islandSignTex(name); islandSign.material.needsUpdate = true; }
 }
 function islandPrompt() {
   const fpp = ferryPrompt(); if (fpp) return fpp;
+  const pp = propPrompt(); if (pp) return pp;
   if (onIsland() && Math.hypot(aiFocus().x - 448, aiFocus().z - 300) < 10) return { kind: 'back', text: `Volver a la ciudad en el barco${G.inCar ? ' con el auto' : ''}` };
   if (G.inside || !onIsland()) return null;
   const p = player.position, cp = G.inCar ? car.position : p;
-  if (G.inCar && !car.userData.boat && Math.hypot(cp.x - 500, cp.z - 300) < 4.5) return { kind: 'store', text: 'Bajar el auto al garaje' };
-  if (!G.inCar && Math.hypot(p.x - 501, p.z - 300) < 4) return { kind: 'garage', text: 'Entrar al garaje' };
-  if (!G.inCar && Math.hypot(p.x - 500, p.z - 327) < 3) return { kind: 'house', text: 'Entrar a tu casa' };
+  if (ELEV) return null;
+  if (G.inCar && !car.userData.boat && Math.hypot(cp.x - 512.5, cp.z - 300) < 3.4) return { kind: 'store', text: 'Bajar el auto con el montacargas' };
+  if (!G.inCar && Math.hypot(p.x - 512.5, p.z - 300) < 3) return { kind: 'garage', text: 'Bajar al garaje (montacargas)' };
+  if (!G.inCar && Math.hypot(p.x - 500.5, p.z - 327.5) < 3) return { kind: 'house', text: 'Entrar a tu mansión' };
   return null;
 }
 function storeCarInGarage() {
   G.garage = G.garage || [];
   if (G.garage.length >= 8) return toast('El garaje está lleno (8 autos). Sacá uno primero.');
   if (Math.abs(car.userData.speed) > 3) return toast('Frená arriba del montacargas.');
+  if (!ELEV) return startElev(-1, true);
   G.garage.push({ model: car.userData.model, color: '#' + car.userData.paint.color.getHexString() });
   G.inCar = false; removeCarCollider(car); if (car.userData.headlight) car.userData.headlight.intensity = 0;
   car.visible = false; car.userData.stored = true; car.position.set(6000, -50, 6000);
   const pi = parked.indexOf(car); if (pi >= 0) parked.splice(pi, 1);
   player.visible = true; standPose(player.userData);
-  toast('El montacargas baja tu auto al garaje…', 2500); markDirty();
-  enterInterior(GARAGE_S);
+  markDirty();
+  G.wanted = 0; enterInterior(GARAGE_S);
 }
 function takeCarOut(i) {
   const e = G.garage.splice(i, 1)[0]; if (!e) return;
-  const nc = makeCar(e.color, false, e.model); nc.position.set(500, ROADY, 300); nc.rotation.y = -Math.PI / 2; scene.add(nc);
+  const nc = makeCar(e.color, false, e.model); nc.position.set(512.5, ROADY - ELEV_D, 300); nc.rotation.y = -Math.PI / 2; scene.add(nc);
   const old = car; moveHeadlight(old, nc);
   if (old.userData.stored) scene.remove(old);
   car = nc; G.carColor = e.color; G.carModel = e.model; car.userData.health = 100;
@@ -2532,19 +2649,22 @@ function takeCarOut(i) {
   G.inCar = true; G.swimming = false; G.camYaw = car.rotation.y + Math.PI;
   if (car.userData.bike) { player.visible = true; sitPose(player.userData); } else player.visible = false;
   player.position.copy(car.position);
-  toast(`Subiste con tu ${carName(car)}.`); markDirty(); saveNow();
+  ISLE.open = 1; ISLE.plat.position.y = ROADY + 0.06 - ELEV_D; startElev(1, true);
+  toast(`El montacargas sube tu ${carName(car)}…`); markDirty(); saveNow();
 }
 function ferry(dest) {
   if (G.inside) exitInterior(true);
-  G.mode = 'dead'; $('ovTitle').textContent = 'BARCO CARGUERO'; $('ovText').textContent = dest === 'isla' ? 'Navegando a tu isla…' : 'Volviendo al puerto de Port Sable…'; $('overlay').hidden = false;
+  G.mode = 'dead'; $('ovTitle').textContent = 'BARCO CARGUERO'; $('ovText').textContent = dest === 'isla' ? (G.wanted > 0 ? 'Nico acelera mar adentro… la policía queda atrás.' : 'Navegando a tu isla…') : 'Volviendo al puerto de Port Sable…'; $('overlay').hidden = false;
   if (document.pointerLockElement) document.exitPointerLock();
   setTimeout(() => {
     const spot = dest === 'isla' ? { x: 466, z: 300, rot: Math.PI / 2 } : { x: 385, z: -216, rot: -Math.PI / 2 };
     if (G.inCar && !car.userData.boat) { removeCarCollider(car); car.position.set(spot.x, ROADY, spot.z); car.rotation.set(0, spot.rot, 0); car.userData.speed = 0; player.position.copy(car.position); G.camYaw = spot.rot + Math.PI; }
     else { const fx = dest === 'isla' ? 450 : spot.x, fz = spot.z; player.position.set(fx, groundY(fx, fz), fz); G.camYaw = spot.rot + Math.PI; }
     G.minutes = (G.minutes + 25) % 1440; G.swimming = false;
+    const escaped = dest === 'isla' && G.wanted > 0;
+    if (dest === 'isla') { G.wanted = 0; clearCops(); }
     $('overlay').hidden = true; G.mode = 'play';
-    toast(dest === 'isla' ? 'Llegaste a tu isla. Subí el auto al montacargas para guardarlo.' : 'Llegaste al puerto de Port Sable.', 4500); saveNow();
+    toast(escaped ? '¡Te escapaste por mar! La policía perdió tu rastro.' : dest === 'isla' ? 'Llegaste a tu isla. Entrá con el auto al garaje y pará arriba del montacargas.' : 'Llegaste al puerto de Port Sable.', 4500); saveNow();
   }, 2200);
 }
 function sleepAtHome() {
@@ -2590,7 +2710,6 @@ function ferryPrompt() {
   return null;
 }
 function sailFerry() {
-  if (G.wanted > 0) return toast('Capitán Nico: "Con la policía atrás no zarpo."');
   if (G.money < 250) return toast('Capitán Nico: "Son $250, jefe."');
   if (G.inCar && car.userData.boat) return toast('Ese barco no entra en el mío.');
   if (G.inCar && Math.abs(car.userData.speed) > 3) return toast('Frená arriba de la cubierta.');
@@ -2698,7 +2817,7 @@ $('loginForm').addEventListener('submit', async e => {
   else if (car.userData.model !== G.carModel) { const nc = makeCar(G.carColor, false, G.carModel); scene.add(nc); moveHeadlight(car, nc); const i = parked.indexOf(car); if (i >= 0) parked.splice(i, 1); scene.remove(car); car = nc; }
   G.swimming = false;
   if (!data || typeof data.x !== 'number') spawn = { x: cs.x - Math.cos(cs.rot) * 3.4, z: cs.z + Math.sin(cs.rot) * 3.4 };
-  player.position.set(spawn.x, groundY(spawn.x, spawn.z), spawn.z); player.visible = true; G.inCar = false; car.position.set(cs.x, ROADY, cs.z); car.rotation.set(0, cs.rot, 0); car.userData.speed = 0; car.userData.wrecked = false; car.visible = true; car.userData.stored = false; car.userData.paint.color.set(G.carColor); addParkedCollider(car); setIslandOwner(name);
+  player.position.set(spawn.x, groundY(spawn.x, spawn.z), spawn.z); player.visible = true; G.inCar = false; car.position.set(cs.x, ROADY, cs.z); car.rotation.set(0, cs.rot, 0); car.userData.speed = 0; car.userData.wrecked = false; car.visible = true; car.userData.stored = false; car.userData.paint.color.set(G.carColor); addParkedCollider(car); setIslandOwner(name); refreshProps();
   G.stores.forEach(s => { if (s.unlock && s.door) s.door.material.color.set(locked(s) ? 0x222222 : 0xfff0c0); });
   removeLucy(); if (STORY[G.mission] && STORY[G.mission].retry !== undefined && G.mstep > STORY[G.mission].retry) G.mstep = STORY[G.mission].retry;
   startStep(); setQuality($('quality').value);
@@ -2720,7 +2839,7 @@ function findCarSpot(p) {
 let nearStore = null;
 function tryEnter() {
   const isp = islandPrompt();
-  if (isp) { if (isp.kind === 'sail') return sailFerry(); if (isp.kind === 'back') { if (G.wanted > 0) return toast('Primero perdé a la policía.'); return ferry('ciudad'); } if (isp.kind === 'store') return storeCarInGarage(); if (isp.kind === 'garage') return enterInterior(GARAGE_S); if (isp.kind === 'house') return enterInterior(HOUSE_S); }
+  if (isp) { if (isp.kind === 'sail') return sailFerry(); if (isp.kind === 'back') { if (G.wanted > 0) return toast('Primero perdé a la policía.'); return ferry('ciudad'); } if (isp.kind === 'store') return storeCarInGarage(); if (isp.kind === 'garage') return startElev(-1, false); if (isp.kind === 'house') return enterInterior(HOUSE_S); if (isp.kind === 'prop') return enterInterior(isp.s); }
   if (G.inCar) return toast('Bajate del auto para entrar (F)');
   if (G.inside) {
     const ip = interiorPrompt();
@@ -3016,7 +3135,7 @@ function shopAction(s, a, i) {
     const item = s.sells[i], p = priceOf(s, item);
     if (G.money < p) return toast('No te alcanza la plata');
     G.money -= p;
-    if (s.actions?.includes('comprar_propiedad')) G.owned.push(s.id + ':' + item);
+    if (s.actions?.includes('comprar_propiedad')) { G.owned.push(s.id + ':' + item); const pr = refreshProps().find(x => x.key === s.id + ':' + item); if (pr) { saveNow(); closeShop(); setWaypoint(wpTo(item, pr.anchor)); toast(`¡Compraste ${item}! Te marqué la entrada en el GPS.`, 4500); return; } }
     const buyModel = /superdeportiv/i.test(item) ? 'moretti' : /convertible/i.test(item) ? 'valor' : /suv/i.test(item) ? 'brennan' : /lancha|jet|yate|avioneta|helic|hangar|licencia|amarre/i.test(item) ? null : s.category === 'autos' && /tuning|motor|pintura|blindaje/i.test(item) ? null : null;
     if (buyModel) { giveCar(buyModel, ['#ffd23f', '#1e4fa3', '#e8e8e8', '#b3122e'][Math.floor(Math.random() * 4)]); toast(`Tu ${MODELS[buyModel].brand} ${MODELS[buyModel].name} nuevo te espera afuera`); }
     else if (/vip|reservado/i.test(item) && ['club_adulto', 'bar'].includes(s.category)) { saveNow(); closeShop(); enterVIP(s); return; }
@@ -3123,6 +3242,7 @@ function drawMapLayer(ctx, cx, cy, k, w, h, opts) {
     if (r >= 7) { ctx.fillStyle = heist ? '#0f0b1e' : '#fff'; ctx.font = `700 ${Math.round(r * (GLYPH[s.category].length > 1 ? 0.8 : 1.1))}px Inter, sans-serif`; ctx.fillText(heist ? '$' : GLYPH[s.category], x, y + 0.5); }
     if (opts.labels && k > 1.6) { ctx.font = '600 11px Inter, sans-serif'; const tw = ctx.measureText(s.name).width + 10; ctx.fillStyle = 'rgba(15,11,30,0.85)'; ctx.fillRect(x - tw / 2, y + r + 3, tw, 16); ctx.fillStyle = '#f4ecff'; ctx.fillText(s.name, x, y + r + 11); }
   }
+  for (const pr of PROPS) if (pr.owned) { ctx.fillStyle = '#3ddc97'; ctx.beginPath(); ctx.arc(pr.mx * k, pr.my * k, r * 0.9, 0, 7); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); if (r >= 7) { ctx.fillStyle = '#0f0b1e'; ctx.font = `700 ${Math.round(r)}px Inter, sans-serif`; ctx.fillText('⌂', pr.mx * k, pr.my * k + 0.5); } if (opts.labels && k > 1.6) { ctx.font = '600 11px Inter, sans-serif'; const tw = ctx.measureText(pr.item).width + 10; ctx.fillStyle = 'rgba(15,11,30,0.85)'; ctx.fillRect(pr.mx * k - tw / 2, pr.my * k + r + 3, tw, 16); ctx.fillStyle = '#3ddc97'; ctx.fillText(pr.item, pr.mx * k, pr.my * k + r + 11); } }
   const fp = M2W(focusPos().x, focusPos().z);
   ctx.fillStyle = '#8a6a4a'; for (const pr of PIERS) { const a = M2W(pr.x0, pr.z0), b = M2W(pr.x1, pr.z1); ctx.fillRect(a.mx * k, a.my * k, Math.max(2, (b.mx - a.mx) * k), Math.max(2, (b.my - a.my) * k)); }
   ctx.fillStyle = '#e8e8e8'; for (const g of boats.concat(aiBoats.map(b => b.g))) { if (g === car && G.inCar) continue; const bp = M2W(g.position.x, g.position.z); ctx.beginPath(); ctx.arc(bp.mx * k, bp.my * k, 3.5, 0, 7); ctx.fill(); }
@@ -3239,6 +3359,8 @@ function inputVec() {
   return { ix, iy, run, brake };
 }
 function update(dt) {
+  updateIsland(dt);
+  if (ELEV) return updateElev(dt);
   const { ix, iy, run, brake } = inputVec();
   if (G.inCar && car.userData.boat) updatePlayerBoat(dt, ix, iy, run, brake, performance.now());
   else if (G.inCar) {
@@ -3305,7 +3427,7 @@ function updateCamera(dt, now) {
     sun.position.copy(camera.position).addScaledVector(sunDir, 250); sun.target.position.set(c.x, 0, c.z);
     return;
   }
-  const t = focusPos();
+  let t = focusPos(); if (ELEV) t = { x: t.x, y: ROADY, z: t.z };
   if (G.inCar && !pointers.size) { let diff = (car.rotation.y + Math.PI) - G.camYaw; diff = Math.atan2(Math.sin(diff), Math.cos(diff)); G.camYaw += diff * Math.min(1, dt * 3); }
   const spd = G.inCar ? Math.abs(car.userData.speed) : 0;
   const bm = G.inCar && car.userData.boat ? MODELS[car.userData.model].cam : null;
