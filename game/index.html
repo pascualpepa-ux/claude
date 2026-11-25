@@ -2082,7 +2082,7 @@ function dialog(id) {
       const there = onIsland(), boatNow = G.inCar && car.userData.boat;
       return there
         ? { lines: ['Capitán Nico: "¿Volvemos a la ciudad, jefe?"'], opts: [{ label: G.inCar ? 'Al puerto, con el auto' : 'Al puerto', disabled: boatNow, run: () => { ferry('ciudad'); return null; } }] }
-        : { lines: ['Capitán Nico: "El carguero sale cuando quieras. Te llevo a tu isla, con auto y todo."', G.inCar ? 'Capitán Nico: "Subí el auto a la rampa y zarpamos."' : 'Capitán Nico: "Si venís en auto, lo cargamos en el barco."'], opts: [{ label: `Llevame a mi isla${G.inCar ? ' con el auto' : ''} · $250`, disabled: G.wanted > 0 || !fee(250) || boatNow || !!G.inside, run: () => { G.money -= 250; ferry('isla'); return null; } }], note: G.wanted > 0 ? 'Capitán Nico: "Con la policía atrás no zarpo."' : null };
+        : { lines: ['Capitán Nico: "¿Qué hacés, jefe? ¿Querés que te busque en barco?"', 'Capitán Nico: "Tengo uno con rampa: subís el auto y te llevo a tu isla. Te marco dónde te espero."'], opts: [{ label: FB ? 'Mandame el barco a otro lado' : 'Sí, buscame', disabled: !!G.inside, run: () => { callFerry(); return `Nico te espera en ${FB.sp.name}. Seguí el GPS y subí a la cubierta.`; } }].concat(FB ? [{ label: 'Cancelá el barco', run: () => { removeFerry(); return 'Capitán Nico: "Cuando quieras me llamás."'; } }] : []) };
     }
     case '911': return {
       lines: ['Emergencias: "Emergencias de Heat City, ¿cuál es su emergencia?"'],
@@ -2501,6 +2501,8 @@ function setIslandOwner(name) {
   if (islandSign) { islandSign.material.map.dispose(); islandSign.material.map = islandSignTex(name); islandSign.material.needsUpdate = true; }
 }
 function islandPrompt() {
+  const fpp = ferryPrompt(); if (fpp) return fpp;
+  if (onIsland() && Math.hypot(aiFocus().x - 448, aiFocus().z - 300) < 10) return { kind: 'back', text: `Volver a la ciudad en el barco${G.inCar ? ' con el auto' : ''}` };
   if (G.inside || !onIsland()) return null;
   const p = player.position, cp = G.inCar ? car.position : p;
   if (G.inCar && !car.userData.boat && Math.hypot(cp.x - 500, cp.z - 300) < 4.5) return { kind: 'store', text: 'Bajar el auto al garaje' };
@@ -2548,6 +2550,51 @@ function ferry(dest) {
 function sleepAtHome() {
   G.mode = 'dead'; $('ovTitle').textContent = 'DORMISTE'; $('ovText').textContent = 'Pasaron 8 horas. Partida guardada.'; $('overlay').hidden = false;
   setTimeout(() => { G.minutes = (G.minutes + 480) % 1440; G.hp = 100; $('overlay').hidden = true; G.mode = 'play'; saveNow(); }, 1800);
+}
+
+// ---------- barco de Nico: te espera en la costa con rampa para el auto ----------
+const FERRY_SPOTS = [
+  { name: 'Puerto de Port Sable', x0: 400, x1: 420, z0: -258, z1: -248, cx: 410, cz: -253, dir: 1, axis: 'x' },
+  { name: 'Costa oeste', x0: -420, x1: -400, z0: -165, z1: -155, cx: -410, cz: -160, dir: -1, axis: 'x' },
+  { name: 'Costa sur', x0: -165, x1: -155, z0: 400, z1: 420, cx: -160, cz: 410, dir: 1, axis: 'z' }
+];
+let FB = null;
+function removeFerry() { if (!FB) return; scene.remove(FB.group); const i = PIERS.indexOf(FB.pier); if (i >= 0) PIERS.splice(i, 1); if (G.waypoint && G.waypoint.follow === FB.marker) setWaypoint(null); FB = null; }
+function callFerry() {
+  removeFerry();
+  const fp = aiFocus(), sp = FERRY_SPOTS.slice().sort((a, b) => Math.hypot(a.cx - fp.x, a.cz - fp.z) - Math.hypot(b.cx - fp.x, b.cz - fp.z))[0];
+  const g = new THREE.Group(), red = new THREE.MeshStandardMaterial({ color: 0xc0392b, roughness: 0.6 }), steel = new THREE.MeshStandardMaterial({ color: 0x5a6068, metalness: 0.7, roughness: 0.4 }), white = new THREE.MeshStandardMaterial({ color: 0xf2f2f2, roughness: 0.6 });
+  const along = sp.axis === 'x', L = 20, Wd = 10;
+  const hull = new THREE.Mesh(new THREE.BoxGeometry(along ? L : Wd, 2.2, along ? Wd : L), red); hull.position.set(sp.cx, -0.55, sp.cz); g.add(hull);
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(along ? L : Wd, 0.15, along ? Wd : L), steel); deck.position.set(sp.cx, 0.55, sp.cz); deck.receiveShadow = true; g.add(deck);
+  // rampa hacia la costa
+  const rx = along ? sp.cx - sp.dir * (L / 2 + 1.5) : sp.cx, rz = along ? sp.cz : sp.cz - sp.dir * (L / 2 + 1.5);
+  const ramp = new THREE.Mesh(new THREE.BoxGeometry(along ? 3 : 5, 0.12, along ? 5 : 3), steel); ramp.position.set(rx, 0.45, rz); ramp.rotation[along ? 'z' : 'x'] = sp.dir * (along ? 0.06 : -0.06); g.add(ramp);
+  // barandas y cabina
+  for (const sd of [-1, 1]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(along ? L : 0.1, 1, along ? 0.1 : L), white); rail.position.set(sp.cx + (along ? 0 : sd * Wd / 2), 1.1, sp.cz + (along ? sd * Wd / 2 : 0)); g.add(rail); }
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(along ? 3 : 6, 3.2, along ? 6 : 3), white); cab.position.set(sp.cx + (along ? sp.dir * (L / 2 - 1.5) : 0), 2.2, sp.cz + (along ? 0 : sp.dir * (L / 2 - 1.5))); g.add(cab);
+  const capt = makeHuman({ skin: 0xc68a5e, top: 0xf4f1e8, pants: 0x1f2f55, shoes: 0x1a1a1a, hair: 0x8a8a8a, stubble: true });
+  capt.position.set(sp.cx + (along ? sp.dir * (L / 2 - 4) : 2), 0.62, sp.cz + (along ? 2 : sp.dir * (L / 2 - 4))); capt.rotation.y = along ? -sp.dir * Math.PI / 2 : (sp.dir > 0 ? Math.PI : 0); g.add(capt);
+  const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffd23f, toneMapped: false })); beacon.position.copy(cab.position).add(new THREE.Vector3(0, 1.9, 0)); g.add(beacon);
+  scene.add(g);
+  const pier = { x0: along ? sp.cx - L / 2 - 3 : sp.cx - Wd / 2, x1: along ? sp.cx + L / 2 : sp.cx + Wd / 2, z0: along ? sp.cz - Wd / 2 : sp.cz - L / 2 - 3, z1: along ? sp.cz + Wd / 2 : sp.cz + L / 2, y: 0.62 };
+  PIERS.push(pier);
+  const marker = new THREE.Object3D(); marker.position.set(sp.cx, 0, sp.cz); g.add(marker);
+  FB = { group: g, pier, marker, sp, capt };
+  setWaypoint(wpTo(`Barco de Nico (${sp.name})`, marker));
+}
+function ferryPrompt() {
+  if (!FB || G.inside) return null;
+  const fp = aiFocus();
+  if (Math.hypot(fp.x - FB.sp.cx, fp.z - FB.sp.cz) < 7) return { kind: 'sail', text: `Zarpar a tu isla${G.inCar ? ' con el auto' : ''} · $250` };
+  return null;
+}
+function sailFerry() {
+  if (G.wanted > 0) return toast('Capitán Nico: "Con la policía atrás no zarpo."');
+  if (G.money < 250) return toast('Capitán Nico: "Son $250, jefe."');
+  if (G.inCar && car.userData.boat) return toast('Ese barco no entra en el mío.');
+  if (G.inCar && Math.abs(car.userData.speed) > 3) return toast('Frená arriba de la cubierta.');
+  G.money -= 250; ferry('isla'); setTimeout(removeFerry, 2300);
 }
 
 // ---------- input ----------
@@ -2673,7 +2720,7 @@ function findCarSpot(p) {
 let nearStore = null;
 function tryEnter() {
   const isp = islandPrompt();
-  if (isp) { if (isp.kind === 'store') return storeCarInGarage(); if (isp.kind === 'garage') return enterInterior(GARAGE_S); if (isp.kind === 'house') return enterInterior(HOUSE_S); }
+  if (isp) { if (isp.kind === 'sail') return sailFerry(); if (isp.kind === 'back') { if (G.wanted > 0) return toast('Primero perdé a la policía.'); return ferry('ciudad'); } if (isp.kind === 'store') return storeCarInGarage(); if (isp.kind === 'garage') return enterInterior(GARAGE_S); if (isp.kind === 'house') return enterInterior(HOUSE_S); }
   if (G.inCar) return toast('Bajate del auto para entrar (F)');
   if (G.inside) {
     const ip = interiorPrompt();
