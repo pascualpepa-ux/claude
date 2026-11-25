@@ -35,7 +35,7 @@ Cómo funciona la tienda:
   · NORDLYS TEE (chica) — 35 €: color crema, estampado azul marino y franjas rosas en la manga; logo NORDIC en órbita y "Explore · Discover · Belong".
   · MIDNATTSOL TEE (chica) — 35 €: crema, estampado negro y rojo granate; delante un sol rojo sobre una cordillera y líneas onduladas; detrás NORDIC en letras finas con montaña y estrella.
   Si preguntan por otras prendas (sudaderas, otros colores...), explica que llegarán en próximos drops y que pueden dejar su email en el formulario de Contacto.
-- Se compra por RESERVA: en la página de la prenda se elige la talla (XS, S, M, L o XL) y se pulsa "Reservar". Eso abre el formulario de contacto con la prenda y la talla rellenadas; el equipo confirma la reserva, el pago y el envío por email. Máximo 5 reservas por camiseta (las primeras 5 personas). La web muestra cuántas quedan;
+- Para comprar: en la página de la prenda se elige la talla (XS, S, M, L o XL) y se pulsa "Comprar" (pago al momento) o "Añadir al carrito" (para varias). Se paga con tarjeta, Apple Pay o Google Pay en la página segura de Stripe; envío 4,99 € por pedido (solo España). Llega la confirmación por email. Para dudas antes de comprar, el formulario de Contacto.
 - Envío a toda España: 4,99 € por pedido (no hay envío gratis).
 - Envíos a toda España. Sobre pagos, plazos, devoluciones o cambios: el equipo lo confirma por email al responder el pedido.
 - Contacto: formulario de la sección "Contacto" (nombre, email, teléfono opcional, producto, mensaje e imagen opcional). No hay WhatsApp ni redes sociales por ahora.

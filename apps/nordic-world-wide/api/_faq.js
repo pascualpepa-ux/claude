@@ -6,9 +6,9 @@
 const FAQ = [
   {
     id: "comprar",
-    k: ["reservar", "reserva", "reserve", "reservation", "comprar", "compro", "compra", "pedido", "pedir", "encargar", "quiero", "conseguir", "buy", "order", "purchase", "get one"],
-    es: "Se compra por reserva: entra en el Shop, abre la camiseta, elige tu talla (XS, S, M, L o XL) y pulsa «Reservar». Se abre el formulario con la prenda y la talla puestas; lo envías y te confirmamos la reserva, el pago y el envío por email. Cada camiseta tiene solo 5 reservas: las primeras 5 personas se la llevan.",
-    en: "Tees are sold by reservation: go to the Shop, open the tee, choose your size (XS, S, M, L or XL) and tap «Reserve». The form opens with the item and size filled in; send it and we'll confirm the reservation, payment and shipping by email. Each tee has only 5 reservations: the first 5 people get it."
+    k: ["comprar", "compro", "compra", "pedido", "pedir", "encargar", "quiero", "conseguir", "buy", "order", "purchase", "get one"],
+    es: "Para comprar: entra en el Shop, abre la camiseta, elige tu talla (XS, S, M, L o XL) y pulsa «Comprar» (pagas al momento) o «Añadir al carrito» para llevarte varias. Se paga con tarjeta, Apple Pay o Google Pay en la página segura de Stripe. El envío cuesta 4,99 € por pedido y te llega la confirmación por email.",
+    en: "To buy: go to the Shop, open the tee, choose your size (XS, S, M, L or XL) and tap «Buy now» (pay right away) or «Add to cart» to get several. You pay by card, Apple Pay or Google Pay on Stripe's secure checkout. Shipping is €4.99 per order and you'll get a confirmation by email."
   },
   {
     id: "tallas",
@@ -31,8 +31,8 @@ const FAQ = [
   {
     id: "pago",
     k: ["pago", "pagar", "pagos", "tarjeta", "bizum", "transferencia", "paypal", "efectivo", "payment", "pay", "card"],
-    es: "La forma de pago te la confirmamos por email al responder tu pedido.",
-    en: "We'll confirm the payment method by email when we reply to your order."
+    es: "Se paga online con tarjeta (Visa, Mastercard, Amex), Apple Pay o Google Pay, en la página segura de Stripe. Nosotros nunca vemos los datos de tu tarjeta.",
+    en: "You pay online by card (Visa, Mastercard, Amex), Apple Pay or Google Pay, on Stripe's secure checkout. We never see your card details."
   },
   {
     id: "devolucion",
@@ -61,8 +61,8 @@ const FAQ = [
   {
     id: "stock",
     k: ["stock", "disponible", "disponibles", "quedan", "agotado", "agotada", "unidades", "hay", "available", "sold out", "left"],
-    es: "Cada camiseta tiene como máximo 5 reservas. En el Shop ves cuántas quedan de cada una; cuando se llenan aparece «RESERVAS COMPLETAS». Si quieres una completa, escríbenos y te apuntamos a la lista de espera.",
-    en: "Each tee has a maximum of 5 reservations. The Shop shows how many are left for each one; when full it says «FULLY RESERVED». If you want a full one, write to us and we'll add you to the waiting list."
+    es: "Las unidades son limitadas: cuando una camiseta se agota, no vuelve. Si quieres asegurarte la tuya, cómprala desde su página; si tienes dudas sobre tu talla, escríbenos desde Contacto.",
+    en: "Units are limited: once a tee sells out, it doesn't come back. To make sure you get yours, buy it from its page; if you're unsure about your size, write to us through Contact."
   },
   {
     id: "material",

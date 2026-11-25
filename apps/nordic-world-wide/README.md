@@ -16,15 +16,9 @@ img/              Imágenes (placeholders SVG; reemplazar por fotos reales)
 ## Añadir una camiseta
 Abre `js/products.js`, copia un bloque `{ ... }` y cambia los datos. Con `precio: null` se muestra **"Precio a consultar"**; pon un número (`precio: 39.9`) cuando esté definido. Las fotos van en `img/products/` (recomendado: cuadradas, 900×900 o más).
 
-## Reservas (máx. 5 por camiseta)
-Los botones dicen «Reservar». Cada camiseta admite `MAX_RESERVAS` (5) reservas; el Shop muestra «Quedan X de 5» y, al llenarse, «RESERVAS COMPLETAS» (ya no deja reservar).
-- Reservas hechas fuera de la web: campo `reservadas` de cada camiseta en `js/products.js`.
-- Contador automático: `api/reserve.js` suma las reservas de la web en la base de datos (Upstash, ver Panel admin). **Sin base de datos** el contador no sube solo: el email de la reserva lo avisa («actualizar reservadas») y hay que sumar 1 a mano en `js/products.js`.
-- Con la clave de Stripe en Vercel, el botón pasa a «Reservar y pagar»: se paga con tarjeta y el pago cuenta como 1 de las 5 reservas (si la camiseta está completa, no deja pagar). Sin la clave: «Reservar» con el formulario.
-
 ## Emails
 Cada envío llega a la vez a pascualpepa@icloud.com (principal) y en copia a guillermogg24@icloud.com y pelayocc@icloud.com (lista en `js/config.js`).
-- Asunto: `🛒 Reserva – [producto]` (con «Reserva nº X de 5») si hay producto, si no `✉️ Contacto – [nombre]`.
+- Asunto: `🛒 Pedido – [producto]` si hay producto, si no `✉️ Contacto – [nombre]`.
 - "Responder a" = email del cliente.
 - Imagen adjunta opcional (máx. 3 MB).
 - Antispam: campo honeypot oculto + tiempo mínimo de rellenado.
@@ -74,9 +68,10 @@ Botón abajo a la derecha en todas las páginas. Responde **solo sobre la web**:
 Carrito + página de pago de Stripe (tarjeta, Apple Pay, Google Pay). Código: `js/cart.js` (web) y `api/checkout.js` (servidor). Los precios se cobran desde `js/products.js` en el servidor; el navegador no puede cambiarlos.
 - **Envío:** 4,99 € por pedido, siempre (sin envío gratis). Solo España (`ENVIO_CENT` en `api/checkout.js`).
 - **Activar:** en Vercel → proyecto → Settings → Environment Variables → `STRIPE_SECRET_KEY` = clave secreta de Stripe → Redeploy. Con una clave `sk_test_…` funciona en modo prueba (aviso amarillo en el carrito, tarjeta de prueba 4242 4242 4242 4242); con `sk_live_…`, cobra de verdad.
-- Sin la clave, el carrito no aparece y la web funciona como antes (botón "Comprar / Consultar").
+- En cada camiseta: «Comprar» (va directo al pago) y «Añadir al carrito». Solo con la clave REAL (`sk_live_`/`rk_live_`); con una de prueba o sin clave, la web vuelve al botón «Comprar / Consultar» con el formulario.
+- **Panel admin → Compras:** lista de compras pagadas (cliente, dirección, teléfono, prendas, total) leída directamente de Stripe (`api/orders.js`), sin base de datos. Se actualiza sola cada minuto.
 - Al pagar: el cliente recibe el recibo de Stripe; el equipo recibe el email "💳 PEDIDO PAGADO" con productos, tallas, dirección y teléfono, y lo ve en el panel de Stripe (Pagos). Recomendado: en Stripe → Ajustes → Notificaciones por email → activar "Pagos correctos".
-- Se cobra con la cuenta de Stripe de Rumbo Traveling; el extracto del cliente lleva el sufijo "NORDIC".
+- Se cobra con la cuenta de Stripe "Nordic World Wide"; el extracto del cliente lleva el sufijo "NORDIC".
 
 ## Pendiente
 - Fotos reales de producto y del hero (`img/hero.svg`).

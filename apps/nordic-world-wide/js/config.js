@@ -1,7 +1,7 @@
 /* Ajustes generales de la web — editar aquí */
 window.SITE_CONFIG = {
-  // Pago con tarjeta (Stripe): "Reservar y pagar" en cada camiseta. Cada pago cuenta como 1 de las 5 reservas.
-  // Necesita STRIPE_SECRET_KEY en Vercel; sin ella, el botón vuelve a ser "Reservar" con el formulario.
+  // Pago con tarjeta (Stripe): botones "Comprar" y "Añadir al carrito" en cada camiseta.
+  // Necesita STRIPE_SECRET_KEY en Vercel; sin ella, vuelve el botón "Comprar / Consultar" con el formulario.
   pagosConTarjeta: true,
 
   // EMAILS DEL FORMULARIO — cada mensaje sale por DOS caminos a la vez, por si uno falla:

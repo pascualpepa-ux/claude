@@ -55,29 +55,6 @@ function validItems(raw) {
   return out;
 }
 
-const { maxReservas } = require("./_catalog");
-const { redis } = require("./_lib");
-const RKEY = (id) => "nww:reservas:" + id;
-
-// Reservas ya hechas de cada camiseta (catálogo + web). Sin base de datos: solo las del catálogo.
-async function reservasActuales(products) {
-  try {
-    const vals = await redis(products.map((p) => ["GET", RKEY(p.id)]));
-    return products.map((p, i) => (p.reservadas || 0) + (parseInt(vals[i], 10) || 0));
-  } catch (e) { return products.map((p) => p.reservadas || 0); }
-}
-
-// Un pago confirmado cuenta como reserva (una sola vez por pago).
-async function contarPago(sessionId, pedido) {
-  try {
-    const [first] = await redis([["SET", "nww:pago:" + sessionId, "1", "NX", "EX", String(60 * 60 * 24 * 365)]]);
-    if (first !== "OK") return;
-    const cmds = String(pedido || "").split(",").map((x) => x.trim().match(/^(\d+)x ([a-z0-9-]+)/)).filter(Boolean)
-      .map((m) => ["INCRBY", RKEY(m[2]), m[1]]);
-    if (cmds.length) await redis(cmds);
-  } catch (e) { /* sin base de datos: el equipo actualiza "reservadas" a mano */ }
-}
-
 module.exports = async function handler(req, res) {
   const active = !!SECRET();
   const q = req.query || {};
@@ -95,7 +72,6 @@ module.exports = async function handler(req, res) {
       const s = await stripe("/checkout/sessions/" + encodeURIComponent(id) + "?expand[]=line_items");
       const ship = (s.collected_information && s.collected_information.shipping_details) || s.shipping_details || {};
       const a = ship.address || {};
-      if (s.payment_status === "paid" && s.livemode) await contarPago(s.id, s.metadata && s.metadata.pedido);
       return send(res, 200, {
         paid: s.payment_status === "paid",
         test: !s.livemode,
@@ -120,10 +96,6 @@ module.exports = async function handler(req, res) {
     const items = validItems(body.items);
     if (!items.length) return send(res, 400, { error: "EMPTY_CART" });
 
-    // Máximo de reservas por camiseta: si ya no quedan, no se cobra.
-    const max = maxReservas();
-    const hechas = await reservasActuales(items.map((i) => i.p));
-    if (items.some((i, n) => hechas[n] + i.qty > max)) return send(res, 409, { error: "FULL" });
 
     const data = {
       mode: "payment",
@@ -140,8 +112,8 @@ module.exports = async function handler(req, res) {
       // Modo prueba (clave sk_test_): se avisa bien claro en la página de pago.
       ...(SECRET().startsWith("sk_test_") ? {
         "custom_text[submit][message]": lang === "en"
-          ? "⚠️ TEST MODE — this is NOT a real payment: nothing is charged and it does NOT count as a reservation."
-          : "⚠️ MODO PRUEBA — este pago NO es real: no se cobra nada y NO cuenta como reserva."
+          ? "⚠️ TEST MODE — this is NOT a real payment: nothing is charged."
+          : "⚠️ MODO PRUEBA — este pago NO es real: no se cobra nada."
       } : {}),
       "payment_intent_data[statement_descriptor_suffix]": "NORDIC",
       "metadata[tienda]": "nordicworldwide",

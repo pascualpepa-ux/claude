@@ -57,7 +57,7 @@
     .hello { color: var(--muted); font-size: 13px; }
     .hello strong { color: var(--text); }
     .grid { display: grid; gap: 16px; }
-    .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 24px 0 16px; }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 24px 0 16px; }
     @media (max-width: 600px) { .tile { padding: 12px; } .tile .num { font-size: 34px; } .tile .eyebrow { font-size: 9px; letter-spacing: .14em; } }
     .tile { background: var(--panel); border: 1px solid var(--line); padding: 18px; min-width: 0; }
     .tile .num { font-family: var(--display); font-size: 48px; line-height: 1; margin-top: 6px; font-variant-numeric: tabular-nums; }
@@ -141,6 +141,8 @@
     <h1>PANEL</h1>
 
     <div class="tiles">
+      <div class="tile"><p class="eyebrow">Compras</p><div class="num" id="t-orders">—</div></div>
+      <div class="tile"><p class="eyebrow">Vendido</p><div class="num" id="t-sales">—</div></div>
       <div class="tile"><p class="eyebrow">Mensajes recibidos</p><div class="num" id="t-msgs">—</div></div>
       <div class="tile"><p class="eyebrow">Visitas · 30 días</p><div class="num" id="t-visits">—</div></div>
       <div class="tile"><p class="eyebrow">Visitas · hoy</p><div class="num" id="t-today">—</div></div>
@@ -149,6 +151,14 @@
 
     <div class="grid">
       <div style="display:grid;gap:16px;min-width:0">
+        <section class="card">
+          <div class="card-head">
+            <h2>COMPRAS</h2>
+            <button class="btn btn-ghost" id="reload-orders" type="button">Actualizar</button>
+          </div>
+          <div class="msgs" id="orders"><p class="note">Cargando…</p></div>
+        </section>
+
         <section class="card">
           <div class="card-head">
             <h2>VISITAS POR DÍA</h2>

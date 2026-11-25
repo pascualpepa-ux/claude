@@ -417,9 +417,8 @@ a { color: inherit; }
   .cart-btn + .lang-toggle { margin-left: 12px; }
 }
 
-/* Reservas */
-.res-left { margin: 6px 0 10px; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
-.res-left.last { color: #b3261e; opacity: 1; font-weight: 600; }
-.res-left.full { color: #b3261e; opacity: 1; font-weight: 700; }
-.btn.is-full, .btn[disabled] { opacity: .45; cursor: not-allowed; }
+.btn[disabled] { opacity: .6; cursor: wait; }
+.btn-link { display: block; margin: 14px auto 0; background: none; border: 0; padding: 4px; font: inherit; font-size: .82rem; color: inherit; opacity: .7; text-decoration: underline; cursor: pointer; }
+.pay-error:empty { display: none; }
+.pay-error { color: #b3261e; font-size: .85rem; margin: 8px 0 0; }
 .pay-test { margin: 10px 0 0; padding: 10px 12px; background: #fff4d6; border: 2px solid #e0a800; color: #5c4400; font-size: .85rem; font-weight: 600; line-height: 1.4; }

@@ -5,7 +5,7 @@
   var TEAM = ["Pascual", "Billy", "Pelayo"];
   var $ = function (id) { return document.getElementById(id); };
   var session = load();
-  var chatTimer = null, statsTimer = null, lastChatLen = -1;
+  var chatTimer = null, statsTimer = null, ordersTimer = null, lastChatLen = -1;
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -60,7 +60,7 @@
 
   function logout() {
     save(null); session = null;
-    clearInterval(chatTimer); clearInterval(statsTimer);
+    clearInterval(chatTimer); clearInterval(statsTimer); clearInterval(ordersTimer);
     $("panel-view").hidden = true; $("login-view").hidden = false;
     $("pass").value = "";
   }
@@ -70,7 +70,9 @@
   function showPanel() {
     $("login-view").hidden = true; $("panel-view").hidden = false;
     $("me-name").textContent = session.name;
-    loadCount(); loadStats(); loadChat();
+    loadCount(); loadStats(); loadChat(); loadOrders();
+    clearInterval(ordersTimer);
+    ordersTimer = setInterval(function () { if (!document.hidden) loadOrders(); }, 60 * 1000);
     clearInterval(chatTimer);
     chatTimer = setInterval(function () { if (!document.hidden) { loadChat(); loadCount(); } }, 4000);
     clearInterval(statsTimer);
@@ -106,6 +108,33 @@
       if (err.message !== "NO_DB") $("chart-wrap").innerHTML = '<p class="setup">No se pudieron cargar las visitas (' + esc(err.message) + ").</p>";
     });
   }
+
+  /* ---------- Compras (pagadas con tarjeta, desde Stripe) ---------- */
+  function euros(n) { return n.toLocaleString("es-ES", { style: "currency", currency: "EUR" }); }
+  function loadOrders() {
+    return api("/api/orders").then(function (d) {
+      if (!d.configured) {
+        $("orders").innerHTML = '<p class="setup">Los pagos con tarjeta no están activados (falta STRIPE_SECRET_KEY en Vercel).</p>';
+        return;
+      }
+      var reales = d.orders.filter(function (o) { return !o.prueba; });
+      $("t-orders").textContent = reales.length;
+      $("t-sales").textContent = euros(reales.reduce(function (a, o) { return a + o.total; }, 0));
+      if (!d.orders.length) { $("orders").innerHTML = '<p class="note">Todavía no hay compras.</p>'; return; }
+      $("orders").innerHTML = d.orders.map(function (o) {
+        return '<article class="msg">' +
+          '<div class="msg-head"><span class="pill pedido">' + (o.prueba ? "PRUEBA" : "PAGADO") + " · " + euros(o.total) + "</span><span>" + fmtDate(o.fecha) + "</span></div>" +
+          '<p class="msg-meta"><strong>' + esc(o.nombre || "Cliente") + "</strong> · " + esc(o.email) + (o.telefono ? " · " + esc(o.telefono) : "") +
+          (o.direccion ? "<br>Envío a: " + esc(o.direccion) : "") + "</p>" +
+          '<div class="msg-body">' + o.items.map(function (i) { return esc(i.cantidad + " × " + i.nombre) + " — " + euros(i.importe); }).join("<br>") +
+          "<br>Envío: " + euros(o.envio) + "</div>" +
+          "</article>";
+      }).join("");
+    }).catch(function (err) {
+      $("orders").innerHTML = '<p class="note">No se pudieron cargar las compras (' + esc(err.message) + ").</p>";
+    });
+  }
+  $("reload-orders").addEventListener("click", function () { $("orders").innerHTML = '<p class="note">Cargando…</p>'; loadOrders(); });
 
   /* ---------- Mensajes (ocultos hasta pulsar) ---------- */
   var msgsOpen = false;
