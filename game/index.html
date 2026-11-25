@@ -610,7 +610,7 @@ function init(data) {
   [mapCanvas] = cnv(TEX); drawMap2D(mapCanvas.getContext('2d'));
   try { build3D(); } catch (e) { console.error(e); $('loading').hidden = true; const er = $('err'); er.hidden = false; er.textContent = 'Tu navegador no pudo iniciar los gráficos 3D. Probá con Chrome o Edge actualizados.'; return; }
   buildMapUI();
-  buildTraffic(); buildParked(); buildPeds(); spawnArmored(); buildPort(); buildPrivateIsland(); buildAirport();
+  buildTraffic(); buildParked(); buildPeds(); spawnArmored(); buildPort(); buildPrivateIsland(); buildAirport(); buildIslandFleet();
   $('loading').hidden = true;
   showLogin();
   requestAnimationFrame(loop);
@@ -2914,6 +2914,23 @@ function buildAirport() {
   makePlane('avioneta', '#1e4fa3', 460, -170, Math.PI / 2);
   makePlane('jet', '#b8902a', 458, -140, Math.PI / 2);
 }
+// tu flota en la isla privada: yate, jet ski y jet en una pista propia
+function buildIslandFleet() {
+  const y = mooredBoat('yate', 432, 289, -Math.PI / 2, '#f4f4f2'); y.userData.mine = true; y.userData.label = 'tu yate';
+  const j = mooredBoat('jetski', 452, 292.5, -Math.PI / 2, '#3ddcd0'); j.userData.mine = true; j.userData.label = 'tu jet ski';
+  const asph = new THREE.MeshStandardMaterial({ color: 0x2b2c30, roughness: 0.85 });
+  const rw = new THREE.Mesh(new THREE.PlaneGeometry(10, 66), asph); rw.rotation.x = -Math.PI / 2; rw.position.set(530, ROADY + 0.03, 301); rw.receiveShadow = true; scene.add(rw);
+  const wm = new THREE.MeshBasicMaterial({ color: 0xf2f2f2 });
+  for (let z = 274; z < 330; z += 6) { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 3), wm); l.rotation.x = -Math.PI / 2; l.position.set(530, ROADY + 0.04, z); scene.add(l); }
+  for (const x of [525.4, 534.6]) { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 66), wm); l.rotation.x = -Math.PI / 2; l.position.set(x, ROADY + 0.04, 301); scene.add(l); }
+  const lg = new THREE.MeshBasicMaterial({ color: 0x9fe8ff, toneMapped: false }); for (let z = 270; z <= 332; z += 5.5) for (const x of [524.6, 535.4]) { const b = new THREE.Mesh(new THREE.SphereGeometry(0.13, 6, 4), lg); b.position.set(x, ROADY + 0.14, z); scene.add(b); }
+  // hangarcito abierto con techo y letrero
+  const metal = new THREE.MeshStandardMaterial({ color: 0x2a2d33, metalness: 0.6, roughness: 0.4 });
+  for (const [x, z] of [[521, 318], [521, 334], [539.5, 318], [539.5, 334]]) { const p = new THREE.Mesh(new THREE.BoxGeometry(0.3, 5.2, 0.3), metal); p.position.set(x, ROADY + 2.6, z); p.castShadow = true; scene.add(p); colliders.push({ x, z, hw: 0.3, hd: 0.3 }); }
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(19.5, 0.35, 17), new THREE.MeshStandardMaterial({ color: 0xf2f0ea, roughness: 0.5 })); roof.position.set(530.2, ROADY + 5.3, 326); roof.castShadow = true; scene.add(roof);
+  const sg = new THREE.Mesh(new THREE.PlaneGeometry(8, 1.4), new THREE.MeshBasicMaterial({ map: makeSign('PRIVATE JET', 'Solo el dueño', '#ffd23f', true), toneMapped: false, side: THREE.DoubleSide })); sg.position.set(530.2, ROADY + 6.3, 317.4); sg.rotation.y = Math.PI; scene.add(sg);
+  const jet = makePlane('jet', '#111111', 530, 326, Math.PI); jet.userData.mine = jet.userData.own = true;
+}
 function nearPlane() {
   const p = player.position; let best = null, bd = 1e9;
   for (const g of planes) { if (g.userData.wrecked) continue; const d = Math.hypot(g.position.x - p.x, g.position.z - p.z) - PLANES[g.userData.plane].L * 0.35; if (d < bd) { bd = d; best = g; } }
@@ -2943,7 +2960,7 @@ function planeCrash(g, why) {
   player.visible = true; player.rotation.set(0, 0, 0); standPose(player.userData);
   if (water) { g.position.y = -1.5; player.position.set(px, -0.28, pz); } else { g.position.y = groundY(g.position.x, g.position.z); g.rotation.x = 0.15; g.rotation.z = 0.3; player.position.set(px, groundY(px, pz), pz); player.userData.down = 2; }
   hurtPlayer(45); toast(why || '¡Te estrellaste!', 4000);
-  setTimeout(() => { if (G.plane === g) return; scene.remove(g); planes.splice(planes.indexOf(g), 1); const h = u.home; makePlane(u.plane, h.color, h.x, h.z, h.rot); }, 45000);
+  setTimeout(() => { if (G.plane === g) return; scene.remove(g); planes.splice(planes.indexOf(g), 1); const h = u.home; const np = makePlane(u.plane, h.color, h.x, h.z, h.rot); if (u.own) np.userData.mine = np.userData.own = true; }, 45000);
 }
 function updatePlane(dt, ix, iy, run, brake) {
   const g = G.plane, u = g.userData, M = PLANES[u.plane];
@@ -3031,7 +3048,7 @@ function islandPrompt() {
   const pp = propPrompt(); if (pp) return pp;
   const dp = dogPrompt(); if (dp) return dp;
   const ep = escapePrompt(); if (ep) return ep;
-  if (!G.inCar && !G.plane && !G.inside) { const pl = nearPlane(); if (pl) return { kind: 'plane', text: `Robar ${PLANES[pl.userData.plane].brand} ${PLANES[pl.userData.plane].name} (F o E)` }; }
+  if (!G.inCar && !G.plane && !G.inside) { const pl = nearPlane(); if (pl) return { kind: 'plane', text: pl.userData.own ? 'Subir a tu jet privado (F o E)' : `Robar ${PLANES[pl.userData.plane].brand} ${PLANES[pl.userData.plane].name} (F o E)` }; }
   if (onIsland() && Math.hypot(aiFocus().x - 448, aiFocus().z - 300) < 10) return { kind: 'back', text: `Volver a la ciudad en el barco${G.inCar ? ' con el auto' : ''}` };
   if (G.inside || !onIsland()) return null;
   const p = player.position, cp = G.inCar ? car.position : p;
@@ -3314,7 +3331,7 @@ function toggleCar() {
     else { if (!parked.includes(old)) parked.push(old); if (!old.userData.collider) addParkedCollider(old); }
     moveHeadlight(old, n.g);
     if (n.kind === 'traffic') { traffic.splice(traffic.indexOf(n.a), 1); spawnAI(); crime(1); if (n.g.userData.rider) { n.g.remove(n.g.userData.rider); n.g.userData.rider = null; } if (n.a.state === 'drive' && !n.g.userData.armored) spawnVictim(n.g); toast(n.g.userData.bike ? `Tiraste al piloto: ${carName(n.g)} robada.` : `Sacaste al conductor: ${carName(n.g)} robado.`); crashSound(4); }
-    else if (n.kind === 'boat') { boats.splice(boats.indexOf(n.g), 1); if (witnessNear()) crime(1); toast(`Te llevaste un ${carName(n.g)} (${n.g.userData.label}).`); }
+    else if (n.kind === 'boat') { boats.splice(boats.indexOf(n.g), 1); if (n.g.userData.mine) toast(`Te subiste a ${n.g.userData.label}.`); else { if (witnessNear()) crime(1); toast(`Te llevaste un ${carName(n.g)} (${n.g.userData.label}).`); } }
     else if (n.kind === 'aiboat') { aiBoats.splice(aiBoats.indexOf(n.b), 1); crime(1); toast(`Tiraste al capitán al agua: ${carName(n.g)} robado.`); }
     else if (cops.some(c => c.g === n.g)) { parked.splice(parked.indexOf(n.g), 1); cops.splice(cops.findIndex(c => c.g === n.g), 1); crime(2); toast('¡Te robaste un patrullero!'); }
     else { parked.splice(parked.indexOf(n.g), 1); if (witnessNear()) crime(1); toast(n.g.userData.bike ? `Hiciste un puente: ${carName(n.g)} robada.` : `Forzaste la puerta: ${carName(n.g)} robado.`); }
