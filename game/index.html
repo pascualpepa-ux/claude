@@ -360,8 +360,8 @@ const ZONE = {
   _:                { map:'#33313f', accent:'#b9aed6', lot:'grass' }
 };
 const LAND = [[30,0],[1000,0],[1000,560],[650,640],[600,1000],[0,1000],[0,40]];
-const ISLANDS = [[715,700,70],[810,740,60],[690,840,55],[870,650,50],[935,900,60],[670,950,40],[955,770,45],[1125,875,56],[-125,-125,40]];
-const BRIDGES = [[[640,620],[715,700]],[[715,700],[810,740]],[[810,740],[870,650]],[[715,700],[690,840]],[[690,840],[670,950]],[[810,740],[955,770]],[[955,770],[935,900]]];
+const ISLANDS = [[715,700,70],[810,740,60],[690,840,55],[870,650,50],[935,900,60],[670,950,40],[955,770,45],[1125,875,56],[-125,-125,40],[1100,300,90]];
+const BRIDGES = [[[640,620],[715,700]],[[715,700],[810,740]],[[810,740],[870,650]],[[715,700],[690,840]],[[690,840],[670,950]],[[810,740],[955,770]],[[955,770],[935,900]],[[985,300],[1014,300]]];
 const PUDDLES = [[60,700,40],[250,760,55],[140,880,35],[320,980,30]];
 const QUADS = [[-21,-21],[21,-21],[-21,21],[21,21]];
 
@@ -610,7 +610,7 @@ function init(data) {
   [mapCanvas] = cnv(TEX); drawMap2D(mapCanvas.getContext('2d'));
   try { build3D(); } catch (e) { console.error(e); $('loading').hidden = true; const er = $('err'); er.hidden = false; er.textContent = 'Tu navegador no pudo iniciar los gráficos 3D. Probá con Chrome o Edge actualizados.'; return; }
   buildMapUI();
-  buildTraffic(); buildParked(); buildPeds(); spawnArmored(); buildPort(); buildPrivateIsland();
+  buildTraffic(); buildParked(); buildPeds(); spawnArmored(); buildPort(); buildPrivateIsland(); buildAirport();
   $('loading').hidden = true;
   showLogin();
   requestAnimationFrame(loop);
@@ -841,7 +841,7 @@ function build3D() {
       add('office', p.x, p.z, (22 + rnd() * 6) * S, (22 + rnd() * 6) * S, 10 + rnd() * 18, new THREE.Color().setHSL(0.08 + rnd() * 0.1, 0.15, 0.85 + rnd() * 0.15));
     }
   }
-  ISLANDS.forEach(([x, y, r]) => { if (x === 1125 || x < 0) return; for (let i = 0; i < 4; i++) { const a = rnd() * 6.28, rr = r * 0.62, mx = x + Math.cos(a) * rr, my = y + Math.sin(a) * rr; if (G.stores.some(s => Math.hypot(s.mx - mx, s.my - my) < 24 || Math.hypot(s.mx - mx, s.my + 12 - my) < 14)) continue; if (BRIDGES.some(([b1, b2]) => segDist(mx, my, b1, b2) < 14)) continue; const p = W2M(mx, my); add('stucco', p.x, p.z, 9 + rnd() * 3, 8 + rnd() * 3, 5 + rnd() * 5, new THREE.Color(pastel[i % pastel.length]), ROADY); } });
+  ISLANDS.forEach(([x, y, r]) => { if (x === 1125 || x === 1100 || x < 0) return; for (let i = 0; i < 4; i++) { const a = rnd() * 6.28, rr = r * 0.62, mx = x + Math.cos(a) * rr, my = y + Math.sin(a) * rr; if (G.stores.some(s => Math.hypot(s.mx - mx, s.my - my) < 24 || Math.hypot(s.mx - mx, s.my + 12 - my) < 14)) continue; if (BRIDGES.some(([b1, b2]) => segDist(mx, my, b1, b2) < 14)) continue; const p = W2M(mx, my); add('stucco', p.x, p.z, 9 + rnd() * 3, 8 + rnd() * 3, 5 + rnd() * 5, new THREE.Color(pastel[i % pastel.length]), ROADY); } });
 
   for (const k in styles) {
     if (!B[k].v) continue;
@@ -1774,6 +1774,7 @@ function gunSound(vol = 0.5) {
   src.connect(f).connect(g).connect(AC.destination); src.start();
 }
 function shoot() {
+  if (G.plane) return;
   if (G.mode !== 'play' || G.inCar || G.swimming || player.userData.down > 0 || fireCd > 0) return;
   const W = WEAPONS[G.weapon];
   if (!W.melee && !(G.weapons[G.weapon] > 0)) { toast('Sin balas. Comprá munición en una armería.'); G.weapon = 'fist'; setGunModel(); return; }
@@ -1834,6 +1835,7 @@ function clearCops() { for (const c of cops) { if (c.deployed) { removeCarCollid
 function endState(kind) {
   if (PH.open) closePhone();
   if (G.inside) exitInterior(true);
+  if (G.plane) { const pg = G.plane; G.plane = null; pg.userData.speed = 0; if (pg.userData.air) { pg.userData.air = false; pg.position.y = inWater(pg.position.x, pg.position.z) ? -1.5 : groundY(pg.position.x, pg.position.z); } player.visible = true; }
   G.mode = 'dead'; firing = false; if (document.pointerLockElement) document.exitPointerLock();
   if (G.inCar) exitCar(true);
   if (G.heist) { toast('Perdiste el botín.'); G.heist = null; }
@@ -1919,7 +1921,7 @@ function updateOfficers(dt, now) {
     } else idleHuman(ud, now);
     g.position.y += (groundY(g.position.x, g.position.z) - g.position.y) * Math.min(1, dt * 10);
     if (G.mode !== 'play') continue;
-    if (G.wanted >= 2 && dist < 38 && !G.inside) {
+    if (G.wanted >= 2 && dist < 38 && !G.inside && !G.plane && !(ESC && ESC.phase !== 'wait')) {
       ud.shR.rotation.x = -1.5; ud.elR.rotation.x = -0.05; ud.shL.rotation.x = -1.3; ud.elL.rotation.x = -0.5;
       o.shootCd -= dt;
       if (o.shootCd <= 0) {
@@ -1931,7 +1933,7 @@ function updateOfficers(dt, now) {
         if (Math.random() < 0.42 - moving - dist / 120) { if (G.inCar) damageCar(3); else hurtPlayer(6 + G.wanted); }
       }
     } else { ud.shR.rotation.x = -0.6; ud.elR.rotation.x = -0.4; }
-    if (!G.inCar && !G.inside && dist < 1.8 && G.wanted <= 1) { o.arrestT += dt; if (o.arrestT > 1.2) { endState('busted'); return; } } else o.arrestT = Math.max(0, o.arrestT - dt);
+    if (!G.inCar && !G.inside && !G.plane && dist < 1.8 && G.wanted <= 1) { o.arrestT += dt; if (o.arrestT > 1.2) { endState('busted'); return; } } else o.arrestT = Math.max(0, o.arrestT - dt);
   }
 }
 function clearLine(ax, az, bx, bz) {
@@ -1984,12 +1986,12 @@ function updateCombat(dt, now) {
     // choque con tu auto
     if (G.inCar && dist < 3.4) { const nx = dx / (dist || 1), nz = dz / (dist || 1), push = (3.4 - dist) / 2; car.position.x += nx * push; car.position.z += nz * push; g.position.x -= nx * push; g.position.z -= nz * push; if (Math.abs(c.speed) > 6) { crashFX(car.position.x - nx * 1.7, car.position.z - nz * 1.7, Math.abs(c.speed)); damageCar(Math.abs(c.speed) * 0.7); car.userData.speed *= 0.5; } c.speed *= 0.3; }
     // disparos
-    if (G.wanted >= 2 && dist < 32 && !G.inside) {
+    if (G.wanted >= 2 && dist < 32 && !G.inside && !G.plane && !(ESC && ESC.phase !== 'wait')) {
       c.shootCd -= dt;
       if (c.shootCd <= 0) { c.shootCd = 1 - G.wanted * 0.1 + Math.random() * 0.4; const from = new THREE.Vector3(g.position.x, 1.5, g.position.z), to = new THREE.Vector3(fp.x + (Math.random() - 0.5) * 1.5, fp.y + 1.2, fp.z + (Math.random() - 0.5) * 1.5); tracer(from, to, 0xfff0b0); gunSound(0.3); if (Math.random() < 0.45) { if (G.inCar) damageCar(3 + G.wanted); else hurtPlayer(6 + G.wanted * 2); } }
     }
     // arresto a pie
-    if (!G.inCar && !G.inside && dist < 5 && Math.abs(c.speed) < 3) { c.arrestT += dt; if (c.arrestT > (G.wanted <= 1 ? 1.5 : 3)) { endState('busted'); return; } } else c.arrestT = Math.max(0, c.arrestT - dt);
+    if (!G.inCar && !G.inside && !G.plane && dist < 5 && Math.abs(c.speed) < 3) { c.arrestT += dt; if (c.arrestT > (G.wanted <= 1 ? 1.5 : 3)) { endState('busted'); return; } } else c.arrestT = Math.max(0, c.arrestT - dt);
   }
   updateOfficers(dt, now);
   if (officers.some(o => o.state !== 'dead' && o.g.position.distanceTo(fp) < 60)) seen = true;
@@ -2014,7 +2016,8 @@ const CONTACTS = [
   { id: 'abog', name: 'Dr. Ortega', role: 'Abogado', color: '#7d3c98', avail: () => true },
   { id: 'pizza', name: 'Pizza Volcano', role: 'Delivery', color: '#e67e22', avail: () => true },
   { id: '911', name: 'Emergencias', role: 'Ambulancia', color: '#c0392b', avail: () => true },
-  { id: 'barco', name: 'Capitán Nico', role: 'Barco carguero · tu isla', color: '#0f4c5c', avail: () => true }
+  { id: 'barco', name: 'Capitán Nico', role: 'Barco carguero · tu isla', color: '#0f4c5c', avail: () => true },
+  { id: 'avion', name: 'Capitana Vega', role: 'Avión de escape · aeropuerto', color: '#3a7bd5', avail: () => true }
 ];
 const PH = { open: false, screen: 'home', call: null, msg: null, ring: null, incoming: null, timers: [] };
 const initials = n => n.split(' ').filter(w => /^[\p{L}0-9]/u.test(w)).map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -2104,6 +2107,8 @@ function dialog(id) {
         ? { lines: ['Capitán Nico: "¿Volvemos a la ciudad, jefe?"'], opts: [{ label: G.inCar ? 'Al puerto, con el auto' : 'Al puerto', disabled: boatNow, run: () => { ferry('ciudad'); return null; } }] }
         : { lines: ['Capitán Nico: "¿Qué hacés, jefe? ¿Querés que te busque en barco?"', 'Capitán Nico: "Tengo uno con rampa: subís el auto y te llevo a tu isla. Te marco dónde te espero."'], opts: [{ label: FB ? 'Mandame el barco a otro lado' : 'Sí, buscame', disabled: !!G.inside, run: () => { callFerry(); return `Nico te espera en ${FB.sp.name}. Seguí el GPS y subí a la cubierta.`; } }].concat(FB ? [{ label: 'Cancelá el barco', run: () => { removeFerry(); return 'Capitán Nico: "Cuando quieras me llamás."'; } }] : []) };
     }
+    case 'avion': return ESC ? { lines: ['Capitana Vega: "Ya estoy en la pista del aeropuerto con la rampa baja. Te marqué el lugar."'], opts: [{ label: 'Marcame el avión', run: () => { setWaypoint(wpTo('Avión de escape (aeropuerto)', ESC.marker)); return 'Avión marcado en el GPS'; } }, { label: 'Cancelá el vuelo', run: () => { removeEscapePlane(); return 'Capitana Vega: "Ok, despego vacía."'; } }] }
+      : { lines: ['Capitana Vega: "¿Te persiguen? Tengo un carguero en el aeropuerto, al este de Port Sable, cruzando el puente."', 'Capitana Vega: "Subís con el auto por la rampa y despegamos al toque. Te dejo en tu isla. Son $1.500."'], opts: [{ label: 'Prepará el avión · $1.500', disabled: !fee(1500), run: () => { G.money -= 1500; callEscapePlane(); saveNow(); return 'El avión te espera en la pista. Seguí el GPS.'; } }] };
     case '911': return {
       lines: ['Emergencias: "Emergencias de Heat City, ¿cuál es su emergencia?"'],
       opts: [{ label: 'Necesito una ambulancia · $300', disabled: G.hp >= 100 || !fee(300), run: () => { G.money -= 300; setTimeout(() => { G.hp = 100; toast('Te atendieron los paramédicos: salud al máximo'); }, 5000); return 'La ambulancia está en camino'; } },
@@ -2825,6 +2830,198 @@ function openDogChest() {
   setTimeout(() => toast('Para volver, subite al jet ski del perro (F) en la orilla.', 5000), 6800);
   saveNow();
 }
+// ---------- aeropuerto (isla al este de Port Sable, unida por un puente) ----------
+const AIR = { x: 480, z: -160 };   // W2M(1100, 300)
+const PLANES = {
+  avioneta: { brand: 'Skypalm', name: 'Gaviota 180', L: 8, span: 10.5, max: 55, acc: 9, vr: 22, stall: 17, climb: 9, land: 42, gear: 0.95, cam: [17, 4] },
+  jet: { brand: 'Aurora', name: 'Jet privado', L: 15, span: 14, max: 90, acc: 14, vr: 32, stall: 27, climb: 13, land: 52, gear: 1.25, cam: [24, 5.5] }
+};
+const planes = [];
+let ESC = null;
+function planeMesh(type, color) {
+  const g = new THREE.Group(), body = new THREE.MeshStandardMaterial({ color: 0xf4f4f2, roughness: 0.35, metalness: 0.2 }), accent = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.2 }), glass = new THREE.MeshStandardMaterial({ color: 0x10202e, metalness: 0.9, roughness: 0.08 }), dark = new THREE.MeshStandardMaterial({ color: 0x222226, roughness: 0.6 });
+  const add = (geo, m, x, y, z, rx = 0, ry = 0, rz = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.rotation.set(rx, ry, rz); o.castShadow = true; g.add(o); return o; };
+  const ud = {};
+  if (type === 'avioneta') {
+    add(new THREE.CylinderGeometry(0.42, 0.72, 6.4, 16), body, 0, 1.45, 0.3, Math.PI / 2);
+    add(new THREE.CylinderGeometry(0.72, 0.62, 1.4, 16), accent, 0, 1.45, 3.9 - 0.3, Math.PI / 2);
+    add(new THREE.SphereGeometry(0.62, 14, 10, 0, 6.3, 0, 1.4), glass, 0, 1.85, 1.6, -0.25).scale.set(1, 0.8, 1.6);
+    add(new THREE.BoxGeometry(10.5, 0.14, 1.55), body, 0, 2.15, 1.2);
+    for (const sd of [-1, 1]) add(new THREE.BoxGeometry(0.9, 0.15, 1.56), accent, sd * 4.85, 2.16, 1.2);
+    add(new THREE.BoxGeometry(3.6, 0.1, 0.9), body, 0, 1.55, -2.7); add(new THREE.BoxGeometry(0.12, 1.5, 1.2), accent, 0, 2.2, -2.75, 0.3);
+    const prop = new THREE.Group(); prop.position.set(0, 1.45, 4.35); g.add(prop); ud.prop = prop;
+    prop.add(new THREE.Mesh(new THREE.BoxGeometry(0.14, 2.3, 0.06), dark)); const sp = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.45, 12), accent); sp.rotation.x = Math.PI / 2; sp.position.z = 0.2; prop.add(sp);
+    for (const [x, z] of [[-1.1, 0.9], [1.1, 0.9], [0, 3.4]]) { add(new THREE.CylinderGeometry(0.04, 0.04, 0.9, 6), dark, x, 0.6, z, 0, 0, x * 0.3); add(new THREE.CylinderGeometry(0.28, 0.28, 0.16, 14), dark, x * 1.2, 0.28, z, 0, 0, Math.PI / 2); }
+  } else if (type === 'jet') {
+    add(new THREE.CylinderGeometry(1.05, 1.05, 10.5, 18), body, 0, 2.1, 0, Math.PI / 2);
+    add(new THREE.SphereGeometry(1.05, 18, 12), body, 0, 2.1, 5.25).scale.set(1, 0.9, 2.2);
+    add(new THREE.ConeGeometry(1.05, 3.2, 18), body, 0, 2.35, -6.8, -Math.PI / 2 - 0.12);
+    add(new THREE.BoxGeometry(1.4, 0.4, 1), glass, 0, 2.75, 6.4, 0.5);
+    for (let i = 0; i < 6; i++) for (const sd of [-1, 1]) add(new THREE.BoxGeometry(0.05, 0.32, 0.5), glass, sd * 1.03, 2.35, 3 - i * 1.1);
+    add(new THREE.BoxGeometry(10.6, 0.08, 0.28), accent, 0, 1.6, 0).scale.set(1.25, 1, 1);
+    for (const sd of [-1, 1]) { add(new THREE.BoxGeometry(6.6, 0.2, 2.6), body, sd * 3.9, 1.55, -0.2, 0, sd * 0.35, 0); add(new THREE.CylinderGeometry(0.5, 0.42, 2.6, 14), accent, sd * 1.75, 2.6, -4.2, Math.PI / 2); add(new THREE.BoxGeometry(0.1, 0.9, 0.5), accent, sd * 7, 1.9, -1.4); }
+    add(new THREE.BoxGeometry(0.16, 2.6, 2), accent, 0, 3.9, -6.3, 0.45); add(new THREE.BoxGeometry(4.6, 0.12, 1.2), body, 0, 5.1, -7);
+    for (const [x, z] of [[-1.6, -0.6], [1.6, -0.6], [0, 4.8]]) { add(new THREE.CylinderGeometry(0.06, 0.06, 1.1, 6), dark, x, 0.75, z); add(new THREE.CylinderGeometry(0.3, 0.3, 0.2, 14), dark, x, 0.3, z, 0, 0, Math.PI / 2); }
+  } else {   // carguero de escape con rampa trasera
+    const grey = new THREE.MeshStandardMaterial({ color: 0x6f7780, roughness: 0.55, metalness: 0.3 });
+    add(new THREE.CylinderGeometry(3, 3, 22, 20), grey, 0, 4, 0, Math.PI / 2);
+    add(new THREE.SphereGeometry(3, 20, 14), grey, 0, 4, 11).scale.set(1, 0.95, 1.4);
+    add(new THREE.BoxGeometry(2.2, 0.6, 1.4), glass, 0, 5.6, 13.2, 0.5);
+    add(new THREE.CylinderGeometry(3, 1.2, 7, 20), grey, 0, 5, -14.4, Math.PI / 2 + 0.1);
+    add(new THREE.BoxGeometry(32, 0.5, 4.2), grey, 0, 6.9, 1.5);
+    for (const x of [-11, -6, 6, 11]) { add(new THREE.CylinderGeometry(0.75, 0.65, 3.6, 14), grey, x, 6.3, 3.6, Math.PI / 2); const p = new THREE.Group(); p.position.set(x, 6.3, 5.5); g.add(p); for (let k = 0; k < 4; k++) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.25, 3.6, 0.08), dark); b.rotation.z = k * Math.PI / 4; p.add(b); } (ud.props = ud.props || []).push(p); }
+    add(new THREE.BoxGeometry(0.4, 7, 5), grey, 0, 9.5, -15, 0.35); add(new THREE.BoxGeometry(12, 0.35, 3), grey, 0, 12.6, -16.3);
+    const ramp = new THREE.Group(); ramp.position.set(0, 1.4, -11); g.add(ramp); const rm = new THREE.Mesh(new THREE.BoxGeometry(5, 0.25, 7), dark); rm.position.z = -3.5; ramp.add(rm); ramp.rotation.x = -0.18; ud.ramp = ramp;
+    const inside = new THREE.Mesh(new THREE.CylinderGeometry(2.9, 2.9, 0.1, 20, 1, false, Math.PI / 2, Math.PI), new THREE.MeshStandardMaterial({ color: 0x15171a, side: THREE.DoubleSide })); inside.position.set(0, 3.95, -10.9); inside.rotation.x = Math.PI / 2; g.add(inside);
+    for (const [x, z] of [[-3.2, 1], [3.2, 1], [0, 10]]) { add(new THREE.CylinderGeometry(0.1, 0.1, 1.4, 6), dark, x, 1, z); add(new THREE.CylinderGeometry(0.55, 0.55, 0.45, 14), dark, x, 0.55, z, 0, 0, Math.PI / 2); }
+  }
+  g.rotation.order = 'YXZ';
+  return { g, ud };
+}
+function makePlane(type, color, x, z, rot) {
+  const { g, ud } = planeMesh(type, color); const M = PLANES[type];
+  Object.assign(g.userData, ud, { plane: type, speed: 0, vy: 0, air: false, wrecked: false, brand: M.brand, name: M.name, home: { x, z, rot, color } });
+  g.position.set(x, ROADY, z); g.rotation.y = rot; scene.add(g); planes.push(g); return g;
+}
+function buildAirport() {
+  const asph = new THREE.MeshStandardMaterial({ map: tex((() => { const [c, x] = cnv(128, 1024); x.fillStyle = '#2b2c30'; x.fillRect(0, 0, 128, 1024); for (let i = 0; i < 3000; i++) { x.fillStyle = `rgba(255,255,255,${Math.random() * 0.05})`; x.fillRect(Math.random() * 128, Math.random() * 1024, 2, 2); } x.fillStyle = '#f2f2f2'; for (let y = 60; y < 960; y += 56) x.fillRect(61, y, 6, 30); x.fillRect(6, 0, 4, 1024); x.fillRect(118, 0, 4, 1024); for (let k = 0; k < 6; k++) { x.fillRect(16 + k * 16, 8, 8, 40); x.fillRect(16 + k * 16, 976, 8, 40); } x.font = 'bold 34px Inter, sans-serif'; x.textAlign = 'center'; x.fillText('36', 64, 1000 - 52 - 8); x.save(); x.translate(64, 84); x.rotate(Math.PI); x.fillText('18', 0, 0); x.restore(); return c; })()), roughness: 0.85 });
+  const rw = new THREE.Mesh(new THREE.PlaneGeometry(14, 112), asph); rw.rotation.x = -Math.PI / 2; rw.position.set(488, ROADY + 0.03, -160); rw.receiveShadow = true; scene.add(rw);
+  const conc = new THREE.MeshStandardMaterial({ color: 0x9a9890, roughness: 0.85 });
+  const pl = (w, d, x, z, m = conc) => { const o = new THREE.Mesh(new THREE.PlaneGeometry(w, d), m); o.rotation.x = -Math.PI / 2; o.position.set(x, ROADY + 0.025, z); o.receiveShadow = true; scene.add(o); return o; };
+  pl(26, 84, 460, -160); pl(10, 10, 476, -175); pl(10, 10, 476, -140);
+  pl(48, 10, 424, -160, new THREE.MeshStandardMaterial({ color: 0x2e2e33, roughness: 0.9 }));
+  const ylw = new THREE.MeshBasicMaterial({ color: 0xf2c230 }); for (let z = -196; z < -124; z += 4) { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 2), ylw); l.rotation.x = -Math.PI / 2; l.position.set(468, ROADY + 0.04, z); scene.add(l); }
+  // luces de borde de pista
+  const lg = new THREE.MeshBasicMaterial({ color: 0x9fe8ff, toneMapped: false }); for (let z = -214; z <= -106; z += 6) for (const x of [481, 495]) { const b = new THREE.Mesh(new THREE.SphereGeometry(0.15, 6, 4), lg); b.position.set(x, ROADY + 0.15, z); scene.add(b); }
+  const white = new THREE.MeshStandardMaterial({ color: 0xeeeeea, roughness: 0.6 }), glass = new THREE.MeshStandardMaterial({ color: 0x0d1822, metalness: 0.9, roughness: 0.06, envMapIntensity: 1 }), metal = new THREE.MeshStandardMaterial({ color: 0x9aa3ad, metalness: 0.6, roughness: 0.4 });
+  const bx = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; scene.add(o); return o; };
+  // terminal
+  bx(white, 16, 7, 12, 438, ROADY + 3.5, -192); bx(glass, 16.1, 4, 0.2, 438, ROADY + 3.2, -185.9); bx(white, 18, 0.5, 14, 438, ROADY + 7.2, -192);
+  const sg = new THREE.Mesh(new THREE.PlaneGeometry(10, 2.2), new THREE.MeshBasicMaterial({ map: makeSign('AEROPUERTO', 'Heat City Intl.', '#3ddcd0', false), toneMapped: false })); sg.position.set(438, ROADY + 8.7, -185.7); scene.add(sg);
+  colliders.push({ x: 438, z: -192, hw: 8, hd: 6 });
+  // hangar con techo curvo
+  bx(metal, 0.4, 8, 16, 432.2, ROADY + 4, -128); bx(metal, 16, 8, 0.4, 440, ROADY + 4, -120.2); bx(metal, 16, 8, 0.4, 440, ROADY + 4, -135.8);
+  const roof = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 16, 24, 1, true, -Math.PI / 2, Math.PI), new THREE.MeshStandardMaterial({ color: 0xb8c0c8, metalness: 0.6, roughness: 0.35, side: THREE.DoubleSide })); roof.rotation.z = Math.PI / 2; roof.scale.set(1, 1, 0.45); roof.position.set(440, ROADY + 8, -128); scene.add(roof);
+  colliders.push({ x: 432.2, z: -128, hw: 0.3, hd: 8 }, { x: 440, z: -120.2, hw: 8, hd: 0.3 }, { x: 440, z: -135.8, hw: 8, hd: 0.3 });
+  // torre de control
+  bx(white, 3, 16, 3, 452, ROADY + 8, -212); bx(glass, 5.5, 2.6, 5.5, 452, ROADY + 17.3, -212); bx(white, 6.2, 0.4, 6.2, 452, ROADY + 18.8, -212);
+  const bea = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff3030, toneMapped: false })); bea.position.set(452, ROADY + 19.4, -212); scene.add(bea);
+  colliders.push({ x: 452, z: -212, hw: 1.6, hd: 1.6 });
+  // manga de viento
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 5, 6), metal); pole.position.set(500, ROADY + 2.5, -200); scene.add(pole);
+  const sock = new THREE.Mesh(new THREE.ConeGeometry(0.45, 2.2, 10, 1, true), new THREE.MeshStandardMaterial({ color: 0xff7a3d, side: THREE.DoubleSide })); sock.rotation.z = Math.PI / 2; sock.position.set(501.1, ROADY + 4.8, -200); scene.add(sock);
+  makePlane('avioneta', '#c0392b', 460, -184, Math.PI / 2);
+  makePlane('avioneta', '#1e4fa3', 460, -170, Math.PI / 2);
+  makePlane('jet', '#b8902a', 458, -140, Math.PI / 2);
+}
+function nearPlane() {
+  const p = player.position; let best = null, bd = 1e9;
+  for (const g of planes) { if (g.userData.wrecked) continue; const d = Math.hypot(g.position.x - p.x, g.position.z - p.z) - PLANES[g.userData.plane].L * 0.35; if (d < bd) { bd = d; best = g; } }
+  return bd < 3.5 ? best : null;
+}
+function enterPlane(g) {
+  G.plane = g; G.inCar = false; player.visible = false; G.swimming = false; G.camYaw = g.rotation.y + Math.PI;
+  g.userData.speed = 0; g.userData.vy = 0;
+  if (!g.userData.mine) { g.userData.mine = true; crime(1); }
+  toast(`Te subiste al ${PLANES[g.userData.plane].brand} ${PLANES[g.userData.plane].name}. Acelerá por la pista (W / acelerador) para despegar. Freno / S para bajar. A-D o volante para girar.`, 7000);
+}
+function exitPlane() {
+  const g = G.plane, u = g.userData;
+  if (u.air) return toast('¡Estás volando! Aterrizá primero (freno / S para bajar).');
+  if (Math.abs(u.speed) > 3) return toast('Frená antes de bajarte.');
+  G.plane = null; u.speed = 0;
+  const sd = new THREE.Vector3(-PLANES[u.plane].span / 2 - 1.5, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), g.rotation.y);
+  let px = g.position.x + sd.x, pz = g.position.z + sd.z; if (inWater(px, pz)) { px = g.position.x - sd.x; pz = g.position.z - sd.z; }
+  player.position.set(px, groundY(px, pz), pz); player.visible = true; player.rotation.set(0, g.rotation.y, 0); standPose(player.userData);
+}
+function planeCrash(g, why) {
+  const u = g.userData, water = inWater(g.position.x, g.position.z);
+  u.wrecked = true; u.air = false; G.plane = null;
+  burst(g.position.x, g.position.y + 1, g.position.z, 80, 18); crashFX(g.position.x, g.position.z, 30); crashSound(10); G.shake = 1.2;
+  g.traverse(o => { if (o.material && o.material.color) { o.material = o.material.clone(); o.material.color.multiplyScalar(0.25); } });
+  const px = g.position.x + 4, pz = g.position.z + 4;
+  player.visible = true; player.rotation.set(0, 0, 0); standPose(player.userData);
+  if (water) { g.position.y = -1.5; player.position.set(px, -0.28, pz); } else { g.position.y = groundY(g.position.x, g.position.z); g.rotation.x = 0.15; g.rotation.z = 0.3; player.position.set(px, groundY(px, pz), pz); player.userData.down = 2; }
+  hurtPlayer(45); toast(why || '¡Te estrellaste!', 4000);
+  setTimeout(() => { if (G.plane === g) return; scene.remove(g); planes.splice(planes.indexOf(g), 1); const h = u.home; makePlane(u.plane, h.color, h.x, h.z, h.rot); }, 45000);
+}
+function updatePlane(dt, ix, iy, run, brake) {
+  const g = G.plane, u = g.userData, M = PLANES[u.plane];
+  if (iy > 0) u.speed += M.acc * dt * iy; else if (iy < 0) u.speed += iy * M.acc * 0.9 * dt; else if (!u.air) u.speed *= (1 - 0.6 * dt);
+  u.speed = Math.max(u.air ? M.stall : -4, Math.min(M.max, u.speed));
+  const turn = u.air ? 0.75 : 1.1 * Math.min(1, Math.abs(u.speed) / 6) * Math.sign(u.speed || 1);
+  g.rotation.y -= ix * turn * dt;
+  g.rotation.z += ((u.air ? ix * 0.55 : 0) - g.rotation.z) * Math.min(1, dt * 3);
+  const fx = Math.sin(g.rotation.y), fz = Math.cos(g.rotation.y);
+  if (!u.air) {
+    const gyr = groundY(g.position.x, g.position.z);
+    if (u.speed > M.vr && iy > 0) { u.air = true; u.vy = 3; toast('¡Despegaste! Mantené el acelerador para subir, soltalo para volar derecho.', 4500); }
+    const nx = g.position.x + fx * u.speed * dt, nz = g.position.z + fz * u.speed * dt;
+    const hit = hitCollider(nx, nz, 1.6);
+    if (hit && !hit.water) { if (Math.abs(u.speed) > 15) return planeCrash(g, '¡Chocaste el avión contra un edificio!'); u.speed = 0; }
+    else if (hit && hit.water) { if (Math.abs(u.speed) > 8) return planeCrash(g, '¡El avión se fue al agua!'); u.speed = 0; }
+    else { g.position.x = nx; g.position.z = nz; }
+    g.position.y = gyr; g.rotation.x += (0 - g.rotation.x) * Math.min(1, dt * 4);
+  } else {
+    const target = iy > 0 || run ? M.climb : (iy < 0 || brake) ? -M.climb * 1.2 : 0;
+    u.vy += (target - u.vy) * Math.min(1, dt * 1.6);
+    if (g.position.y > 150 && u.vy > 0) u.vy = 0;
+    g.position.x += fx * u.speed * dt; g.position.z += fz * u.speed * dt; g.position.y += u.vy * dt;
+    g.rotation.x = -u.vy * 0.03;
+    if (Math.abs(g.position.x) > 545 || Math.abs(g.position.z) > 545) { const want = Math.atan2(-g.position.x, -g.position.z); let d = want - g.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); g.rotation.y += d * Math.min(1, dt * 1.5); if (!u.edgeT || performance.now() - u.edgeT > 4000) { u.edgeT = performance.now(); toast('Fin del mapa: el avión pega la vuelta.'); } }
+    const water = inWater(g.position.x, g.position.z), gy = water ? 0 : groundY(g.position.x, g.position.z);
+    if (g.position.y < gy + 24 && !water && colliders.some(c => (c.hw > 3 || c.hd > 3) && Math.abs(g.position.x - c.x) < c.hw + 2 && Math.abs(g.position.z - c.z) < c.hd + 2)) return planeCrash(g, '¡Chocaste el avión contra un edificio!');
+    if (g.position.y <= gy + 0.05) {
+      if (water) return planeCrash(g, '¡Amerizaje forzoso! El avión se hunde.');
+      if (u.speed > M.land || u.vy < -9) return planeCrash(g, 'Aterrizaste demasiado rápido y te estrellaste.');
+      u.air = false; u.vy = 0; g.position.y = gy; toast('Aterrizaste. Frená (S / freno) y bajate con F.', 4000);
+    }
+  }
+  if (u.prop) u.prop.rotation.z += dt * (8 + Math.abs(u.speed) * 2);
+  if (Math.abs(u.speed) > 5 && Math.random() < dt * 8 && u.plane === 'jet') puff(g.position.x - fx * 8, g.position.y + 2.6, g.position.z - fz * 8, 0xdddddd, 0.6);
+  player.position.copy(g.position); player.rotation.y = g.rotation.y;
+  if (engine && AC) { engine.o.frequency.value = 60 + Math.abs(u.speed) * 3; engine.g.gain.value = 0.05; }
+  let d = (g.rotation.y + Math.PI) - G.camYaw; d = Math.atan2(Math.sin(d), Math.cos(d)); if (!pointers.size) G.camYaw += d * Math.min(1, dt * 2.5);
+  markDirty();
+}
+// avión de escape: Capitana Vega te espera en la pista con un carguero
+function callEscapePlane() {
+  removeEscapePlane();
+  const { g, ud } = planeMesh('carguero', '#6f7780'); g.position.set(488, ROADY, -142); g.rotation.y = Math.PI; scene.add(g);
+  ESC = { g, ud, phase: 'wait', t: 0 };
+  const marker = new THREE.Object3D(); marker.position.set(488, 0, -120); scene.add(marker); ESC.marker = marker;
+  setWaypoint(wpTo('Avión de escape (aeropuerto)', marker));
+}
+function removeEscapePlane() { if (!ESC) return; scene.remove(ESC.g); scene.remove(ESC.marker); if (G.waypoint && G.waypoint.follow === ESC.marker) setWaypoint(null); ESC = null; }
+function escapePrompt() {
+  if (!ESC || ESC.phase !== 'wait' || G.inside) return null;
+  const f = focusPos(); if (Math.hypot(f.x - 488, f.z - (-121)) > 7) return null;
+  if (G.inCar && car.userData.boat) return null;
+  return { kind: 'escplane', text: G.inCar ? 'Subir el auto al avión de escape' : 'Subir al avión de escape' };
+}
+function boardEscape() {
+  ESC.phase = 'board'; ESC.t = 0; ESC.withCar = G.inCar;
+  if (G.inCar) { car.userData.speed = 0; removeCarCollider(car); ESC.carStart = car.position.clone(); }
+  setWaypoint(null); toast('Capitana Vega: "¡Adentro! Cierro la rampa y nos vamos."', 3500);
+}
+function updateEscape(dt) {
+  const E = ESC, g = E.g; E.t += dt;
+  for (const p of E.ud.props) p.rotation.z += dt * (E.phase === 'wait' ? 6 : 30);
+  if (E.phase === 'board') {
+    const k = Math.min(1, E.t / 1.6), tz = -134;
+    if (E.withCar) { car.position.x += (488 - car.position.x) * Math.min(1, dt * 3); car.position.z = E.carStart.z + (tz - E.carStart.z) * k; car.position.y = ROADY + Math.max(0, Math.min(1.2, (car.position.z + 122) / -6 * 1.2)); car.rotation.y = Math.PI; player.position.copy(car.position); }
+    else { player.position.x += (488 - player.position.x) * Math.min(1, dt * 3); player.position.z += (tz - player.position.z) * Math.min(1, dt * 1.5); player.position.y = ROADY + 1.3; }
+    if (k >= 1) { E.phase = 'takeoff'; E.t = 0; E.speed = 0; if (E.withCar) { car.visible = false; car.position.set(6000, -50, 6000); } player.visible = false; G.camYaw = 0; }
+  } else if (E.phase === 'takeoff') {
+    E.ud.ramp.rotation.x += (0.25 - E.ud.ramp.rotation.x) * Math.min(1, dt * 2);
+    E.speed = Math.min(60, E.speed + 14 * dt); g.position.z -= E.speed * dt;
+    if (E.speed > 32) { g.position.y += (E.speed - 30) * 0.25 * dt; g.rotation.x = -0.12; }
+    player.position.set(g.position.x, g.position.y + 2, g.position.z);
+    let d = Math.PI * 0 - G.camYaw; G.camYaw += Math.atan2(Math.sin(d), Math.cos(d)) * Math.min(1, dt * 2);
+    if (engine && AC) { engine.o.frequency.value = 80 + E.speed * 2; engine.g.gain.value = 0.06; }
+    if (E.t > 6.5) { E.phase = 'gone'; G.inCar = E.withCar; ferry('isla', 'avion'); setTimeout(removeEscapePlane, 2400); }
+  }
+}
 function setIslandOwner(name) {
   GARAGE_S.name = `Garaje de ${name}`; HOUSE_S.name = `Casa de ${name}`;
   if (islandSign) { islandSign.material.map.dispose(); islandSign.material.map = islandSignTex(name); islandSign.material.needsUpdate = true; }
@@ -2833,6 +3030,8 @@ function islandPrompt() {
   const fpp = ferryPrompt(); if (fpp) return fpp;
   const pp = propPrompt(); if (pp) return pp;
   const dp = dogPrompt(); if (dp) return dp;
+  const ep = escapePrompt(); if (ep) return ep;
+  if (!G.inCar && !G.plane && !G.inside) { const pl = nearPlane(); if (pl) return { kind: 'plane', text: `Robar ${PLANES[pl.userData.plane].brand} ${PLANES[pl.userData.plane].name} (F o E)` }; }
   if (onIsland() && Math.hypot(aiFocus().x - 448, aiFocus().z - 300) < 10) return { kind: 'back', text: `Volver a la ciudad en el barco${G.inCar ? ' con el auto' : ''}` };
   if (G.inside || !onIsland()) return null;
   const p = player.position, cp = G.inCar ? car.position : p;
@@ -2868,19 +3067,19 @@ function takeCarOut(i) {
   ISLE.open = 1; ISLE.plat.position.y = ROADY + 0.06 - ELEV_D; startElev(1, true);
   toast(`El montacargas sube tu ${carName(car)}…`); markDirty(); saveNow();
 }
-function ferry(dest) {
+function ferry(dest, via) {
   if (G.inside) exitInterior(true);
-  G.mode = 'dead'; $('ovTitle').textContent = 'BARCO CARGUERO'; $('ovText').textContent = dest === 'isla' ? (G.wanted > 0 ? 'Nico acelera mar adentro… la policía queda atrás.' : 'Navegando a tu isla…') : 'Volviendo al puerto de Port Sable…'; $('overlay').hidden = false;
+  G.mode = 'dead'; $('ovTitle').textContent = via === 'avion' ? 'AVIÓN DE ESCAPE' : 'BARCO CARGUERO'; $('ovText').textContent = dest === 'isla' ? (via === 'avion' ? 'Volando sobre el mar… aterrizamos en tu isla.' : G.wanted > 0 ? 'Nico acelera mar adentro… la policía queda atrás.' : 'Navegando a tu isla…') : 'Volviendo al puerto de Port Sable…'; $('overlay').hidden = false;
   if (document.pointerLockElement) document.exitPointerLock();
   setTimeout(() => {
     const spot = dest === 'isla' ? { x: 466, z: 300, rot: Math.PI / 2 } : { x: 385, z: -216, rot: -Math.PI / 2 };
     if (G.inCar && !car.userData.boat) { removeCarCollider(car); car.position.set(spot.x, ROADY, spot.z); car.rotation.set(0, spot.rot, 0); car.userData.speed = 0; player.position.copy(car.position); G.camYaw = spot.rot + Math.PI; }
     else { const fx = dest === 'isla' ? 450 : spot.x, fz = spot.z; player.position.set(fx, groundY(fx, fz), fz); G.camYaw = spot.rot + Math.PI; }
-    G.minutes = (G.minutes + 25) % 1440; G.swimming = false;
+    G.minutes = (G.minutes + 25) % 1440; G.swimming = false; if (G.inCar) car.visible = true; else player.visible = true;
     const escaped = dest === 'isla' && G.wanted > 0;
     if (dest === 'isla') { G.wanted = 0; clearCops(); }
     $('overlay').hidden = true; G.mode = 'play';
-    toast(escaped ? '¡Te escapaste por mar! La policía perdió tu rastro.' : dest === 'isla' ? 'Llegaste a tu isla. Entrá con el auto al garaje y pará arriba del montacargas.' : 'Llegaste al puerto de Port Sable.', 4500); saveNow();
+    toast(escaped ? (via === 'avion' ? '¡Te escapaste en avión! La policía perdió tu rastro.' : '¡Te escapaste por mar! La policía perdió tu rastro.') : dest === 'isla' ? 'Llegaste a tu isla. Entrá con el auto al garaje y pará arriba del montacargas.' : 'Llegaste al puerto de Port Sable.', 4500); saveNow();
   }, 2200);
 }
 function sleepAtHome() {
@@ -3055,8 +3254,9 @@ function findCarSpot(p) {
 // ---------- acciones ----------
 let nearStore = null;
 function tryEnter() {
+  if (G.plane) return exitPlane();
   const isp = islandPrompt();
-  if (isp) { if (isp.kind === 'sail') return sailFerry(); if (isp.kind === 'back') { if (G.wanted > 0) return toast('Primero perdé a la policía.'); return ferry('ciudad'); } if (isp.kind === 'store') return storeCarInGarage(); if (isp.kind === 'garage') return startElev(-1, false); if (isp.kind === 'house') return enterInterior(HOUSE_S); if (isp.kind === 'prop') return enterInterior(isp.s); if (isp.kind === 'dogride') return boardDog(); if (isp.kind === 'dogchest') return openDogChest(); }
+  if (isp) { if (isp.kind === 'sail') return sailFerry(); if (isp.kind === 'back') { if (G.wanted > 0) return toast('Primero perdé a la policía.'); return ferry('ciudad'); } if (isp.kind === 'store') return storeCarInGarage(); if (isp.kind === 'garage') return startElev(-1, false); if (isp.kind === 'house') return enterInterior(HOUSE_S); if (isp.kind === 'prop') return enterInterior(isp.s); if (isp.kind === 'dogride') return boardDog(); if (isp.kind === 'dogchest') return openDogChest(); if (isp.kind === 'escplane') return boardEscape(); if (isp.kind === 'plane') return toggleCar(); }
   if (G.inCar) return toast('Bajate del auto para entrar (F)');
   if (G.inside) {
     const ip = interiorPrompt();
@@ -3102,6 +3302,8 @@ function nearestCar() {
 }
 function moveHeadlight(from, to) { const hl = from.userData.headlight; if (!hl || from === to) return; from.remove(hl, hl.target); to.add(hl, hl.target); to.userData.headlight = hl; from.userData.headlight = null; hl.intensity = 0; }
 function toggleCar() {
+  if (G.plane) return exitPlane();
+  if (!G.inCar) { const pl = nearPlane(); if (pl) return enterPlane(pl); }
   if (G.inCar) { if (Math.abs(car.userData.speed) > 4) return toast('Frená antes de bajarte'); exitCar(); return; }
   const n = nearestCar();
   if (!n) return toast('No hay ningún vehículo cerca. Acercate a un auto, moto o barco (F).');
@@ -3459,6 +3661,9 @@ function drawMapLayer(ctx, cx, cy, k, w, h, opts) {
     if (opts.labels && k > 1.6) { ctx.font = '600 11px Inter, sans-serif'; const tw = ctx.measureText(s.name).width + 10; ctx.fillStyle = 'rgba(15,11,30,0.85)'; ctx.fillRect(x - tw / 2, y + r + 3, tw, 16); ctx.fillStyle = '#f4ecff'; ctx.fillText(s.name, x, y + r + 11); }
   }
   for (const pr of PROPS) if (pr.owned) { ctx.fillStyle = '#3ddc97'; ctx.beginPath(); ctx.arc(pr.mx * k, pr.my * k, r * 0.9, 0, 7); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); if (r >= 7) { ctx.fillStyle = '#0f0b1e'; ctx.font = `700 ${Math.round(r)}px Inter, sans-serif`; ctx.fillText('⌂', pr.mx * k, pr.my * k + 0.5); } if (opts.labels && k > 1.6) { ctx.font = '600 11px Inter, sans-serif'; const tw = ctx.measureText(pr.item).width + 10; ctx.fillStyle = 'rgba(15,11,30,0.85)'; ctx.fillRect(pr.mx * k - tw / 2, pr.my * k + r + 3, tw, 16); ctx.fillStyle = '#3ddc97'; ctx.fillText(pr.item, pr.mx * k, pr.my * k + r + 11); } }
+  ctx.fillStyle = '#e8d3a0'; ctx.beginPath(); ctx.arc(1100 * k, 300 * k, 95 * k, 0, 7); ctx.fill(); ctx.fillStyle = '#9fbf8a'; ctx.beginPath(); ctx.arc(1100 * k, 300 * k, 90 * k, 0, 7); ctx.fill();
+  ctx.fillStyle = '#3a3b40'; ctx.fillRect(1006 * k, 293 * k, 85 * k, 14 * k); ctx.fillRect((1110 - 9) * k, (300 - 70) * k, 18 * k, 140 * k);
+  if (r >= 7) { ctx.fillStyle = '#fff'; ctx.font = `700 ${Math.round(r * 1.8)}px Inter, sans-serif`; ctx.fillText('✈', 1075 * k, 300 * k); } if (opts.labels && k > 0.5) { ctx.font = '600 12px Inter, sans-serif'; ctx.fillStyle = '#f4ecff'; ctx.fillText('Aeropuerto', 1100 * k, 300 * k + 90 * k + 14); }
   const fp = M2W(focusPos().x, focusPos().z);
   ctx.fillStyle = '#8a6a4a'; for (const pr of PIERS) { const a = M2W(pr.x0, pr.z0), b = M2W(pr.x1, pr.z1); ctx.fillRect(a.mx * k, a.my * k, Math.max(2, (b.mx - a.mx) * k), Math.max(2, (b.my - a.my) * k)); }
   ctx.fillStyle = '#e8e8e8'; for (const g of boats.concat(aiBoats.map(b => b.g))) { if (g === car && G.inCar) continue; const bp = M2W(g.position.x, g.position.z); ctx.beginPath(); ctx.arc(bp.mx * k, bp.my * k, 3.5, 0, 7); ctx.fill(); }
@@ -3528,7 +3733,7 @@ function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.05); last = now;
   if (G.mode === 'play' || G.mode === 'map' || G.mode === 'shop' || G.mode === 'dead' || G.mode === 'phone') { G.minutes = (G.minutes + dt) % 1440; if (G.heistCooldown > 0) G.heistCooldown -= dt; }
   if (G.mode === 'play') update(dt);
-  if (G.mode !== 'boot') { updateTraffic(dt); updatePeds(dt, now); updateCombat(dt, now); if (G.mode === 'play') { checkMission(dt); updateHeist(dt); updateLucy(dt, now); updateVictims(dt, now); updateCash(dt, now); updateBoats(dt, now); updateDog(dt, now); if (G.waypoint && G.waypoint.follow) { const f = G.waypoint.follow.position; G.waypoint.wx = f.x; G.waypoint.wz = f.z; const mm = M2W(f.x, f.z); G.waypoint.mx = mm.mx; G.waypoint.my = mm.my; beam.position.set(f.x, 80, f.z); } } if (G.mode === 'play') { if (G.inCar) { carVsTraffic(); carVsPeds(); } else pedVsTraffic(); } }
+  if (G.mode !== 'boot') { updateTraffic(dt); updatePeds(dt, now); updateCombat(dt, now); if (G.mode === 'play') { checkMission(dt); updateHeist(dt); updateLucy(dt, now); updateVictims(dt, now); updateCash(dt, now); updateBoats(dt, now); updateDog(dt, now); if (ESC) updateEscape(dt); if (G.waypoint && G.waypoint.follow) { const f = G.waypoint.follow.position; G.waypoint.wx = f.x; G.waypoint.wz = f.z; const mm = M2W(f.x, f.z); G.waypoint.mx = mm.mx; G.waypoint.my = mm.my; beam.position.set(f.x, 80, f.z); } } if (G.mode === 'play') { if (G.inCar) { carVsTraffic(); carVsPeds(); } else if (!G.plane) pedVsTraffic(); } }
   updateSparks(dt); updateSmoke(dt);
   if ((skyTick += dt) > 0.5) { skyTick = 0; updateSky(false); }
   if (G.inside) updateInterior(dt, now); else { scene.fog.density = 0.0016; if (inLights[0] && inLights[0].intensity) inLights.forEach(l => l.intensity = 0); }
@@ -3557,7 +3762,7 @@ const TD = { steer: 0, angle: 0, gas: false, brake: false, hand: false, id: null
   $('dExit').addEventListener('click', () => { if (G.mode === 'play' && G.inCar) toggleCar(); });
 })();
 function updateDriveUI(dt) {
-  const show = G.inCar && G.mode === 'play';
+  const show = (G.inCar || !!G.plane) && G.mode === 'play';
   $('drive').hidden = !show; document.body.classList.toggle('driving', show);
   if (!show) { TD.gas = TD.brake = TD.hand = false; TD.angle = 0; return; }
   if (TD.id === null) TD.angle *= Math.pow(0.0005, dt);
@@ -3571,14 +3776,16 @@ function inputVec() {
   let run = !!k['shift'] || !!G.sprint;
   if (joy) { const m = Math.hypot(joy.dx, joy.dy); if (m > 10) { ix = joy.dx / Math.max(m, 60); iy = -joy.dy / Math.max(m, 60); run = run || m > 55; } }
   let brake = !!k[' '];
-  if (G.inCar) { if (Math.abs(TD.steer) > 0.03) ix = TD.steer; if (TD.gas) iy = 1; else if (TD.brake) iy = -1; if (TD.hand) brake = true; }
+  if (G.inCar || G.plane) { if (Math.abs(TD.steer) > 0.03) ix = TD.steer; if (TD.gas) iy = 1; else if (TD.brake) iy = -1; if (TD.hand) brake = true; }
   return { ix, iy, run, brake };
 }
 function update(dt) {
   updateIsland(dt);
   if (ELEV) return updateElev(dt);
   if (DOG && DOG.phase === 'ride') return DOG.leg ? dogRide(dt) : null;
+  if (ESC && (ESC.phase === 'board' || ESC.phase === 'takeoff')) return;
   const { ix, iy, run, brake } = inputVec();
+  if (G.plane) return updatePlane(dt, ix, iy, run, brake);
   if (G.inCar && car.userData.boat) updatePlayerBoat(dt, ix, iy, run, brake, performance.now());
   else if (G.inCar) {
     const c = car.userData, max = run ? 52 : 36;
@@ -3650,13 +3857,14 @@ function updateCamera(dt, now) {
     return;
   }
   let t = focusPos(); if (ELEV) t = { x: t.x, y: ROADY, z: t.z };
+  const pc = G.plane ? PLANES[G.plane.userData.plane].cam : ESC && ESC.phase === 'takeoff' ? [40, 9] : null;
   if (G.inCar && !pointers.size) { let diff = (car.rotation.y + Math.PI) - G.camYaw; diff = Math.atan2(Math.sin(diff), Math.cos(diff)); G.camYaw += diff * Math.min(1, dt * 3); }
   const spd = G.inCar ? Math.abs(car.userData.speed) : 0;
   const bm = G.inCar && car.userData.boat ? MODELS[car.userData.model].cam : null;
   const gunOut = !G.inCar && !G.swimming && G.weapon !== 'fist' && G.mode === 'play';
   G.aimK = (G.aimK || 0) + (((gunOut ? (G.aiming ? 1 : 0.55) : 0)) - (G.aimK || 0)) * Math.min(1, dt * 9);
   const ak = G.aimK, side = 0.8 * Math.min(1, ak / 0.55);
-  const dist = bm ? bm[0] + spd * 0.05 : G.inCar ? (car.userData.bike ? 5.5 : 9) + spd * 0.06 : 5.4 - 3 * ak, hgt = bm ? bm[1] : G.inCar ? (car.userData.bike ? 1.6 : 2) : 1.6 + 0.08 * ak;
+  const dist = pc ? pc[0] + (G.plane ? Math.abs(G.plane.userData.speed) * 0.08 : 0) : bm ? bm[0] + spd * 0.05 : G.inCar ? (car.userData.bike ? 5.5 : 9) + spd * 0.06 : 5.4 - 3 * ak, hgt = pc ? pc[1] : bm ? bm[1] : G.inCar ? (car.userData.bike ? 1.6 : 2) : 1.6 + 0.08 * ak;
   camera.fov += ((G.inCar ? 60 + spd * 0.35 : 60 - 20 * Math.max(0, ak - 0.55) / 0.45) - camera.fov) * Math.min(1, dt * 6); camera.updateProjectionMatrix();
   const rx = Math.cos(G.camYaw) * side, rz = -Math.sin(G.camYaw) * side;   // a la derecha de la cámara
   v3.set(t.x + rx + Math.sin(G.camYaw) * Math.cos(G.camPitch) * dist, t.y + hgt + Math.sin(G.camPitch) * dist, t.z + rz + Math.cos(G.camYaw) * Math.cos(G.camPitch) * dist);
