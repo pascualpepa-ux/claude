@@ -1592,12 +1592,13 @@ function pedVsTraffic() {
 
 // ---------- armas, policía y estrellas ----------
 const WEAPONS = {
-  fist:    { name: 'Puños', dmg: 20, rate: 0.4, melee: true },
-  pistol:  { name: 'Pistola', dmg: 25, rate: 0.3, range: 90, spread: 0.012, ammo: 48 },
+  fist:    { name: 'Puños', dmg: 14.5, dmgMax: 21, rate: 0.4, melee: true },
+  pistol:  { name: 'Pistola', dmg: 36, dmgMax: 51, rate: 0.3, range: 90, spread: 0.012, ammo: 48 },
   shotgun: { name: 'Escopeta', dmg: 9, pellets: 7, rate: 0.9, range: 32, spread: 0.06, ammo: 24 },
   smg:     { name: 'Subfusil', dmg: 12, rate: 0.085, range: 65, spread: 0.03, ammo: 150, auto: true },
   rifle:   { name: 'Rifle de asalto', dmg: 22, rate: 0.12, range: 140, spread: 0.014, ammo: 120, auto: true }
 };
+const rollDmg = W => W.dmgMax ? W.dmg + Math.random() * (W.dmgMax - W.dmg) : W.dmg;
 const WEAPON_ORDER = ['fist', 'pistol', 'shotgun', 'smg', 'rifle'];
 Object.assign(G, { weapons: {}, weapon: 'fist', hp: 100, armor: 0, wanted: 0, lastSeen: 0, aimT: 0, punchT: 0 });
 let firing = false, fireCd = 0, lockFailed = false;
@@ -1740,7 +1741,7 @@ function shoot() {
     G.punchT = 0.26; G.guardT = 2; G.punchSide = !G.punchSide;
     const fx = Math.sin(yaw), fz = Math.cos(yaw);
     const hitP = peds.concat(victims.map(v => ({ g: v.g, state: v.mode === 'dead' ? 'dead' : 'walk', victimRef: v })), officers.map(o => ({ g: o.g, state: o.state === 'dead' ? 'dead' : 'walk', officerRef: o }))).find(q => q.g !== player && q.state !== 'dead' && q.g.visible && (() => { const dx = q.g.position.x - player.position.x, dz = q.g.position.z - player.position.z, d = Math.hypot(dx, dz); return d < 1.7 && (dx * fx + dz * fz) / (d || 1) > 0.4; })());
-    if (hitP) { damageTarget(hitP.officerRef ? { officer: hitP.officerRef } : hitP.victimRef ? { victim: hitP.victimRef } : { ped: hitP }, W.dmg, new THREE.Vector3(fx, 0, fz), true); crashSound(3); }
+    if (hitP) { damageTarget(hitP.officerRef ? { officer: hitP.officerRef } : hitP.victimRef ? { victim: hitP.victimRef } : { ped: hitP }, rollDmg(W), new THREE.Vector3(fx, 0, fz), true); crashSound(3); }
     return;
   }
   G.weapons[G.weapon]--; markDirty();
@@ -1749,7 +1750,7 @@ function shoot() {
     const d = dir.clone().add(new THREE.Vector3((Math.random() - 0.5) * 2 * W.spread, (Math.random() - 0.5) * 2 * W.spread, (Math.random() - 0.5) * 2 * W.spread)).normalize();
     const hit = raycastWorld(camera.position, d, W.range + camera.position.distanceTo(player.position));
     tracer(muzzle, hit.point);
-    if (hit.target) damageTarget(hit.target, W.dmg, d); else if (hit.wall) burst(hit.point.x, hit.point.y, hit.point.z, 3, 3);
+    if (hit.target) damageTarget(hit.target, rollDmg(W), d); else if (hit.wall) burst(hit.point.x, hit.point.y, hit.point.z, 3, 3);
   }
   burst(muzzle.x, muzzle.y, muzzle.z, 3, 2); gunSound(0.55);
   alarmPeds(player.position, 45);
@@ -2128,16 +2129,16 @@ function ibox(g, col, w, h, d, x, y, z, mat, solid = true) {
 function inPerson(o, x, z, ry) { const h = makeHuman(o); h.position.set(x, 0, z); h.rotation.y = ry; return h; }
 const pickR = a => a[Math.floor(Math.random() * a.length)];
 function randomPerson(top) { const f = Math.random() < 0.5; return { skin: pickR(SKINS), top: top ?? pickR(TOPS), pants: pickR(PANTS), shoes: pickR([0xf2f2f2, 0x1a1a1a]), hair: pickR(HAIRS), long: f && Math.random() < 0.8, wide: f ? 0.92 : 1.02, stubble: !f && Math.random() < 0.4 }; }
-function buildInterior(s) {
+function buildInterior(s, vip) {
   const M = imats(), g = new THREE.Group(), col = [], npcs = [], dyn = [];
   const cat = s.category;
-  const kind = s.id === 'hcpd-precinct-7' ? 'police' : s.id === 'heat-city-general' ? 'hospital' : cat === 'banco' ? 'bank' : cat === 'autos' ? 'showroom' : ['comida', 'bar', 'club_adulto'].includes(cat) ? 'venue' : 'shop';
-  const W = { bank: 22, showroom: 24, police: 20, venue: 18, hospital: 18, shop: 16 }[kind], D = { bank: 16, showroom: 16, police: 16, venue: 14, hospital: 14, shop: 12 }[kind], H = kind === 'showroom' || kind === 'bank' ? 6 : 4.2;
-  const floorMat = kind === 'bank' || kind === 'showroom' ? M.marble : kind === 'venue' && cat !== 'comida' ? M.wood : M.floor;
-  const fl = new THREE.Mesh(new THREE.PlaneGeometry(W, D), floorMat); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; fl.material.map.repeat && fl.material.map.repeat.set(W / 4, D / 4); g.add(fl);
+  const kind = vip ? 'vip' : s.id === 'hcpd-precinct-7' ? 'police' : s.id === 'heat-city-general' ? 'hospital' : cat === 'banco' ? 'bank' : cat === 'autos' ? 'showroom' : ['comida', 'bar', 'club_adulto'].includes(cat) ? 'venue' : 'shop';
+  const W = { vip: 12, bank: 22, showroom: 24, police: 20, venue: 18, hospital: 18, shop: 16 }[kind], D = { vip: 10, bank: 16, showroom: 16, police: 16, venue: 14, hospital: 14, shop: 12 }[kind], H = kind === 'showroom' || kind === 'bank' ? 6 : 4.2;
+  const floorMat = kind === 'vip' ? M.carpet : kind === 'bank' || kind === 'showroom' ? M.marble : kind === 'venue' && cat !== 'comida' ? M.wood : M.floor;
+  const fl = new THREE.Mesh(new THREE.PlaneGeometry(W, D), floorMat); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; fl.material.map && fl.material.map.repeat.set(W / 4, D / 4); g.add(fl);
   const ce = new THREE.Mesh(new THREE.PlaneGeometry(W, D), M.ceil); ce.rotation.x = Math.PI / 2; ce.position.y = H; g.add(ce);
   // paredes (con puerta al frente)
-  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
+  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'vip' ? 0x1e1030 : kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
   ibox(g, col, W, H, 0.3, 0, 0, -D / 2 - 0.15, wallMat);
   ibox(g, col, 0.3, H, D, -W / 2 - 0.15, 0, 0, wallMat); ibox(g, col, 0.3, H, D, W / 2 + 0.15, 0, 0, wallMat);
   ibox(g, col, (W - 3) / 2, H, 0.3, -(W + 3) / 4, 0, D / 2 + 0.15, wallMat); ibox(g, col, (W - 3) / 2, H, 0.3, (W + 3) / 4, 0, D / 2 + 0.15, wallMat);
@@ -2177,6 +2178,21 @@ function buildInterior(s) {
       for (let k = 0; k < 4; k++) { const fr = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.8), new THREE.MeshStandardMaterial({ color: new THREE.Color().setHSL(Math.random(), 0.5, 0.6) })); fr.position.set(-W / 2 + 0.06, 1.8, -3 + k * 2); fr.rotation.y = Math.PI / 2; g.add(fr); }
     }
     for (let i = 0; i < 2; i++) { const c = inPerson(randomPerson(), 1 + i * 3, 2.5 - i * 2, Math.random() * 6); npcs.push(c); }
+  } else if (kind === 'vip') {
+    // sala VIP: sillones de terciopelo, neón, botellas y bailarinas (vestidas)
+    const velvet = new THREE.MeshStandardMaterial({ color: 0x7a0f3a, roughness: 0.75 }), gold = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.3 });
+    ibox(g, col, W - 2, 0.5, 1.1, 0, 0, -D / 2 + 1.1, velvet); ibox(g, col, W - 2, 0.9, 0.3, 0, 0.5, -D / 2 + 0.6, velvet, false);
+    ibox(g, col, 1.1, 0.5, D - 4, -W / 2 + 1.1, 0, -0.5, velvet); ibox(g, col, 0.3, 0.9, D - 4, -W / 2 + 0.6, 0.5, -0.5, velvet, false);
+    ibox(g, col, 2.6, 0.45, 1.3, 0, 0, -1.2, M.glass); ibox(g, col, 2.6, 0.04, 1.3, 0, 0.45, -1.2, gold, false);
+    const bucket = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.14, 0.3, 16), gold); bucket.position.set(0.5, 0.64, -1.2); g.add(bucket);
+    for (let k = 0; k < 3; k++) { const b = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 0.36, 10), new THREE.MeshStandardMaterial({ color: 0x0c3b1f, metalness: 0.4, roughness: 0.1 })); b.position.set(0.42 + k * 0.08, 0.84, -1.2); b.rotation.z = 0.2; g.add(b); }
+    const neonCols = [0xff3d8b, 0x3ddcd0, 0xb48cff];
+    neonCols.forEach((c, i) => { const n = new THREE.Mesh(new THREE.BoxGeometry(W - 1, 0.06, 0.06), new THREE.MeshBasicMaterial({ color: c, toneMapped: false })); n.position.set(0, 1.6 + i * 0.7, -D / 2 + 0.2); g.add(n); dyn.push(n); });
+    const stage = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.25, 40), new THREE.MeshStandardMaterial({ color: 0x1b1222, metalness: 0.6, roughness: 0.25 })); stage.position.set(2.4, 0.12, 1); g.add(stage); col.push({ x: IN_X + 2.4, z: IN_Z + 1, hw: 1.5, hd: 1.5 });
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.04, 8, 48), new THREE.MeshBasicMaterial({ color: 0xff3d8b, toneMapped: false })); ring.rotation.x = Math.PI / 2; ring.position.set(2.4, 0.26, 1); g.add(ring);
+    [[1.8, 0.8, 0xc0392b], [3.0, 1.3, 0x111111]].forEach(([x, z, top]) => { const d = inPerson({ skin: pickR(SKINS), top, pants: 0x111111, shoes: 0x111111, hair: pickR(HAIRS), long: true, wide: 0.9, sleeves: false }, x, z, Math.PI); d.position.y = 0.25; d.scale.setScalar(0.96); d.userData.dance = Math.random() * 6; npcs.push(d); });
+    npcs.push(inPerson(randomPerson(0x111111), -W / 2 + 2.2, D / 2 - 2, Math.PI / 2));
+    counter = { x: -W / 2 + 3.2, z: D / 2 - 2 };
   } else if (kind === 'venue') {
     const club = cat === 'club_adulto' || s.id === 'club-ember';
     ibox(g, col, W * 0.55, 1.1, 0.9, 0, 0, -D / 2 + 2.2, M.wood);
@@ -2238,6 +2254,16 @@ function interiorHit(x, z, r) {
   for (const c of interior.col) if (Math.abs(x - c.x) < c.hw + r && Math.abs(z - c.z) < c.hd + r) return c;
   return null;
 }
+function enterVIP(s) {
+  G.mode = 'dead'; $('ovTitle').textContent = 'SALA VIP'; $('ovText').textContent = 'Te acompañan al reservado…'; $('overlay').hidden = false;
+  setTimeout(() => {
+    if (interior) scene.remove(interior.group);
+    interior = buildInterior(s, true); scene.add(interior.group); G.inside = s;
+    player.position.set(IN_X - 1.5, 0, IN_Z + 1.5); player.rotation.y = Math.PI; G.camYaw = 0.4; G.camPitch = 0.22;
+    $('minimap').style.visibility = 'hidden'; $('overlay').hidden = true; G.mode = 'play'; G.hp = 100;
+    toast('Sala VIP: botella de la casa, música y show. Recuperaste toda la salud.', 4000);
+  }, 1200);
+}
 function enterInterior(s) {
   if (G.wanted > 0 && !(curStep() && curStep().store === s.id)) return toast('Con la policía atrás no podés esconderte en un local.');
   G.mode = 'dead'; $('ovTitle').textContent = ''; $('ovText').textContent = ''; $('overlay').hidden = false; $('overlay').style.background = '#000';
@@ -2270,7 +2296,7 @@ function interiorPrompt() {
   const lx = player.position.x - IN_X, lz = player.position.z - IN_Z;
   if (Math.hypot(lx - interior.exit.x, lz - interior.exit.z) < 1.8) return { kind: 'exit', text: 'Salir a la calle' };
   if (interior.cell && lucy && lucy.caged && Math.hypot(lx - interior.cell.x, lz - interior.cell.z) < 1.8) return { kind: 'cell', text: 'Abrir la celda de Lucy' };
-  if (Math.hypot(lx - interior.counter.x, lz - interior.counter.z) < 2.2) return { kind: 'counter', text: interior.kind === 'bank' ? 'Hablar con la cajera' : interior.kind === 'police' ? 'Hablar con el oficial' : interior.kind === 'venue' ? 'Pedir en la barra' : 'Hablar con el vendedor' };
+  if (Math.hypot(lx - interior.counter.x, lz - interior.counter.z) < 2.2) return { kind: 'counter', text: interior.kind === 'vip' ? 'Pedir otra botella' : interior.kind === 'bank' ? 'Hablar con la cajera' : interior.kind === 'police' ? 'Hablar con el oficial' : interior.kind === 'venue' ? 'Pedir en la barra' : 'Hablar con el vendedor' };
   return null;
 }
 function updateInterior(dt, now) {
@@ -2781,6 +2807,7 @@ function shopAction(s, a, i) {
     if (s.actions?.includes('comprar_propiedad')) G.owned.push(s.id + ':' + item);
     const buyModel = /superdeportiv/i.test(item) ? 'moretti' : /convertible/i.test(item) ? 'valor' : /suv/i.test(item) ? 'brennan' : /lancha|jet|yate|avioneta|helic|hangar|licencia|amarre/i.test(item) ? null : s.category === 'autos' && /tuning|motor|pintura|blindaje/i.test(item) ? null : null;
     if (buyModel) { giveCar(buyModel, ['#ffd23f', '#1e4fa3', '#e8e8e8', '#b3122e'][Math.floor(Math.random() * 4)]); toast(`Tu ${MODELS[buyModel].brand} ${MODELS[buyModel].name} nuevo te espera afuera`); }
+    else if (/vip|reservado/i.test(item) && ['club_adulto', 'bar'].includes(s.category)) { saveNow(); closeShop(); enterVIP(s); return; }
     else if (!giveWeapon(s, item)) toast(`Compraste: ${item} · -${money(p)}`);
     saveNow(); renderShop(s);
   }
