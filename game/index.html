@@ -3672,11 +3672,15 @@ function buildMapUI() {
     drag = null; if (moved) return;
     const r = cv.getBoundingClientRect(), p = screenToMap(e.clientX - r.left, e.clientY - r.top), k = mapScale();
     let best = null, bd = 16 / k;
-    for (const s of visibleStores()) { const d = Math.hypot(s.mx - p.x, s.my - p.y); if (d < bd) { bd = d; best = s; } }
+    for (const s of visibleStores().concat(PLACES)) { const d = Math.hypot(s.mx - p.x, s.my - p.y) - (s.place ? 20 : 0); if (d < bd) { bd = d; best = s; } }
     if (best) selectStore(best);
   });
   cv.addEventListener('wheel', e => { e.preventDefault(); MV.zoom = Math.max(1, Math.min(6, MV.zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15))); }, { passive: false });
 }
+const PLACES = [
+  { id: 'airport', place: true, name: 'Aeropuerto Heat City Intl.', color: '#9fe8ff', glyph: '✈', zone: 'Isla del aeropuerto', mx: 1075, my: 300, wx: 444, wz: -160, description: 'Pista, terminal, hangar y torre de control. Hay avionetas y un jet para robar, y ahí te espera el avión de escape de la Capitana Vega.', tags: 'aeropuerto avion avión jet avioneta vuelo pista' },
+  { id: 'myisland', place: true, name: 'Tu isla privada', color: '#3ddcd0', glyph: '⌂', zone: 'Mar abierto', mx: 1125, my: 875, wx: 499.5, wz: 323, description: 'Tu mansión con parque acuático, garaje con montacargas, yate, jet ski y jet privado. Se llega en barco (Capitán Nico) o en avión.', tags: 'isla mansion mansión yate jet ski casa garaje' }
+];
 const visibleStores = () => G.stores.filter(s => !G.hidden.has(s.category) && !locked(s));
 const focusPos = () => (G.inCar && !(ESC && ESC.phase === 'takeoff') ? car.position : player.position);
 function mapScale() { const cv = $('bigmap'); return Math.min(cv.clientWidth, cv.clientHeight) / 1000 * MV.zoom; }
@@ -3695,14 +3699,23 @@ function renderList() {
   const fp = M2W(focusPos().x, focusPos().z);
   const items = visibleStores().filter(s => !MV.q || [s.name, G.zones[s.zone].name, G.cats[s.category].name, ...s.sells].join(' ').toLowerCase().includes(MV.q))
     .map(s => ({ s, d: Math.hypot(s.mx - fp.mx, s.my - fp.my) * S })).sort((a, b) => a.d - b.d);
-  $('list').innerHTML = items.length ? items.map(({ s, d }) => `<button class="it ${MV.sel === s ? 'sel' : ''}" data-id="${s.id}" type="button"><span class="d" style="background:${s.special?.pin_color || G.cats[s.category].color}"></span><span>${esc(s.name)}<small>${esc(G.cats[s.category].name)} · ${esc(G.zones[s.zone].name)}</small></span><span class="dist">${Math.round(d)} m</span></button>`).join('') : '<p style="color:var(--muted);padding:8px;font-size:13px">No hay tiendas que coincidan.</p>';
-  $('list').querySelectorAll('.it').forEach(b => b.onclick = () => { const s = G.stores.find(x => x.id === b.dataset.id); selectStore(s); MV.cx = s.mx; MV.cy = s.my; MV.zoom = Math.max(MV.zoom, 2.5); });
+  const pl = PLACES.filter(x => !MV.q || (x.name + ' ' + x.tags).toLowerCase().includes(MV.q)).map(x => `<button class="it ${MV.sel === x ? 'sel' : ''}" data-place="${x.id}" type="button"><span class="d" style="background:${x.color}"></span><span>${esc(x.name)}<small>${esc(x.zone)} · ${Math.round(Math.hypot(x.mx - fp.mx, x.my - fp.my) * S)} m</small></span></button>`).join('');
+  $('list').innerHTML = pl + (items.length ? items.map(({ s, d }) => `<button class="it ${MV.sel === s ? 'sel' : ''}" data-id="${s.id}" type="button"><span class="d" style="background:${s.special?.pin_color || G.cats[s.category].color}"></span><span>${esc(s.name)}<small>${esc(G.cats[s.category].name)} · ${esc(G.zones[s.zone].name)}</small></span><span class="dist">${Math.round(d)} m</span></button>`).join('') : (pl ? '' : '<p style="color:var(--muted);padding:8px;font-size:13px">No hay lugares que coincidan.</p>'));
+  $('list').querySelectorAll('.it').forEach(b => b.onclick = () => { const s = b.dataset.place ? PLACES.find(x => x.id === b.dataset.place) : G.stores.find(x => x.id === b.dataset.id); selectStore(s); MV.cx = s.mx; MV.cy = s.my; MV.zoom = Math.max(MV.zoom, 2.5); });
 }
 function renderDetail() {
   const el = $('detail'), s = MV.sel;
   if (!s || G.mode !== 'map') { el.hidden = true; return; }
-  const c = G.cats[s.category];
   el.hidden = false;
+  if (s.place) {
+    el.innerHTML = `<div class="meta"><span class="pill" style="color:${s.color};border-color:${s.color}">${s.glyph} Lugar</span><span class="pill">${esc(s.zone)}</span><span class="pill open">Abierto 24 h</span></div><h3>${esc(s.name)}</h3><p>${esc(s.description)}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${G.waypoint === s ? '<button class="btn" id="wpOff" type="button">Quitar ruta</button>' : '<button class="btn primary" id="wpOn" type="button">Marcar ruta e ir</button>'}</div>`;
+    const on = $('wpOn'), off = $('wpOff');
+    if (on) on.onclick = () => { setWaypoint(s); toast(s.id === 'myisland' ? 'Ruta marcada a tu isla. Es en el mar: llamá a Capitán Nico o andá en barco.' : `Ruta marcada a ${s.name}. Cruzá el puente al este de Port Sable.`, 4500); closeMap(); };
+    if (off) off.onclick = () => setWaypoint(null);
+    return;
+  }
+  const c = G.cats[s.category];
   el.innerHTML = `<div class="meta"><span class="pill" style="color:${c.color};border-color:${c.color}">${esc(c.name)}</span><span class="pill">${esc(G.zones[s.zone].name)}</span><span class="pill open">Abierto 24 h</span>${s.special ? `<span class="pill heist">${esc(s.special.label)}</span>` : ''}</div>
     <h3>${esc(s.name)}</h3><p>${esc(s.description)}</p><p>Vende: ${esc(s.sells.join(', '))}</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">${G.waypoint === s ? '<button class="btn" id="wpOff" type="button">Quitar ruta</button>' : '<button class="btn primary" id="wpOn" type="button">Marcar ruta e ir</button>'}</div>`;
@@ -3733,7 +3746,8 @@ function drawMapLayer(ctx, cx, cy, k, w, h, opts) {
   for (const pr of PROPS) if (pr.owned) { ctx.fillStyle = '#3ddc97'; ctx.beginPath(); ctx.arc(pr.mx * k, pr.my * k, r * 0.9, 0, 7); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); if (r >= 7) { ctx.fillStyle = '#0f0b1e'; ctx.font = `700 ${Math.round(r)}px Inter, sans-serif`; ctx.fillText('⌂', pr.mx * k, pr.my * k + 0.5); } if (opts.labels && k > 1.6) { ctx.font = '600 11px Inter, sans-serif'; const tw = ctx.measureText(pr.item).width + 10; ctx.fillStyle = 'rgba(15,11,30,0.85)'; ctx.fillRect(pr.mx * k - tw / 2, pr.my * k + r + 3, tw, 16); ctx.fillStyle = '#3ddc97'; ctx.fillText(pr.item, pr.mx * k, pr.my * k + r + 11); } }
   ctx.fillStyle = '#e8d3a0'; ctx.beginPath(); ctx.arc(1100 * k, 300 * k, 95 * k, 0, 7); ctx.fill(); ctx.fillStyle = '#9fbf8a'; ctx.beginPath(); ctx.arc(1100 * k, 300 * k, 90 * k, 0, 7); ctx.fill();
   ctx.fillStyle = '#3a3b40'; ctx.fillRect(1006 * k, 293 * k, 85 * k, 14 * k); ctx.fillRect((1110 - 9) * k, (300 - 70) * k, 18 * k, 140 * k);
-  if (r >= 7) { ctx.fillStyle = '#fff'; ctx.font = `700 ${Math.round(r * 1.8)}px Inter, sans-serif`; ctx.fillText('✈', 1075 * k, 300 * k); } if (opts.labels && k > 0.5) { ctx.font = '600 12px Inter, sans-serif'; ctx.fillStyle = '#f4ecff'; ctx.fillText('Aeropuerto', 1100 * k, 300 * k + 90 * k + 14); }
+  if (opts.labels && k > 0.5) { ctx.font = '600 12px Inter, sans-serif'; ctx.fillStyle = '#f4ecff'; ctx.fillText('Aeropuerto', 1100 * k, 300 * k + 90 * k + 14); }
+  for (const pl of PLACES) { const sel = MV.sel === pl && opts.labels; ctx.fillStyle = pl.color; ctx.beginPath(); ctx.arc(pl.mx * k, pl.my * k, r * 1.15, 0, 7); ctx.fill(); ctx.lineWidth = sel ? 3.5 : 2; ctx.strokeStyle = sel ? '#fff' : '#0f0b1e'; ctx.stroke(); if (r >= 7) { ctx.fillStyle = '#0f0b1e'; ctx.font = `700 ${Math.round(r * 1.2)}px Inter, sans-serif`; ctx.fillText(pl.glyph, pl.mx * k, pl.my * k + 0.5); } }
   const fp = M2W(focusPos().x, focusPos().z);
   ctx.fillStyle = '#8a6a4a'; for (const pr of PIERS) { const a = M2W(pr.x0, pr.z0), b = M2W(pr.x1, pr.z1); ctx.fillRect(a.mx * k, a.my * k, Math.max(2, (b.mx - a.mx) * k), Math.max(2, (b.my - a.my) * k)); }
   ctx.fillStyle = '#e8e8e8'; for (const g of boats.concat(aiBoats.map(b => b.g))) { if (g === car && G.inCar) continue; const bp = M2W(g.position.x, g.position.z); ctx.beginPath(); ctx.arc(bp.mx * k, bp.my * k, 3.5, 0, 7); ctx.fill(); }
