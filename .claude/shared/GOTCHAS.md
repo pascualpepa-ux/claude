@@ -313,10 +313,10 @@ BẮT BUỘC: Sau khi thêm entry mới → cập nhật bảng "Mục lục nha
 **Category:** `[UI-BINDING]`
 
 **Ngày phát hiện:** 2026-11-26
-**Môi trường:** Next.js 15 (App Router) + Tailwind v4, `apps/playforge`
+**Môi trường:** Next.js 15 (App Router) + Tailwind v4, `apps/bitzy`
 **Vấn đề:** El reproductor a pantalla completa (`fixed inset-0`) aparecía con alto 0: sólo se veía la barra superior y el botón «Jugar» quedaba inaccesible. Sin errores en consola.
 **Nguyên nhân:** `app/template.tsx` envolvía cada página en una animación de entrada con `transform` y `animation-fill-mode: both`. Al terminar, el valor computado queda `matrix(1,0,0,1,0,0)` (no `none`), y cualquier `transform` convierte al ancestro en el bloque contenedor de los `fixed` → `inset-0` se mide contra un div de alto 0.
 **Cách xử lý:** En `template.tsx` animar sólo `opacity`; para animaciones con `transform` usar `fill-mode: backwards` (no `both`/`forwards`).
-**Lần đầu gặp:** Fase 1 de Playforge (prueba con Playwright de `/jugar/[id]`).
-**Không cần làm lại:** Ya corregido en `apps/playforge/app/template.tsx` y `globals.css`.
+**Lần đầu gặp:** Fase 1 de Bitzy (ex Playforge) (prueba con Playwright de `/jugar/[id]`).
+**Không cần làm lại:** Ya corregido en `apps/bitzy/app/template.tsx` y `globals.css`.
 
