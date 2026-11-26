@@ -658,7 +658,7 @@ const PIERS = [];
 const onPier = (x, z) => PIERS.find(p => x > p.x0 && x < p.x1 && z > p.z0 && z < p.z1);
 const inWater = (x, z) => { if (x > 2000) return false; if (poolAt(x, z)) return true; const { mx, my } = M2W(x, z); return !isLand(mx, my) && !onPier(x, z); };
 function groundY(x, z) {
-  if (x > 2000) return 0;
+  if (x > 2000) return interior && interior.levels ? mansionHeight(x - IN_X, z - IN_Z, player.position.y) : 0;
   const pr = onPier(x, z); if (pr) return pr.y;
   const { mx, my } = M2W(x, z);
   const bx = Math.round(mx / 100) * 100, by = Math.round(my / 100) * 100;
@@ -2363,16 +2363,25 @@ function concreteMat() {
   for (let i = 0; i < 9000; i++) { x.fillStyle = `rgba(${Math.random() < 0.5 ? '0,0,0' : '255,255,255'},0.05)`; x.fillRect(Math.random() * 512, Math.random() * 512, 1.5, 1.5); }
   return CONC_M = new THREE.MeshStandardMaterial({ map: tex(c, 4, 4), roughness: 0.75, metalness: 0.05 });
 }
+const MFH = 3.6;
+// altura del piso adentro de la mansión: planta baja, escaleras, piso 1 y 2
+function mansionHeight(lx, lz, cy) {
+  const FH = MFH, h1 = lx > 7 && lx < 9.6 && lz > -3.5 && lz < 3.5, h2 = lx > 4.2 && lx < 6.8 && lz > -3.5 && lz < 3.5;
+  const c = [0]; if (!h1) c.push(FH); if (!h2) c.push(2 * FH);
+  if (h1) c.push(FH * (3.5 - lz) / 7); if (h2) c.push(FH + FH * (lz + 3.5) / 7);
+  let best = 0; for (const v of c) if (v <= cy + 0.7 && v > best) best = v; return best;
+}
+const floorOf = y => Math.max(0, Math.min(2, Math.floor((y + 0.6) / MFH)));
 function buildInterior(s, vip) {
   const M = imats(), g = new THREE.Group(), col = [], npcs = [], dyn = [];
   const cat = s.category;
   const kind = s.private ? s.private : vip ? 'vip' : s.id === 'hcpd-precinct-7' ? 'police' : s.id === 'heat-city-general' ? 'hospital' : cat === 'banco' ? 'bank' : cat === 'autos' ? 'showroom' : ['comida', 'bar', 'club_adulto'].includes(cat) ? 'venue' : 'shop';
-  const W = { garage: 26, house: 18, vip: 12, bank: 22, showroom: 24, police: 24, venue: 18, hospital: 18, shop: 16 }[kind], D = { garage: 16, house: 12, vip: 10, bank: 16, showroom: 16, police: 20, venue: 14, hospital: 14, shop: 12 }[kind], H = kind === 'showroom' || kind === 'bank' ? 6 : kind === 'police' ? 4.6 : 4.2;
-  const floorMat = kind === 'house' ? M.wood : kind === 'vip' ? M.carpet : kind === 'bank' || kind === 'showroom' ? M.marble : kind === 'venue' && cat !== 'comida' ? M.wood : M.floor;
+  const W = { mansion: 20, garage: 26, house: 18, vip: 12, bank: 22, showroom: 24, police: 24, venue: 18, hospital: 18, shop: 16 }[kind], D = { mansion: 14, garage: 16, house: 12, vip: 10, bank: 16, showroom: 16, police: 20, venue: 14, hospital: 14, shop: 12 }[kind], H = kind === 'mansion' ? MFH * 3 : kind === 'showroom' || kind === 'bank' ? 6 : kind === 'police' ? 4.6 : 4.2;
+  const floorMat = kind === 'mansion' ? M.marble : kind === 'house' ? M.wood : kind === 'vip' ? M.carpet : kind === 'bank' || kind === 'showroom' ? M.marble : kind === 'venue' && cat !== 'comida' ? M.wood : M.floor;
   const fl = new THREE.Mesh(new THREE.PlaneGeometry(W, D), kind === 'police' ? concreteMat() : floorMat); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; fl.material.map && fl.material.map.repeat.set(W / 4, D / 4); g.add(fl);
   const ce = new THREE.Mesh(new THREE.PlaneGeometry(W, D), M.ceil); ce.rotation.x = Math.PI / 2; ce.position.y = H; g.add(ce);
   // paredes (con puerta al frente)
-  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'garage' ? 0x8e9096 : kind === 'house' ? (s.wall || 0xf4efe6) : kind === 'vip' ? 0x1e1030 : kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
+  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'garage' ? 0x8e9096 : kind === 'house' || kind === 'mansion' ? (s.wall || 0xf4efe6) : kind === 'vip' ? 0x1e1030 : kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
   if (kind === 'police') { wallMat.map = blockTex(); wallMat.color.set(0xe9edf0); }
   ibox(g, col, W, H, 0.3, 0, 0, -D / 2 - 0.15, wallMat);
   ibox(g, col, 0.3, H, D, -W / 2 - 0.15, 0, 0, wallMat); ibox(g, col, 0.3, H, D, W / 2 + 0.15, 0, 0, wallMat);
@@ -2383,8 +2392,8 @@ function buildInterior(s, vip) {
   for (let x = -W / 2 + 3; x < W / 2 - 1; x += 4) for (let z = -D / 2 + 3; z < D / 2 - 1; z += 4) { const l = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.5), M.light); l.rotation.x = Math.PI / 2; l.position.set(x, H - 0.02, z); g.add(l); }
   // cartel con el nombre en la pared del fondo
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(W - 4, 9), 2.2), new THREE.MeshBasicMaterial({ map: makeSign(s.name.toUpperCase(), (G.cats[s.category] || { name: s.sub }).name, (G.cats[s.category] || { color: s.color }).color, s.special?.type === 'golpe'), toneMapped: false }));
-  sign.position.set(0, H - 1.5, -D / 2 + 0.02); g.add(sign); if (kind === 'house' || kind === 'police') sign.visible = false;
-  let hazy = false, counter = { x: 0, z: -D / 2 + 3.6 }, cell = null, clerkTop = 0x1d1d1d, spots = null, bed = null;
+  sign.position.set(0, H - 1.5, -D / 2 + 0.02); g.add(sign); if (kind === 'house' || kind === 'mansion' || kind === 'police') sign.visible = false;
+  let hazy = false, levels = false, acts = null, counter = { x: 0, z: -D / 2 + 3.6 }, cell = null, clerkTop = 0x1d1d1d, spots = null, bed = null;
   if (kind === 'shop') {
     clerkTop = { tienda24: 0x2fa36b, armeria: 0x4d5a3a, ropa: 0x111111, tecnologia: 0x3a7bd5, empeno: 0x7a4a2a, tatuajes: 0x222222, gimnasio: 0xe94b3c, inmobiliaria: 0x1f2f55 }[cat] || 0x1d1d1d;
     ibox(g, col, 4.2, 1.05, 1, -W / 2 + 3.2, 0, -D / 2 + 2.8, M.wood); ibox(g, col, 0.5, 0.3, 0.4, -W / 2 + 2.4, 1.05, -D / 2 + 2.8, M.dark, false);
@@ -2477,6 +2486,73 @@ function buildInterior(s, vip) {
     for (let i = 0; i < 6; i++) { const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 8), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.3 })); post.position.set(-5 + i * 2, 0.5, 1.5); g.add(post); }
     counter = { x: 0, z: -0.6 };
     for (let i = 0; i < 3; i++) npcs.push(inPerson(randomPerson(), -6 + i * 5, 3 + Math.random() * 2, Math.PI + (Math.random() - 0.5)));
+  } else if (kind === 'mansion') {
+    counter = { x: 999, z: 999 }; levels = true;
+    const FH = MFH, fb = (fl, w, h, d, x, y, z, mat, solid = true) => { const n = col.length; const m = ibox(g, col, w, h, d, x, y + fl * FH, z, mat, solid); for (let i = n; i < col.length; i++) col[i].floor = fl; return m; };
+    const mat = c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6 }), white = mat(0xf7f5f0), dark = mat(0x2a2522), steelM = new THREE.MeshStandardMaterial({ color: 0xc9ccd0, metalness: 0.85, roughness: 0.25 }), glassR = new THREE.MeshStandardMaterial({ color: 0xbfe3ff, transparent: true, opacity: 0.25, depthWrite: false });
+    // losas de los pisos 1 y 2 (con el hueco de cada escalera)
+    const slab = (fl, pcs) => pcs.forEach(([w, d, x, z]) => { const s = new THREE.Mesh(new THREE.BoxGeometry(w, 0.25, d), M.wood); s.position.set(x, fl * FH - 0.125, z); s.receiveShadow = true; g.add(s); const c = new THREE.Mesh(new THREE.PlaneGeometry(w, d), white); c.rotation.x = Math.PI / 2; c.position.set(x, fl * FH - 0.26, z); g.add(c); });
+    slab(1, [[17, 14, -1.5, 0], [3, 3.5, 8.5, -5.25], [3, 3.5, 8.5, 5.25], [0.4, 7, 9.8, 0]]);
+    slab(2, [[14.2, 14, -2.9, 0], [2.6, 3.5, 5.5, -5.25], [2.6, 3.5, 5.5, 5.25], [3.2, 14, 8.4, 0]]);
+    // escaleras (dos tramos) con baranda de vidrio
+    for (let i = 0; i < 14; i++) { const h = (i + 1) * FH / 14; const s1 = new THREE.Mesh(new THREE.BoxGeometry(2.6, h, 0.5), M.wood); s1.position.set(8.3, h / 2, 3.5 - (i + 0.5) * 0.5); g.add(s1); const s2 = new THREE.Mesh(new THREE.BoxGeometry(2.6, h, 0.5), M.wood); s2.position.set(5.5, FH + h / 2, -3.5 + (i + 0.5) * 0.5); g.add(s2); }
+    const rail = (x, y0, y1, z0, z1) => { const L = Math.hypot(z1 - z0, y1 - y0), r = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.9, L), glassR); r.position.set(x, (y0 + y1) / 2 + 0.5, (z0 + z1) / 2); r.rotation.x = Math.atan2(y1 - y0, z0 - z1); g.add(r); const h = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, L), steelM); h.position.set(x, (y0 + y1) / 2 + 0.95, (z0 + z1) / 2); h.rotation.x = r.rotation.x; g.add(h); };
+    rail(6.95, 0, FH, 3.5, -3.5); rail(4.1, FH, 2 * FH, -3.5, 3.5); rail(6.95, FH, FH, -3.5, 3.5); rail(4.1, 2 * FH, 2 * FH, -3.5, 3.5);
+    { const r = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.9, 0.06), glassR); r.position.set(8.3, FH + 0.5, 3.55); g.add(r); const r2 = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.9, 0.06), glassR); r2.position.set(5.5, 2 * FH + 0.5, -3.55); g.add(r2); }
+    col.push({ x: IN_X + 6.95, z: IN_Z, hw: 0.08, hd: 3.5, floor: 0 }, { x: IN_X + 6.95, z: IN_Z, hw: 0.08, hd: 3.5, floor: 1 }, { x: IN_X + 4.1, z: IN_Z + 0.5, hw: 0.08, hd: 3, floor: 1 }, { x: IN_X + 8.3, z: IN_Z + 3.55, hw: 1.3, hd: 0.08, floor: 1 },
+      { x: IN_X + 4.1, z: IN_Z, hw: 0.08, hd: 3.5, floor: 2 }, { x: IN_X + 5.5, z: IN_Z - 3.55, hw: 1.3, hd: 0.08, floor: 2 });
+    // luces de techo en cada piso + ventanales
+    for (let fl = 0; fl < 3; fl++) { for (const [x, z] of [[-6, -3], [-6, 3], [0, -3], [0, 3]]) { const l = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.5), M.light); l.rotation.x = Math.PI / 2; l.position.set(x, fl * FH + FH - 0.28, z); g.add(l); }
+      for (const x of [-7, -3]) { const w = new THREE.Mesh(new THREE.PlaneGeometry(3, 1.8), new THREE.MeshBasicMaterial({ color: 0xbfe6ff, toneMapped: false })); w.position.set(x, fl * FH + 1.8, -D / 2 + 0.02); g.add(w); } }
+    // --- planta baja: living, cocina, comedor, vinos ---
+    fb(0, 4.4, 0.45, 1, -6, 0, 5.6, mat(0x8a8f99)); fb(0, 4.4, 0.8, 0.3, -6, 0.45, 6.1, mat(0x8a8f99), false); fb(0, 1, 0.45, 2.6, -8.7, 0, 4.4, mat(0x8a8f99));
+    const rug = new THREE.Mesh(new THREE.PlaneGeometry(5, 3.4), mat(0xd8c8a8)); rug.rotation.x = -Math.PI / 2; rug.position.set(-5.5, 0.01, 3.6); g.add(rug);
+    fb(0, 1.6, 0.4, 0.9, -5.5, 0, 3.4, M.wood);
+    const tv = new THREE.Mesh(new THREE.PlaneGeometry(0.05, 0.05), M.dark); g.add(tv);
+    const tvs = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 1.9), new THREE.MeshBasicMaterial({ color: 0x3a7bd5, toneMapped: false })); tvs.position.set(-5.5, 1.9, 0.6); g.add(tvs); dyn.push(tvs); fb(0, 3.6, 0.5, 0.4, -5.5, 0, 0.6, dark);
+    fb(0, 7.5, 0.95, 0.7, -5.8, 0, -6.6, white); fb(0, 7.5, 0.06, 0.72, -5.8, 0.95, -6.6, M.marble, false);
+    const ck = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.02, 0.55), mat(0x111111)); ck.position.set(-4, 1.02, -6.6); g.add(ck);
+    fb(0, 1, 2.1, 0.8, -9.4, 0, -5.6, steelM);
+    fb(0, 3, 0.95, 1.2, -5.5, 0, -3.4, white); fb(0, 3.1, 0.06, 1.3, -5.5, 0.95, -3.4, M.marble, false);
+    const fruit = [0xff3d3d, 0xffd23f, 0x7ad94f, 0xff8a3d]; for (let i = 0; i < 7; i++) { const f = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), mat(fruit[i % 4])); f.position.set(-6.3 + Math.cos(i) * 0.18, 1.1, -3.4 + Math.sin(i) * 0.18); g.add(f); }
+    const pz = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.04, 20), mat(0xe8a050)); pz.position.set(-5.2, 1.03, -3.3); g.add(pz); for (let i = 0; i < 6; i++) { const pp = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.02, 8), mat(0xb3122e)); pp.position.set(-5.2 + Math.cos(i) * 0.18, 1.06, -3.3 + Math.sin(i) * 0.18); g.add(pp); }
+    const bread = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.4, 10), mat(0xc8894a)); bread.rotation.z = Math.PI / 2; bread.position.set(-4.5, 1.06, -3.5); g.add(bread);
+    // cava de vinos
+    fb(0, 0.5, 2.4, 3, -9.7, 0, -1.6, M.wood);
+    for (let r = 0; r < 5; r++) for (let k = 0; k < 6; k++) { const b = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.3, 8), new THREE.MeshStandardMaterial({ color: (r + k) % 3 ? 0x1f3a1c : 0x5a0f1a, metalness: 0.3, roughness: 0.2 })); b.rotation.z = Math.PI / 2; b.position.set(-9.45, 0.35 + r * 0.42, -2.75 + k * 0.45); g.add(b); }
+    // comedor con vino servido
+    fb(0, 3, 0.08, 1.4, 1.5, 0.72, -4.5, M.wood); fb(0, 0.12, 0.72, 0.12, 0.2, 0, -4.5, dark); fb(0, 0.12, 0.72, 0.12, 2.8, 0, -4.5, dark);
+    col.push({ x: IN_X + 1.5, z: IN_Z - 4.5, hw: 1.5, hd: 0.7, floor: 0 });
+    for (let i = 0; i < 6; i++) { const cx = 0.4 + (i % 3) * 1.1, cz = i < 3 ? -5.5 : -3.5; fb(0, 0.45, 0.45, 0.45, cx, 0, cz, dark, false); fb(0, 0.45, 0.6, 0.06, cx, 0.45, cz + (i < 3 ? -0.2 : 0.2), dark, false); const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.02, 16), white); pl.position.set(cx, 0.81, i < 3 ? -4.9 : -4.1); g.add(pl); const gl = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.025, 0.14, 10), glassR); gl.position.set(cx + 0.22, 0.88, i < 3 ? -4.85 : -4.15); g.add(gl); }
+    const wine = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.32, 10), new THREE.MeshStandardMaterial({ color: 0x3a0a12, metalness: 0.3, roughness: 0.2 })); wine.position.set(1.5, 0.96, -4.5); g.add(wine);
+    for (const [x, z] of [[-1, 6.2], [3.4, 6.2], [-9.4, 0.6]]) { const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.24, 0.5, 12), white); pot.position.set(x, 0.25, z); g.add(pot); const lf = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8), mat(0x3f7a3a)); lf.position.set(x, 1, z); lf.scale.y = 1.4; g.add(lf); }
+    // --- primer piso: dormitorio principal y baño ---
+    fb(1, 0.2, FH, 6, -1, 0, -4, white); fb(1, 0.2, FH, 3, -1, 0, 5.5, white);
+    fb(1, 2.6, 0.55, 2.8, -6, 0, -4.9, white); fb(1, 2.6, 0.25, 2.6, -6, 0.55, -4.85, mat(0xe9e2d4), false); fb(1, 2.8, 1.4, 0.2, -6, 0, -6.45, mat(0x5a4636));
+    for (const x of [-8, -4]) { fb(1, 0.6, 0.55, 0.5, x, 0, -6.2, M.wood); const lp = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 0.3, 12), new THREE.MeshBasicMaterial({ color: 0xffe3a0, toneMapped: false })); lp.position.set(x, FH + 0.75, -6.2); g.add(lp); }
+    for (const x of [-6.6, -5.4]) { const pi = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.18, 0.45), white); pi.position.set(x, FH + 0.88, -5.9); g.add(pi); }
+    const rug1 = new THREE.Mesh(new THREE.PlaneGeometry(4, 3), mat(0xb9a58a)); rug1.rotation.x = -Math.PI / 2; rug1.position.set(-6, FH + 0.01, -2.4); g.add(rug1);
+    fb(1, 2.4, 1, 0.6, -6, 0, 6.6, M.wood);
+    // baño
+    fb(1, 5, FH, 0.2, 1.5, 0, -1, white); fb(1, 2.2, 0.6, 1.1, 2.6, 0, -6.3, white); const water = new THREE.Mesh(new THREE.PlaneGeometry(2, 0.9), new THREE.MeshBasicMaterial({ color: 0xbfefff, toneMapped: false })); water.rotation.x = -Math.PI / 2; water.position.set(2.6, FH + 0.58, -6.3); g.add(water);
+    for (let i = 0; i < 8; i++) { const fo = new THREE.Mesh(new THREE.SphereGeometry(0.12 + Math.random() * 0.08, 8, 6), white); fo.position.set(2 + Math.random() * 1.3, FH + 0.62, -6.6 + Math.random() * 0.6); g.add(fo); }
+    fb(1, 1.4, 0.9, 0.55, -0.2, 0, -6.4, white); const mir = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.02 })); mir.position.set(-0.2, FH + 1.7, -6.68); g.add(mir);
+    // --- segundo piso: cine, bar de vinos y pool ---
+    const screen = new THREE.Mesh(new THREE.PlaneGeometry(6, 3.2), new THREE.MeshBasicMaterial({ color: 0x223355, toneMapped: false })); screen.rotation.y = Math.PI / 2; screen.position.set(-9.85, 2 * FH + 1.8, 0); g.add(screen); dyn.push(screen);
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 3; i++) { const x = -5 + r * 2.2, z = -2.2 + i * 2.2; fb(2, 1, 0.5, 1, x, 0, z, mat(0x4a1d2a)); fb(2, 0.3, 0.9, 1, x + 0.45, 0.5, z, mat(0x4a1d2a), false); }
+    fb(2, 4.5, 1.05, 0.7, 0, 0, -5.4, M.wood); fb(2, 4.6, 0.06, 0.8, 0, 1.05, -5.4, M.marble, false);
+    for (let i = 0; i < 4; i++) { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.75, 12), dark); st.position.set(-1.5 + i, 2 * FH + 0.375, -4.5); g.add(st); }
+    const shelf = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 1.6), M.bottles); shelf.position.set(0, 2 * FH + 1.9, -6.85); g.add(shelf);
+    fb(2, 2.6, 0.85, 1.4, 1.5, 0, 3.6, mat(0x1f5a3a)); fb(2, 2.8, 0.12, 1.6, 1.5, 0.78, 3.6, M.wood, false);
+    for (let i = 0; i < 6; i++) { const bl = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), mat([0xffffff, 0xffd23f, 0xb3122e, 0x1e4fa3, 0xff7a3d, 0x111111][i])); bl.position.set(1 + (i % 3) * 0.3, 2 * FH + 0.9, 3.4 + Math.floor(i / 3) * 0.3); g.add(bl); }
+    acts = [
+      { x: -5.5, z: -2.3, floor: 0, kind: 'eat', text: 'Comer algo (pizza, fruta, pan)' },
+      { x: -8.8, z: -1.6, floor: 0, kind: 'wine', text: 'Servirte una copa de vino' },
+      { x: -6, z: -2.6, floor: 1, kind: 'sleep', text: 'Dormir y guardar la partida' },
+      { x: 2.6, z: -5, floor: 1, kind: 'bath', text: 'Darte un baño de espuma' },
+      { x: -3.6, z: 0, floor: 2, kind: 'tv', text: 'Ver una película' },
+      { x: 0, z: -4.3, floor: 2, kind: 'wine', text: 'Pedir un vino en el bar' }
+    ];
   } else if (kind === 'police') {
     // recepción
     ibox(g, col, 4.5, 1.1, 1, -W / 2 + 3.5, 0, 4, M.wood); counter = { x: -W / 2 + 3.5, z: 5.4 };
@@ -2561,14 +2637,15 @@ function buildInterior(s, vip) {
   npcs.forEach(n => g.add(n));
   g.traverse(o => { if (o.material && o.material.isMeshStandardMaterial) o.material.envMapIntensity = o.material.metalness > 0.9 && o.material.roughness < 0.05 ? 0.8 : 0.12; });
   g.position.set(IN_X, 0, IN_Z);
-  return { group: g, col, npcs, dyn, s, W, D, H, counter, cell, kind, spots, bed, hazy, exit: { x: 0, z: D / 2 - 0.8 } };
+  return { group: g, col, npcs, dyn, s, W, D, H, counter, cell, kind, spots, bed, hazy, levels, acts, exit: { x: 0, z: D / 2 - 0.8 } };
 }
 function interiorHit(x, z, r) {
   if (!interior) return { wall: true };
   const lx = x - IN_X, lz = z - IN_Z;
   if (lz > interior.D / 2 - 0.3 && Math.abs(lx) < 1.4) return null;   // la puerta
   if (Math.abs(lx) > interior.W / 2 - r || Math.abs(lz) > interior.D / 2 - r) return { wall: true };
-  for (const c of interior.col) if (Math.abs(x - c.x) < c.hw + r && Math.abs(z - c.z) < c.hd + r) return c;
+  const fl = interior.levels ? floorOf(player.position.y) : 0;
+  for (const c of interior.col) { if (c.floor !== undefined && c.floor !== fl) continue; if (Math.abs(x - c.x) < c.hw + r && Math.abs(z - c.z) < c.hd + r) return c; }
   return null;
 }
 function enterVIP(s) {
@@ -2613,7 +2690,8 @@ function exitInterior(silent) {
 function interiorPrompt() {
   if (!interior) return null;
   const lx = player.position.x - IN_X, lz = player.position.z - IN_Z;
-  if (Math.hypot(lx - interior.exit.x, lz - interior.exit.z) < 1.8) return { kind: 'exit', text: interior.kind === 'garage' ? 'Subir a la isla a pie' : interior.kind === 'house' ? 'Salir al jardín' : 'Salir a la calle' };
+  if (interior.acts) { const fl = floorOf(player.position.y); for (const a of interior.acts) if (a.floor === fl && Math.hypot(lx - a.x, lz - a.z) < 1.6) return a; if (fl > 0) return null; }
+  if (Math.hypot(lx - interior.exit.x, lz - interior.exit.z) < 1.8) return { kind: 'exit', text: interior.kind === 'garage' ? 'Subir a la isla a pie' : interior.kind === 'house' || interior.kind === 'mansion' ? 'Salir al jardín' : 'Salir a la calle' };
   if (interior.spots) for (const sp of interior.spots) if (Math.hypot(lx - sp.x, lz - sp.z) < 1.6) return { kind: 'takecar', i: sp.i, text: `Sacar ${sp.name}` };
   if (interior.bed && Math.hypot(lx - interior.bed.x, lz - interior.bed.z) < 2) return { kind: 'sleep', text: 'Dormir y guardar la partida' };
   if (interior.cell && lucy && lucy.caged && Math.hypot(lx - interior.cell.x, lz - interior.cell.z) < 1.8) return { kind: 'cell', text: 'Abrir la celda de Lucy' };
@@ -2625,7 +2703,7 @@ function updateInterior(dt, now) {
   if (!inside) return;
   sun.intensity = 0.02; hemi.intensity = 0.32; scene.fog.density = 0; finalPass.uniforms.exposure.value = 0.42; bloom.strength = 0.18; bloom.threshold = 0.95;
   const alarm = G.wanted > 0 || (G.heist && G.heist.phase === 'fill');
-  inLights.forEach((l, i) => { l.position.set(IN_X + (i ? 4 : -4), interior.H - 0.5, IN_Z + (i ? 2 : -2)); l.intensity = 0.8; l.color.set(alarm && Math.floor(now / 300) % 2 ? 0xff2020 : 0xfff0dc); });
+  inLights.forEach((l, i) => { l.position.set(IN_X + (i ? 4 : -4), interior.levels ? floorOf(player.position.y) * MFH + MFH - 0.6 : interior.H - 0.5, IN_Z + (i ? 2 : -2)); l.intensity = 0.8; l.color.set(alarm && Math.floor(now / 300) % 2 ? 0xff2020 : 0xfff0dc); });
   for (const n of interior.npcs) { if (n.userData.dance !== undefined) { n.userData.dance += dt * 6; const ud = n.userData; ud.shL.rotation.x = ud.shR.rotation.x = -2.4 + Math.sin(ud.dance) * 0.4; ud.body.position.y = Math.abs(Math.sin(ud.dance)) * 0.12; n.rotation.y += dt * 0.6; } else if (!n.userData.fixed) idleHuman(n.userData, now + n.id * 300); }
   if (interior.hazy) { scene.fog.color.set(0x8a6f58); scene.fog.density = 0.035; finalPass.uniforms.exposure.value = 0.5; bloom.strength = 0.35; bloom.threshold = 0.8; }
   for (const d of interior.dyn) { if (d.dust) { const a = d.dust.geometry.attributes.position; for (let i = 0; i < a.count; i++) { a.array[i * 3 + 1] += Math.sin(now / 900 + i) * 0.0015 + 0.0008; a.array[i * 3] += Math.cos(now / 1300 + i * 0.7) * 0.001; if (a.array[i * 3 + 1] > 3.8) a.array[i * 3 + 1] = 0.1; } a.needsUpdate = true; continue; } if (d.tiles) d.tiles.forEach((t, i) => t.material.color.setHSL(((now / 1500) + i * 0.13) % 1, 0.9, 0.55)); else if (d.spin) d.spin.rotation.y += dt * 0.3; else if (d.material) d.material.color.setHSL(((now / 4000) + d.id * 0.1) % 1, 0.6, 0.5); }
@@ -2715,7 +2793,7 @@ function updateVictims(dt, now) {
 // ---------- isla privada (escondida en el mar, una por usuario) ----------
 const ISL = { x: 500, z: 300 };
 const GARAGE_S = { id: 'garage', private: 'garage', name: 'Garaje', sub: 'Privado', color: '#ff7a3d', category: '_priv', zone: '_', wx: 503.5, wz: 298.5 };
-const HOUSE_S = { id: 'house', private: 'house', name: 'Tu casa', sub: 'Isla privada', color: '#3ddcd0', category: '_priv', zone: '_', wx: 499.5, wz: 326 };
+const HOUSE_S = { id: 'house', private: 'mansion', name: 'Tu casa', sub: 'Isla privada', color: '#3ddcd0', category: '_priv', zone: '_', wx: 499.5, wz: 326 };
 const onIsland = () => { const p = aiFocus(); return Math.hypot(p.x - ISL.x, p.z - ISL.z) < 80 && !G.inside; };
 let islandSign = null, ISLE = null, ELEV = null; const ELEV_D = 3.8;
 function islandSignTex(name) { return makeSign(`ISLA DE ${name.toUpperCase()}`, 'Propiedad privada', '#3ddcd0', false); }
@@ -3483,6 +3561,10 @@ function tryEnter() {
     if (ip.kind === 'cell') { breakout(); return; }
     if (ip.kind === 'takecar') return takeCarOut(ip.i);
     if (ip.kind === 'sleep') return sleepAtHome();
+    if (ip.kind === 'eat') { G.hp = 100; SFX.buy(); return toast('Te comiste una porción de pizza y una manzana. Salud al máximo.'); }
+    if (ip.kind === 'wine') { G.hp = Math.min(100, G.hp + 10); G.drunk = 12; tone(AC ? AC.currentTime : 0, 1760, 0.3, 'sine', 0.05); return toast('Una copa de tinto de la casa… todo se mueve un poquito.'); }
+    if (ip.kind === 'bath') { G.hp = 100; SFX.splash(); return toast('Baño de espuma relajante. Salud al máximo.'); }
+    if (ip.kind === 'tv') { G.minutes = (G.minutes + 120) % 1440; return toast('Viste una peli de acción en tu cine. Pasaron 2 horas.'); }
   }
   if (!nearStore) return toast('No hay ningún local cerca. Buscá uno en el mapa (M).');
   if (locked(nearStore)) return toast(nearStore.unlock.hint);
@@ -4103,10 +4185,11 @@ function updateCamera(dt, now) {
   v3.set(t.x + rx + Math.sin(G.camYaw) * Math.cos(G.camPitch) * dist, t.y + hgt + Math.sin(G.camPitch) * dist, t.z + rz + Math.cos(G.camYaw) * Math.cos(G.camPitch) * dist);
   // que la cámara no atraviese edificios
   for (let k = 0; k < 6 && hitCollider(v3.x, v3.z, 0.3) && !hitCollider(v3.x, v3.z, 0.3).water; k++) v3.lerp(new THREE.Vector3(t.x, v3.y, t.z), 0.25);
-  if (interior && t.x > 2000) { v3.y = Math.min(v3.y, interior.H - 0.35); for (let k = 0; k < 8 && interiorHit(v3.x, v3.z, 0.25); k++) v3.lerp(new THREE.Vector3(t.x, v3.y, t.z), 0.3); }
+  if (interior && t.x > 2000) { if (interior.levels) { const fb0 = floorOf(t.y) * MFH; v3.y = Math.max(fb0 + 0.5, Math.min(v3.y, fb0 + MFH - 0.45)); } else v3.y = Math.min(v3.y, interior.H - 0.35); for (let k = 0; k < 8 && interiorHit(v3.x, v3.z, 0.25); k++) v3.lerp(new THREE.Vector3(t.x, v3.y, t.z), 0.3); }
   camera.position.lerp(v3, Math.min(1, dt * 10));
   if (G.shake > 0) { camera.position.x += (Math.random() - 0.5) * G.shake; camera.position.y += (Math.random() - 0.5) * G.shake; G.shake = Math.max(0, G.shake - dt * 2.5); }
   camera.lookAt(t.x + rx, t.y + hgt, t.z + rz);
+  if (G.drunk > 0) { G.drunk -= dt; camera.rotateZ(Math.sin(now / 700) * 0.05 * Math.min(1, G.drunk / 4)); }
   sun.position.set(t.x, 0, t.z).addScaledVector(sunDir, 250); sun.target.position.set(t.x, 0, t.z);
   beam.material.opacity = 0.16 + 0.08 * Math.sin(now / 300);
 }
