@@ -359,7 +359,7 @@ const W2M = (mx, my) => ({ x: (mx - 500) * S, z: (my - 500) * S });
 const M2W = (x, z) => ({ mx: x / S + 500, my: z / S + 500 });
 const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
-const GLYPH = { armeria:'✦', ropa:'◆', autos:'▲', tatuajes:'✂', comida:'●', tienda24:'24', bar:'♪', inmobiliaria:'⌂', tecnologia:'▣', gimnasio:'≡', banco:'$', empeno:'◎', servicios:'+', club_adulto:'♥' };
+const GLYPH = { casino:'♠', armeria:'✦', ropa:'◆', autos:'▲', tatuajes:'✂', comida:'●', tienda24:'24', bar:'♪', inmobiliaria:'⌂', tecnologia:'▣', gimnasio:'≡', banco:'$', empeno:'◎', servicios:'+', club_adulto:'♥' };
 const ZONE = {
   'sunset-strip':   { map:'#4a2b58', accent:'#ff3d8b', lot:'grass' },
   'downtown-blaze': { map:'#2e2846', accent:'#ff7a3d', lot:'plaza' },
@@ -402,7 +402,7 @@ function hash(str) { let h = 2166136261; for (const c of str) { h ^= c.charCodeA
 let rngSeed = 11; const rnd = () => (rngSeed = (rngSeed * 16807) % 2147483647) / 2147483647;
 function toast(msg, ms = 2600) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, ms); }
 
-const PRICE = { armeria:[300,2500], ropa:[40,900], autos:[18000,240000], tatuajes:[60,400], comida:[6,30], tienda24:[3,40], bar:[10,300], inmobiliaria:[4000,90000], tecnologia:[150,2200], gimnasio:[40,300], banco:[0,0], empeno:[20,1500], servicios:[0,500], club_adulto:[20,800] };
+const PRICE = { armeria:[300,2500], ropa:[40,900], autos:[18000,240000], tatuajes:[60,400], comida:[6,30], tienda24:[3,40], bar:[10,300], inmobiliaria:[4000,90000], tecnologia:[150,2200], gimnasio:[40,300], banco:[0,0], empeno:[20,1500], servicios:[0,500], club_adulto:[20,800], casino:[0,0] };
 const priceOf = (s, item) => { if (s.prices && s.prices[item] != null) return s.prices[item]; const [a, b] = PRICE[s.category] || [10, 100], step = a > 1000 ? 100 : 1; return Math.round((a + (b - a) * hash(s.id + item)) / step) * step; };
 
 // ---------- guardado por username ----------
@@ -411,7 +411,7 @@ const dbReady = (window.claude && window.claude.use) ? window.claude.use('db').t
 const slugOf = name => name.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
 function profileData() {
   const p = G.inside ? { x: G.inside.wx, z: G.inside.wz + 1.5 } : focusPos();
-  return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, garage: (G.garage || []).slice(0, 8), job: !!G.job, dogDone: !!G.dogDone, airportIntro: !!G.airportIntro, char: G.char, mission: G.mission, mstep: G.mstep, sms: (G.sms || []).slice(0, 30), weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
+  return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, garage: (G.garage || []).slice(0, 8), job: !!G.job, dogDone: !!G.dogDone, chips: Math.round(G.chips || 0), airportIntro: !!G.airportIntro, char: G.char, mission: G.mission, mstep: G.mstep, sms: (G.sms || []).slice(0, 30), weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
 }
 function setSaveState(t) { $('saveState').textContent = t; }
 let saving = false, saveAgain = false;
@@ -1412,7 +1412,7 @@ function radioStep(S, step, t, dest) {
 }
 function updateRadio() {
   if (!AC || !audioBus()) return;
-  const club = interior && (interior.kind === 'vip' || (interior.kind === 'venue' && G.inside && G.inside.category !== 'comida'));
+  const club = interior && (interior.kind === 'vip' || interior.kind === 'casino' || (interior.kind === 'venue' && G.inside && G.inside.category !== 'comida'));
   const want = (RADIO.on && (G.inCar && !car.userData.boat || G.plane)) || club;
   if (!RADIO.out) { RADIO.out = AC.createGain(); RADIO.out.gain.value = 0; const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 6000; RADIO.out.connect(f).connect(MASTER); RADIO.filter = f; }
   RADIO.out.gain.setTargetAtTime(want ? (club ? 0.55 : 0.4) : 0, AC.currentTime, 0.2);
@@ -2376,13 +2376,13 @@ const floorOf = y => Math.max(0, Math.min(2, Math.floor((y + 0.6) / MFH)));
 function buildInterior(s, vip) {
   const M = imats(), g = new THREE.Group(), col = [], npcs = [], dyn = [];
   const cat = s.category;
-  const kind = s.private ? s.private : vip ? 'vip' : s.id === 'hcpd-precinct-7' ? 'police' : s.id === 'heat-city-general' ? 'hospital' : cat === 'banco' ? 'bank' : cat === 'autos' ? 'showroom' : ['comida', 'bar', 'club_adulto'].includes(cat) ? 'venue' : 'shop';
-  const W = { mansion: 20, garage: 26, house: 18, vip: 12, bank: 22, showroom: 24, police: 24, venue: 18, hospital: 18, shop: 16 }[kind], D = { mansion: 14, garage: 16, house: 12, vip: 10, bank: 16, showroom: 16, police: 20, venue: 14, hospital: 14, shop: 12 }[kind], H = kind === 'mansion' ? MFH * 3 : kind === 'showroom' || kind === 'bank' ? 6 : kind === 'police' ? 4.6 : 4.2;
-  const floorMat = kind === 'mansion' ? M.marble : kind === 'house' ? M.wood : kind === 'vip' ? M.carpet : kind === 'bank' || kind === 'showroom' ? M.marble : kind === 'venue' && cat !== 'comida' ? M.wood : M.floor;
+  const kind = s.private ? s.private : vip ? 'vip' : s.id === 'hcpd-precinct-7' ? 'police' : s.id === 'heat-city-general' ? 'hospital' : cat === 'banco' ? 'bank' : cat === 'autos' ? 'showroom' : ['comida', 'bar', 'club_adulto'].includes(cat) ? 'venue' : cat === 'casino' ? 'casino' : 'shop';
+  const W = { casino: 24, mansion: 20, garage: 26, house: 18, vip: 12, bank: 22, showroom: 24, police: 24, venue: 18, hospital: 18, shop: 16 }[kind], D = { casino: 18, mansion: 14, garage: 16, house: 12, vip: 10, bank: 16, showroom: 16, police: 20, venue: 14, hospital: 14, shop: 12 }[kind], H = kind === 'mansion' ? MFH * 3 : kind === 'casino' ? 5 : kind === 'showroom' || kind === 'bank' ? 6 : kind === 'police' ? 4.6 : 4.2;
+  const floorMat = kind === 'mansion' || kind === 'casino' ? M.marble : kind === 'house' ? M.wood : kind === 'vip' ? M.carpet : kind === 'bank' || kind === 'showroom' ? M.marble : kind === 'venue' && cat !== 'comida' ? M.wood : M.floor;
   const fl = new THREE.Mesh(new THREE.PlaneGeometry(W, D), kind === 'police' ? concreteMat() : floorMat); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; fl.material.map && fl.material.map.repeat.set(W / 4, D / 4); g.add(fl);
   const ce = new THREE.Mesh(new THREE.PlaneGeometry(W, D), M.ceil); ce.rotation.x = Math.PI / 2; ce.position.y = H; g.add(ce);
   // paredes (con puerta al frente)
-  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'garage' ? 0x8e9096 : kind === 'house' || kind === 'mansion' ? (s.wall || 0xf4efe6) : kind === 'vip' ? 0x1e1030 : kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
+  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'garage' ? 0x8e9096 : kind === 'house' || kind === 'mansion' ? (s.wall || 0xf4efe6) : kind === 'casino' ? 0x2a0f1e : kind === 'vip' ? 0x1e1030 : kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
   if (kind === 'police') { wallMat.map = blockTex(); wallMat.color.set(0xe9edf0); }
   ibox(g, col, W, H, 0.3, 0, 0, -D / 2 - 0.15, wallMat);
   ibox(g, col, 0.3, H, D, -W / 2 - 0.15, 0, 0, wallMat); ibox(g, col, 0.3, H, D, W / 2 + 0.15, 0, 0, wallMat);
@@ -2487,6 +2487,34 @@ function buildInterior(s, vip) {
     for (let i = 0; i < 6; i++) { const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 8), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.3 })); post.position.set(-5 + i * 2, 0.5, 1.5); g.add(post); }
     counter = { x: 0, z: -0.6 };
     for (let i = 0; i < 3; i++) npcs.push(inPerson(randomPerson(), -6 + i * 5, 3 + Math.random() * 2, Math.PI + (Math.random() - 0.5)));
+  } else if (kind === 'casino') {
+    counter = { x: 0, z: -D / 2 + 3.4 };
+    const gold = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.25 }), felt = new THREE.MeshStandardMaterial({ color: 0x0f6b3a, roughness: 0.95 }), wood2 = new THREE.MeshStandardMaterial({ color: 0x4a1f12, roughness: 0.5 }), blackM = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.4 });
+    // caja de fichas al fondo
+    ibox(g, col, 6, 1.15, 1, 0, 0, -D / 2 + 2.2, wood2); ibox(g, col, 6.1, 0.06, 1.1, 0, 1.15, -D / 2 + 2.2, gold, false);
+    for (const x of [-2.4, 2.4]) ibox(g, col, 0.12, 2.6, 0.12, x, 1.2, -D / 2 + 2.2, gold, false);
+    npcs.push(inPerson({ skin: pickR(SKINS), top: 0x111111, pants: 0x111111, shoes: 0x0a0a0a, hair: pickR(HAIRS) }, 0, -D / 2 + 1.2, 0));
+    // tragamonedas a la izquierda
+    const slotScreen = [];
+    for (let i = 0; i < 6; i++) { const z = -D / 2 + 4 + i * 2; ibox(g, col, 1.1, 1.9, 0.9, -W / 2 + 0.9, 0, z, new THREE.MeshStandardMaterial({ color: [0xb3122e, 0x1e4fa3, 0x7d3c98][i % 3], metalness: 0.5, roughness: 0.3 })); const sc = new THREE.Mesh(new THREE.PlaneGeometry(0.75, 0.5), new THREE.MeshBasicMaterial({ color: 0xffd23f, toneMapped: false })); sc.rotation.y = Math.PI / 2; sc.position.set(-W / 2 + 1.46, 1.35, z); g.add(sc); dyn.push(sc); const lv = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 6), gold); lv.position.set(-W / 2 + 1.3, 1.3, z + 0.5); g.add(lv); }
+    // ruleta en el centro
+    ibox(g, col, 4.2, 0.85, 2.2, -1, 0, 0, wood2); ibox(g, col, 4, 0.04, 2, -1, 0.85, 0, felt, false);
+    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.12, 37), new THREE.MeshStandardMaterial({ map: tex((() => { const [c, x] = cnv(256); for (let i = 0; i < 37; i++) { x.fillStyle = i === 0 ? '#0f6b3a' : i % 2 ? '#b3122e' : '#111'; x.beginPath(); x.moveTo(128, 128); x.arc(128, 128, 128, i / 37 * 6.283, (i + 1) / 37 * 6.283); x.fill(); } x.fillStyle = '#d4af37'; x.beginPath(); x.arc(128, 128, 40, 0, 7); x.fill(); return c; })()), metalness: 0.4, roughness: 0.4 }));
+    wheel.position.set(-2.4, 0.95, 0); g.add(wheel); dyn.push({ spin: wheel });
+    npcs.push(inPerson({ skin: pickR(SKINS), top: 0xf2f2f2, pants: 0x111111, shoes: 0x0a0a0a, hair: pickR(HAIRS) }, -1, -1.6, 0));
+    // dos mesas de blackjack a la derecha
+    for (const z of [-3, 3]) { const t = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.85, 32, 1, false, Math.PI / 2, Math.PI), wood2); t.position.set(W / 2 - 4, 0.425, z); g.add(t); const f = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.04, 32, 1, false, Math.PI / 2, Math.PI), felt); f.position.set(W / 2 - 4, 0.87, z); g.add(f); col.push({ x: IN_X + W / 2 - 3.3, z: IN_Z + z, hw: 0.8, hd: 1.5 }); npcs.push(inPerson({ skin: pickR(SKINS), top: 0xf2f2f2, pants: 0x111111, shoes: 0x0a0a0a, hair: pickR(HAIRS), long: Math.random() < 0.5 }, W / 2 - 2.5, z, -Math.PI / 2)); for (let k = 0; k < 3; k++) { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.7, 12), blackM); st.position.set(W / 2 - 5.9, 0.35, z - 1 + k); g.add(st); } }
+    // arañas de luz doradas y alfombra roja
+    for (const [x, z] of [[-4, -3], [4, -3], [-4, 4], [4, 4]]) { const ch = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffe6a0, toneMapped: false })); ch.position.set(x, H - 0.8, z); g.add(ch); const rg = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.04, 6, 20), gold); rg.rotation.x = Math.PI / 2; rg.position.set(x, H - 0.8, z); g.add(rg); }
+    const carpet = new THREE.Mesh(new THREE.PlaneGeometry(W - 1, D - 1), new THREE.MeshStandardMaterial({ map: tex((() => { const [c, x] = cnv(128); x.fillStyle = '#5a0f1e'; x.fillRect(0, 0, 128, 128); x.strokeStyle = '#d4af37'; x.lineWidth = 3; for (let i = 0; i < 128; i += 32) for (let j = 0; j < 128; j += 32) { x.beginPath(); x.arc(i + 16, j + 16, 10, 0, 7); x.stroke(); } return c; })(), 6, 5), roughness: 1 }));
+    carpet.rotation.x = -Math.PI / 2; carpet.position.y = 0.01; g.add(carpet);
+    acts = [
+      { x: -W / 2 + 2.6, z: 0, floor: 0, kind: 'casino', game: 'slots', text: 'Jugar a las tragamonedas' },
+      { x: -1, z: 1.9, floor: 0, kind: 'casino', game: 'roulette', text: 'Jugar a la ruleta' },
+      { x: W / 2 - 6.3, z: -3, floor: 0, kind: 'casino', game: 'blackjack', text: 'Jugar al blackjack' },
+      { x: W / 2 - 6.3, z: 3, floor: 0, kind: 'casino', game: 'blackjack', text: 'Jugar al blackjack' },
+      { x: 0, z: -D / 2 + 3.4, floor: 0, kind: 'casino', game: 'cashier', text: 'Caja: comprar o cambiar fichas' }
+    ];
   } else if (kind === 'mansion') {
     counter = { x: 999, z: 999 }; levels = true;
     const FH = MFH, fb = (fl, w, h, d, x, y, z, mat, solid = true) => { const n = col.length; const m = ibox(g, col, w, h, d, x, y + fl * FH, z, mat, solid); for (let i = n; i < col.length; i++) col[i].floor = fl; return m; };
@@ -3592,7 +3620,7 @@ $('loginForm').addEventListener('submit', async e => {
   if ((G.pickChar || 'mateo') !== G.char) setCharacter(G.pickChar || 'mateo');
   let spawn = W2M(450, 460);
   if (data) {
-    G.money = Number(data.money) || 0; G.story = data.story || 0; G.owned = Array.isArray(data.owned) ? data.owned : []; G.job = data.job !== undefined ? !!data.job : (data.mstep || 0) > 0; G.dogDone = !!data.dogDone; G.airportIntro = !!data.airportIntro; G.sms = Array.isArray(data.sms) ? data.sms.filter(m => m && typeof m.text === 'string').slice(0, 30) : []; G.mission = data.mission || 0; G.mstep = data.mstep || 0; if (data.mstep === undefined && G.mission >= 1) { G.mstep = G.mission === 1 ? 1 : 0; G.mission = G.mission === 1 ? 0 : 1; } G.carColor = data.carColor || '#ff3d8b'; G.carModel = MODELS[data.carModel] ? data.carModel : 'sakura';
+    G.money = Number(data.money) || 0; G.story = data.story || 0; G.owned = Array.isArray(data.owned) ? data.owned : []; G.job = data.job !== undefined ? !!data.job : (data.mstep || 0) > 0; G.dogDone = !!data.dogDone; G.chips = Number(data.chips) || 0; G.airportIntro = !!data.airportIntro; G.sms = Array.isArray(data.sms) ? data.sms.filter(m => m && typeof m.text === 'string').slice(0, 30) : []; G.mission = data.mission || 0; G.mstep = data.mstep || 0; if (data.mstep === undefined && G.mission >= 1) { G.mstep = G.mission === 1 ? 1 : 0; G.mission = G.mission === 1 ? 0 : 1; } G.carColor = data.carColor || '#ff3d8b'; G.carModel = MODELS[data.carModel] ? data.carModel : 'sakura';
     if (data.weapons && typeof data.weapons === 'object') for (const k in data.weapons) if (WEAPONS[k]) G.weapons[k] = Math.max(0, Number(data.weapons[k]) || 0);
     G.armor = Math.min(100, Number(data.armor) || 0);
     G.garage = Array.isArray(data.garage) ? data.garage.filter(e => e && MODELS[e.model] && MODELS[e.model].kind !== 'boat' && /^#[0-9a-f]{6}$/i.test(e.color)).slice(0, 8) : [];
@@ -3641,6 +3669,7 @@ function tryEnter() {
     if (ip.kind === 'cell') { breakout(); return; }
     if (ip.kind === 'takecar') return takeCarOut(ip.i);
     if (ip.kind === 'sleep') return sleepAtHome();
+    if (ip.kind === 'casino') return openCasino(G.inside, ip.game === 'cashier' ? 'cashier' : ip.game);
     if (ip.kind === 'eat') { G.hp = 100; SFX.buy(); return toast('Te comiste una porción de pizza y una manzana. Salud al máximo.'); }
     if (ip.kind === 'wine') { G.hp = Math.min(100, G.hp + 10); G.drunk = 12; tone(AC ? AC.currentTime : 0, 1760, 0.3, 'sine', 0.05); return toast('Una copa de tinto de la casa… todo se mueve un poquito.'); }
     if (ip.kind === 'bath') { G.hp = 100; SFX.splash(); return toast('Baño de espuma relajante. Salud al máximo.'); }
@@ -3895,6 +3924,7 @@ function updateCash(dt, now) {
 // ---------- interior del local ----------
 function openShop(s) { if (document.pointerLockElement) document.exitPointerLock(); firing = false; G.mode = 'shop'; G.keys = {}; $('shop').hidden = false; $('prompt').hidden = true; renderShop(s); }
 function renderShop(s) {
+  if (s.category === 'casino') return renderCasino(s);
   const c = G.cats[s.category], z = G.zones[s.zone];
   $('shopTitle').textContent = z.name; $('shopMoney').textContent = money(G.money);
   let html = `<div class="meta"><span class="pill" style="color:${c.color};border-color:${c.color}">${esc(c.name)}</span><span class="pill open">Abierto 24 h</span>${c.age_rating ? `<span class="pill">${esc(c.age_rating)}</span>` : ''}${s.special ? `<span class="pill heist">${esc(s.special.label)}</span>` : ''}</div>
@@ -3957,6 +3987,85 @@ function giveCar(key, color) {
   const old = car; removeCarCollider(old); if (!parked.includes(old)) parked.push(old); addParkedCollider(old);
   moveHeadlight(old, nc); car = nc; addParkedCollider(nc);
   G.carColor = color; G.carModel = key; car.userData.health = 100;
+}
+// ---------- casino: fichas, tragamonedas, ruleta y blackjack ----------
+const CAS = { tab: 'cashier', bet: 50, slot: ['🍒', '🍋', '🔔'], spinning: false, rl: null, bj: null, msg: '' };
+const SLOT_SYM = [['🍒', 30, 5], ['🍋', 25, 8], ['🔔', 18, 12], ['⭐', 12, 20], ['7️⃣', 8, 50], ['💎', 4, 100]];
+const RED = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+function pickSym() { const tot = SLOT_SYM.reduce((a, s) => a + s[1], 0); let r = Math.random() * tot; for (const s of SLOT_SYM) { if ((r -= s[1]) < 0) return s[0]; } return '🍒'; }
+function chipClink() { if (!AC) return; const t = AC.currentTime; tone(t, 2600, 0.08, 'triangle', 0.04); tone(t + 0.05, 3100, 0.08, 'triangle', 0.03); }
+function openCasino(s, tab) { if (document.pointerLockElement) document.exitPointerLock(); firing = false; G.mode = 'shop'; G.keys = {}; $('shop').hidden = false; $('prompt').hidden = true; CAS.tab = tab || 'cashier'; CAS.msg = ''; renderCasino(s); }
+function card(n) { const r = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'][n % 13], su = ['♠', '♥', '♦', '♣'][Math.floor(n / 13) % 4]; return { r, su, v: r === 'A' ? 11 : ['J', 'Q', 'K'].includes(r) ? 10 : +r }; }
+function handVal(h) { let v = h.reduce((a, c) => a + c.v, 0), aces = h.filter(c => c.r === 'A').length; while (v > 21 && aces--) v -= 10; return v; }
+const cardHtml = c => `<span style="display:inline-grid;place-items:center;width:42px;height:58px;margin:2px;border-radius:7px;background:#fff;color:${c.su === '♥' || c.su === '♦' ? '#c0392b' : '#111'};font:800 16px var(--body)">${c.r}${c.su}</span>`;
+function renderCasino(s) {
+  G.chips = G.chips || 0;
+  $('shopTitle').textContent = s.name; $('shopMoney').textContent = `${money(G.money)} · 🪙 ${G.chips.toLocaleString('en-US')} fichas`;
+  const tabs = [['cashier', 'Caja'], ['slots', 'Tragamonedas'], ['roulette', 'Ruleta'], ['blackjack', 'Blackjack']];
+  let h = `<div style="display:flex;gap:6px;flex-wrap:wrap">${tabs.map(([k, n]) => `<button class="btn ${CAS.tab === k ? 'gold' : ''}" data-tab="${k}" type="button">${n}</button>`).join('')}</div>`;
+  const bets = [10, 50, 100, 500, 1000];
+  const betRow = `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="color:var(--muted);font-size:13px">Apuesta:</span>${bets.map(b => `<button class="btn ${CAS.bet === b ? 'primary' : ''}" data-bet="${b}" type="button">${b}</button>`).join('')}</div>`;
+  if (CAS.tab === 'cashier') {
+    h += `<h2>Caja de fichas</h2><p>Cada ficha vale $1. Tenés <b style="color:var(--gold)">${G.chips.toLocaleString('en-US')} fichas</b> y ${money(G.money)}.</p><div class="items">`;
+    for (const n of [100, 500, 1000, 5000, 25000]) h += `<div class="item"><span class="n">🪙 ${n.toLocaleString('en-US')} fichas</span><span class="p">${money(n)}</span><button class="btn primary" data-buy="${n}" type="button" ${G.money < n ? 'disabled' : ''}>Comprar</button></div>`;
+    h += `</div><div><button class="btn gold" data-cash="1" type="button" ${G.chips ? '' : 'disabled'}>Cambiar todas las fichas por plata (+${money(G.chips)})</button></div>`;
+  } else if (CAS.tab === 'slots') {
+    h += `<h2>Tragamonedas</h2><div style="display:flex;gap:10px;justify-content:center;font-size:58px;background:#1a0f22;border:3px solid #d4af37;border-radius:16px;padding:14px">${CAS.slot.map(x => `<span style="width:80px;text-align:center">${x}</span>`).join('')}</div>
+      <p style="font-size:13px">3 iguales: 🍒×5 · 🍋×8 · 🔔×12 · ⭐×20 · 7️⃣×50 · 💎×100. Dos 🍒: ×2.</p>${betRow}<button class="btn primary" data-play="slots" type="button" ${CAS.spinning || G.chips < CAS.bet ? 'disabled' : ''}>${CAS.spinning ? 'Girando…' : `Tirar la palanca (${CAS.bet} fichas)`}</button>`;
+  } else if (CAS.tab === 'roulette') {
+    h += `<h2>Ruleta</h2><div style="font:800 40px var(--display);text-align:center;padding:10px;border-radius:14px;background:#0f6b3a;color:${CAS.rl == null ? '#fff' : CAS.rl === 0 ? '#3ddc97' : RED.includes(CAS.rl) ? '#ff5a5a' : '#111'}">${CAS.spinning ? '…' : CAS.rl == null ? '¡Hagan sus apuestas!' : CAS.rl}</div>${betRow}
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" style="border-color:#ff5a5a;color:#ff5a5a" data-play="red" type="button">Rojo ×2</button><button class="btn" data-play="black" type="button">Negro ×2</button><button class="btn" data-play="even" type="button">Par ×2</button><button class="btn" data-play="odd" type="button">Impar ×2</button>
+      <span style="display:flex;gap:6px;align-items:center"><input id="rlNum" type="number" min="0" max="36" value="7" style="width:64px;padding:7px;border-radius:8px;border:1px solid var(--line);background:#0004;color:var(--text);font:600 14px var(--body)"><button class="btn gold" data-play="num" type="button">Número ×36</button></span></div>`;
+  } else {
+    const B = CAS.bj;
+    h += `<h2>Blackjack</h2>`;
+    if (B) h += `<p>Crupier (${B.done ? handVal(B.d) : '?'}):</p><div>${B.d.map((c, i) => i === 1 && !B.done ? '<span style="display:inline-block;width:42px;height:58px;margin:2px;border-radius:7px;background:repeating-linear-gradient(45deg,#b3122e 0 6px,#7a0c1f 6px 12px)"></span>' : cardHtml(c)).join('')}</div><p>Vos (${handVal(B.p)}):</p><div>${B.p.map(cardHtml).join('')}</div>`;
+    h += betRow;
+    h += B && !B.done ? `<div style="display:flex;gap:8px"><button class="btn primary" data-play="hit" type="button">Pedir carta</button><button class="btn gold" data-play="stand" type="button">Plantarse</button></div>` : `<button class="btn primary" data-play="deal" type="button" ${G.chips < CAS.bet ? 'disabled' : ''}>Repartir (${CAS.bet} fichas)</button>`;
+  }
+  if (CAS.msg) h += `<div class="special"><b>${CAS.msg}</b></div>`;
+  if (G.chips < CAS.bet && CAS.tab !== 'cashier') h += `<p style="color:var(--muted);font-size:13px">No te alcanzan las fichas: pasá por la Caja.</p>`;
+  const card0 = $('shopCard'); card0.innerHTML = h;
+  card0.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { CAS.tab = b.dataset.tab; CAS.msg = ''; renderCasino(s); });
+  card0.querySelectorAll('[data-bet]').forEach(b => b.onclick = () => { CAS.bet = +b.dataset.bet; renderCasino(s); });
+  card0.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => { const n = +b.dataset.buy; if (G.money < n) return; G.money -= n; G.chips += n; chipClink(); CAS.msg = `Compraste ${n.toLocaleString('en-US')} fichas.`; saveNow(); renderCasino(s); });
+  card0.querySelectorAll('[data-cash]').forEach(b => b.onclick = () => { const n = G.chips; G.money += n; G.chips = 0; SFX.cash(); CAS.msg = `Cambiaste tus fichas por ${money(n)}.`; saveNow(); renderCasino(s); });
+  card0.querySelectorAll('[data-play]').forEach(b => b.onclick = () => casinoPlay(s, b.dataset.play));
+}
+function casinoPlay(s, a) {
+  const bet = CAS.bet;
+  if (a === 'slots') {
+    if (CAS.spinning || G.chips < bet) return; G.chips -= bet; CAS.spinning = true; CAS.msg = ''; chipClink();
+    let n = 0; const iv = setInterval(() => { CAS.slot = [pickSym(), pickSym(), pickSym()]; if (AC) tone(AC.currentTime, 600 + Math.random() * 400, 0.04, 'square', 0.02); if (G.mode === 'shop') renderCasino(s);
+      if (++n >= 14) { clearInterval(iv); CAS.spinning = false; const r = CAS.slot, sym = SLOT_SYM.find(x => x[0] === r[0]); let win = 0;
+        if (r[0] === r[1] && r[1] === r[2]) win = bet * sym[2]; else if (r.filter(x => x === '🍒').length === 2) win = bet * 2;
+        G.chips += win; CAS.msg = win ? `¡Ganaste ${win.toLocaleString('en-US')} fichas!` : 'Nada esta vez.'; if (win) { SFX.mission(); chipClink(); } saveNow(); if (G.mode === 'shop') renderCasino(s); } }, 90);
+    return renderCasino(s);
+  }
+  if (['red', 'black', 'even', 'odd', 'num'].includes(a)) {
+    if (CAS.spinning || G.chips < bet) return; const pick = a === 'num' ? Math.max(0, Math.min(36, Math.round(+($('rlNum') || {}).value || 0))) : null;
+    G.chips -= bet; CAS.spinning = true; CAS.msg = ''; chipClink(); renderCasino(s);
+    let n = 0; const iv = setInterval(() => { if (AC) tone(AC.currentTime, 1500, 0.02, 'triangle', 0.02); if (++n < 18) return; clearInterval(iv);
+      const r = Math.floor(Math.random() * 37); CAS.rl = r; CAS.spinning = false;
+      const win = a === 'red' ? r && RED.includes(r) : a === 'black' ? r && !RED.includes(r) : a === 'even' ? r && r % 2 === 0 : a === 'odd' ? r % 2 === 1 : r === pick;
+      const pay = win ? bet * (a === 'num' ? 36 : 2) : 0; G.chips += pay;
+      CAS.msg = `Salió el ${r} ${r === 0 ? 'verde' : RED.includes(r) ? 'rojo' : 'negro'}. ${pay ? `¡Ganaste ${pay.toLocaleString('en-US')} fichas!` : 'Perdiste la apuesta.'}`; if (pay) SFX.mission(); saveNow(); if (G.mode === 'shop') renderCasino(s); }, 110);
+    return;
+  }
+  const deck = () => card(Math.floor(Math.random() * 52));
+  if (a === 'deal') { if (G.chips < bet) return; G.chips -= bet; chipClink(); CAS.bj = { p: [deck(), deck()], d: [deck(), deck()], bet, done: false }; CAS.msg = ''; if (handVal(CAS.bj.p) === 21) return bjEnd(s, true); return renderCasino(s); }
+  const B = CAS.bj; if (!B || B.done) return;
+  if (a === 'hit') { B.p.push(deck()); chipClink(); if (handVal(B.p) > 21) return bjEnd(s); return renderCasino(s); }
+  if (a === 'stand') { while (handVal(B.d) < 17) B.d.push(deck()); return bjEnd(s); }
+}
+function bjEnd(s, natural) {
+  const B = CAS.bj; B.done = true; const p = handVal(B.p), d = handVal(B.d); let pay = 0, m;
+  if (natural) { pay = Math.floor(B.bet * 2.5); m = '¡Blackjack!'; }
+  else if (p > 21) m = 'Te pasaste de 21.';
+  else if (d > 21 || p > d) { pay = B.bet * 2; m = 'Le ganaste al crupier.'; }
+  else if (p === d) { pay = B.bet; m = 'Empate: te devuelven la apuesta.'; }
+  else m = 'Ganó el crupier.';
+  G.chips += pay; CAS.msg = `${m} ${pay ? `+${pay.toLocaleString('en-US')} fichas` : ''}`; if (pay > B.bet) SFX.mission(); saveNow(); renderCasino(s);
 }
 function closeShop() { G.mode = 'play'; $('shop').hidden = true; }
 
