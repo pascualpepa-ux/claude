@@ -282,7 +282,7 @@ body.driving .touch, body.driving #help { display: none !important; }
   <div id="gps" hidden><span id="gpsArrow">▲</span><span id="gpsText"></span></div>
   <div id="prompt" hidden></div>
   <canvas id="minimap" width="340" height="340" aria-label="Minimapa. Tocá para abrir el mapa"></canvas>
-  <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> saltar / freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>CLIC DER</kbd> apuntar · <kbd>Q</kbd>/<kbd>1-5</kbd>/ruedita cambiar arma · <kbd>P</kbd> teléfono · hacé clic en el juego para apuntar con el mouse</div>
+  <div id="help"><kbd>WASD</kbd> moverse/manejar · <kbd>SHIFT</kbd> correr/turbo · <kbd>ESPACIO</kbd> saltar / freno de mano · arrastrá el mouse para mirar<br><kbd>E</kbd> entrar · <kbd>F</kbd> subir / robar cualquier auto · <kbd>M</kbd> mapa<br><kbd>CLIC</kbd> disparar / pegar · <kbd>CLIC DER</kbd> apuntar · <kbd>Q</kbd>/<kbd>1-0</kbd>/ruedita cambiar arma · <kbd>P</kbd> teléfono · hacé clic en el juego para apuntar con el mouse</div>
   <div id="crosshair" hidden><i></i><i></i><i></i><i></i><b></b></div>
   <div class="touch"><button id="tPhone" type="button">TEL<span id="phoneBadge" hidden>0</span></button><button id="tRun" type="button">CORRER</button><button id="tJump" type="button">SALTAR</button><button id="tGun" type="button">ARMA</button><button id="tShoot" type="button">TIRO</button><button id="tMap" type="button">MAPA</button><button id="tCar" type="button">AUTO</button><button id="tAct" type="button">ENTRAR</button></div>
 </div>
@@ -359,7 +359,7 @@ const W2M = (mx, my) => ({ x: (mx - 500) * S, z: (my - 500) * S });
 const M2W = (x, z) => ({ mx: x / S + 500, my: z / S + 500 });
 const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
-const GLYPH = { casino:'♠', armeria:'✦', ropa:'◆', autos:'▲', tatuajes:'✂', comida:'●', tienda24:'24', bar:'♪', inmobiliaria:'⌂', tecnologia:'▣', gimnasio:'≡', banco:'$', empeno:'◎', servicios:'+', club_adulto:'♥' };
+const GLYPH = { torre:'▮', casino:'♠', armeria:'✦', ropa:'◆', autos:'▲', tatuajes:'✂', comida:'●', tienda24:'24', bar:'♪', inmobiliaria:'⌂', tecnologia:'▣', gimnasio:'≡', banco:'$', empeno:'◎', servicios:'+', club_adulto:'♥' };
 const ZONE = {
   'sunset-strip':   { map:'#4a2b58', accent:'#ff3d8b', lot:'grass' },
   'downtown-blaze': { map:'#2e2846', accent:'#ff7a3d', lot:'plaza' },
@@ -402,7 +402,7 @@ function hash(str) { let h = 2166136261; for (const c of str) { h ^= c.charCodeA
 let rngSeed = 11; const rnd = () => (rngSeed = (rngSeed * 16807) % 2147483647) / 2147483647;
 function toast(msg, ms = 2600) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, ms); }
 
-const PRICE = { armeria:[300,2500], ropa:[40,900], autos:[18000,240000], tatuajes:[60,400], comida:[6,30], tienda24:[3,40], bar:[10,300], inmobiliaria:[4000,90000], tecnologia:[150,2200], gimnasio:[40,300], banco:[0,0], empeno:[20,1500], servicios:[0,500], club_adulto:[20,800], casino:[0,0] };
+const PRICE = { armeria:[300,2500], ropa:[40,900], autos:[18000,240000], tatuajes:[60,400], comida:[6,30], tienda24:[3,40], bar:[10,300], inmobiliaria:[4000,90000], tecnologia:[150,2200], gimnasio:[40,300], banco:[0,0], empeno:[20,1500], servicios:[0,500], club_adulto:[20,800], casino:[0,0], torre:[0,0] };
 const priceOf = (s, item) => { if (s.prices && s.prices[item] != null) return s.prices[item]; const [a, b] = PRICE[s.category] || [10, 100], step = a > 1000 ? 100 : 1; return Math.round((a + (b - a) * hash(s.id + item)) / step) * step; };
 
 // ---------- guardado por username ----------
@@ -411,7 +411,7 @@ const dbReady = (window.claude && window.claude.use) ? window.claude.use('db').t
 const slugOf = name => name.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
 function profileData() {
   const p = G.inside ? { x: G.inside.wx, z: G.inside.wz + 1.5 } : focusPos();
-  return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, garage: (G.garage || []).slice(0, 8), job: !!G.job, dogDone: !!G.dogDone, chips: Math.round(G.chips || 0), airportIntro: !!G.airportIntro, char: G.char, mission: G.mission, mstep: G.mstep, sms: (G.sms || []).slice(0, 30), weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
+  return { name: G.user.name, money: Math.round(G.money), story: G.story, owned: G.owned, garage: (G.garage || []).slice(0, 8), job: !!G.job, dogDone: !!G.dogDone, chips: Math.round(G.chips || 0), vault: !!G.vault, airportIntro: !!G.airportIntro, char: G.char, mission: G.mission, mstep: G.mstep, sms: (G.sms || []).slice(0, 30), weapons: G.weapons, armor: Math.round(G.armor), carColor: G.carColor, carModel: G.carModel, carHealth: Math.round(car ? car.userData.health : 100), x: +p.x.toFixed(1), z: +p.z.toFixed(1), minutes: Math.round(G.minutes), updatedAt: Date.now() };
 }
 function setSaveState(t) { $('saveState').textContent = t; }
 let saving = false, saveAgain = false;
@@ -903,7 +903,7 @@ function build3D() {
   for (const s of G.stores) {
     const c = G.cats[s.category], p = W2M(s.mx, s.my), heist = s.special?.type === 'golpe';
     const y0 = s.zone === 'coral-keys' ? ROADY : WALKY;
-    const w = 17, d = 15, h = s.category === 'servicios' ? 24 : s.category === 'banco' ? 20 : 10 + hash(s.id) * 6;
+    const w = 17, d = 15, h = s.id === 'torre-heat' ? 170 : s.category === 'servicios' ? 24 : s.category === 'banco' ? 20 : 10 + hash(s.id) * 6;
     const tint = new THREE.Color(c.color).lerp(new THREE.Color(0xffffff), 0.65);
     const style = s.zone === 'sunset-strip' || s.zone === 'coral-keys' ? 'deco' : s.zone === 'swamp-row' ? 'wood' : s.zone === 'port-sable' ? 'warehouse' : 'office';
     const st = styles[style];
@@ -911,6 +911,7 @@ function build3D() {
     const r = new Batch(); r.box(p.x, p.z, w, d, y0 + h, y0 + h, tint, 1, 1, r, new THREE.Color(0xffffff), false);
     const shell = b.mesh(winMats[Object.keys(styles).filter(k => B[k].v).indexOf(style)] || winMats[0]);
     scene.add(shell, r.mesh(roofM));
+    if (s.id === 'torre-heat') { const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.6, 26, 8), new THREE.MeshStandardMaterial({ color: 0xb8c0c8, metalness: 0.8, roughness: 0.3 })); ant.position.set(p.x, y0 + h + 13, p.z); scene.add(ant); const bl = new THREE.Mesh(new THREE.SphereGeometry(0.8, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff2020, toneMapped: false })); bl.position.set(p.x, y0 + h + 26.5, p.z); scene.add(bl); const crown = new THREE.Mesh(new THREE.BoxGeometry(w + 0.6, 2.5, d + 0.6), new THREE.MeshBasicMaterial({ color: 0x9fe8ff, toneMapped: false })); crown.position.set(p.x, y0 + h - 1.5, p.z); scene.add(crown); }
     // planta baja vidriada iluminada
     const glass = new THREE.Mesh(new THREE.BoxGeometry(w, 4.2, d), new THREE.MeshStandardMaterial({ color: 0x1a2430, metalness: 0.8, roughness: 0.08, emissive: new THREE.Color(c.color).lerp(new THREE.Color(0xfff0d0), 0.6), emissiveIntensity: 0.35 }));
     glass.position.set(p.x, y0 + 2.1, p.z); glass.castShadow = true; scene.add(glass);
@@ -1747,10 +1748,15 @@ const WEAPONS = {
   pistol:  { name: 'Pistola', dmg: 36, dmgMax: 51, rate: 0.3, range: 90, spread: 0.012, ammo: 48 },
   shotgun: { name: 'Escopeta', dmg: 9, pellets: 7, rate: 0.9, range: 32, spread: 0.06, ammo: 24 },
   smg:     { name: 'Subfusil', dmg: 12, rate: 0.085, range: 65, spread: 0.03, ammo: 150, auto: true },
-  rifle:   { name: 'Rifle de asalto', dmg: 22, rate: 0.12, range: 140, spread: 0.014, ammo: 120, auto: true }
+  rifle:   { name: 'Rifle de asalto', dmg: 22, rate: 0.12, range: 140, spread: 0.014, ammo: 120, auto: true },
+  gold:    { name: 'Pistola dorada', dmg: 60, dmgMax: 80, rate: 0.25, range: 110, spread: 0.008, ammo: 60 },
+  combat:  { name: 'Escopeta de combate', dmg: 11, pellets: 9, rate: 0.45, range: 36, spread: 0.055, ammo: 40, auto: true },
+  tactical:{ name: 'Subfusil táctico', dmg: 16, rate: 0.06, range: 80, spread: 0.025, ammo: 300, auto: true },
+  sniper:  { name: 'Francotirador', dmg: 220, rate: 1.2, range: 320, spread: 0.001, ammo: 30 },
+  lmg:     { name: 'Ametralladora', dmg: 28, rate: 0.07, range: 150, spread: 0.02, ammo: 500, auto: true }
 };
 const rollDmg = W => W.dmgMax ? W.dmg + Math.random() * (W.dmgMax - W.dmg) : W.dmg;
-const WEAPON_ORDER = ['fist', 'pistol', 'shotgun', 'smg', 'rifle'];
+const WEAPON_ORDER = ['fist', 'pistol', 'shotgun', 'smg', 'rifle', 'gold', 'combat', 'tactical', 'sniper', 'lmg'];
 Object.assign(G, { weapons: {}, weapon: 'fist', hp: 100, armor: 0, wanted: 0, lastSeen: 0, aimT: 0, punchT: 0 });
 let firing = false, fireCd = 0, lockFailed = false;
 const cops = [], tracers = [], officers = [];
@@ -1782,7 +1788,8 @@ function setGunModel() {
     const grip = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.13, 0.05), m); grip.position.set(0, -0.08, 0.04); g.add(grip);
     g.position.set(0, -0.3, 0.02); g.rotation.x = Math.PI / 2; player.userData.elR.add(g); gunMesh = g;
   }
-  const len = { fist: 0, pistol: 0.2, shotgun: 0.75, smg: 0.42, rifle: 0.8 }[G.weapon];
+  const len = { fist: 0, pistol: 0.2, shotgun: 0.75, smg: 0.42, rifle: 0.8, gold: 0.22, combat: 0.7, tactical: 0.45, sniper: 1.1, lmg: 0.95 }[G.weapon];
+  gunMesh.children[0].material.color.set(G.weapon === 'gold' ? 0xd4af37 : 0x1b1c1f);
   gunMesh.visible = len > 0; gunMesh.children[0].scale.z = len || 0.01; gunMesh.children[0].position.z = (len || 0) / 2;
 }
 function giveWeapon(s, item) {
@@ -1954,7 +1961,7 @@ function endState(kind) {
   const finish = (x, z, label) => {
     $('respawn').hidden = true;
     G.money -= fee; G.hp = 100; G.wanted = 0; clearCops();
-    if (kind !== 'dead') { G.weapons = {}; G.weapon = 'fist'; G.armor = 0; setGunModel(); }
+    if (kind !== 'dead') { const keep = {}; for (const w of VAULT_GUNS) if (G.weapons[w] > 0) keep[w] = G.weapons[w]; G.weapons = keep; G.weapon = VAULT_GUNS.find(w => keep[w]) || 'fist'; G.armor = 0; setGunModel(); }
     player.position.set(x, groundY(x, z), z); player.userData.down = 0; player.userData.body.rotation.x = 0; player.visible = true; standPose(player.userData);
     $('overlay').hidden = true; G.mode = 'play'; saveNow();
     if (label) toast(`Apareciste en: ${label}`);
@@ -2376,13 +2383,13 @@ const floorOf = y => Math.max(0, Math.min(2, Math.floor((y + 0.6) / MFH)));
 function buildInterior(s, vip) {
   const M = imats(), g = new THREE.Group(), col = [], npcs = [], dyn = [];
   const cat = s.category;
-  const kind = s.private ? s.private : vip ? 'vip' : s.id === 'hcpd-precinct-7' ? 'police' : s.id === 'heat-city-general' ? 'hospital' : cat === 'banco' ? 'bank' : cat === 'autos' ? 'showroom' : ['comida', 'bar', 'club_adulto'].includes(cat) ? 'venue' : cat === 'casino' ? 'casino' : 'shop';
-  const W = { casino: 24, mansion: 20, garage: 26, house: 18, vip: 12, bank: 22, showroom: 24, police: 24, venue: 18, hospital: 18, shop: 16 }[kind], D = { casino: 18, mansion: 14, garage: 16, house: 12, vip: 10, bank: 16, showroom: 16, police: 20, venue: 14, hospital: 14, shop: 12 }[kind], H = kind === 'mansion' ? MFH * 3 : kind === 'casino' ? 5 : kind === 'showroom' || kind === 'bank' ? 6 : kind === 'police' ? 4.6 : 4.2;
-  const floorMat = kind === 'mansion' || kind === 'casino' ? M.marble : kind === 'house' ? M.wood : kind === 'vip' ? M.carpet : kind === 'bank' || kind === 'showroom' ? M.marble : kind === 'venue' && cat !== 'comida' ? M.wood : M.floor;
+  const kind = s.private ? s.private : vip ? 'vip' : s.id === 'hcpd-precinct-7' ? 'police' : s.id === 'heat-city-general' ? 'hospital' : cat === 'banco' ? 'bank' : cat === 'autos' ? 'showroom' : ['comida', 'bar', 'club_adulto'].includes(cat) ? 'venue' : cat === 'casino' ? 'casino' : cat === 'torre' ? 'tower' : 'shop';
+  const W = { tower: 22, penthouse: 22, casino: 24, mansion: 20, garage: 26, house: 18, vip: 12, bank: 22, showroom: 24, police: 24, venue: 18, hospital: 18, shop: 16 }[kind], D = { tower: 14, penthouse: 16, casino: 18, mansion: 14, garage: 16, house: 12, vip: 10, bank: 16, showroom: 16, police: 20, venue: 14, hospital: 14, shop: 12 }[kind], H = kind === 'mansion' ? MFH * 3 : kind === 'casino' || kind === 'tower' || kind === 'penthouse' ? 5.5 : kind === 'showroom' || kind === 'bank' ? 6 : kind === 'police' ? 4.6 : 4.2;
+  const floorMat = kind === 'mansion' || kind === 'casino' || kind === 'tower' || kind === 'penthouse' ? M.marble : kind === 'house' ? M.wood : kind === 'vip' ? M.carpet : kind === 'bank' || kind === 'showroom' ? M.marble : kind === 'venue' && cat !== 'comida' ? M.wood : M.floor;
   const fl = new THREE.Mesh(new THREE.PlaneGeometry(W, D), kind === 'police' ? concreteMat() : floorMat); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; fl.material.map && fl.material.map.repeat.set(W / 4, D / 4); g.add(fl);
   const ce = new THREE.Mesh(new THREE.PlaneGeometry(W, D), M.ceil); ce.rotation.x = Math.PI / 2; ce.position.y = H; g.add(ce);
   // paredes (con puerta al frente)
-  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'garage' ? 0x8e9096 : kind === 'house' || kind === 'mansion' ? (s.wall || 0xf4efe6) : kind === 'casino' ? 0x2a0f1e : kind === 'vip' ? 0x1e1030 : kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
+  const wallMat = M.wall.clone(); wallMat.color = new THREE.Color(kind === 'garage' ? 0x8e9096 : kind === 'house' || kind === 'mansion' ? (s.wall || 0xf4efe6) : kind === 'casino' ? 0x2a0f1e : kind === 'tower' ? 0xe8e4dc : kind === 'penthouse' ? 0x1b1a22 : kind === 'vip' ? 0x1e1030 : kind === 'venue' && cat !== 'comida' ? 0x2a1d3a : kind === 'police' ? 0xc9d3dc : kind === 'hospital' ? 0xe8f2f2 : 0xffffff);
   if (kind === 'police') { wallMat.map = blockTex(); wallMat.color.set(0xe9edf0); }
   ibox(g, col, W, H, 0.3, 0, 0, -D / 2 - 0.15, wallMat);
   ibox(g, col, 0.3, H, D, -W / 2 - 0.15, 0, 0, wallMat); ibox(g, col, 0.3, H, D, W / 2 + 0.15, 0, 0, wallMat);
@@ -2393,7 +2400,7 @@ function buildInterior(s, vip) {
   for (let x = -W / 2 + 3; x < W / 2 - 1; x += 4) for (let z = -D / 2 + 3; z < D / 2 - 1; z += 4) { const l = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.5), M.light); l.rotation.x = Math.PI / 2; l.position.set(x, H - 0.02, z); g.add(l); }
   // cartel con el nombre en la pared del fondo
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(W - 4, 9), 2.2), new THREE.MeshBasicMaterial({ map: makeSign(s.name.toUpperCase(), (G.cats[s.category] || { name: s.sub }).name, (G.cats[s.category] || { color: s.color }).color, s.special?.type === 'golpe'), toneMapped: false }));
-  sign.position.set(0, H - 1.5, -D / 2 + 0.02); g.add(sign); if (kind === 'house' || kind === 'mansion' || kind === 'police') sign.visible = false;
+  sign.position.set(0, H - 1.5, -D / 2 + 0.02); g.add(sign); if (kind === 'house' || kind === 'mansion' || kind === 'police' || kind === 'penthouse') sign.visible = false;
   let hazy = false, levels = false, acts = null, counter = { x: 0, z: -D / 2 + 3.6 }, cell = null, clerkTop = 0x1d1d1d, spots = null, bed = null;
   if (kind === 'shop') {
     clerkTop = { tienda24: 0x2fa36b, armeria: 0x4d5a3a, ropa: 0x111111, tecnologia: 0x3a7bd5, empeno: 0x7a4a2a, tatuajes: 0x222222, gimnasio: 0xe94b3c, inmobiliaria: 0x1f2f55 }[cat] || 0x1d1d1d;
@@ -2487,6 +2494,30 @@ function buildInterior(s, vip) {
     for (let i = 0; i < 6; i++) { const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 8), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.3 })); post.position.set(-5 + i * 2, 0.5, 1.5); g.add(post); }
     counter = { x: 0, z: -0.6 };
     for (let i = 0; i < 3; i++) npcs.push(inPerson(randomPerson(), -6 + i * 5, 3 + Math.random() * 2, Math.PI + (Math.random() - 0.5)));
+  } else if (kind === 'tower') {
+    // lobby: recepción, seguridad y ascensores dorados al fondo
+    const gold = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.25 });
+    ibox(g, col, 5, 1.1, 1, -W / 2 + 4, 0, 1, M.wood); counter = { x: -W / 2 + 4, z: 2.4 };
+    npcs.push(inPerson({ skin: pickR(SKINS), top: 0x1b1b1b, pants: 0x1b1b1b, shoes: 0x0a0a0a, hair: pickR(HAIRS) }, -W / 2 + 4, 0, 0));
+    for (const x of [-3, 3]) { const dr = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 3), gold); dr.position.set(x, 1.5, -D / 2 + 0.03); g.add(dr); const ln = new THREE.Mesh(new THREE.PlaneGeometry(0.04, 3), new THREE.MeshBasicMaterial({ color: 0x111111 })); ln.position.set(x, 1.5, -D / 2 + 0.04); g.add(ln); const ar = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.25), new THREE.MeshBasicMaterial({ color: 0xff7a3d, toneMapped: false })); ar.position.set(x, 3.3, -D / 2 + 0.04); g.add(ar); }
+    for (const [x, z] of [[-6, -3], [6, -3], [-6, 4], [6, 4]]) { const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, H, 16), M.marble); pl.position.set(x, H / 2, z); g.add(pl); col.push({ x: IN_X + x, z: IN_Z + z, hw: 0.45, hd: 0.45 }); }
+    acts = [{ x: 0, z: -D / 2 + 1.6, floor: 0, kind: 'lift', up: true, text: 'Tomar el ascensor al último piso (88)' }];
+  } else if (kind === 'penthouse') {
+    counter = { x: 999, z: 999 };
+    // ventanales con la ciudad de noche abajo
+    const sky = tex((() => { const [c, x] = cnv(1024, 256); const gr = x.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#0b1030'); gr.addColorStop(0.7, '#3a2350'); gr.addColorStop(1, '#ff7a3d'); x.fillStyle = gr; x.fillRect(0, 0, 1024, 256);
+      for (let i = 0; i < 70; i++) { const w = 10 + Math.random() * 26, h = 30 + Math.random() * 120, bx = Math.random() * 1024; x.fillStyle = '#0d0b1c'; x.fillRect(bx, 256 - h, w, h); for (let k = 0; k < h / 7; k++) for (let j = 0; j < w / 6; j++) if (Math.random() < 0.35) { x.fillStyle = Math.random() < 0.8 ? '#ffd58a' : '#7fe8ff'; x.fillRect(bx + 2 + j * 6, 256 - h + 3 + k * 7, 2.5, 3); } } return c; })());
+    const win = new THREE.MeshBasicMaterial({ map: sky, toneMapped: false });
+    for (const [w, x, z, ry] of [[W - 0.4, 0, -D / 2 + 0.05, 0], [D - 0.4, -W / 2 + 0.05, 0, Math.PI / 2], [D - 0.4, W / 2 - 0.05, 0, -Math.PI / 2]]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(w, H - 0.6), win); p.position.set(x, H / 2, z); p.rotation.y = ry; g.add(p); }
+    ibox(g, col, 4.4, 0.45, 1, -4, 0, 2.6, new THREE.MeshStandardMaterial({ color: 0xf2efe8, roughness: 0.8 })); ibox(g, col, 4.4, 0.8, 0.3, -4, 0.45, 3.1, new THREE.MeshStandardMaterial({ color: 0xf2efe8, roughness: 0.8 }), false);
+    ibox(g, col, 2, 0.4, 1, -4, 0, 1, new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.6, roughness: 0.2 }));
+    ibox(g, col, 3, 1.05, 0.7, 5, 0, 3, M.marble); const shelf = new THREE.Mesh(new THREE.PlaneGeometry(3, 1.4), M.bottles); shelf.position.set(5, 2.2, 3.6); shelf.rotation.y = Math.PI; g.add(shelf);
+    // bóveda con teclado
+    const vault = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.3, 32), new THREE.MeshStandardMaterial({ color: 0x9aa3ad, metalness: 0.95, roughness: 0.25 })); vault.rotation.x = Math.PI / 2; vault.position.set(5, 1.6, -D / 2 + 0.3); g.add(vault); g.userData.vault = vault;
+    for (let k = 0; k < 4; k++) { const sp = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 0.1), new THREE.MeshStandardMaterial({ color: 0x5a6068, metalness: 0.9 })); sp.rotation.z = k * Math.PI / 4; sp.position.set(5, 1.6, -D / 2 + 0.5); g.add(sp); }
+    const pad = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.6, 0.08), new THREE.MeshBasicMaterial({ color: G.vault ? 0x3ddc97 : 0xff3030, toneMapped: false })); pad.position.set(7, 1.5, -D / 2 + 0.1); g.add(pad);
+    const lift = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 3), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.25 })); lift.position.set(0, 1.5, D / 2 - 0.05); lift.rotation.y = Math.PI; g.add(lift);
+    acts = [{ x: 6.4, z: -D / 2 + 1.5, floor: 0, kind: 'vault', text: G.vault ? 'La bóveda ya está vacía' : 'Teclado de la bóveda: ingresar código' }, { x: 0, z: D / 2 - 1.5, floor: 0, kind: 'lift', up: false, text: 'Bajar en ascensor al lobby' }];
   } else if (kind === 'casino') {
     counter = { x: 0, z: -D / 2 + 3.4 };
     const gold = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.25 }), felt = new THREE.MeshStandardMaterial({ color: 0x0f6b3a, roughness: 0.95 }), wood2 = new THREE.MeshStandardMaterial({ color: 0x4a1f12, roughness: 0.5 }), blackM = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.4 });
@@ -2720,7 +2751,7 @@ function interiorPrompt() {
   if (!interior) return null;
   const lx = player.position.x - IN_X, lz = player.position.z - IN_Z;
   if (interior.acts) { const fl = floorOf(player.position.y); for (const a of interior.acts) if (a.floor === fl && Math.hypot(lx - a.x, lz - a.z) < 1.6) return a; if (fl > 0) return null; }
-  if (Math.hypot(lx - interior.exit.x, lz - interior.exit.z) < 1.8) return { kind: 'exit', text: interior.kind === 'garage' ? 'Subir a la isla a pie' : interior.kind === 'house' || interior.kind === 'mansion' ? 'Salir al jardín' : 'Salir a la calle' };
+  if (interior.kind !== 'penthouse' && Math.hypot(lx - interior.exit.x, lz - interior.exit.z) < 1.8) return { kind: 'exit', text: interior.kind === 'garage' ? 'Subir a la isla a pie' : interior.kind === 'house' || interior.kind === 'mansion' ? 'Salir al jardín' : 'Salir a la calle' };
   if (interior.spots) for (const sp of interior.spots) if (Math.hypot(lx - sp.x, lz - sp.z) < 1.6) return { kind: 'takecar', i: sp.i, text: `Sacar ${sp.name}` };
   if (interior.bed && Math.hypot(lx - interior.bed.x, lz - interior.bed.z) < 2) return { kind: 'sleep', text: 'Dormir y guardar la partida' };
   if (interior.cell && lucy && lucy.caged && Math.hypot(lx - interior.cell.x, lz - interior.cell.z) < 1.8) return { kind: 'cell', text: 'Abrir la celda de Lucy' };
@@ -3422,6 +3453,41 @@ function updateGhosts(dt) {
     }
   }
 }
+// ---------- Torre Heat: ascensor al piso 88 y bóveda con código ----------
+const VAULT_GUNS = ['gold', 'combat', 'tactical', 'sniper', 'lmg'];
+function rideLift(up) {
+  const s = G.inside; G.mode = 'dead'; $('overlay').hidden = false; $('overlay').style.background = '#05040c'; $('ovTitle').textContent = 'ASCENSOR';
+  let f = up ? 1 : 88; const step = () => { $('ovText').textContent = `Piso ${f}`; if (AC) tone(AC.currentTime, 220, 0.05, 'sine', 0.02); };
+  beep(120, 2.8, 'sine', 0.03); step();
+  const iv = setInterval(() => { f += up ? 3 : -3; if ((up && f >= 88) || (!up && f <= 1)) { f = up ? 88 : 1; clearInterval(iv); step();
+      setTimeout(() => { scene.remove(interior.group); interior = buildInterior(up ? Object.assign({}, s, { private: 'penthouse', name: 'Penthouse · piso 88' }) : s); scene.add(interior.group);
+        player.position.set(IN_X, 0, IN_Z + (up ? interior.D / 2 - 2.2 : -interior.D / 2 + 2.6)); player.rotation.y = up ? Math.PI : 0; G.camYaw = up ? 0 : Math.PI;
+        $('overlay').hidden = true; $('overlay').style.background = ''; G.mode = 'play'; tone(AC ? AC.currentTime : 0, 1320, 0.4, 'sine', 0.05);
+        if (up) toast(G.vault ? 'Penthouse del piso 88. La bóveda ya la abriste.' : 'Penthouse del piso 88. Al fondo hay una bóveda con un teclado…', 4500); }, 500); }
+    else step(); }, 90);
+}
+function openKeypad() {
+  if (G.vault) return toast('La bóveda ya está vacía. Tus armas especiales ya son tuyas.');
+  if (document.pointerLockElement) document.exitPointerLock(); G.mode = 'shop'; G.keys = {}; $('shop').hidden = false; $('prompt').hidden = true;
+  $('shopTitle').textContent = 'Bóveda · Torre Heat'; $('shopMoney').textContent = money(G.money);
+  $('shopCard').innerHTML = `<h2>Ingresá el código</h2><p>La bóveda tiene un teclado. Si sabés el código, se abre.</p>
+    <input id="vCode" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Código" style="font:700 22px var(--body);letter-spacing:0.1em;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:#0006;color:var(--text);width:100%;box-sizing:border-box">
+    <button class="btn primary" id="vGo" type="button" style="font-size:16px;padding:12px">Abrir bóveda</button><p id="vMsg" style="color:var(--bad);min-height:1.4em"></p>`;
+  const tryCode = () => { const v = $('vCode').value.trim().toLowerCase().replace(/\s+/g, '');
+    if (v === 'heatcity') { closeShop(); openVault(); }
+    else { $('vMsg').textContent = 'Código incorrecto.'; if (AC) tone(AC.currentTime, 160, 0.35, 'square', 0.05); $('vCode').select(); } };
+  $('vGo').onclick = tryCode; $('vCode').onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') tryCode(); };
+  setTimeout(() => $('vCode').focus(), 50);
+}
+function openVault() {
+  G.vault = true; G.money += 100000;
+  for (const w of VAULT_GUNS) G.weapons[w] = (G.weapons[w] || 0) + WEAPONS[w].ammo * 3;
+  G.weapon = 'gold'; setGunModel(); SFX.cash(); setTimeout(SFX.mission, 300);
+  const v = interior && interior.group.userData.vault; if (v) { let t = 0; const iv = setInterval(() => { v.position.x -= 0.06; v.rotation.z += 0.05; if ((t += 1) > 40) clearInterval(iv); }, 30); }
+  toast('¡BÓVEDA ABIERTA! +$100.000 y 5 armas especiales: Pistola dorada, Escopeta de combate, Subfusil táctico, Francotirador y Ametralladora. La policía no te las puede sacar.', 8000);
+  if (interior) interior.acts[0].text = 'La bóveda ya está vacía';
+  saveNow();
+}
 function setIslandOwner(name) {
   GARAGE_S.name = `Garaje de ${name}`; HOUSE_S.name = `Casa de ${name}`;
   if (islandSign) { islandSign.material.map.dispose(); islandSign.material.map = islandSignTex(name); islandSign.material.needsUpdate = true; }
@@ -3549,7 +3615,7 @@ addEventListener('keydown', e => {
   if (k === 'p' && (G.mode === 'play' || G.mode === 'phone')) { if (PH.open) closePhone(); else openPhone(); }
   if (k === 't' && PH.incoming) answerCall();
   if (k === 'x' && PH.incoming) declineCall();
-  if (/^[1-5]$/.test(k) && G.mode === 'play') selectWeapon(WEAPON_ORDER[+k - 1]);
+  if (/^[0-9]$/.test(k) && G.mode === 'play') selectWeapon(WEAPON_ORDER[k === '0' ? 9 : +k - 1]);
   if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
 });
 addEventListener('keyup', e => { G.keys[e.key.toLowerCase()] = false; });
@@ -3620,7 +3686,7 @@ $('loginForm').addEventListener('submit', async e => {
   if ((G.pickChar || 'mateo') !== G.char) setCharacter(G.pickChar || 'mateo');
   let spawn = W2M(450, 460);
   if (data) {
-    G.money = Number(data.money) || 0; G.story = data.story || 0; G.owned = Array.isArray(data.owned) ? data.owned : []; G.job = data.job !== undefined ? !!data.job : (data.mstep || 0) > 0; G.dogDone = !!data.dogDone; G.chips = Number(data.chips) || 0; G.airportIntro = !!data.airportIntro; G.sms = Array.isArray(data.sms) ? data.sms.filter(m => m && typeof m.text === 'string').slice(0, 30) : []; G.mission = data.mission || 0; G.mstep = data.mstep || 0; if (data.mstep === undefined && G.mission >= 1) { G.mstep = G.mission === 1 ? 1 : 0; G.mission = G.mission === 1 ? 0 : 1; } G.carColor = data.carColor || '#ff3d8b'; G.carModel = MODELS[data.carModel] ? data.carModel : 'sakura';
+    G.money = Number(data.money) || 0; G.story = data.story || 0; G.owned = Array.isArray(data.owned) ? data.owned : []; G.job = data.job !== undefined ? !!data.job : (data.mstep || 0) > 0; G.dogDone = !!data.dogDone; G.chips = Number(data.chips) || 0; G.vault = !!data.vault; G.airportIntro = !!data.airportIntro; G.sms = Array.isArray(data.sms) ? data.sms.filter(m => m && typeof m.text === 'string').slice(0, 30) : []; G.mission = data.mission || 0; G.mstep = data.mstep || 0; if (data.mstep === undefined && G.mission >= 1) { G.mstep = G.mission === 1 ? 1 : 0; G.mission = G.mission === 1 ? 0 : 1; } G.carColor = data.carColor || '#ff3d8b'; G.carModel = MODELS[data.carModel] ? data.carModel : 'sakura';
     if (data.weapons && typeof data.weapons === 'object') for (const k in data.weapons) if (WEAPONS[k]) G.weapons[k] = Math.max(0, Number(data.weapons[k]) || 0);
     G.armor = Math.min(100, Number(data.armor) || 0);
     G.garage = Array.isArray(data.garage) ? data.garage.filter(e => e && MODELS[e.model] && MODELS[e.model].kind !== 'boat' && /^#[0-9a-f]{6}$/i.test(e.color)).slice(0, 8) : [];
@@ -3669,6 +3735,8 @@ function tryEnter() {
     if (ip.kind === 'cell') { breakout(); return; }
     if (ip.kind === 'takecar') return takeCarOut(ip.i);
     if (ip.kind === 'sleep') return sleepAtHome();
+    if (ip.kind === 'lift') return rideLift(ip.up);
+    if (ip.kind === 'vault') return openKeypad();
     if (ip.kind === 'casino') return openCasino(G.inside, ip.game === 'cashier' ? 'cashier' : ip.game);
     if (ip.kind === 'eat') { G.hp = 100; SFX.buy(); return toast('Te comiste una porción de pizza y una manzana. Salud al máximo.'); }
     if (ip.kind === 'wine') { G.hp = Math.min(100, G.hp + 10); G.drunk = 12; tone(AC ? AC.currentTime : 0, 1760, 0.3, 'sine', 0.05); return toast('Una copa de tinto de la casa… todo se mueve un poquito.'); }
@@ -4391,7 +4459,7 @@ function updateHUD() {
   $('money').textContent = money(G.money);
   const st = $('stars'); st.innerHTML = '<b>' + '★'.repeat(G.wanted) + '</b>' + '★'.repeat(5 - G.wanted); st.classList.toggle('blink', G.wanted > 0 && performance.now() - G.lastSeen > 2500);
   $('hpBar').firstElementChild.style.width = Math.max(0, G.hp) + '%'; $('hpBar').firstElementChild.style.background = G.hp > 50 ? 'var(--ok)' : G.hp > 25 ? 'var(--gold)' : 'var(--bad)'; $('hpBar').lastElementChild.style.width = (G.armor || 0) + '%';
-  $('weaponChip').innerHTML = WEAPON_ORDER.map((w, i) => (w === 'fist' || G.weapons[w] > 0) ? `<span class="wslot${w === G.weapon ? ' on' : ''}"><kbd>${i + 1}</kbd>${esc(WEAPONS[w].name)}${w === 'fist' ? '' : ` <small>${G.weapons[w]}</small>`}</span>` : '').join('');
+  $('weaponChip').innerHTML = WEAPON_ORDER.map((w, i) => (w === 'fist' || G.weapons[w] > 0) ? `<span class="wslot${w === G.weapon ? ' on' : ''}"><kbd>${(i + 1) % 10}</kbd>${esc(WEAPONS[w].name)}${w === 'fist' ? '' : ` <small>${G.weapons[w]}</small>`}</span>` : '').join('');
   const ch = $('crosshair'); ch.hidden = !(G.mode === 'play' && !G.inCar && !G.swimming && G.weapon !== 'fist'); ch.classList.toggle('aim', !!G.aiming); ch.classList.toggle('hit', performance.now() < (G.hitUntil || 0));
   const fp = M2W(focusPos().x, focusPos().z), z = zoneAt(fp.mx, fp.my);
   $('zone').textContent = G.inside ? G.inside.name.toUpperCase() : onIsland() ? `ISLA DE ${G.user.name.toUpperCase()}` : z ? z.name.toUpperCase() : 'AFUERAS';

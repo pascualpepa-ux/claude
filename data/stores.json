@@ -173,6 +173,12 @@
       "name": "Casinos",
       "icon": "dice",
       "color": "#D4AF37"
+    },
+    {
+      "id": "torre",
+      "name": "Rascacielos",
+      "icon": "building",
+      "color": "#9FE8FF"
     }
   ],
   "stores": [
@@ -999,6 +1005,27 @@
       "description": "Casino con tragamonedas, ruleta y blackjack. Cambiá plata por fichas en la caja y probá suerte.",
       "actions": [
         "casino"
+      ]
+    },
+    {
+      "id": "torre-heat",
+      "name": "Torre Heat",
+      "category": "torre",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 430,
+        "y": 400
+      },
+      "icon": "building",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [],
+      "description": "El rascacielos más alto de Heat City: 88 pisos de vidrio. Dicen que en el penthouse hay una bóveda con código.",
+      "actions": [
+        "ascensor"
       ]
     }
   ]
