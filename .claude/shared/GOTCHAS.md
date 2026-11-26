@@ -35,6 +35,7 @@
 | G005 | `md_to_docx_kztek.py` báo `✗ PDF thất bại` (RPC failed) nhưng PDF **vẫn được tạo hợp lệ** | `[SCRIPT]` | 2026-07-27 |
 | G006 | Tool "graphify" tên package PyPI thật là `graphifyy` (2 chữ y) — `pip install graphify` báo lỗi | `[CONFIG]` | 2026-07-29 |
 | G007 | Edit tool báo "updated successfully" nhưng **không ghi vào disk** trên Windows trong 1 số branch context | `[AGENT-LOOP]` | 2026-08-04 |
+| G008 | Next.js `template.tsx` con animación `transform` → los hijos `position: fixed` quedan con alto 0 | `[UI-BINDING]` | 2026-11-26 |
 
 **Category hiện có:** `[SCRIPT]` (lỗi Python script/tool) · `[ENCODING]` (lỗi mã hóa ký tự) · `[UI-BINDING]` (lỗi Avalonia/WinForms binding) · `[CONFIG]` (cài đặt sai, tên package sai) · `[GIT]` (git workflow) · `[AGENT-LOOP]` (agent bị stuck/loop)
 
@@ -305,3 +306,17 @@ tạo skill `.claude/commands/graphify.md` ngay sau đó có ghi lại gotcha n�
 BẮT BUỘC: Sau khi thêm entry mới → cập nhật bảng "Mục lục nhanh + Bảng lọc theo Category" ở đầu file.
 
 -->
+
+---
+
+## G008 — Animación con `transform` en `app/template.tsx` rompe los elementos `position: fixed`
+**Category:** `[UI-BINDING]`
+
+**Ngày phát hiện:** 2026-11-26
+**Môi trường:** Next.js 15 (App Router) + Tailwind v4, `apps/playforge`
+**Vấn đề:** El reproductor a pantalla completa (`fixed inset-0`) aparecía con alto 0: sólo se veía la barra superior y el botón «Jugar» quedaba inaccesible. Sin errores en consola.
+**Nguyên nhân:** `app/template.tsx` envolvía cada página en una animación de entrada con `transform` y `animation-fill-mode: both`. Al terminar, el valor computado queda `matrix(1,0,0,1,0,0)` (no `none`), y cualquier `transform` convierte al ancestro en el bloque contenedor de los `fixed` → `inset-0` se mide contra un div de alto 0.
+**Cách xử lý:** En `template.tsx` animar sólo `opacity`; para animaciones con `transform` usar `fill-mode: backwards` (no `both`/`forwards`).
+**Lần đầu gặp:** Fase 1 de Playforge (prueba con Playwright de `/jugar/[id]`).
+**Không cần làm lại:** Ya corregido en `apps/playforge/app/template.tsx` y `globals.css`.
+

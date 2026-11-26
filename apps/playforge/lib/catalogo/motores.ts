@@ -1,0 +1,200 @@
+import type { MetaMotor } from "./tipos";
+
+/**
+ * Registro de motores. Cada motor aporta TEMAS × DIFICULTADES × MODOS × MAPAS variantes
+ * (12 × 5 × 3 × 6 = 1.080). Agregar un motor acá + su código en juegos/motores/ multiplica el catálogo.
+ */
+export const MOTORES: MetaMotor[] = [
+  {
+    id: "serpiente",
+    nombre: "Serpentina",
+    generos: ["snake", "arcade"],
+    cabezas: ["Serpiente", "Víbora", "Culebra", "Serpentina", "Anaconda", "Cobra"],
+    modos: [
+      { nombre: "Clásico", descripcion: "Las paredes y tu propia cola te eliminan. Llegá al largo objetivo para ganar.", duracion: "corta" },
+      { nombre: "Sin bordes", descripcion: "Los bordes te teletransportan al otro lado, pero el mapa tiene más obstáculos.", duracion: "media" },
+      { nombre: "Contrarreloj", descripcion: "60 segundos para comer todo lo posible. Las frutas doradas suman tiempo.", duracion: "corta" },
+    ],
+    frases: [
+      "Guiá a tu serpiente por {lugar} y devorá todo lo que brille.",
+      "Cada bocado te hace más larga y más rápida. ¿Cuánto aguantás en {lugar}?",
+      "Una serpiente {palabra} recorre laberintos que cambian con cada mapa.",
+    ],
+    controles: "Flechas o WASD para girar · P o Esc para pausar",
+    controlesTactiles: "Deslizá el dedo o usá la cruceta",
+    movil: true,
+  },
+  {
+    id: "corredor",
+    nombre: "Corredor Infinito",
+    generos: ["corredores", "parkour"],
+    cabezas: ["Corredor", "Fuga", "Sprint", "Escape", "Carrera", "Huida"],
+    modos: [
+      { nombre: "Infinito", descripcion: "Corré lo más lejos posible. La velocidad no para de subir.", duracion: "media" },
+      { nombre: "Monedas", descripcion: "Juntá 120 monedas antes de chocar para ganar.", duracion: "corta" },
+      { nombre: "Maratón", descripcion: "Llegá a la meta de 3.000 metros con sólo una vida.", duracion: "media" },
+    ],
+    frases: [
+      "Saltá, deslizate y esquivá obstáculos sin frenar por {lugar}.",
+      "Un escape {palabra} donde cada metro es más rápido que el anterior.",
+      "Reflejos al límite: {lugar} no perdona un salto tarde.",
+    ],
+    controles: "Espacio o ↑ para saltar (doble salto) · ↓ para deslizarte",
+    controlesTactiles: "Tocá para saltar · deslizá hacia abajo para agacharte",
+    movil: true,
+  },
+  {
+    id: "plataformas",
+    nombre: "Saltarín",
+    generos: ["plataformas", "parkour"],
+    cabezas: ["Aventura", "Saltarín", "Odisea", "Travesía", "Leyenda", "Expedición"],
+    modos: [
+      { nombre: "Aventura", descripcion: "Cinco niveles con enemigos, pinches y monedas. Tenés 3 vidas.", duracion: "media" },
+      { nombre: "Contrarreloj", descripcion: "Terminá cada nivel antes de que se acabe el tiempo.", duracion: "corta" },
+      { nombre: "Coleccionista", descripcion: "La bandera sólo se abre si juntaste todas las gemas del nivel.", duracion: "larga" },
+    ],
+    frases: [
+      "Saltá entre plataformas por {lugar} hasta alcanzar la bandera.",
+      "Un plataformero {palabra} con niveles generados que se vuelven cada vez más traicioneros.",
+      "Pisá enemigos, esquivá pinches y conquistá {lugar}.",
+    ],
+    controles: "← → o A D para moverte · Espacio, ↑ o W para saltar",
+    controlesTactiles: "Botones de dirección y salto en pantalla",
+    movil: true,
+  },
+  {
+    id: "naves",
+    nombre: "Escuadrón",
+    generos: ["disparos", "arcade"],
+    cabezas: ["Escuadrón", "Invasión", "Galaxia", "Asalto", "Defensor", "Nave"],
+    modos: [
+      { nombre: "Arcade", descripcion: "Oleadas de enemigos y un jefe cada cinco oleadas. Ganás al vencer al tercer jefe.", duracion: "media" },
+      { nombre: "Meteoritos", descripcion: "Esquivá una lluvia de meteoritos y juntá monedas durante 90 segundos.", duracion: "corta" },
+      { nombre: "Cazajefes", descripcion: "Sólo jefes, uno tras otro, cada vez más feroces.", duracion: "corta" },
+    ],
+    frases: [
+      "Pilotá tu nave sobre {lugar} y resistí oleadas enemigas.",
+      "Disparos frenéticos, mejoras de arma y jefes {palabra}.",
+      "Defendé {lugar} de una invasión que no da respiro.",
+    ],
+    controles: "Flechas o WASD para mover · disparo automático · Espacio para bomba",
+    controlesTactiles: "Arrastrá el dedo para mover la nave",
+    movil: true,
+  },
+  {
+    id: "rompebloques",
+    nombre: "Rompebloques",
+    generos: ["arcade", "logica"],
+    cabezas: ["Rompebloques", "Muro", "Ladrillo", "Rebote", "Demolición", "Bloque"],
+    modos: [
+      { nombre: "Campaña", descripcion: "Cinco muros de ladrillos con mejoras. Rompelos todos para ganar.", duracion: "media" },
+      { nombre: "Multibola", descripcion: "Arrancás con tres pelotas, pero la paleta es más chica.", duracion: "corta" },
+      { nombre: "Descenso", descripcion: "El muro baja cada pocos segundos. Rompelo antes de que llegue.", duracion: "corta" },
+    ],
+    frases: [
+      "Rebotá la pelota y demolé los muros de {lugar}.",
+      "Ladrillos {palabra}, mejoras locas y rebotes imposibles.",
+      "Cada muro esconde una mejora. ¿Podés limpiar {lugar}?",
+    ],
+    controles: "← → o mouse para mover la paleta · Espacio para lanzar",
+    controlesTactiles: "Arrastrá el dedo para mover la paleta, tocá para lanzar",
+    movil: true,
+  },
+  {
+    id: "defensa",
+    nombre: "Bastión",
+    generos: ["defensa", "estrategia"],
+    cabezas: ["Bastión", "Fortaleza", "Muralla", "Torreón", "Ciudadela", "Defensa"],
+    modos: [
+      { nombre: "Campaña", descripcion: "Resistí 15 oleadas construyendo y mejorando torres.", duracion: "larga" },
+      { nombre: "Escasez", descripcion: "Menos oro inicial: cada torre cuenta. 12 oleadas.", duracion: "media" },
+      { nombre: "Asedio", descripcion: "Oleadas más grandes y rápidas. Sólo 10 vidas.", duracion: "media" },
+    ],
+    frases: [
+      "Construí torres y frená a las hordas que marchan sobre {lugar}.",
+      "Estrategia {palabra}: elegí bien dónde poner cada torre.",
+      "Cañones, hielo y rayos para defender {lugar}.",
+    ],
+    controles: "Mouse: elegí una torre abajo y hacé clic en el mapa · clic en una torre para mejorarla",
+    controlesTactiles: "Tocá una torre del menú y después un casillero libre",
+    movil: true,
+  },
+  {
+    id: "gemas",
+    nombre: "Gemas",
+    generos: ["puzzles", "logica"],
+    cabezas: ["Gemas", "Joyas", "Tesoro", "Cristales", "Brillos", "Diamantes"],
+    modos: [
+      { nombre: "Movimientos", descripcion: "Alcanzá el puntaje objetivo con movimientos limitados. 6 niveles.", duracion: "media" },
+      { nombre: "Contrarreloj", descripcion: "90 segundos: cada combinación suma tiempo extra.", duracion: "corta" },
+      { nombre: "Bloques de hielo", descripcion: "Rompé todo el hielo del tablero antes de quedarte sin movimientos.", duracion: "media" },
+    ],
+    frases: [
+      "Intercambiá gemas y formá combinaciones de tres o más en {lugar}.",
+      "Cascadas {palabra} y combos encadenados para mentes rápidas.",
+      "Un puzzle relajante pero tramposo con tableros de {lugar}.",
+    ],
+    controles: "Clic en una gema y después en una vecina (o arrastrá)",
+    controlesTactiles: "Deslizá una gema hacia su vecina",
+    movil: true,
+  },
+  {
+    id: "carreras",
+    nombre: "Turbo",
+    generos: ["carreras", "deportes"],
+    cabezas: ["Turbo", "Rally", "Gran Premio", "Derrape", "Nitro", "Circuito"],
+    modos: [
+      { nombre: "Contrarreloj", descripcion: "Pasá los puntos de control antes de que el reloj llegue a cero.", duracion: "corta" },
+      { nombre: "Carrera", descripcion: "Tres vueltas contra 7 rivales. Terminá en el podio.", duracion: "media" },
+      { nombre: "Tráfico", descripcion: "Esquivá autos en una ruta sin fin. Cada choque te frena.", duracion: "media" },
+    ],
+    frases: [
+      "Acelerá por las curvas y colinas de {lugar}.",
+      "Una carrera {palabra} a toda velocidad con nitro y rivales agresivos.",
+      "Pisá a fondo en {lugar} y no sueltes el acelerador.",
+    ],
+    controles: "← → para doblar · aceleración automática · ↓ o Shift frenar · Espacio nitro",
+    controlesTactiles: "Botones izquierda/derecha, freno y nitro en pantalla",
+    movil: true,
+  },
+  {
+    id: "ritmo",
+    nombre: "Pulso",
+    generos: ["ritmo"],
+    cabezas: ["Pulso", "Beat", "Ritmo", "Compás", "Groove", "Sintonía"],
+    modos: [
+      { nombre: "Cuatro carriles", descripcion: "La experiencia completa: cuatro carriles y notas largas.", duracion: "corta" },
+      { nombre: "Tres carriles", descripcion: "Menos carriles, ideal para el celular.", duracion: "corta" },
+      { nombre: "Frenesí", descripcion: "Muchas más notas y un tempo más rápido.", duracion: "corta" },
+    ],
+    frases: [
+      "Tocá cada nota al compás de una canción {palabra} compuesta para {lugar}.",
+      "Cada variante trae su propia melodía generada. Seguí el ritmo y no rompas el combo.",
+      "Un juego musical con canciones únicas inspiradas en {lugar}.",
+    ],
+    controles: "D F J K (o ← ↓ ↑ →) para cada carril",
+    controlesTactiles: "Tocá los carriles en la zona de golpe",
+    movil: true,
+  },
+  {
+    id: "hockey",
+    nombre: "Hockey de Aire",
+    generos: ["deportes", "multijugador"],
+    cabezas: ["Hockey", "Disco", "Mesa", "Duelo", "Golazo", "Choque"],
+    modos: [
+      { nombre: "Contra la CPU", descripcion: "El primero en llegar a 7 goles gana.", duracion: "corta" },
+      { nombre: "Dos jugadores", descripcion: "Multijugador local en el mismo dispositivo: uno de cada lado.", duracion: "corta", multijugador: "local" },
+      { nombre: "Torneo", descripcion: "Tres rivales cada vez más difíciles. Ganá los tres partidos.", duracion: "media" },
+    ],
+    frases: [
+      "Un duelo de hockey de aire en {lugar}: reflejos y rebotes perfectos.",
+      "Física real de mesa {palabra} y rivales con estilo propio.",
+      "Desafiá a la CPU o a un amigo en el mismo dispositivo.",
+    ],
+    controles: "Mouse o WASD (jugador 1) · flechas (jugador 2)",
+    controlesTactiles: "Arrastrá tu mazo con el dedo · en dos jugadores cada uno usa su mitad",
+    movil: true,
+  },
+];
+
+export const motorPorId = (id: string) => MOTORES.find((m) => m.id === id);
