@@ -33,7 +33,7 @@ export function clave(palabra: string): string {
 
 /** Sinónimos: la gente busca «autos» o «carros» y el género se llama «coches». */
 const SINONIMOS: Record<string, string> = {
-  auto: "coches", autos: "coches", carro: "coches", carros: "coches", coche: "coches", car: "coches", cars: "coches", policia: "heat city", policias: "heat city", persecucion: "heat city",
+  auto: "coches", autos: "coches", carro: "coches", carros: "coches", coche: "coches", car: "coches", cars: "coches", policia: "fuga", policias: "fuga", persecucion: "fuga",
   nave: "naves", espacial: "naves", disparo: "disparos", tiros: "disparos", vibora: "serpiente", snake: "serpiente", musica: "ritmo", baile: "ritmo",
   futbol: "hockey", deporte: "deportes", rompecabezas: "puzzles", puzle: "puzzles", joyas: "gemas", torres: "defensa", ladrillos: "rompebloques", saltos: "plataformas", correr: "corredor", estacionamiento: "estaciona", parking: "estaciona", miedo: "terror",
 };

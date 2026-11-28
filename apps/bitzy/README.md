@@ -6,7 +6,8 @@ Plataforma web de juegos estilo Roblox/Poki: un catálogo de **15.120 juegos jug
 
 ## Cómo funciona el catálogo
 
-- `juegos/motores/` — 14 motores de juego en Canvas 2D. **Coches (5):** Heat City (persecuciones policiales en una ciudad, con nivel de calor), carreras pseudo-3D (Turbo), subida de montaña con física (Subida Extrema), circuito con derrapes y rivales (Derrape GP) y estacionamiento (Estacioná). **Otros:** serpiente, corredor infinito, plataformas, naves, rompebloques, defensa de torres, gemas match-3, ritmo y hockey de aire para 2 jugadores locales.
+- `juegos/motores/` — 14 motores de juego en Canvas 2D. **Coches (5):** Fuga Policial (persecuciones vistas desde arriba, con nivel de calor), carreras pseudo-3D (Turbo), subida de montaña con física (Subida Extrema), circuito con derrapes y rivales (Derrape GP) y estacionamiento (Estacioná). **Otros:** serpiente, corredor infinito, plataformas, naves, rompebloques, defensa de torres, gemas match-3, ritmo y hockey de aire para 2 jugadores locales.
+- **Heat City** (`public/heat-city/`) — juego especial: mundo abierto en 3D (Three.js) con autos, tiendas, teléfono y policía. Aparece destacado en la portada, en `/coches` y en el buscador (`lib/catalogo/especiales.ts`).
 - `/coches` — sección propia de coches (desafío de coches del día, filas por tipo); el juego destacado de la portada siempre es de coches.
 - `lib/catalogo/generador.ts` — cada motor se multiplica por **12 temáticas × 5 dificultades × 3 modos × 6 mapas = 1.080 variantes**, cada una con nombre, portada (SVG generado), descripción y estadísticas propias.
 - Todo es **determinístico**: la semilla sale del id (`naves-42`), así que el mismo juego es siempre idéntico (mapas, niveles, enemigos, portada).

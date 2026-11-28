@@ -4,7 +4,7 @@ import { coches } from "@/lib/catalogo/consultas";
 import { MOTORES } from "@/lib/catalogo/motores";
 import { urlPortada } from "@/lib/portadas";
 
-const FOTOS: Record<string, string> = { heatcity: "Persecuciones", carreras: "Turbo 3D", montana: "Subidas", derrape: "Derrapes", estacionar: "Estacionar" };
+const FOTOS: Record<string, string> = { fuga: "Persecuciones", carreras: "Turbo 3D", montana: "Subidas", derrape: "Derrapes", estacionar: "Estacionar" };
 
 /** Bloque destacado de la portada: los juegos de coches primero. */
 export function ZonaCoches() {

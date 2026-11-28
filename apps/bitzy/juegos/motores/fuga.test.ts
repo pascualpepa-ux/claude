@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { variantesDe } from "@/lib/catalogo/generador";
 import { parametros, simular } from "../simulador";
 import type { ApiJuego } from "../runtime/tipos";
-import heat from "./heatcity";
+import heat from "./fuga";
 
 vi.stubGlobal("window", { devicePixelRatio: 1 });
 const C = 230;
@@ -33,9 +33,9 @@ export function pilotoCalles() {
   };
 }
 
-describe("Heat City", () => {
+describe("Fuga Policial", () => {
   it("juega sin errores; un piloto que maneja por las calles a veces gana y a veces pierde", () => {
-    const vs = variantesDe("heatcity");
+    const vs = variantesDe("fuga");
     const res: string[] = [];
     let ganadas = 0;
     for (let k = 0; k < 18; k++) {

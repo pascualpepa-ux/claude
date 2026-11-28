@@ -8,6 +8,8 @@ import { urlPortada } from "@/lib/portadas";
 import { ANCHO_TARJETA, Fila } from "@/components/Fila";
 import { TarjetaJuego } from "@/components/TarjetaJuego";
 import { CuentaRegresiva } from "@/components/CuentaRegresiva";
+import { TarjetaEspecial } from "@/components/TarjetaEspecial";
+import { ESPECIALES } from "@/lib/catalogo/especiales";
 
 export const revalidate = 1800;
 export const metadata: Metadata = {
@@ -43,6 +45,7 @@ export default function Coches() {
         </div>
       </section>
 
+      <div className="mx-4 mt-6 sm:mx-6"><TarjetaEspecial juego={ESPECIALES[0]} /></div>
       <nav className="sin-scroll mx-4 mt-6 flex gap-2 overflow-x-auto sm:mx-6" aria-label="Tipos de juegos de coches">
         {motores.map((m) => <a key={m.id} href={`#${m.id}`} className="shrink-0 rounded-full border border-borde bg-capa-1 px-4 py-2 text-sm font-medium hover:border-cian">{m.nombre}</a>)}
       </nav>

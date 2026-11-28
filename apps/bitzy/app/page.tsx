@@ -15,6 +15,8 @@ import { CuentaRegresiva } from "@/components/CuentaRegresiva";
 import { BotonAzar } from "@/components/BotonAzar";
 import { Estrellas } from "@/components/Estrellas";
 import { ZonaCoches } from "@/components/ZonaCoches";
+import { TarjetaEspecial } from "@/components/TarjetaEspecial";
+import { ESPECIALES } from "@/lib/catalogo/especiales";
 
 export const revalidate = 1800;
 
@@ -87,6 +89,7 @@ export default async function Inicio() {
         </div>
       </section>
 
+      <div className="mx-4 mt-6 sm:mx-6"><TarjetaEspecial juego={ESPECIALES[0]} /></div>
       <Fila titulo="Para jugar hoy" icono={<Sparkles className="h-5 w-5 text-marca-2" />} subtitulo="Un poco de todo: arcade, puzzles, ritmo, deportes, coches…">
         {variados(16).map((j, i) => <TarjetaJuego key={j.id} juego={j} prioridad={i < 4} ancho={ANCHO_TARJETA} />)}
       </Fila>

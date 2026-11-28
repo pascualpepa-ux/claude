@@ -1,0 +1,1032 @@
+{
+  "version": 1,
+  "map": {
+    "width": 1000,
+    "height": 1000,
+    "coords": "x,y en píxeles del mapa base (origen arriba a la izquierda)"
+  },
+  "zones": [
+    {
+      "id": "sunset-strip",
+      "name": "Sunset Strip",
+      "vibe": "Costa oeste de lujo: boulevards, mansiones y concesionarias",
+      "bounds": {
+        "x": [
+          0,
+          300
+        ],
+        "y": [
+          0,
+          500
+        ]
+      }
+    },
+    {
+      "id": "downtown-blaze",
+      "name": "Downtown Blaze",
+      "vibe": "Centro de la ciudad: comida, bares, comercio y servicios",
+      "bounds": {
+        "x": [
+          300,
+          650
+        ],
+        "y": [
+          250,
+          650
+        ]
+      }
+    },
+    {
+      "id": "coral-keys",
+      "name": "Coral Keys",
+      "vibe": "Islas y playas del sureste: bares, marinas y vida nocturna",
+      "bounds": {
+        "x": [
+          650,
+          1000
+        ],
+        "y": [
+          600,
+          1000
+        ]
+      }
+    },
+    {
+      "id": "port-sable",
+      "name": "Port Sable",
+      "vibe": "Puerto industrial del noreste: galpones, armas y talleres",
+      "bounds": {
+        "x": [
+          650,
+          1000
+        ],
+        "y": [
+          0,
+          400
+        ]
+      }
+    },
+    {
+      "id": "swamp-row",
+      "name": "Swamp Row",
+      "vibe": "Pantanos del suroeste: rutas de tierra, chatarra y armas",
+      "bounds": {
+        "x": [
+          0,
+          350
+        ],
+        "y": [
+          550,
+          1000
+        ]
+      }
+    }
+  ],
+  "categories": [
+    {
+      "id": "armeria",
+      "name": "Armerías",
+      "icon": "pistol",
+      "color": "#C0392B"
+    },
+    {
+      "id": "ropa",
+      "name": "Ropa",
+      "icon": "tshirt",
+      "color": "#8E44AD"
+    },
+    {
+      "id": "autos",
+      "name": "Autos y talleres",
+      "icon": "car",
+      "color": "#2980B9"
+    },
+    {
+      "id": "tatuajes",
+      "name": "Tatuajes y barberías",
+      "icon": "scissors",
+      "color": "#16A085"
+    },
+    {
+      "id": "comida",
+      "name": "Comida",
+      "icon": "burger",
+      "color": "#E67E22"
+    },
+    {
+      "id": "tienda24",
+      "name": "Tiendas 24h",
+      "icon": "shop-24",
+      "color": "#27AE60"
+    },
+    {
+      "id": "bar",
+      "name": "Bares y clubes",
+      "icon": "cocktail",
+      "color": "#E84393"
+    },
+    {
+      "id": "inmobiliaria",
+      "name": "Inmobiliarias",
+      "icon": "house-key",
+      "color": "#D4AC0D"
+    },
+    {
+      "id": "tecnologia",
+      "name": "Tecnología",
+      "icon": "smartphone",
+      "color": "#00B5D8"
+    },
+    {
+      "id": "gimnasio",
+      "name": "Gimnasios",
+      "icon": "dumbbell",
+      "color": "#7F8C8D"
+    },
+    {
+      "id": "banco",
+      "name": "Bancos",
+      "icon": "bank",
+      "color": "#1E8449"
+    },
+    {
+      "id": "empeno",
+      "name": "Casas de empeño",
+      "icon": "pawn-ring",
+      "color": "#A0522D"
+    },
+    {
+      "id": "servicios",
+      "name": "Hospital y policía",
+      "icon": "shield-cross",
+      "color": "#34495E"
+    },
+    {
+      "id": "club_adulto",
+      "name": "Clubes de striptease",
+      "icon": "heels",
+      "color": "#FF2E88",
+      "age_rating": "18+"
+    },
+    {
+      "id": "casino",
+      "name": "Casinos",
+      "icon": "dice",
+      "color": "#D4AF37"
+    },
+    {
+      "id": "torre",
+      "name": "Rascacielos",
+      "icon": "building",
+      "color": "#9FE8FF"
+    }
+  ],
+  "stores": [
+    {
+      "id": "lead-lime-gunworks",
+      "name": "Lead & Lime Gunworks",
+      "category": "armeria",
+      "zone": "port-sable",
+      "position": {
+        "x": 760,
+        "y": 120
+      },
+      "icon": "pistol",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Pistolas",
+        "Escopetas",
+        "Munición",
+        "Mirillas y silenciadores"
+      ],
+      "description": "Armería de galpón portuario; trabaja con lo que baja de los contenedores."
+    },
+    {
+      "id": "sable-arms-depot",
+      "name": "Sable Arms Depot",
+      "category": "armeria",
+      "zone": "port-sable",
+      "position": {
+        "x": 905,
+        "y": 270
+      },
+      "icon": "rifle",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Rifles de asalto",
+        "Subfusiles",
+        "Chalecos antibalas",
+        "Munición pesada"
+      ],
+      "description": "El depósito más grande del puerto: armamento pesado y blindaje."
+    },
+    {
+      "id": "bayou-bullet-co",
+      "name": "Bayou Bullet Co.",
+      "category": "armeria",
+      "zone": "swamp-row",
+      "position": {
+        "x": 120,
+        "y": 760
+      },
+      "icon": "bullet",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Rifles de caza",
+        "Revólveres",
+        "Munición",
+        "Explosivos caseros"
+      ],
+      "description": "Cabaña sobre pilotes en el pantano; precios bajos y pocas preguntas."
+    },
+    {
+      "id": "drip-coast",
+      "name": "Drip Coast",
+      "category": "ropa",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 420,
+        "y": 330
+      },
+      "icon": "sneaker",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Streetwear",
+        "Zapatillas",
+        "Gorras",
+        "Cadenas"
+      ],
+      "description": "Streetwear y zapatillas de edición limitada en pleno centro."
+    },
+    {
+      "id": "velvet-palms",
+      "name": "Velvet Palms",
+      "category": "ropa",
+      "zone": "sunset-strip",
+      "position": {
+        "x": 140,
+        "y": 110
+      },
+      "icon": "diamond",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Trajes de diseñador",
+        "Vestidos de gala",
+        "Relojes",
+        "Lentes de sol"
+      ],
+      "description": "Boutique de lujo sobre el boulevard; solo con cita para clientes VIP."
+    },
+    {
+      "id": "thrift-tide",
+      "name": "Thrift Tide",
+      "category": "ropa",
+      "zone": "coral-keys",
+      "position": {
+        "x": 720,
+        "y": 690
+      },
+      "icon": "hanger",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Ropa de segunda mano",
+        "Camisas hawaianas",
+        "Vintage",
+        "Accesorios de playa"
+      ],
+      "description": "Segunda mano frente a la playa: barato, colorido y con hallazgos raros."
+    },
+    {
+      "id": "gator-gear",
+      "name": "Gator Gear",
+      "category": "ropa",
+      "zone": "swamp-row",
+      "position": {
+        "x": 230,
+        "y": 640
+      },
+      "icon": "boot",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Botas",
+        "Camuflaje",
+        "Equipo de pesca y caza",
+        "Mochilas"
+      ],
+      "description": "Ropa y equipo outdoor para sobrevivir al pantano."
+    },
+    {
+      "id": "sunburn-motors",
+      "name": "Sunburn Motors",
+      "category": "autos",
+      "zone": "sunset-strip",
+      "position": {
+        "x": 210,
+        "y": 260
+      },
+      "icon": "sports-car",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Superdeportivos",
+        "Convertibles",
+        "SUVs de lujo"
+      ],
+      "description": "Concesionaria de lujo con vidriera al boulevard."
+    },
+    {
+      "id": "rust-chrome-customs",
+      "name": "Rust & Chrome Customs",
+      "category": "autos",
+      "zone": "swamp-row",
+      "position": {
+        "x": 300,
+        "y": 880
+      },
+      "icon": "wrench",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Tuning",
+        "Pintura y vinilos",
+        "Motores",
+        "Blindaje de vehículos"
+      ],
+      "description": "Taller de tuning escondido entre chatarra; repara y modifica a cualquier hora."
+    },
+    {
+      "id": "keys-boat-club",
+      "name": "Keys Boat Club",
+      "category": "autos",
+      "zone": "coral-keys",
+      "position": {
+        "x": 930,
+        "y": 920
+      },
+      "icon": "speedboat",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Lanchas rápidas",
+        "Jet skis",
+        "Yates",
+        "Amarres"
+      ],
+      "description": "Marina y club náutico en la punta de las islas."
+    },
+    {
+      "id": "skypalm-aviation",
+      "name": "SkyPalm Aviation",
+      "category": "autos",
+      "zone": "port-sable",
+      "position": {
+        "x": 960,
+        "y": 60
+      },
+      "icon": "helicopter",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Avionetas",
+        "Helicópteros",
+        "Hangares",
+        "Licencias de vuelo"
+      ],
+      "description": "Aeródromo privado en el extremo del puerto."
+    },
+    {
+      "id": "ink-reef-tattoo",
+      "name": "Ink Reef Tattoo",
+      "category": "tatuajes",
+      "zone": "coral-keys",
+      "position": {
+        "x": 800,
+        "y": 750
+      },
+      "icon": "tattoo-machine",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Tatuajes",
+        "Piercings",
+        "Remoción láser"
+      ],
+      "description": "Estudio de tatuajes en el paseo marítimo."
+    },
+    {
+      "id": "fade-kings-barber",
+      "name": "Fade Kings Barber",
+      "category": "tatuajes",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 500,
+        "y": 300
+      },
+      "icon": "scissors",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Cortes",
+        "Fades",
+        "Barba",
+        "Tintes"
+      ],
+      "description": "Barbería clásica del centro, punto de encuentro del barrio."
+    },
+    {
+      "id": "burger-inferno",
+      "name": "Burger Inferno",
+      "category": "comida",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 370,
+        "y": 420
+      },
+      "icon": "burger",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Hamburguesas",
+        "Papas fritas",
+        "Malteadas"
+      ],
+      "description": "Hamburguesas picantes a la parrilla; recupera salud rápido."
+    },
+    {
+      "id": "taco-tsunami",
+      "name": "Taco Tsunami",
+      "category": "comida",
+      "zone": "coral-keys",
+      "position": {
+        "x": 690,
+        "y": 820
+      },
+      "icon": "taco",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Tacos de pescado",
+        "Burritos",
+        "Nachos",
+        "Margaritas"
+      ],
+      "description": "Puesto de tacos playero con cola permanente."
+    },
+    {
+      "id": "cuban-heatwave-cafe",
+      "name": "Cuban Heatwave Café",
+      "category": "comida",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 560,
+        "y": 470
+      },
+      "icon": "coffee",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Café cubano",
+        "Sándwich cubano",
+        "Pastelitos",
+        "Mojitos"
+      ],
+      "description": "Ventanita cubana: cafecito, chisme y negocios turbios."
+    },
+    {
+      "id": "pizza-volcano",
+      "name": "Pizza Volcano",
+      "category": "comida",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 450,
+        "y": 580
+      },
+      "icon": "pizza",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Pizzas",
+        "Calzones",
+        "Alitas",
+        "Delivery"
+      ],
+      "description": "Pizzería con horno de lava y delivery a toda hora."
+    },
+    {
+      "id": "smoothie-shack",
+      "name": "Smoothie Shack",
+      "category": "comida",
+      "zone": "coral-keys",
+      "position": {
+        "x": 860,
+        "y": 650
+      },
+      "icon": "smoothie",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Smoothies",
+        "Jugos naturales",
+        "Bowls de açaí"
+      ],
+      "description": "Chiringuito de batidos sobre la arena; recupera stamina."
+    },
+    {
+      "id": "quickheat-mart",
+      "name": "QuickHeat Mart",
+      "category": "tienda24",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 610,
+        "y": 360
+      },
+      "icon": "shop-24",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Snacks",
+        "Bebidas",
+        "Botiquines",
+        "Cigarrillos",
+        "Tarjetas prepagas"
+      ],
+      "description": "Minimercado 24h del centro; blanco habitual de robos menores."
+    },
+    {
+      "id": "sol-stop-gas",
+      "name": "Sol Stop Gas",
+      "category": "tienda24",
+      "zone": "swamp-row",
+      "position": {
+        "x": 60,
+        "y": 590
+      },
+      "icon": "gas-pump",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Combustible",
+        "Snacks",
+        "Bidones",
+        "Repuestos básicos"
+      ],
+      "description": "Gasolinera 24h en la ruta que entra al pantano."
+    },
+    {
+      "id": "club-ember",
+      "name": "Club Ember",
+      "category": "bar",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 520,
+        "y": 620
+      },
+      "icon": "disco",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Entradas",
+        "Mesas VIP",
+        "Cócteles",
+        "Botellas"
+      ],
+      "description": "Club nocturno insignia de la ciudad; la fiesta no para nunca."
+    },
+    {
+      "id": "the-rusty-anchor",
+      "name": "The Rusty Anchor",
+      "category": "bar",
+      "zone": "coral-keys",
+      "position": {
+        "x": 670,
+        "y": 950
+      },
+      "icon": "anchor",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Cerveza",
+        "Ron",
+        "Contactos",
+        "Rumores"
+      ],
+      "description": "Bar de puerto en el muelle de las islas; buen lugar para conseguir trabajos."
+    },
+    {
+      "id": "flamingo-lounge",
+      "name": "Flamingo Lounge",
+      "category": "bar",
+      "zone": "coral-keys",
+      "position": {
+        "x": 950,
+        "y": 760
+      },
+      "icon": "cocktail",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Cócteles",
+        "Música en vivo",
+        "Terraza con vista al mar"
+      ],
+      "description": "Lounge rosa neón con vista a la bahía."
+    },
+    {
+      "id": "palmira-realty",
+      "name": "Palmira Realty",
+      "category": "inmobiliaria",
+      "zone": "sunset-strip",
+      "position": {
+        "x": 80,
+        "y": 420
+      },
+      "icon": "house-key",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Departamentos",
+        "Mansiones",
+        "Locales comerciales",
+        "Garajes"
+      ],
+      "description": "Inmobiliaria para comprar propiedades en toda la ciudad.",
+      "actions": [
+        "comprar_propiedad"
+      ]
+    },
+    {
+      "id": "pixel-bay-electronics",
+      "name": "Pixel Bay Electronics",
+      "category": "tecnologia",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 330,
+        "y": 280
+      },
+      "icon": "smartphone",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Celulares",
+        "Gadgets",
+        "Laptops",
+        "Drones"
+      ],
+      "description": "Electrónica y celulares; también desbloqueos sin preguntas."
+    },
+    {
+      "id": "iron-sun-gym",
+      "name": "Iron Sun Gym",
+      "category": "gimnasio",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 630,
+        "y": 540
+      },
+      "icon": "dumbbell",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Membresías",
+        "Entrenamiento personal",
+        "Suplementos"
+      ],
+      "description": "Gimnasio old-school: sube fuerza y stamina."
+    },
+    {
+      "id": "solara-national-bank",
+      "name": "Solara National Bank",
+      "category": "banco",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 480,
+        "y": 450
+      },
+      "icon": "bank",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Cuentas",
+        "Préstamos",
+        "Cajas de seguridad"
+      ],
+      "description": "El banco más grande de Heat City. Bóveda subterránea.",
+      "special": {
+        "type": "golpe",
+        "pin_icon": "heist-mask",
+        "pin_color": "#FFD700",
+        "label": "Golpe disponible"
+      }
+    },
+    {
+      "id": "lucky-lagoon-pawn",
+      "name": "Lucky Lagoon Pawn",
+      "category": "empeno",
+      "zone": "swamp-row",
+      "position": {
+        "x": 180,
+        "y": 950
+      },
+      "icon": "pawn-ring",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Joyas",
+        "Electrónica usada",
+        "Compra de objetos robados",
+        "Herramientas"
+      ],
+      "description": "Casa de empeño al borde de la laguna; compra lo que traigas."
+    },
+    {
+      "id": "heat-city-general",
+      "name": "Heat City General",
+      "category": "servicios",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 390,
+        "y": 520
+      },
+      "icon": "hospital",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Atención médica",
+        "Curaciones",
+        "Respawn"
+      ],
+      "description": "Hospital central; punto de reaparición al caer en combate."
+    },
+    {
+      "id": "hcpd-precinct-7",
+      "name": "HCPD Precinct 7",
+      "category": "servicios",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 600,
+        "y": 280
+      },
+      "icon": "police-badge",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Denuncias",
+        "Pago de multas",
+        "Fianzas",
+        "Corralón"
+      ],
+      "description": "Comisaría del centro; aquí terminás si te atrapan."
+    },
+    {
+      "id": "neon-mirage",
+      "name": "Neon Mirage",
+      "category": "club_adulto",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 580,
+        "y": 600
+      },
+      "icon": "heels",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Shows",
+        "Salones VIP",
+        "Botellas premium",
+        "Pista de baile"
+      ],
+      "description": "El club más lujoso de la ciudad; de madrugada funciona también como megadiscoteca.",
+      "tier": "lujo",
+      "tags": [
+        "megadisco"
+      ]
+    },
+    {
+      "id": "silk-smoke",
+      "name": "Silk & Smoke",
+      "category": "club_adulto",
+      "zone": "port-sable",
+      "position": {
+        "x": 700,
+        "y": 350
+      },
+      "icon": "heels",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Shows",
+        "Reservados",
+        "Cócteles"
+      ],
+      "description": "Club de nivel medio entre los galpones del puerto; se habilita avanzando en la historia.",
+      "tier": "medio",
+      "unlock": {
+        "type": "historia",
+        "locked_by_default": true,
+        "hint": "Avanzá en la historia principal para desbloquearlo"
+      }
+    },
+    {
+      "id": "mudbug-cabaret",
+      "name": "Mudbug Cabaret",
+      "category": "club_adulto",
+      "zone": "swamp-row",
+      "position": {
+        "x": 90,
+        "y": 870
+      },
+      "icon": "heels",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Shows",
+        "Cerveza barata",
+        "Mesa de billar"
+      ],
+      "description": "Cabaret rústico de madera sobre el pantano; el más barato de la ciudad.",
+      "tier": "economico"
+    },
+    {
+      "id": "coastline-estates",
+      "name": "Coastline Estates",
+      "category": "inmobiliaria",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 530,
+        "y": 360
+      },
+      "icon": "house-key",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [
+        "Departamento en Downtown Blaze",
+        "Loft en Port Sable",
+        "Casa con pileta en Coral Keys",
+        "Villa en Sunset Strip",
+        "Mansión frente al mar"
+      ],
+      "prices": {
+        "Departamento en Downtown Blaze": 6000,
+        "Loft en Port Sable": 12000,
+        "Casa con pileta en Coral Keys": 30000,
+        "Villa en Sunset Strip": 65000,
+        "Mansión frente al mar": 150000
+      },
+      "description": "Inmobiliaria de lujo: departamentos, villas y mansiones listas para mudarse. Lo que comprás queda marcado en tu mapa.",
+      "actions": [
+        "comprar_propiedad"
+      ]
+    },
+    {
+      "id": "royal-flamingo-casino",
+      "name": "Royal Flamingo Casino",
+      "category": "casino",
+      "zone": "sunset-strip",
+      "position": {
+        "x": 230,
+        "y": 380
+      },
+      "icon": "dice",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [],
+      "description": "Casino con tragamonedas, ruleta y blackjack. Cambiá plata por fichas en la caja y probá suerte.",
+      "actions": [
+        "casino"
+      ]
+    },
+    {
+      "id": "torre-heat",
+      "name": "Torre Heat",
+      "category": "torre",
+      "zone": "downtown-blaze",
+      "position": {
+        "x": 430,
+        "y": 400
+      },
+      "icon": "building",
+      "hours": {
+        "open": "00:00",
+        "close": "24:00",
+        "always_open": true
+      },
+      "sells": [],
+      "description": "El rascacielos más alto de Heat City: 88 pisos de vidrio. Dicen que en el penthouse hay una bóveda con código.",
+      "actions": [
+        "ascensor"
+      ]
+    }
+  ]
+}

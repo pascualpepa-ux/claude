@@ -7,6 +7,8 @@ import { buscar, type Filtros, type Orden } from "@/lib/catalogo/consultas";
 import { MOTORES } from "@/lib/catalogo/motores";
 import { DIFICULTADES, NOMBRE_DURACION, NOMBRE_GENERO, type Duracion, type Genero } from "@/lib/catalogo/tipos";
 import { TarjetaJuego } from "./TarjetaJuego";
+import { TarjetaEspecial } from "./TarjetaEspecial";
+import { buscarEspeciales } from "@/lib/catalogo/especiales";
 
 const PAGINA = 48;
 const GENEROS = ["coches", ...(Object.keys(NOMBRE_GENERO) as Genero[]).filter((g) => g !== "coches")] as Genero[];
@@ -34,6 +36,7 @@ export function Explorador({ inicial }: { inicial: Filtros }) {
   const [vista, setVista] = useState({ desde: 0, hasta: 12 });
 
   const resultados = useMemo(() => buscar(f), [f]);
+  const especiales = useMemo(() => (f.q ? buscarEspeciales(f.q) : []), [f.q]);
   const visibles = Math.min(cantidad, resultados.length);
   const columnas = Math.max(2, Math.floor((ancho + 16) / (ancho < 640 ? 170 : 236)));
   const anchoTarjeta = (ancho - (columnas - 1) * 16) / columnas;
@@ -82,7 +85,7 @@ export function Explorador({ inicial }: { inicial: Filtros }) {
     <div className="mx-auto max-w-[1500px] px-4 pb-10 sm:px-6">
       <div className="pt-6">
         <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Explorar</h1>
-        <p className="mt-1 text-tenue">{resultados.length.toLocaleString("es")} juegos {f.q ? <>para «<span className="text-texto">{f.q}</span>»</> : "para jugar ya mismo"}</p>
+        <p className="mt-1 text-tenue">{(resultados.length + especiales.length).toLocaleString("es")} juegos {f.q ? <>para «<span className="text-texto">{f.q}</span>»</> : "para jugar ya mismo"}</p>
       </div>
 
       <div className="sticky top-16 z-30 -mx-4 mt-4 border-b border-borde/60 bg-fondo/85 px-4 py-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
@@ -143,6 +146,7 @@ export function Explorador({ inicial }: { inicial: Filtros }) {
         )}
       </div>
 
+      {especiales.length > 0 && <div className="mt-6 grid gap-4">{especiales.map((e) => <TarjetaEspecial key={e.id} juego={e} compacta />)}</div>}
       <div ref={grilla} className="relative mt-6" style={{ height: filas * altoFila }}>
         {Array.from({ length: Math.max(0, Math.min(filas, vista.hasta) - vista.desde) }, (_, k) => {
           const fila = vista.desde + k;
@@ -153,7 +157,7 @@ export function Explorador({ inicial }: { inicial: Filtros }) {
           );
         })}
       </div>
-      {!resultados.length && (
+      {!resultados.length && !especiales.length && (
         <div className="py-20 text-center">
           <p className="text-xl font-bold">No encontramos juegos con esos filtros</p>
           <p className="mt-2 text-tenue">Probá con otra palabra o sacá algún filtro.</p>

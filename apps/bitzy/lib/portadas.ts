@@ -117,7 +117,7 @@ function escena(motor: string, t: Tema, rng: Rng, mapa: number): string {
       s += `<circle cx="90" cy="${90 + rng() * 20}" r="16" fill="${s2}" ${glow(s2)}/><circle cx="236" cy="${90 + rng() * 20}" r="16" fill="${d}" ${glow(d)}/><circle cx="${150 + rng() * 30}" cy="${80 + rng() * 40}" r="8" fill="#fff"/>`;
       return s;
     }
-    case "heatcity": {
+    case "fuga": {
       let s = `<rect width="${W}" height="${H}" fill="#0a0a12" opacity=".55"/>`;
       for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) {
         const x = 8 + i * 80, y = 6 + j * 68;

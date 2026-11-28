@@ -13,7 +13,7 @@ const MUNDO = N * C;
 interface Patrullero { x: number; y: number; ang: number; v: number; nodo: [number, number]; activo: boolean; espera: number }
 interface Bolsa { x: number; y: number; tomada: boolean }
 
-/** Heat City: ciudad vista desde arriba. Robá botines, escapá de la policía y bajá el calor. */
+/** Fuga Policial: ciudad vista desde arriba. Robá botines, escapá de la policía y bajá el calor. */
 const modulo: ModuloMotor = {
   ancho: W,
   alto: H,

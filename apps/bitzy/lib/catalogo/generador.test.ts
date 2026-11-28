@@ -44,12 +44,12 @@ describe("catálogo", () => {
 
 describe("buscador tolerante", () => {
   it("encuentra Heat City aunque se escriba mal", async () => {
-    const { buscar } = await import("./consultas");
-    for (const q of ["hit city", "Hit City", "heat city", "jit siti", "heatcity", "heat"]) {
-      const r = buscar({ q });
-      expect(r.length, q).toBeGreaterThan(0);
-      expect(r[0].motor, q).toBe("heatcity");
+    const { buscarEspeciales } = await import("./especiales");
+    for (const q of ["hit city", "Hit City", "heat city", "jit siti", "heatcity", "heat", "Hit Siri"]) {
+      expect(buscarEspeciales(q).map((e) => e.id), q).toEqual(["heat-city"]);
     }
+    expect(buscarEspeciales("gemas")).toEqual([]);
+    expect(buscarEspeciales("serpiente")).toEqual([]);
   });
   it("entiende sinónimos y errores de tipeo", async () => {
     const { buscar } = await import("./consultas");
