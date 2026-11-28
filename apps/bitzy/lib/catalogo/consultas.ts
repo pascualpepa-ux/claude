@@ -17,15 +17,63 @@ export interface Filtros {
   motor?: string;
 }
 
-const indiceTexto = new WeakMap<Juego, string>();
-function textoDe(j: Juego): string {
+/**
+ * Clave fonética simple (español + inglés pronunciado a la criolla): «heat» y «hit»,
+ * «carro» y «karro», «velocidad» y «belosidad» dan la misma clave. Sirve para
+ * encontrar juegos aunque el nombre esté mal escrito.
+ */
+export function clave(palabra: string): string {
+  return normalizar(palabra)
+    .replace(/[^a-z0-9ñ]/g, "")
+    .replace(/ee|ea|ie(?=[^nr]|$)/g, "i").replace(/oo|ou/g, "u")
+    .replace(/ph/g, "f").replace(/th/g, "t").replace(/ck|qu|c(?=[aou])|q/g, "k").replace(/c(?=[ei])|z/g, "s")
+    .replace(/v/g, "b").replace(/ll|y(?=[aeiou])/g, "y").replace(/w/g, "u").replace(/j/g, "h").replace(/y$/, "i").replace(/h/g, "")
+    .replace(/(.)\1+/g, "$1");
+}
+
+/** Sinónimos: la gente busca «autos» o «carros» y el género se llama «coches». */
+const SINONIMOS: Record<string, string> = {
+  auto: "coches", autos: "coches", carro: "coches", carros: "coches", coche: "coches", car: "coches", cars: "coches", policia: "heat city", policias: "heat city", persecucion: "heat city",
+  nave: "naves", espacial: "naves", disparo: "disparos", tiros: "disparos", vibora: "serpiente", snake: "serpiente", musica: "ritmo", baile: "ritmo",
+  futbol: "hockey", deporte: "deportes", rompecabezas: "puzzles", puzle: "puzzles", joyas: "gemas", torres: "defensa", ladrillos: "rompebloques", saltos: "plataformas", correr: "corredor", estacionamiento: "estaciona", parking: "estaciona", miedo: "terror",
+};
+
+function distancia(a: string, b: string, max: number): number {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    let minFila = i;
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      minFila = Math.min(minFila, cur[j]);
+    }
+    if (minFila > max) return max + 1;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+interface Indice { texto: string; claves: string[] }
+const indiceTexto = new WeakMap<Juego, Indice>();
+function indiceDe(j: Juego): Indice {
   let t = indiceTexto.get(j);
   if (!t) {
     const motor = MOTORES.find((m) => m.id === j.motor);
-    t = normalizar(`${j.nombre} ${motor?.nombre ?? ""} ${j.generos.map((g) => NOMBRE_GENERO[g]).join(" ")} ${j.tema} ${motor?.modos[j.modo].nombre ?? ""}`);
+    const texto = normalizar(`${j.nombre} ${motor?.nombre ?? ""} ${j.generos.map((g) => NOMBRE_GENERO[g]).join(" ")} ${j.tema} ${motor?.modos[j.modo].nombre ?? ""} ${motor?.id ?? ""}`);
+    t = { texto, claves: [...new Set(texto.split(/[^a-z0-9ñ]+/).filter(Boolean).map(clave))] };
     indiceTexto.set(j, t);
   }
   return t;
+}
+
+/** ¿La palabra buscada aparece en el juego? Exacta, por sonido o con un error de tipeo. */
+function coincide(j: Juego, palabra: string, k: string): number {
+  const ix = indiceDe(j);
+  if (ix.texto.includes(palabra)) return 3;
+  if (k.length >= 2 && ix.claves.some((c) => c.startsWith(k))) return 2;
+  if (k.length >= 4) { const max = k.length >= 7 ? 2 : 1; if (ix.claves.some((c) => distancia(c.slice(0, k.length + 1), k, max) <= max || distancia(c, k, max) <= max)) return 1; }
+  return 0;
 }
 
 /** Popularidad reciente: partidas ponderadas por lo nuevo que es el juego. */
@@ -36,7 +84,9 @@ export function puntajeTendencia(j: Juego, hoy = hoyUTC()): number {
 }
 
 export function buscar(f: Filtros, hoy = hoyUTC()): Juego[] {
-  const palabras = f.q ? normalizar(f.q).split(/\s+/).filter(Boolean) : [];
+  const palabras = f.q ? normalizar(f.q).split(/[^a-z0-9ñ]+/).filter(Boolean).flatMap((p) => (SINONIMOS[p] ? SINONIMOS[p].split(" ") : [p])) : [];
+  const claves = palabras.map(clave);
+  const puntaje = new Map<Juego, number>();
   let lista = catalogo().filter((j) => {
     if (j.lanzamiento > hoy) return false;
     if (f.motor && j.motor !== f.motor) return false;
@@ -46,8 +96,9 @@ export function buscar(f: Filtros, hoy = hoyUTC()): Juego[] {
     if (f.multijugador && j.multijugador === "no") return false;
     if (f.movil && !j.movil) return false;
     if (palabras.length) {
-      const t = textoDe(j);
-      return palabras.every((p) => t.includes(p));
+      let total = 0;
+      for (let i = 0; i < palabras.length; i++) { const c = coincide(j, palabras[i], claves[i]); if (!c) return false; total += c; }
+      puntaje.set(j, total);
     }
     return true;
   });
@@ -60,7 +111,7 @@ export function buscar(f: Filtros, hoy = hoyUTC()): Juego[] {
     lista = [...lista].sort((a, b) => {
       const pa = normalizar(a.nombre).startsWith(q) ? 1 : 0;
       const pb = normalizar(b.nombre).startsWith(q) ? 1 : 0;
-      return pb - pa || b.partidas - a.partidas;
+      return (puntaje.get(b) ?? 0) - (puntaje.get(a) ?? 0) || pb - pa || b.partidas - a.partidas;
     });
   }
   return lista;
@@ -70,16 +121,34 @@ export function publicados(hoy = hoyUTC()): Juego[] {
   return catalogo().filter((j) => j.lanzamiento <= hoy);
 }
 
+/** Evita que una fila quede llena de un solo tipo de juego: como máximo `max` por motor. */
+export function diversificar(lista: Juego[], n: number, max = 2): Juego[] {
+  // Rondas: primero uno de cada motor, después un segundo de cada uno, etc.
+  const cuenta = new Map<string, number>();
+  const usados = new Set<Juego>();
+  const res: Juego[] = [];
+  for (let tope = 1; tope <= max && res.length < n; tope++) {
+    for (const j of lista) {
+      if (res.length >= n) break;
+      if (usados.has(j) || (cuenta.get(j.motor) ?? 0) >= tope) continue;
+      cuenta.set(j.motor, (cuenta.get(j.motor) ?? 0) + 1);
+      usados.add(j);
+      res.push(j);
+    }
+  }
+  return res;
+}
+
 export function tendencias(n = 18, hoy = hoyUTC()): Juego[] {
-  return [...publicados(hoy)].sort((a, b) => puntajeTendencia(b, hoy) - puntajeTendencia(a, hoy)).slice(0, n);
+  return diversificar([...publicados(hoy)].sort((a, b) => puntajeTendencia(b, hoy) - puntajeTendencia(a, hoy)), n);
 }
 
 export function masJugados(n = 18): Juego[] {
-  return [...publicados()].sort((a, b) => b.partidas - a.partidas).slice(0, n);
+  return diversificar([...publicados()].sort((a, b) => b.partidas - a.partidas), n, 3);
 }
 
 export function nuevos(n = 18, hoy = hoyUTC()): Juego[] {
-  return buscar({ orden: "nuevo" }, hoy).slice(0, n);
+  return diversificar(buscar({ orden: "nuevo" }, hoy), n);
 }
 
 /** Mejor valorados de un género, variando motores. */
@@ -103,10 +172,24 @@ export function desafioDelDia(fecha = hoyUTC()): Juego {
   return lista[hashTexto(`desafio:${fecha}`) % lista.length];
 }
 
-/** Juego destacado de la portada: rota cada día y siempre es un juego de coches bien valorado. */
+/** Juego destacado de la portada: rota cada día entre TODOS los motores (uno distinto por día). */
 export function destacado(fecha = hoyUTC()): Juego {
-  const top = [...publicados(fecha)].filter((j) => j.generos.includes("coches") && j.estrellas >= 4.3).sort((a, b) => b.partidas - a.partidas).slice(0, 200);
+  const dia = Math.floor(Date.parse(fecha) / 86_400_000);
+  const motor = MOTORES[dia % MOTORES.length].id;
+  const top = [...publicados(fecha)].filter((j) => j.motor === motor && j.estrellas >= 4.2).sort((a, b) => b.partidas - a.partidas).slice(0, 60);
   return top[hashTexto(`destacado:${fecha}`) % top.length];
+}
+
+/** Una mezcla variada: un juego bien valorado de cada motor, en orden rotativo. */
+export function variados(n = 18, semilla = hoyUTC()): Juego[] {
+  const lista: Juego[] = [];
+  const motores = [...MOTORES].sort((a, b) => hashTexto(semilla + a.id) - hashTexto(semilla + b.id));
+  for (let ronda = 0; lista.length < n && ronda < 5; ronda++) for (const m of motores) {
+    const top = buscar({ motor: m.id, orden: "puntuacion" });
+    const j = top[(hashTexto(semilla + m.id) + ronda * 7) % Math.min(60, top.length)];
+    if (j && lista.length < n) lista.push(j);
+  }
+  return lista;
 }
 
 export const MOTORES_COCHES = MOTORES.filter((m) => m.generos.includes("coches")).map((m) => m.id);

@@ -41,3 +41,21 @@ describe("catálogo", () => {
     expect(desafioDelDia("2026-11-26").id).not.toBe(desafioDelDia("2026-11-27").id);
   });
 });
+
+describe("buscador tolerante", () => {
+  it("encuentra Heat City aunque se escriba mal", async () => {
+    const { buscar } = await import("./consultas");
+    for (const q of ["hit city", "Hit City", "heat city", "jit siti", "heatcity", "heat"]) {
+      const r = buscar({ q });
+      expect(r.length, q).toBeGreaterThan(0);
+      expect(r[0].motor, q).toBe("heatcity");
+    }
+  });
+  it("entiende sinónimos y errores de tipeo", async () => {
+    const { buscar } = await import("./consultas");
+    expect(buscar({ q: "autos" }).every((j) => j.generos.includes("coches"))).toBe(true);
+    expect(buscar({ q: "serpinte" })[0].motor).toBe("serpiente");
+    expect(buscar({ q: "estacionar" })[0].motor).toBe("estacionar");
+    expect(buscar({ q: "zzzzqqq" }).length).toBe(0);
+  });
+});

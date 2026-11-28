@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Car, Clock, Flame, Gamepad2, Play, Sparkles, Star, TrendingUp, Trophy, Users, Wand2 } from "lucide-react";
-import { coches, desafioDelDia, destacado, masJugados, nuevos, porGenero, tendencias } from "@/lib/catalogo/consultas";
+import { coches, desafioDelDia, destacado, masJugados, nuevos, porGenero, tendencias, variados } from "@/lib/catalogo/consultas";
 import { totalJuegos } from "@/lib/catalogo/generador";
 import { MOTORES } from "@/lib/catalogo/motores";
 import { NOMBRE_GENERO, type Genero } from "@/lib/catalogo/tipos";
@@ -35,7 +35,7 @@ export default async function Inicio() {
         <div className="absolute inset-0 bg-gradient-to-r from-fondo via-fondo/85 to-fondo/30" />
         <div className="relative grid items-center gap-8 p-6 sm:p-10 lg:grid-cols-[1.05fr_1fr] lg:p-14">
           <div className="order-2 lg:order-1">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-cian/40 bg-cian/15 px-3 py-1 text-xs font-semibold text-cian"><Flame className="h-3.5 w-3.5" /> Coche destacado de hoy</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-marca/40 bg-marca/15 px-3 py-1 text-xs font-semibold text-marca-2"><Flame className="h-3.5 w-3.5" /> Destacado de hoy</span>
             <h1 className="mt-4 text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">{hero.nombre}</h1>
             <p className="mt-4 line-clamp-3 max-w-xl text-base text-tenue sm:line-clamp-none sm:text-lg">{hero.descripcion}</p>
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-tenue">
@@ -87,12 +87,15 @@ export default async function Inicio() {
         </div>
       </section>
 
+      <Fila titulo="Para jugar hoy" icono={<Sparkles className="h-5 w-5 text-marca-2" />} subtitulo="Un poco de todo: arcade, puzzles, ritmo, deportes, coches…">
+        {variados(16).map((j, i) => <TarjetaJuego key={j.id} juego={j} prioridad={i < 4} ancho={ANCHO_TARJETA} />)}
+      </Fila>
+      <Fila titulo="Tendencias" icono={<TrendingUp className="h-5 w-5 text-rosa" />} verTodo="/explorar?orden=popular">
+        {tendencias(16).map((j) => <TarjetaJuego key={j.id} juego={j} ancho={ANCHO_TARJETA} />)}
+      </Fila>
       <ZonaCoches />
       <Fila titulo="Juegos de coches" icono={<Car className="h-5 w-5 text-cian" />} subtitulo="Los mejor puntuados" verTodo="/coches">
         {coches(18).map((j) => <TarjetaJuego key={j.id} juego={j} ancho={ANCHO_TARJETA} />)}
-      </Fila>
-      <Fila titulo="Tendencias" icono={<TrendingUp className="h-5 w-5 text-rosa" />} verTodo="/explorar?orden=popular">
-        {tendencias(16).map((j, i) => <TarjetaJuego key={j.id} juego={j} prioridad={i < 4} ancho={ANCHO_TARJETA} />)}
       </Fila>
       <FilaPersonal />
       <Fila titulo="Nuevos" icono={<Sparkles className="h-5 w-5 text-lima" />} verTodo="/explorar?orden=nuevo">
