@@ -7,7 +7,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(SITIO_URL),
   title: { default: "Bitzy — Juegos de coches y miles de juegos gratis, más un creador con IA", template: "%s · Bitzy" },
-  description: "Jugá más de 14.000 juegos gratis en el navegador: juegos de coches, carreras, plataformas, puzzles, ritmo, defensa de torres y más. Y creá tu propio juego charlando con una IA.",
+  description: "Jugá más de 15.000 juegos gratis en el navegador: juegos de coches, carreras, plataformas, puzzles, ritmo, defensa de torres y más. Y creá tu propio juego charlando con una IA.",
   applicationName: "Bitzy",
   authors: [{ name: "Pascual Pepa" }],
   creator: "Pascual Pepa",

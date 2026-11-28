@@ -117,6 +117,21 @@ function escena(motor: string, t: Tema, rng: Rng, mapa: number): string {
       s += `<circle cx="90" cy="${90 + rng() * 20}" r="16" fill="${s2}" ${glow(s2)}/><circle cx="236" cy="${90 + rng() * 20}" r="16" fill="${d}" ${glow(d)}/><circle cx="${150 + rng() * 30}" cy="${80 + rng() * 40}" r="8" fill="#fff"/>`;
       return s;
     }
+    case "heatcity": {
+      let s = `<rect width="${W}" height="${H}" fill="#0a0a12" opacity=".55"/>`;
+      for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) {
+        const x = 8 + i * 80, y = 6 + j * 68;
+        s += `<rect x="${x}" y="${y}" width="56" height="46" fill="${mezclarColor(t.fondo2, s2, 0.25)}"/>`;
+        for (let k = 0; k < 4; k++) if (rng() < 0.55) s += `<rect x="${x + 6 + (k % 2) * 26}" y="${y + 6 + Math.floor(k / 2) * 20}" width="8" height="8" fill="${a}" opacity=".7"/>`;
+      }
+      s += `<line x1="0" y1="${62 + 6}" x2="${W}" y2="68" stroke="#ffd166" stroke-width="2" stroke-dasharray="10 10" opacity=".6"/><line x1="0" y1="136" x2="${W}" y2="136" stroke="#ffd166" stroke-width="2" stroke-dasharray="10 10" opacity=".6"/>`;
+      s += `<circle cx="210" cy="136" r="46" fill="#ff2a4d" opacity=".16"/><circle cx="268" cy="132" r="40" fill="#3b82f6" opacity=".16"/>`;
+      s += `<g transform="translate(130 134)" ${glow(s2)}><rect x="-22" y="-11" width="44" height="22" rx="7" fill="${s2}"/><rect x="-6" y="-8" width="15" height="16" fill="#000" opacity=".5"/></g>`;
+      for (const [x, y] of [[214, 130], [270, 140]]) s += `<g transform="translate(${x} ${y})"><rect x="-21" y="-11" width="42" height="22" rx="7" fill="#e9eef7"/><rect x="-4" y="-9" width="5" height="7" fill="#ff2a4d"/><rect x="-4" y="2" width="5" height="7" fill="#3b82f6"/></g>`;
+      s += `<text x="${W - 14}" y="30" text-anchor="end" font-family="sans-serif" font-size="22" fill="#ffd166">★★★<tspan fill="#ffffff" opacity=".35">☆☆</tspan></text>`;
+      s += `<circle cx="${60 + rng() * 40}" cy="70" r="9" fill="${a}"/><text x="${70 + rng() * 0}" y="74" font-size="11" font-weight="900" fill="${t.fondo}" text-anchor="middle" font-family="sans-serif"></text>`;
+      return s;
+    }
     case "montana": {
       let path = "M0 200 ";
       const pts: [number, number][] = [];

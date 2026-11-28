@@ -9,8 +9,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Params 
   const s = await searchParams;
   const g = s.genero && s.genero in NOMBRE_GENERO ? NOMBRE_GENERO[s.genero as Genero] : null;
   return {
-    title: g ? `Juegos de ${g.toLowerCase()} gratis` : s.q ? `Resultados para «${s.q}»` : "Explorar más de 14.000 juegos gratis",
-    description: g ? `Jugá cientos de juegos de ${g.toLowerCase()} gratis en el navegador, en celular o computadora.` : "Buscá entre más de 14.000 juegos gratis: filtrá por género, duración, dificultad y multijugador.",
+    title: g ? `Juegos de ${g.toLowerCase()} gratis` : s.q ? `Resultados para «${s.q}»` : "Explorar más de 15.000 juegos gratis",
+    description: g ? `Jugá cientos de juegos de ${g.toLowerCase()} gratis en el navegador, en celular o computadora.` : "Buscá entre más de 15.000 juegos gratis: filtrá por género, duración, dificultad y multijugador.",
     alternates: { canonical: g ? `/explorar?genero=${s.genero}` : "/explorar" },
   };
 }

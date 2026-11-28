@@ -196,6 +196,25 @@ export const MOTORES: MetaMotor[] = [
     movil: true,
   },
   {
+    id: "heatcity",
+    nombre: "Heat City",
+    generos: ["coches", "carreras", "arcade"],
+    cabezas: ["Heat City"],
+    modos: [
+      { nombre: "Gran golpe", descripcion: "Robá todas las bolsas de botín y llevalas al garaje mientras la policía te persigue.", duracion: "media" },
+      { nombre: "Persecución", descripcion: "Resistí 2 minutos sin que te atrapen. Cuanto más calor, más puntos.", duracion: "corta" },
+      { nombre: "Entregas", descripcion: "Llegá a 6 puntos de entrega contra reloj, esquivando patrulleros.", duracion: "media" },
+    ],
+    frases: [
+      "Una ciudad de noche, un auto rápido y la policía detrás: bienvenido a Heat City.",
+      "Cuanto más robás, más sube el calor. Escapá por las calles de {lugar} sin que te rodeen.",
+      "Derrapes, sirenas y botín en una Heat City {palabra}.",
+    ],
+    controles: "← → doblar · aceleración automática · ↓ frenar · Espacio nitro",
+    controlesTactiles: "Botones de dirección, freno y nitro",
+    movil: true,
+  },
+  {
     id: "montana",
     nombre: "Subida Extrema",
     generos: ["coches", "carreras", "simulacion"],

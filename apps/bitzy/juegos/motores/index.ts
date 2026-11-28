@@ -15,6 +15,7 @@ export const CARGADORES: Record<string, () => Promise<{ default: ModuloMotor }>>
   carreras: () => import("./carreras"),
   ritmo: () => import("./ritmo"),
   hockey: () => import("./hockey"),
+  heatcity: () => import("./heatcity"),
   montana: () => import("./montana"),
   derrape: () => import("./derrape"),
   estacionar: () => import("./estacionar"),

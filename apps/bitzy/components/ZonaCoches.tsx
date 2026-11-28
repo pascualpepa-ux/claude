@@ -4,7 +4,7 @@ import { coches } from "@/lib/catalogo/consultas";
 import { MOTORES } from "@/lib/catalogo/motores";
 import { urlPortada } from "@/lib/portadas";
 
-const FOTOS: Record<string, string> = { carreras: "Turbo 3D", montana: "Subidas", derrape: "Derrapes", estacionar: "Estacionar" };
+const FOTOS: Record<string, string> = { heatcity: "Persecuciones", carreras: "Turbo 3D", montana: "Subidas", derrape: "Derrapes", estacionar: "Estacionar" };
 
 /** Bloque destacado de la portada: los juegos de coches primero. */
 export function ZonaCoches() {
@@ -20,7 +20,7 @@ export function ZonaCoches() {
         </div>
         <Link href="/coches" className="flex items-center gap-1 rounded-xl bg-cian px-4 py-2.5 text-sm font-bold text-fondo transition hover:scale-[1.03]">Ver todos <ChevronRight className="h-4 w-4" /></Link>
       </div>
-      <div className="relative mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="relative mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
         {categorias.map((m) => {
           const j = coches(1, "puntuacion", m.id)[0];
           return (
